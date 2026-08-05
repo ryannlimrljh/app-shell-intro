@@ -42,6 +42,21 @@
      shape by a plain screen-space amount, independent of the skew. */
   .wipe-panel{position:fixed; top:0; bottom:0; left:-14vh; right:-14vh; z-index:100; background:var(--color-amber); transform:translateX(-160vw) skewX(-12deg); transition:transform 380ms cubic-bezier(.65,0,.35,1);}
 
+  /* Sidebar footer — pin to the bottom. DESIGN-SYSTEM.md documents the
+     Footer row as "pinned to the bottom (margin-top: auto)", but
+     components.css actually ships a fixed margin-top:spacing-16 instead
+     — a real gap between the spec and the component, not something App
+     Shell invented. Overridden here at the page level (not in
+     components.css) for the same reason .c-shell's height is: this
+     page needs the documented behavior, but fixing the shared file
+     isn't this page's call to make. .c-sidebar is already a stretched-
+     height flex column (via the align-items:stretch chain from
+     .c-shell down), so margin-top:auto has a real height to push
+     against. The existing border-top (from components.css, untouched)
+     is what reads as "a divider on top of the row" once this sits
+     pinned at the bottom, directly above the account row below. */
+  .c-sidebar-footer{margin-top:auto;}
+
   /* Sidebar footer — account row. Not a documented SidebarNav sub-part
      yet (DESIGN-SYSTEM.md's Footer row says "sign-out, account, or help
      slot" but specs no row anatomy of its own) — composed here from

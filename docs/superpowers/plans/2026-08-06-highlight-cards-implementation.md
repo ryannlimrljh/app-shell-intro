@@ -196,7 +196,7 @@ Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>"
 **Files:**
 - Modify: `pages/app-shell-intro.html` (style block — append after Card 2's CSS; markup — replace the third empty card div)
 
-- [ ] **Step 1: Add Card 3's CSS**
+- [x] **Step 1: Add Card 3's CSS**
 
 Insert after Card 2's CSS block (after the `.c-hcard-gauge{...}` line):
 
@@ -215,7 +215,7 @@ Insert after Card 2's CSS block (after the `.c-hcard-gauge{...}` line):
   .c-hcard-sparkline{display:block; margin-top:auto; width:100%; height:36px;}
 ```
 
-- [ ] **Step 2: Replace the third placeholder card**
+- [x] **Step 2: Replace the third placeholder card**
 
 Replace the (now only remaining) four `<div class="c-card c-card-slide"></div>` lines' **first** occurrence (i.e. the 3rd card overall) with:
 
@@ -231,7 +231,7 @@ Replace the (now only remaining) four `<div class="c-card c-card-slide"></div>` 
             </div>
 ```
 
-- [ ] **Step 3: Verify in the browser**
+- [x] **Step 3: Verify in the browser**
 
 Reload, wait for reveal, then:
 
@@ -248,7 +248,7 @@ JSON.stringify({
 
 Expected: `border` is Obsidian (near-black, not the default light Neutral-3), `value:"RM2.4M"`, and `trendWidth` noticeably smaller than `cardContentWidth` (confirms the pill isn't invisibly stretched full-width). Screenshot to confirm: this card visually reads as the anchor of the row (bordered), with the green sparkline sitting at the bottom edge.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add pages/app-shell-intro.html

@@ -294,9 +294,9 @@
      each logo's rendered *width* — "Influencers" is the longest word,
      so its image is the widest; that's the wordmark being read at a
      consistent size, not an inconsistent one. Bumped from 18px to 22px
-     ("enlarge the logos") — still comfortable in the 240px menu even
-     for the widest lockup. */
-  .c-app-switcher-menu{display:none; position:fixed; width:240px; z-index:60; background:var(--color-neutral-1); border:1px solid var(--color-neutral-3); border-radius:var(--radius-md); box-shadow:var(--shadow-3); padding:var(--spacing-4); overflow:hidden;}
+     ("enlarge the logos") — still comfortable in the 200px menu (matched
+     to .c-account-menu's width) even for the widest lockup. */
+  .c-app-switcher-menu{display:none; position:fixed; width:200px; z-index:60; background:var(--color-neutral-1); border:1px solid var(--color-neutral-3); border-radius:var(--radius-md); box-shadow:var(--shadow-3); padding:var(--spacing-4); overflow:hidden;}
   .c-app-switcher-menu.is-open{display:block;}
   .c-app-switcher-item{display:flex; align-items:center; gap:var(--spacing-12); width:100%; height:40px; padding:0 var(--spacing-8); border:none; background:transparent; border-radius:var(--radius-sm); cursor:pointer; transition:background-color var(--duration-fast) var(--ease-standard);}
   .c-app-switcher-item:hover{background:var(--color-neutral-2);}

@@ -341,7 +341,7 @@ Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>"
 **Files:**
 - Modify: `pages/app-shell-intro.html` (style block — append after Card 4's CSS; markup — replace the fifth empty card div)
 
-- [ ] **Step 1: Add Card 5's CSS**
+- [x] **Step 1: Add Card 5's CSS**
 
 Insert after Card 4's CSS block (after `.c-hcard-tag{...}`):
 
@@ -361,7 +361,7 @@ Insert after Card 4's CSS block (after `.c-hcard-tag{...}`):
   .c-hcard-barlabel{display:block; margin:var(--spacing-4) 0 0; font-size:var(--text-caption-size); color:var(--color-neutral-5);}
 ```
 
-- [ ] **Step 2: Replace the fifth placeholder card**
+- [x] **Step 2: Replace the fifth placeholder card**
 
 Replace the (now only remaining) two `<div class="c-card c-card-slide"></div>` lines' **first** occurrence (i.e. the 5th card overall) with:
 
@@ -383,7 +383,7 @@ Replace the (now only remaining) two `<div class="c-card c-card-slide"></div>` l
 
 Note: `BW` deliberately matches Bryan Wong's own initials already shown in the sidebar's account avatar — he's one of the four dots in his own team's stack.
 
-- [ ] **Step 3: Verify in the browser**
+- [x] **Step 3: Verify in the browser**
 
 Reload, wait for reveal, then:
 
@@ -399,7 +399,7 @@ JSON.stringify({
 
 Expected: `rank:"#2"`, `avatarCount:4`, and `barFillWidth` ≈ 72% of `barWidth`. Screenshot to confirm the whole card reads centered (rank number, "this month," avatar stack, and bar label all horizontally centered), with the overlapping avatar circles and the progress bar spanning full width regardless of the centered siblings.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add pages/app-shell-intro.html

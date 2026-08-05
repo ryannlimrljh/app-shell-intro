@@ -62,12 +62,60 @@
      scrolling flex track instead of a grid. Drag-to-scroll and
      ArrowLeft/ArrowRight paging are handled in the script below;
      native scroll-snap does the actual per-card settling so the JS
-     doesn't have to compute exact stop positions itself. */
-  .c-card-slider{overflow-x:auto; scroll-snap-type:x proximity; cursor:grab; outline:none; -webkit-overflow-scrolling:touch; scrollbar-width:none;}
+     doesn't have to compute exact stop positions itself.
+
+     Full-bleed on the right: margin-right cancels .c-shell-content's
+     own page-gutter (32px) right padding, so the scrollable window's
+     right edge is the true viewport edge — cards crop flush against it
+     while scrolling, no reserved gutter creating a gap before the true
+     end. The *only* padding-right that exists is on the track itself
+     (16px, below), so it scrolls away with the content and only ever
+     shows up once you've actually reached the last card.
+
+     Left inset is dynamic, not the static page-gutter either — the
+     nav floats on top now (position:absolute, see below), so the
+     track's own leading padding-left has to clear the nav's own right
+     edge + a 16px gap, in both collapse states. Target *viewport*
+     position: 16(nav's own left inset)+240(width)+16(gap)=272px
+     expanded, 16+72+16=104px collapsed — but the track sits inside
+     .c-shell-content's own 32px page-gutter left padding already, so
+     the padding *value* has to be 32px less than that target to land
+     the card at the right actual screen position: 272-32=240px
+     expanded, 104-32=72px collapsed (this 32px was missed on the
+     first pass — verified and caught via direct pixel/hit-test
+     checks, not getComputedStyle, see below for why that mattered
+     here). It's on the track (not the outer scroll window) so it
+     scrolls away too, same as the trailing padding — once you've
+     scrolled past card 1's leading edge, the nav's overlay is no
+     longer this content's problem.
+
+     Set from JS (updateCardSliderInset(), called from
+     setSidebarCollapsed() so it can never drift out of sync with the
+     collapse state), not a :has(.c-sidebar.is-collapsed) reactive CSS
+     rule — tried that first, but shrinking the *scrollable content's
+     own* leading padding moves every card's scroll-snap-align:start
+     offset with it, and CSS scroll-snap re-aligns scrollLeft to the
+     nearest snap target's new offset on the very next layout pass,
+     silently scrolling the new padding right back out of view. A
+     plain scrollLeft=0 reset issued the same tick doesn't survive
+     that. overflow-anchor:none on the scroll container (below) does
+     NOT fix this either — that's a different mechanism (scroll
+     *anchoring*, not scroll *snap*) and was a dead end tried first.
+     The actual fix, in updateCardSliderInset(): briefly set
+     scroll-snap-type:none around the padding change (one
+     requestAnimationFrame), so there's no snap target yet for the
+     browser to re-align to when the padding shifts, then restore it.
+     The scrollLeft=0 reset stays too (only applied when the slider
+     was already at/near the start — never fighting a real mid-slider
+     scroll position), as a belt-and-suspenders correction alongside
+     the snap suppression, not a replacement for it. No CSS transition
+     on padding-left, for the same reason — an animated change gives
+     the browser a longer window in which a snap re-alignment could
+     still slip in before the suppression takes hold. */
+  .c-card-slider{overflow-x:auto; overflow-anchor:none; scroll-snap-type:x proximity; cursor:grab; outline:none; -webkit-overflow-scrolling:touch; scrollbar-width:none; margin-right:calc(-1 * var(--page-gutter));}
   .c-card-slider::-webkit-scrollbar{display:none;}
-  .c-card-slider:focus-visible{outline:2px solid var(--color-obsidian); outline-offset:2px;}
   .c-card-slider.is-dragging{cursor:grabbing; scroll-snap-type:none; user-select:none;}
-  .c-card-slider-track{display:flex; gap:var(--spacing-16); width:max-content; padding:4px 4px var(--spacing-8);}
+  .c-card-slider-track{display:flex; gap:var(--spacing-16); width:max-content; padding:4px 16px var(--spacing-8) 240px;}
   .c-card-slide{flex:0 0 340px; width:340px; min-height:280px; scroll-snap-align:start;}
 
   /* Main nav — position:absolute, floating overlay with a top z-index,
@@ -318,6 +366,38 @@
   // does — logo swap, arrow direction, aria-label all included — rather
   // than just toggling the class and leaving the toggle button's own
   // visual state out of sync.
+  // Card slider's leading inset has to track the nav's own collapse
+  // state (see .c-card-slider-track's own CSS comment for why this is
+  // JS, not a :has() reactive rule — scroll anchoring silently
+  // cancelled the pure-CSS version out). Called from
+  // setSidebarCollapsed() below so it can never drift out of sync with
+  // the class that actually drives the nav's width.
+  function updateCardSliderInset(collapsed) {
+    const track = document.querySelector('.c-card-slider-track');
+    const slider = document.getElementById('cardSlider');
+    if (!track || !slider) return;
+    const wasAtStart = slider.scrollLeft <= 4; // only correct scrollLeft if the user hasn't actually scrolled into the slider yet — don't fight a real mid-slider position
+    // Root cause (found by direct pixel/hit-test verification, not
+    // getComputedStyle — see this function's call site for why):
+    // shrinking padding-left moves every card's own scroll-snap-align:
+    // start offset with it, and CSS scroll-snap re-aligns scrollLeft to
+    // the nearest snap target's *new* offset on the very next layout —
+    // which for card 1 is exactly the new padding-left value, silently
+    // scrolling the padding right back out of view. overflow-anchor:
+    // none (still set on .c-card-slider, doesn't hurt) does NOT prevent
+    // this — that property governs scroll *anchoring*, a different
+    // mechanism from scroll *snap*. The actual fix: suppress snapping
+    // for one frame around the padding change, so there's no snap
+    // target for the browser to re-align to yet.
+    const previousSnapType = slider.style.scrollSnapType;
+    slider.style.scrollSnapType = 'none';
+    track.style.paddingLeft = collapsed ? '72px' : '240px';
+    if (wasAtStart) slider.scrollLeft = 0;
+    requestAnimationFrame(() => {
+      slider.style.scrollSnapType = previousSnapType;
+    });
+  }
+
   function setSidebarCollapsed(nav, sidebarToggle, collapsed) {
     if (nav.classList.contains('is-collapsed') === collapsed) return;
     nav.classList.toggle('is-collapsed', collapsed);
@@ -328,6 +408,8 @@
 
     const arrow = sidebarToggle.querySelector('.js-sidebar-toggle-arrow');
     arrow.setAttribute('d', collapsed ? 'M11.5 7 14 10l-2.5 3' : 'M13.5 7 11 10l2.5 3');
+
+    updateCardSliderInset(collapsed);
   }
   document.addEventListener('click', (e) => {
     const sidebarToggle = e.target.closest('.js-sidebar-toggle');

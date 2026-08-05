@@ -421,7 +421,7 @@ Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>"
 **Files:**
 - Modify: `pages/app-shell-intro.html` (style block — append after Card 5's CSS; markup — replace the sixth, final empty card div)
 
-- [ ] **Step 1: Add Card 6's CSS**
+- [x] **Step 1: Add Card 6's CSS**
 
 Insert after Card 5's CSS block (after `.c-hcard-barlabel{...}`):
 
@@ -443,7 +443,7 @@ Insert after Card 5's CSS block (after `.c-hcard-barlabel{...}`):
   .c-hcard-cta-btn:hover{opacity:.88;}
 ```
 
-- [ ] **Step 2: Replace the sixth, final placeholder card**
+- [x] **Step 2: Replace the sixth, final placeholder card**
 
 Replace the last remaining `<div class="c-card c-card-slide"></div>` with:
 
@@ -468,7 +468,7 @@ grep -c '<div class="c-card c-card-slide"></div>' pages/app-shell-intro.html
 
 Expected: `0`.
 
-- [ ] **Step 3: Verify in the browser**
+- [x] **Step 3: Verify in the browser**
 
 Reload, wait for reveal, then:
 
@@ -485,11 +485,11 @@ JSON.stringify({
 
 Expected: `bg` is the dark Obsidian color (not white), `titleColor` is white/near-white (not the default dark text — confirms the `.c-hcard-ai h4` override actually won the specificity tie), `tagBg` is a translucent white (not the default light-grey `.c-tag`), `tagCount:3`, and `btnWidth` well under the card's ~308px content width (confirms the button isn't stretched full-width). Screenshot to confirm the dark card with amber eyebrow, white title, translucent tag chips, and the orange "Draft outreach" button.
 
-- [ ] **Step 4: Full-row screenshot**
+- [x] **Step 4: Full-row screenshot**
 
 Scroll/drag the card slider (or reduce browser zoom) to get all six cards in view in one screenshot if possible, or take two screenshots covering the full scroll width. Confirm the final left-to-right order matches the spec: Pipeline · At-risk · Pace (bordered, centre) · Upsell · Team · AI (dark, closing).
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add pages/app-shell-intro.html

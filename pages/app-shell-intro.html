@@ -182,6 +182,18 @@
   .c-hcard-risk .c-hcard-label{color:var(--color-orange);}
   .c-hcard-gauge{margin-top:auto; align-self:center;}
 
+  /* Card 3/6 — Pace (centre card): reuses collabrium-dls's own .c-stat
+     component wholesale (.c-stat-label/.c-stat-value.hero/
+     .c-stat-trend.up) rather than reinventing a "big number" card.
+     Border emphasizes it as the row's anchor, per the approved
+     design. .c-stat-trend has no background of its own, but it's
+     still a flex item of a flex-column card with default
+     align-items:stretch — align-self:flex-start keeps its box hugging
+     its own content instead of invisibly reserving full card width. */
+  .c-hcard-pace{border-color:var(--color-obsidian);}
+  .c-hcard-pace .c-stat-trend{align-self:flex-start;}
+  .c-hcard-sparkline{display:block; margin-top:auto; width:100%; height:36px;}
+
   /* Main nav — position:absolute, floating overlay with a top z-index,
      not a flex sibling reserving row space anymore. Canvas content
      (.c-shell-main) is now the *only* in-flow flex child of .c-shell,
@@ -405,7 +417,15 @@
                 <path d="M5 47 A40 40 0 0 1 58 12" style="stroke:var(--color-orange)" stroke-width="8" fill="none" stroke-linecap="round"/>
               </svg>
             </div>
-            <div class="c-card c-card-slide"></div>
+            <div class="c-card c-card-slide c-stat c-hcard-pace">
+              <span class="c-stat-label">Pace</span>
+              <div class="c-stat-value hero">RM2.4M</div>
+              <p>MTD vs RM2.1M run-rate</p>
+              <span class="c-stat-trend up">🎉 +14% ahead</span>
+              <svg class="c-hcard-sparkline" viewBox="0 0 200 40" preserveAspectRatio="none" aria-hidden="true">
+                <polyline points="0,32 30,28 60,30 90,20 120,22 150,10 180,14 200,4" fill="none" style="stroke:var(--color-green)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
             <div class="c-card c-card-slide"></div>
             <div class="c-card c-card-slide"></div>
             <div class="c-card c-card-slide"></div>

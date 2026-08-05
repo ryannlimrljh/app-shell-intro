@@ -51,19 +51,19 @@
   .c-canvas-greeting h1{margin:0 0 var(--spacing-8); font-family:var(--font-primary); font-size:var(--text-h1-size); font-weight:var(--text-h1-weight); color:var(--color-neutral-9);}
   .c-canvas-greeting p{margin:0; font-family:var(--font-primary); font-size:var(--text-body1-size); font-weight:var(--text-body1-weight); color:var(--color-neutral-5);}
 
-  /* Greeting/cards entrance — held invisible until the nav has finished
-     its own auto-collapse (see revealCanvasContent() in the script
-     below), then fade + slide up, staggered one after another (h1,
-     then subtitle, then the card slider) via transition-delay off a
-     single shared .is-revealed trigger — one JS call sets the class on
-     all three at once, CSS alone does the staggering, so there's only
-     one moment in the script that has to know the reveal even happens.
-     Same easing curve as the nav's own slide-in (cubic-bezier(.16,1,.3,1))
-     for a consistent "settle" feel across every entrance on this page. */
-  .c-canvas-greeting h1, .c-canvas-greeting p, .c-card-slider{opacity:0; transform:translateY(16px); transition:opacity 550ms cubic-bezier(.16,1,.3,1), transform 550ms cubic-bezier(.16,1,.3,1);}
+  /* Greeting entrance — held invisible until the nav has finished its
+     own auto-collapse (see revealCanvasContent() in the script below),
+     then fade + slide up, staggered one after another (h1, then
+     subtitle) via transition-delay off a single shared .is-revealed
+     trigger — one JS call sets the class on both at once, CSS alone
+     does the staggering. The card slider's own children stagger
+     separately and more elaborately — see .c-card-slide below —
+     rather than the whole slider moving as one block. Same easing
+     curve as the nav's own slide-in (cubic-bezier(.16,1,.3,1)) for a
+     consistent "settle" feel on these two. */
+  .c-canvas-greeting h1, .c-canvas-greeting p{opacity:0; transform:translateY(16px); transition:opacity 550ms cubic-bezier(.16,1,.3,1), transform 550ms cubic-bezier(.16,1,.3,1);}
   .c-canvas-greeting h1.is-revealed{opacity:1; transform:translateY(0);}
   .c-canvas-greeting p.is-revealed{opacity:1; transform:translateY(0); transition-delay:130ms;}
-  .c-card-slider.is-revealed{opacity:1; transform:translateY(0); transition-delay:260ms;}
 
   /* Blank placeholder cards — now a slider, not the Content region's
      fixed 4-column box grid (.c-shell-grid), since 8 cards at a
@@ -131,6 +131,22 @@
   .c-card-slider.is-dragging{cursor:grabbing; scroll-snap-type:none; user-select:none;}
   .c-card-slider-track{display:flex; gap:var(--spacing-16); width:max-content; padding:4px 16px var(--spacing-8) 240px;}
   .c-card-slide{flex:0 0 340px; width:340px; min-height:280px; scroll-snap-align:start;}
+
+  /* Card entrance — each card fades/glides in independently, not the
+     slider as one block, per feedback ("each card randomly move in
+     [at a] slight different speed"). --card-reveal-delay/-duration are
+     set per card from JS (revealCanvasContent(), randomized — see
+     script below) rather than a fixed nth-child stagger, since a
+     uniform pattern reads as mechanical and the ask was specifically
+     for a less uniform, "sophisticated" feel. Defaults here (650ms,
+     0ms delay) only matter if the JS somehow didn't run — the real
+     values always come from the inline custom properties. Gentler
+     than the h1/subtitle entrance on purpose: slower (~600–820ms vs a
+     flat 550ms), more travel (24px vs 16px), and a softer, more
+     decelerated ease-out curve (cubic-bezier(.22,1,.36,1) vs the
+     nav/h1's snappier cubic-bezier(.16,1,.3,1)). */
+  .c-card-slide{opacity:0; transform:translateY(24px); transition:opacity var(--card-reveal-duration, 650ms) cubic-bezier(.22,1,.36,1), transform var(--card-reveal-duration, 650ms) cubic-bezier(.22,1,.36,1); transition-delay:var(--card-reveal-delay, 0ms);}
+  .c-card-slide.is-revealed{opacity:1; transform:translateY(0);}
 
   /* Main nav — position:absolute, floating overlay with a top z-index,
      not a flex sibling reserving row space anymore. Canvas content
@@ -555,10 +571,30 @@
     function revealCanvasContent() {
       const h1 = document.getElementById('greetingH1');
       const subtitle = document.getElementById('greetingSubtitle');
-      const cardSlider = document.getElementById('cardSlider');
       if (h1) h1.classList.add('is-revealed');
       if (subtitle) subtitle.classList.add('is-revealed');
-      if (cardSlider) cardSlider.classList.add('is-revealed');
+
+      // Cards: each one gets its own randomized delay and duration
+      // (read by .c-card-slide's own CSS via --card-reveal-delay/
+      // -duration) instead of one shared timing for the whole row —
+      // a fixed nth-child stagger would still look like a single
+      // mechanical wave; per-card randomness is what actually reads as
+      // "sophisticated" rather than programmatic. CARDS_BASE_DELAY_MS
+      // keeps the first card starting after the h1/subtitle beat
+      // above (130ms) has already begun, not simultaneously with it.
+      const CARDS_BASE_DELAY_MS = 260;
+      const CARDS_STAGGER_STEP_MS = 90;   // average spacing between one card's start and the next
+      const CARDS_JITTER_MS = 50;         // +/- randomness on top of the step, so the spacing itself isn't perfectly even
+      const CARDS_DURATION_MIN_MS = 600;
+      const CARDS_DURATION_MAX_MS = 820;
+      document.querySelectorAll('.c-card-slide').forEach((card, i) => {
+        const jitter = (Math.random() * 2 - 1) * CARDS_JITTER_MS;
+        const delay = Math.max(0, CARDS_BASE_DELAY_MS + i * CARDS_STAGGER_STEP_MS + jitter);
+        const duration = CARDS_DURATION_MIN_MS + Math.random() * (CARDS_DURATION_MAX_MS - CARDS_DURATION_MIN_MS);
+        card.style.setProperty('--card-reveal-delay', `${delay.toFixed(0)}ms`);
+        card.style.setProperty('--card-reveal-duration', `${duration.toFixed(0)}ms`);
+        card.classList.add('is-revealed');
+      });
     }
     // Auto-collapse the main nav a couple seconds after it's settled —
     // reuses setSidebarCollapsed (defined above, in the sidebar-toggle

@@ -514,7 +514,7 @@ Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>"
 
 **Files:** none — verification only.
 
-- [ ] **Step 1: Reload fresh and let the full intro sequence play out**
+- [x] **Step 1: Reload fresh and let the full intro sequence play out**
 
 Navigate to `http://localhost:8791/pages/app-shell-intro.html`, wait for the curtain/wipe/greeting/card-reveal sequence to fully finish (~3–4s), and confirm no console errors:
 
@@ -524,7 +524,7 @@ read_console_messages with onlyErrors: true
 
 Expected: empty.
 
-- [ ] **Step 2: Confirm all six cards structurally, in one pass**
+- [x] **Step 2: Confirm all six cards structurally, in one pass**
 
 ```js
 JSON.stringify(Array.from(document.querySelectorAll('.c-card-slide')).map(c => ({
@@ -536,11 +536,11 @@ JSON.stringify(Array.from(document.querySelectorAll('.c-card-slide')).map(c => (
 
 Expected: six entries, each `w:340, h:400, hasContent:true`.
 
-- [ ] **Step 3: Spot-check drag/scroll and arrow-key navigation still work**
+- [x] **Step 3: Spot-check drag/scroll and arrow-key navigation still work**
 
 Click into the slider and press the right-arrow key twice via `computer` (`key` action, `ArrowRight`), then confirm `cardSlider.scrollLeft` increased. This confirms filling the cards with real content didn't break the existing slider mechanics (drag, scroll-snap, keyboard nav) from prior sessions.
 
-- [ ] **Step 4: Screenshot for the record**
+- [x] **Step 4: Screenshot for the record**
 
 Take a final screenshot (or two, covering the full scrollable width) showing all six populated cards, for sharing with the user. No commit — this task produces no file changes.
 

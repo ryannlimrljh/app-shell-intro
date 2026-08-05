@@ -20,22 +20,29 @@
      the component gallery — this page is a real full-viewport shell,
      so the height is overridden here, not in components.css. */
   .c-shell{height:100dvh;}
-  .curtain-overlay{position:fixed; inset:0; z-index:100; display:flex;}
-  .curtain-strip{flex:1 0 20%; background:var(--color-obsidian); transform-origin:bottom; transition:transform 650ms cubic-bezier(.65,0,.35,1);}
+
+  /* Main nav starts off-screen to the left and slides in on its own
+     beat, after the wipe has already passed — see the wipe-intro
+     script below. transform doesn't affect layout, so .c-shell-main's
+     position never shifts; the nav just slides into its already-
+     reserved flex slot. */
+  .c-sidebar-shell{transition:transform 450ms cubic-bezier(.16,1,.3,1); transform:translateX(-120%);}
+  .c-sidebar-shell.is-in{transform:translateX(0);}
+
+  /* Wipe intro: a single solid panel, off-screen left on load (so the
+     warm canvas is what's actually visible first), that sweeps all the
+     way across the viewport and off the right edge in one continuous
+     transition — a true "pass-through" wipe, not a curtain that starts
+     by covering the page. */
+  .wipe-panel{position:fixed; inset:0; z-index:100; background:var(--color-obsidian); transform:translateX(-100%); transition:transform 700ms cubic-bezier(.65,0,.35,1);}
 </style>
 </head>
 <body>
 
-  <div class="curtain-overlay" id="curtainOverlay" aria-hidden="true">
-    <div class="curtain-strip"></div>
-    <div class="curtain-strip"></div>
-    <div class="curtain-strip"></div>
-    <div class="curtain-strip"></div>
-    <div class="curtain-strip"></div>
-  </div>
+  <div class="wipe-panel" id="wipePanel" aria-hidden="true"></div>
 
   <div class="c-shell">
-    <div class="c-sidebar-shell">
+    <div class="c-sidebar-shell" id="shellSidebarShell">
       <nav class="c-sidebar" id="shellSidebarNav">
         <div class="c-sidebar-header">
           <div class="c-sidebar-logo">
@@ -62,13 +69,7 @@
       </button>
     </div>
     <div class="c-shell-main">
-      <div class="c-shell-content">
-        <div class="c-shell-page-header">
-          <div>
-            <h1>Overview</h1>
-          </div>
-        </div>
-      </div>
+      <div class="c-shell-content"></div>
     </div>
   </div>
 
@@ -130,30 +131,41 @@
     if (item) hideHoverLabel();
   });
 
-  // Curtain wipe intro. 5 strips, left→right, 70ms stagger, 650ms each,
-  // cubic-bezier(.65,0,.35,1) — see docs/superpowers/specs/
-  // 2026-08-05-app-shell-intro-page-design.md for the timing rationale.
-  // Runs on every load (no sessionStorage skip, by design).
-  const overlay = document.getElementById('curtainOverlay');
-  const strips = overlay ? Array.from(overlay.querySelectorAll('.curtain-strip')) : [];
-  if (overlay && strips.length) {
-    const HOLD_MS = 200;
-    const STAGGER_MS = 70;
-    const STRIP_DURATION_MS = 650; // must match .curtain-strip's transition-duration in <style> above
-    const last = strips[strips.length - 1];
-    function hideOverlay() {
-      overlay.style.display = 'none';
+  // Wipe intro. Sequence: blank warm canvas → a single solid panel
+  // sweeps left→right across the full viewport and off the far edge →
+  // blank warm canvas again, briefly → the main nav slides in from the
+  // left. Runs on every load (no sessionStorage skip, by design). See
+  // docs/superpowers/specs/2026-08-05-app-shell-intro-page-design.md.
+  const wipePanel = document.getElementById('wipePanel');
+  const sidebarShell = document.getElementById('shellSidebarShell');
+  if (wipePanel && sidebarShell) {
+    const HOLD_MS = 150;            // blank warm canvas, before the wipe starts
+    const WIPE_DURATION_MS = 700;   // must match .wipe-panel's transition-duration in <style> above
+    const POST_WIPE_HOLD_MS = 200;  // blank warm canvas again, after the wipe, before the nav slides in
+    const NAV_DURATION_MS = 450;    // must match .c-sidebar-shell's transition-duration in <style> above
+
+    function hideWipePanel() {
+      wipePanel.style.display = 'none';
     }
-    last.addEventListener('transitionend', hideOverlay, { once: true });
-    strips.forEach((strip, i) => {
-      setTimeout(() => { strip.style.transform = 'scaleY(0)'; }, HOLD_MS + i * STAGGER_MS);
-    });
-    // Fallback: guarantee the overlay is removed even if the last strip's
-    // transitionend never fires (e.g. a backgrounded/throttled tab
-    // suspends the transition before it starts) — a stuck overlay would
-    // otherwise block the entire page forever. hideOverlay() is
-    // idempotent, so this is harmless if transitionend already fired.
-    setTimeout(hideOverlay, HOLD_MS + (strips.length - 1) * STAGGER_MS + STRIP_DURATION_MS + 100);
+    function revealNav() {
+      sidebarShell.classList.add('is-in');
+    }
+
+    wipePanel.addEventListener('transitionend', () => {
+      hideWipePanel();
+      setTimeout(revealNav, POST_WIPE_HOLD_MS);
+    }, { once: true });
+
+    setTimeout(() => { wipePanel.style.transform = 'translateX(100%)'; }, HOLD_MS);
+
+    // Fallback: guarantee the wipe panel hides and the nav reveals even
+    // if transitionend never fires (e.g. a backgrounded/throttled tab
+    // suspends the transition before it starts) — both functions are
+    // idempotent, so this is harmless if the normal path already ran.
+    setTimeout(() => {
+      hideWipePanel();
+      revealNav();
+    }, HOLD_MS + WIPE_DURATION_MS + POST_WIPE_HOLD_MS + 200);
   }
 })();
 </script>

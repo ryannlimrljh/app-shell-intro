@@ -64,5 +64,63 @@
 
   <div class="c-sidebar-hover-label" id="shellSidebarHoverLabel" role="tooltip"></div>
 
+  <script>
+(function () {
+  // SidebarNav — collapse/expand toggle. Swaps the logo asset itself
+  // and the toggle icon's arrow direction. Ported from
+  // collabrium-dls/preview.html's own implementation, unmodified.
+  document.addEventListener('click', (e) => {
+    const sidebarToggle = e.target.closest('.js-sidebar-toggle');
+    if (!sidebarToggle) return;
+    const nav = document.getElementById(sidebarToggle.dataset.sidebarToggle);
+    const collapsing = !nav.classList.contains('is-collapsed');
+    nav.classList.toggle('is-collapsed');
+    sidebarToggle.setAttribute('aria-label', collapsing ? 'Expand sidebar' : 'Collapse sidebar');
+
+    const img = nav.querySelector('.js-sidebar-logo-img');
+    img.src = collapsing ? img.dataset.collapsedSrc : img.dataset.expandedSrc;
+
+    const arrow = sidebarToggle.querySelector('.js-sidebar-toggle-arrow');
+    arrow.setAttribute('d', collapsing ? 'M11.5 7 14 10l-2.5 3' : 'M13.5 7 11 10l2.5 3');
+  });
+
+  // SidebarNav — collapsed hover label. Single shared, fixed-position
+  // element; mouseover/mouseout (they bubble) rather than
+  // mouseenter/mouseleave so it stays event-delegated. Ported from
+  // collabrium-dls/preview.html's own implementation, unmodified.
+  const hoverLabel = document.getElementById('shellSidebarHoverLabel');
+  function showHoverLabel(item) {
+    const nav = item.closest('.c-sidebar');
+    const source = item.querySelector('.c-sidebar-hover-text');
+    if (!hoverLabel || !nav || !nav.classList.contains('is-collapsed') || !source) return;
+    const iconRect = item.querySelector('i').getBoundingClientRect();
+    hoverLabel.textContent = source.textContent;
+    hoverLabel.style.left = (iconRect.right + 8) + 'px';
+    hoverLabel.style.top = (iconRect.top + iconRect.height / 2) + 'px';
+    hoverLabel.style.transform = 'translateY(-50%)';
+    hoverLabel.classList.add('is-visible');
+  }
+  function hideHoverLabel() {
+    if (hoverLabel) hoverLabel.classList.remove('is-visible');
+  }
+  document.addEventListener('mouseover', (e) => {
+    const item = e.target.closest('.c-sidebar-item');
+    if (item && !item.contains(e.relatedTarget)) showHoverLabel(item);
+  });
+  document.addEventListener('mouseout', (e) => {
+    const item = e.target.closest('.c-sidebar-item');
+    if (item && !item.contains(e.relatedTarget)) hideHoverLabel();
+  });
+  document.addEventListener('focusin', (e) => {
+    const item = e.target.closest('.c-sidebar-item');
+    if (item) showHoverLabel(item);
+  });
+  document.addEventListener('focusout', (e) => {
+    const item = e.target.closest('.c-sidebar-item');
+    if (item) hideHoverLabel();
+  });
+})();
+  </script>
+
 </body>
 </html>

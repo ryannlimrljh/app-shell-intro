@@ -130,7 +130,7 @@ Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>"
 **Files:**
 - Modify: `pages/app-shell-intro.html` (style block — append after Card 1's CSS; markup — replace the second empty card div)
 
-- [ ] **Step 1: Add Card 2's CSS**
+- [x] **Step 1: Add Card 2's CSS**
 
 Find the end of Card 1's CSS block (the last line should now be `.c-hcard-cta{margin-top:auto; ...}`) and insert immediately after it:
 
@@ -145,7 +145,7 @@ Find the end of Card 1's CSS block (the last line should now be `.c-hcard-cta{ma
   .c-hcard-gauge{margin-top:auto; align-self:center;}
 ```
 
-- [ ] **Step 2: Replace the second placeholder card**
+- [x] **Step 2: Replace the second placeholder card**
 
 Find the (now only remaining) five `<div class="c-card c-card-slide"></div>` lines and replace the **first** of those five (i.e. the 2nd card overall) with:
 
@@ -161,7 +161,7 @@ Find the (now only remaining) five `<div class="c-card c-card-slide"></div>` lin
             </div>
 ```
 
-- [ ] **Step 3: Verify in the browser**
+- [x] **Step 3: Verify in the browser**
 
 Reload, wait for reveal, then:
 
@@ -176,7 +176,7 @@ JSON.stringify({
 
 Expected: `bg` is the Fire tint (not white), `title:"Sunway Retail"`, `gaugeWidth:90` (not stretched to the card's full ~308px content width — confirms `align-self:center` took effect). Screenshot to confirm the warm background and the two-tone arc render correctly.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add pages/app-shell-intro.html

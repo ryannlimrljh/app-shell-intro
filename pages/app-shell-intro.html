@@ -129,6 +129,24 @@
     const item = e.target.closest('.c-sidebar-item');
     if (item) hideHoverLabel();
   });
+
+  // Curtain wipe intro. 5 strips, left→right, 70ms stagger, 650ms each,
+  // cubic-bezier(.65,0,.35,1) — see docs/superpowers/specs/
+  // 2026-08-05-app-shell-intro-page-design.md for the timing rationale.
+  // Runs on every load (no sessionStorage skip, by design).
+  const overlay = document.getElementById('curtainOverlay');
+  const strips = overlay ? Array.from(overlay.querySelectorAll('.curtain-strip')) : [];
+  if (overlay && strips.length) {
+    const HOLD_MS = 200;
+    const STAGGER_MS = 70;
+    const last = strips[strips.length - 1];
+    last.addEventListener('transitionend', () => {
+      overlay.style.display = 'none';
+    }, { once: true });
+    strips.forEach((strip, i) => {
+      setTimeout(() => { strip.style.transform = 'scaleY(0)'; }, HOLD_MS + i * STAGGER_MS);
+    });
+  }
 })();
 </script>
 

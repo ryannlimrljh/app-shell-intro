@@ -222,6 +222,25 @@
   .c-hcard-bar-fill{width:72%; height:100%; background:var(--color-obsidian);}
   .c-hcard-barlabel{display:block; margin:var(--spacing-4) 0 0; font-size:var(--text-caption-size); color:var(--color-neutral-5);}
 
+  /* Card 6/6 — AI next-best-action (closing): the deliberate outlier —
+     the only dark card, signalling "this one's different in kind, not
+     just in colour," per the approved design. Reasoning shown as
+     .c-tag chips (reused as-is) instead of a paragraph. Two different
+     specificity situations below, both verified live (Step 3), not
+     just assumed: .c-hcard-ai .c-tag genuinely exceeds .c-tag's own
+     specificity, so it wins under any stylesheet ordering. .c-hcard-ai
+     h4 only *ties* .c-card h4 (one class + one type selector each) —
+     it wins here only because this page's <style> block loads after
+     components.css's <link>, not because of specificity alone; that
+     tie-break would flip if the load order ever changed. */
+  .c-hcard-ai{background:var(--color-obsidian); border-color:var(--color-obsidian);}
+  .c-hcard-ai .c-hcard-label{color:var(--color-amber);}
+  .c-hcard-ai h4{color:var(--color-neutral-1);}
+  .c-hcard-ai .c-tag{background:rgba(255,255,255,.12); color:var(--color-neutral-1);}
+  .c-hcard-tags{display:flex; flex-wrap:wrap; gap:var(--spacing-8);}
+  .c-hcard-cta-btn{margin-top:auto; align-self:flex-start; border:none; border-radius:var(--radius-sm); background:var(--color-orange); color:var(--color-neutral-1); font-family:var(--font-primary); font-size:var(--text-label2-size); font-weight:700; padding:var(--spacing-8) var(--spacing-12); cursor:pointer; transition:opacity var(--duration-fast) var(--ease-standard);}
+  .c-hcard-cta-btn:hover{opacity:.88;}
+
   /* Main nav — position:absolute, floating overlay with a top z-index,
      not a flex sibling reserving row space anymore. Canvas content
      (.c-shell-main) is now the *only* in-flow flex child of .c-shell,
@@ -475,7 +494,16 @@
               <div class="c-hcard-bar"><div class="c-hcard-bar-fill"></div></div>
               <span class="c-hcard-barlabel">RM120K behind #1</span>
             </div>
-            <div class="c-card c-card-slide"></div>
+            <div class="c-card c-card-slide c-hcard-ai">
+              <span class="c-hcard-label">🤖 Next best action</span>
+              <h4>Call PetronasBiz</h4>
+              <div class="c-hcard-tags">
+                <span class="c-tag">Renews in 30d</span>
+                <span class="c-tag">Budget opens next wk</span>
+                <span class="c-tag">2 unopened proposals</span>
+              </div>
+              <button class="c-hcard-cta-btn" type="button">Draft outreach</button>
+            </div>
           </div>
         </div>
       </div>

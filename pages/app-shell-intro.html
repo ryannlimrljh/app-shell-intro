@@ -34,6 +34,28 @@
      precedent to draw from. */
   .c-canvas-date{position:fixed; top:var(--spacing-24); left:50%; transform:translateX(-50%); z-index:5; margin:0; font-family:var(--font-primary); font-size:var(--text-body2-size); font-weight:var(--text-body2-weight); color:var(--color-neutral-5); pointer-events:none;}
 
+  /* Content region — personalized greeting. Centered, unlike Page
+     header (left-aligned title/subtitle, App Shell's documented
+     top-of-screen pattern) — this is a different shape (a dashboard
+     "hero" greeting, not the shell's structural header), so it's a new
+     page-local block rather than a reuse of .c-shell-page-header.
+     Still built from the same h1/body1 type tokens .c-shell-page-header
+     itself uses, not new sizes — the only new thing here is the
+     centered layout. Name is read from the sidebar account row's own
+     .c-userpicker-name (see script below) rather than a second hardcoded
+     "Bryan" — one source for the name, not two copies that can drift. */
+  .c-canvas-greeting{text-align:center; padding:var(--spacing-60) var(--page-gutter) 0;}
+  .c-canvas-greeting h1{margin:0 0 var(--spacing-8); font-family:var(--font-primary); font-size:var(--text-h1-size); font-weight:var(--text-h1-weight); color:var(--color-neutral-9);}
+  .c-canvas-greeting p{margin:0; font-family:var(--font-primary); font-size:var(--text-body1-size); font-weight:var(--text-body1-weight); color:var(--color-neutral-5);}
+
+  /* Blank placeholder cards — reuses Content region's own documented
+     box grid (.c-shell-grid/.c-shell-span-*) and Card's own .c-card
+     fill/border/radius exactly, unmodified. The only page-local
+     addition is a min-height, since an empty Card with no children
+     collapses to just its own padding — a deliberate placeholder needs
+     enough height to actually read as a held space, not a sliver. */
+  .c-shell-grid .c-card{min-height:280px;}
+
   /* Main nav starts off-screen to the left and slides in on its own
      beat, after the wipe has already passed — see the wipe-intro
      script below. transform doesn't affect layout, so .c-shell-main's
@@ -151,7 +173,18 @@
       </button>
     </div>
     <div class="c-shell-main">
-      <div class="c-shell-content"></div>
+      <div class="c-shell-content">
+        <div class="c-canvas-greeting">
+          <h1><span id="greetingText"></span> <span aria-hidden="true">🌻</span>.</h1>
+          <p>Here's what needs your eyes across the business today.</p>
+        </div>
+        <div class="c-shell-grid" style="margin-top:var(--spacing-24)">
+          <div class="c-card c-shell-span-1"></div>
+          <div class="c-card c-shell-span-1"></div>
+          <div class="c-card c-shell-span-1"></div>
+          <div class="c-card c-shell-span-1"></div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -178,6 +211,24 @@
       month: 'long',
       day: 'numeric',
     });
+  }
+
+  // Content region greeting — "Good [morning/afternoon/evening],
+  // [First name]". Same "follow system setting" idea as the canvas
+  // date above: the time-of-day segment is read from the visitor's own
+  // system clock (new Date().getHours()), not hardcoded to "Good
+  // morning" regardless of when the page is actually opened. First name
+  // is read from the sidebar account row's own .c-userpicker-name text
+  // (currently "Bryan Wong") rather than a second hardcoded "Bryan" —
+  // one source for the name, so the greeting can't drift out of sync
+  // with the account row if that name ever changes.
+  const greetingText = document.getElementById('greetingText');
+  if (greetingText) {
+    const hour = new Date().getHours();
+    const timeOfDay = hour < 12 ? 'morning' : hour < 17 ? 'afternoon' : 'evening';
+    const fullName = document.querySelector('.c-userpicker-name');
+    const firstName = fullName ? fullName.textContent.trim().split(' ')[0] : '';
+    greetingText.textContent = `Good ${timeOfDay}, ${firstName}`;
   }
 
   // SidebarNav — collapse/expand toggle. Swaps the logo asset itself

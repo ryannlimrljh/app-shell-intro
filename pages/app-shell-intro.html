@@ -150,21 +150,28 @@
 <script>
 (function () {
   // SidebarNav — collapse/expand toggle. Swaps the logo asset itself
-  // and the toggle icon's arrow direction. Ported from
-  // collabrium-dls/preview.html's own implementation, unmodified.
+  // and the toggle icon's arrow direction. Pulled out into a named
+  // function (ported logic, unmodified) so the auto-collapse timer
+  // further down can drive the exact same state change a manual click
+  // does — logo swap, arrow direction, aria-label all included — rather
+  // than just toggling the class and leaving the toggle button's own
+  // visual state out of sync.
+  function setSidebarCollapsed(nav, sidebarToggle, collapsed) {
+    if (nav.classList.contains('is-collapsed') === collapsed) return;
+    nav.classList.toggle('is-collapsed', collapsed);
+    sidebarToggle.setAttribute('aria-label', collapsed ? 'Expand sidebar' : 'Collapse sidebar');
+
+    const img = nav.querySelector('.js-sidebar-logo-img');
+    img.src = collapsed ? img.dataset.collapsedSrc : img.dataset.expandedSrc;
+
+    const arrow = sidebarToggle.querySelector('.js-sidebar-toggle-arrow');
+    arrow.setAttribute('d', collapsed ? 'M11.5 7 14 10l-2.5 3' : 'M13.5 7 11 10l2.5 3');
+  }
   document.addEventListener('click', (e) => {
     const sidebarToggle = e.target.closest('.js-sidebar-toggle');
     if (!sidebarToggle) return;
     const nav = document.getElementById(sidebarToggle.dataset.sidebarToggle);
-    const collapsing = !nav.classList.contains('is-collapsed');
-    nav.classList.toggle('is-collapsed');
-    sidebarToggle.setAttribute('aria-label', collapsing ? 'Expand sidebar' : 'Collapse sidebar');
-
-    const img = nav.querySelector('.js-sidebar-logo-img');
-    img.src = collapsing ? img.dataset.collapsedSrc : img.dataset.expandedSrc;
-
-    const arrow = sidebarToggle.querySelector('.js-sidebar-toggle-arrow');
-    arrow.setAttribute('d', collapsing ? 'M11.5 7 14 10l-2.5 3' : 'M13.5 7 11 10l2.5 3');
+    setSidebarCollapsed(nav, sidebarToggle, !nav.classList.contains('is-collapsed'));
   });
 
   // SidebarNav — collapsed hover label. Single shared, fixed-position
@@ -273,12 +280,22 @@
     const EXIT_MS = 380;            // panel sweeps out, uncovering the viewport — same transition-duration as ENTER_MS
     const POST_WIPE_HOLD_MS = 200;  // blank warm canvas again, after the panel exits, before the nav slides in
     const NAV_DURATION_MS = 450;    // must match .c-sidebar-shell's transition-duration in <style> above
+    const AUTO_COLLAPSE_DELAY_MS = 2500; // how long the nav stays expanded, once fully settled, before auto-collapsing
 
     function hideWipePanel() {
       wipePanel.style.display = 'none';
     }
     function revealNav() {
       sidebarShell.classList.add('is-in');
+    }
+    // Auto-collapse the main nav a couple seconds after it's settled —
+    // reuses setSidebarCollapsed (defined above, in the sidebar-toggle
+    // section) so this drives the exact same state a manual click does
+    // (logo swap, arrow direction, aria-label), not just the class.
+    function autoCollapseNav() {
+      const nav = document.getElementById('shellSidebarNav');
+      const toggle = document.querySelector('[data-sidebar-toggle="shellSidebarNav"]');
+      if (nav && toggle) setSidebarCollapsed(nav, toggle, true);
     }
     function enterCover() {
       wipePanel.style.transform = 'translateX(0) skewX(-12deg)';
@@ -291,16 +308,20 @@
     setTimeout(exitCover, PRE_HOLD_MS + ENTER_MS + HOLD_COVER_MS);
     setTimeout(() => {
       hideWipePanel();
-      setTimeout(revealNav, POST_WIPE_HOLD_MS);
+      setTimeout(() => {
+        revealNav();
+        setTimeout(autoCollapseNav, NAV_DURATION_MS + AUTO_COLLAPSE_DELAY_MS);
+      }, POST_WIPE_HOLD_MS);
     }, PRE_HOLD_MS + ENTER_MS + HOLD_COVER_MS + EXIT_MS);
 
-    // Fallback: guarantee the wipe panel hides and the nav reveals even
-    // if something delays a timer (e.g. a backgrounded/throttled tab)
-    // — both functions are idempotent, so this is harmless if the
-    // normal path already ran.
+    // Fallback: guarantee the wipe panel hides, the nav reveals, and it
+    // still auto-collapses even if something delays a timer (e.g. a
+    // backgrounded/throttled tab) — all three functions are idempotent,
+    // so this is harmless if the normal path already ran.
     setTimeout(() => {
       hideWipePanel();
       revealNav();
+      setTimeout(autoCollapseNav, AUTO_COLLAPSE_DELAY_MS);
     }, PRE_HOLD_MS + ENTER_MS + HOLD_COVER_MS + EXIT_MS + POST_WIPE_HOLD_MS + 300);
   }
 })();

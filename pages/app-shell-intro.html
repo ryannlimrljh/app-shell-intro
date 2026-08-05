@@ -252,6 +252,31 @@
   .c-account-menu-item{display:flex; align-items:center; gap:var(--spacing-12); width:100%; height:36px; padding:0 var(--spacing-8); border:none; background:transparent; border-radius:var(--radius-sm); font-family:var(--font-primary); font-size:var(--text-body1-size); font-weight:500; color:var(--color-neutral-9); text-align:left; cursor:pointer; transition:background-color var(--duration-fast) var(--ease-standard);}
   .c-account-menu-item:hover{background:var(--color-neutral-2);}
   .c-account-menu-item i{flex:none; font-size:16px; color:var(--color-neutral-5);}
+
+  /* Logo — now a menu trigger, same "wrap the existing element in a
+     <button>, reset the button chrome, keep everything else" move
+     .c-sidebar-account already made. Row padding/radius/hover echo the
+     account row's own so both triggers in this rail read as the same
+     kind of control. */
+  .c-sidebar-logo{border:none; background:transparent; padding:var(--spacing-4); border-radius:var(--radius-sm); cursor:pointer; transition:background-color var(--duration-fast) var(--ease-standard);}
+  .c-sidebar-logo:hover{background:var(--color-neutral-2);}
+
+  /* App switcher menu — same popover convention and same off-DOM/
+     position:fixed/z-index:60 reasoning as .c-account-menu above (see
+     its comment for the clipping + stacking rationale in full; not
+     repeated here). Only real difference: it opens *below* its trigger,
+     not above — the logo sits at the top of the rail, so there's room
+     underneath, unlike the footer-pinned account row. Wider than the
+     account menu (240px vs 200px) since these are logo lockups, not
+     icon+label rows, and the widest of the four ("Influencers") needs
+     the room. */
+  .c-app-switcher-menu{display:none; position:fixed; width:240px; z-index:60; background:var(--color-neutral-1); border:1px solid var(--color-neutral-3); border-radius:var(--radius-md); box-shadow:var(--shadow-3); padding:var(--spacing-4); overflow:hidden;}
+  .c-app-switcher-menu.is-open{display:block;}
+  .c-app-switcher-item{display:flex; align-items:center; justify-content:space-between; gap:var(--spacing-12); width:100%; height:44px; padding:0 var(--spacing-8); border:none; background:transparent; border-radius:var(--radius-sm); cursor:pointer; transition:background-color var(--duration-fast) var(--ease-standard);}
+  .c-app-switcher-item:hover{background:var(--color-neutral-2);}
+  .c-app-switcher-item img{height:18px; width:auto; display:block;}
+  .c-app-switcher-item i{flex:none; font-size:16px; color:var(--color-obsidian); visibility:hidden;}
+  .c-app-switcher-item.is-active i{visibility:visible;}
 </style>
 </head>
 <body>
@@ -264,13 +289,13 @@
     <div class="c-sidebar-shell" id="shellSidebarShell">
       <nav class="c-sidebar" id="shellSidebarNav">
         <div class="c-sidebar-header">
-          <div class="c-sidebar-logo">
+          <button class="c-sidebar-logo" type="button" id="appSwitcherTrigger" aria-haspopup="menu" aria-expanded="false" aria-controls="appSwitcherMenu">
             <img class="js-sidebar-logo-img"
                  src="../collabrium-dls/logo-lockups/collabrium-default-logo.svg"
                  data-expanded-src="../collabrium-dls/logo-lockups/collabrium-default-logo.svg"
                  data-collapsed-src="../collabrium-dls/SVG/coin.svg"
                  alt="Collabrium" />
-          </div>
+          </button>
         </div>
         <div class="c-sidebar-section">Overview</div>
         <button class="c-sidebar-item active" type="button"><i class="ph-fill ph-house"></i><span class="label">Dashboard</span><span class="c-sidebar-hover-text">Dashboard</span></button>
@@ -318,6 +343,13 @@
   <div class="c-account-menu" id="accountMenu" role="menu" aria-hidden="true">
     <button class="c-account-menu-item" type="button" role="menuitem"><i class="ph-fill ph-gear"></i><span>Settings</span></button>
     <button class="c-account-menu-item" type="button" role="menuitem"><i class="ph-fill ph-sign-out"></i><span>Log out</span></button>
+  </div>
+
+  <div class="c-app-switcher-menu" id="appSwitcherMenu" role="menu" aria-hidden="true">
+    <button class="c-app-switcher-item" type="button" role="menuitemradio" data-engine="studio" aria-checked="false"><img src="assets/logos/collab-studio.svg" alt="Studio" /><i class="ph-fill ph-check"></i></button>
+    <button class="c-app-switcher-item" type="button" role="menuitemradio" data-engine="sales" aria-checked="false"><img src="assets/logos/collab-sales.svg" alt="Sales" /><i class="ph-fill ph-check"></i></button>
+    <button class="c-app-switcher-item" type="button" role="menuitemradio" data-engine="influencers" aria-checked="false"><img src="assets/logos/collab-influencers.svg" alt="Influencers" /><i class="ph-fill ph-check"></i></button>
+    <button class="c-app-switcher-item" type="button" role="menuitemradio" data-engine="content" aria-checked="false"><img src="assets/logos/collab-content.svg" alt="Content" /><i class="ph-fill ph-check"></i></button>
   </div>
 
 <script type="module">
@@ -605,6 +637,69 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
     });
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') closeAccountMenu();
+    });
+  }
+
+  // Sidebar header — app switcher. Click the logo to pick which
+  // engine's lockup it shows (Studio / Sales / Influencers / Content).
+  // Same position:fixed/JS-positioned/z-index:60 popover pattern as the
+  // account menu above (see its CSS comment for the full clipping +
+  // stacking rationale) — opens *below* the trigger instead of above,
+  // since the logo sits at the top of the rail with room underneath.
+  // Selecting an item swaps the sidebar's *expanded* logo image (via
+  // the same data-expanded-src attribute setSidebarCollapsed() already
+  // reads) to that engine's lockup and re-renders immediately if the
+  // rail isn't currently collapsed; the collapsed coin icon is shared
+  // across all four engines on purpose — none of the source files is a
+  // compact square mark, so collapsed state stays engine-agnostic.
+  const appSwitcherTrigger = document.getElementById('appSwitcherTrigger');
+  const appSwitcherMenu = document.getElementById('appSwitcherMenu');
+  if (appSwitcherTrigger && appSwitcherMenu) {
+    const logoImg = appSwitcherTrigger.querySelector('.js-sidebar-logo-img');
+    function positionAppSwitcherMenu() {
+      const rect = appSwitcherTrigger.getBoundingClientRect();
+      const menuWidth = appSwitcherMenu.offsetWidth || 240;
+      const left = Math.max(8, Math.min(rect.left, window.innerWidth - menuWidth - 8));
+      appSwitcherMenu.style.left = left + 'px';
+      appSwitcherMenu.style.top = (rect.bottom + 8) + 'px';
+    }
+    function closeAppSwitcherMenu() {
+      appSwitcherMenu.classList.remove('is-open');
+      appSwitcherMenu.setAttribute('aria-hidden', 'true');
+      appSwitcherTrigger.setAttribute('aria-expanded', 'false');
+    }
+    function openAppSwitcherMenu() {
+      positionAppSwitcherMenu();
+      appSwitcherMenu.classList.add('is-open');
+      appSwitcherMenu.setAttribute('aria-hidden', 'false');
+      appSwitcherTrigger.setAttribute('aria-expanded', 'true');
+    }
+    appSwitcherTrigger.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const isOpen = appSwitcherMenu.classList.contains('is-open');
+      if (isOpen) closeAppSwitcherMenu(); else openAppSwitcherMenu();
+    });
+    appSwitcherMenu.addEventListener('click', (e) => {
+      const item = e.target.closest('.c-app-switcher-item');
+      if (!item) return;
+      appSwitcherMenu.querySelectorAll('.c-app-switcher-item').forEach((btn) => {
+        const active = btn === item;
+        btn.classList.toggle('is-active', active);
+        btn.setAttribute('aria-checked', String(active));
+      });
+      logoImg.dataset.expandedSrc = item.querySelector('img').src;
+      if (!logoImg.closest('.c-sidebar').classList.contains('is-collapsed')) {
+        logoImg.src = logoImg.dataset.expandedSrc;
+      }
+      closeAppSwitcherMenu();
+    });
+    document.addEventListener('click', (e) => {
+      if (!appSwitcherMenu.classList.contains('is-open')) return;
+      if (e.target.closest('#appSwitcherMenu') || e.target.closest('#appSwitcherTrigger')) return;
+      closeAppSwitcherMenu();
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeAppSwitcherMenu();
     });
   }
 

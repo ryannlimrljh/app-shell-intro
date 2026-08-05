@@ -129,7 +129,7 @@
   .c-card-slider{overflow-x:auto; overflow-anchor:none; scroll-snap-type:x proximity; cursor:grab; outline:none; -webkit-overflow-scrolling:touch; scrollbar-width:none; margin-right:calc(-1 * var(--page-gutter));}
   .c-card-slider::-webkit-scrollbar{display:none;}
   .c-card-slider.is-dragging{cursor:grabbing; scroll-snap-type:none; user-select:none;}
-  .c-card-slider-track{display:flex; gap:var(--spacing-16); width:max-content; padding:4px 16px var(--spacing-8) 240px;}
+  .c-card-slider-track{display:flex; gap:var(--spacing-16); width:max-content; padding:4px 16px var(--spacing-8) 240px; perspective:900px;}
   .c-card-slide{flex:0 0 340px; width:340px; min-height:280px; scroll-snap-align:start;}
 
   /* Card entrance — each card fades/glides in independently, not the
@@ -301,7 +301,17 @@
     <button class="c-account-menu-item" type="button" role="menuitem"><i class="ph-fill ph-sign-out"></i><span>Log out</span></button>
   </div>
 
-<script>
+<script type="module">
+// Motion (motion.dev's vanilla JS package, not the React build — this
+// page has no framework) via ESM CDN import, no bundler needed, same
+// no-build-step approach as the rest of this static page. Pinned to a
+// major version rather than @latest so this stress-test page doesn't
+// silently change behavior on a future Motion release. Used below only
+// for the card tilt's spring physics — everything else on this page
+// stays plain CSS transitions/vanilla JS, on purpose, not migrated to
+// Motion wholesale just because it's now loaded.
+import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
+
 (function () {
   // Top-center canvas date — "[Day], [Date]". No explicit locale passed
   // to toLocaleDateString, so it renders in whatever locale the user's
@@ -384,6 +394,50 @@
       const card = cardSlider.querySelector('.c-card-slide');
       const step = (card ? card.getBoundingClientRect().width : 340) + gap;
       cardSlider.scrollBy({ left: e.key === 'ArrowRight' ? step : -step, behavior: 'smooth' });
+    });
+
+    // Card tilt — each card leans toward the pointer in 3D
+    // (rotateX/rotateY, pivoting around its own center), spring-
+    // animated via Motion rather than a CSS transition, so it has real
+    // physics (stiffness/damping) instead of a fixed easing curve —
+    // that's what actually gives the "chases the pointer, slightly
+    // overshoots, settles" feel a plain ease can't. .c-card-slider-
+    // track's own perspective (in <style> above) is what makes the
+    // rotation read as 3D depth instead of a flat skew.
+    //
+    // Deferred per card until *that card's own* entrance transition
+    // (the CSS opacity/translateY reveal from the previous pass) has
+    // actually finished — not attached at load — so a stray pointer
+    // already resting over a card during its staggered, randomized
+    // entrance can't fight the entrance transform before the card has
+    // even finished arriving.
+    //
+    // Mouse-only (pointerType check): the same pointer events already
+    // drive this slider's own drag-to-scroll on touch, and a finger
+    // panning across cards would otherwise also fire wild tilts on
+    // every card it crosses — a real conflict, not a hypothetical one,
+    // since both listen on overlapping pointer events. Also skipped
+    // outright while an actual slider drag is in progress.
+    function enableCardTilt(card) {
+      const MAX_TILT_DEG = 12;
+      card.addEventListener('pointermove', (e) => {
+        if (e.pointerType !== 'mouse' || cardSlider.classList.contains('is-dragging')) return;
+        const rect = card.getBoundingClientRect();
+        const px = (e.clientX - rect.left) / rect.width;
+        const py = (e.clientY - rect.top) / rect.height;
+        const rotateY = (px - 0.5) * 2 * MAX_TILT_DEG;
+        const rotateX = -(py - 0.5) * 2 * MAX_TILT_DEG;
+        animate(card, { rotateX, rotateY }, { type: 'spring', stiffness: 300, damping: 22, mass: 0.6 });
+      });
+      card.addEventListener('pointerleave', (e) => {
+        if (e.pointerType !== 'mouse') return;
+        animate(card, { rotateX: 0, rotateY: 0 }, { type: 'spring', stiffness: 220, damping: 18 });
+      });
+    }
+    document.querySelectorAll('.c-card-slide').forEach((card) => {
+      card.addEventListener('transitionend', (e) => {
+        if (e.propertyName === 'transform') enableCardTilt(card);
+      }, { once: true });
     });
   }
 

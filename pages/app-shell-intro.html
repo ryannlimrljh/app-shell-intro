@@ -205,6 +205,23 @@
   .c-hcard-thumb i{position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); font-size:32px; color:var(--color-orange);}
   .c-hcard-tag{display:block; margin-top:auto; font-size:var(--text-caption-size); font-weight:700; color:var(--color-orange);}
 
+  /* Card 5/6 — Team standing: also a Stat/KPI card in spirit (reuses
+     .c-stat + .c-stat-label + .c-stat-value.hero for "#2"), centered
+     rather than left-aligned since it's a single hero figure. Avatar
+     circles reuse collabrium-dls's own .c-userpicker-avatar (already
+     used elsewhere on this page for the sidebar account avatar)
+     rather than reinventing that recipe — only the overlapping-stack
+     treatment (ring border, negative margin) is new/page-local. The
+     progress bar has no equivalent yet in collabrium-dls, so it's
+     page-local, same as the gauge/sparkline above. */
+  .c-hcard-team{align-items:center; text-align:center;}
+  .c-hcard-avatars{display:flex; margin:var(--spacing-16) 0 var(--spacing-8);}
+  .c-hcard-avatar{width:28px; height:28px; border:2px solid var(--color-neutral-1); margin-left:-8px;}
+  .c-hcard-avatar:first-child{margin-left:0;}
+  .c-hcard-bar{width:100%; height:6px; margin-top:auto; border-radius:var(--radius-pill); background:var(--color-neutral-2); overflow:hidden;}
+  .c-hcard-bar-fill{width:72%; height:100%; background:var(--color-obsidian);}
+  .c-hcard-barlabel{display:block; margin:var(--spacing-4) 0 0; font-size:var(--text-caption-size); color:var(--color-neutral-5);}
+
   /* Main nav — position:absolute, floating overlay with a top z-index,
      not a flex sibling reserving row space anymore. Canvas content
      (.c-shell-main) is now the *only* in-flow flex child of .c-shell,
@@ -445,7 +462,19 @@
               <h4>TrendCafe is crushing it 🚀</h4>
               <span class="c-hcard-tag">via Collab Influencers</span>
             </div>
-            <div class="c-card c-card-slide"></div>
+            <div class="c-card c-card-slide c-stat c-hcard-team">
+              <span class="c-stat-label">SEA team</span>
+              <div class="c-stat-value hero">#2</div>
+              <p>this month</p>
+              <div class="c-hcard-avatars">
+                <span class="c-userpicker-avatar c-hcard-avatar">JL</span>
+                <span class="c-userpicker-avatar c-hcard-avatar">KW</span>
+                <span class="c-userpicker-avatar c-hcard-avatar">SM</span>
+                <span class="c-userpicker-avatar c-hcard-avatar">BW</span>
+              </div>
+              <div class="c-hcard-bar"><div class="c-hcard-bar-fill"></div></div>
+              <span class="c-hcard-barlabel">RM120K behind #1</span>
+            </div>
             <div class="c-card c-card-slide"></div>
           </div>
         </div>

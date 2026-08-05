@@ -269,7 +269,7 @@ Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>"
 **Files:**
 - Modify: `pages/app-shell-intro.html` (style block — append after Card 3's CSS; markup — replace the fourth empty card div)
 
-- [ ] **Step 1: Add Card 4's CSS**
+- [x] **Step 1: Add Card 4's CSS**
 
 Insert after Card 3's CSS block (after `.c-hcard-sparkline{...}`):
 
@@ -287,7 +287,7 @@ Insert after Card 3's CSS block (after `.c-hcard-sparkline{...}`):
   .c-hcard-tag{display:block; margin-top:auto; font-size:var(--text-caption-size); font-weight:700; color:var(--color-orange);}
 ```
 
-- [ ] **Step 2: Replace the fourth placeholder card**
+- [x] **Step 2: Replace the fourth placeholder card**
 
 Replace the (now only remaining) three `<div class="c-card c-card-slide"></div>` lines' **first** occurrence (i.e. the 4th card overall) with:
 
@@ -302,7 +302,7 @@ Replace the (now only remaining) three `<div class="c-card c-card-slide"></div>`
             </div>
 ```
 
-- [ ] **Step 3: Verify in the browser**
+- [x] **Step 3: Verify in the browser**
 
 Reload, wait for reveal, then:
 
@@ -320,7 +320,7 @@ JSON.stringify({
 
 Expected: `title` contains "TrendCafe", `thumbHeight:120`, and `badgeBottom` very close to `thumbBottom` (within ~10px — confirms the "2.3x ROAS" badge sits at the *bottom* of the thumbnail, not the top, i.e. `align-items:flex-end` on `.c-hcard-thumb` worked and wasn't overridden). Screenshot to confirm the warm thumbnail block with the centered play icon and the bottom-left stat badge.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add pages/app-shell-intro.html

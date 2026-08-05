@@ -29,12 +29,18 @@
   .c-sidebar-shell{transition:transform 450ms cubic-bezier(.16,1,.3,1); transform:translateX(-120%);}
   .c-sidebar-shell.is-in{transform:translateX(0);}
 
-  /* Wipe intro: a single solid panel, off-screen left on load (so the
-     warm canvas is what's actually visible first), that sweeps all the
-     way across the viewport and off the right edge in one continuous
-     transition — a true "pass-through" wipe, not a curtain that starts
-     by covering the page. */
-  .wipe-panel{position:fixed; inset:0; z-index:100; background:var(--color-obsidian); transform:translateX(-100%); transition:transform 700ms cubic-bezier(.65,0,.35,1);}
+  /* Wipe intro: a single solid, slanted panel — off-screen left on load
+     (so the warm canvas is what's actually visible first) — sweeps in,
+     holds fully covering the viewport for a beat, then sweeps out to
+     the right. skewX turns it into a parallelogram instead of a plain
+     rectangle; left/right overscan (beyond -12deg's worst-case shift of
+     ~50vh*tan(12deg)≈10.6vh at the top/bottom edges, from the default
+     center transform-origin) keeps the slanted edges from ever exposing
+     a gap at the viewport's top or bottom while it's in the "cover"
+     resting position. transform order matters here: translateX is
+     listed first (outermost), so it always shifts the *already-skewed*
+     shape by a plain screen-space amount, independent of the skew. */
+  .wipe-panel{position:fixed; top:0; bottom:0; left:-14vh; right:-14vh; z-index:100; background:var(--color-obsidian); transform:translateX(-160vw) skewX(-12deg); transition:transform 380ms cubic-bezier(.65,0,.35,1);}
 </style>
 </head>
 <body>
@@ -131,17 +137,22 @@
     if (item) hideHoverLabel();
   });
 
-  // Wipe intro. Sequence: blank warm canvas → a single solid panel
-  // sweeps left→right across the full viewport and off the far edge →
-  // blank warm canvas again, briefly → the main nav slides in from the
-  // left. Runs on every load (no sessionStorage skip, by design). See
+  // Wipe intro. Sequence: blank warm canvas → a single slanted panel
+  // sweeps in from the left and holds, fully covering the viewport →
+  // sweeps out to the right, uncovering the canvas again → blank warm
+  // canvas, briefly → the main nav slides in from the left. Timed with
+  // plain setTimeouts (not transitionend chaining) since the hold phase
+  // has no property change of its own to key an event off of. Runs on
+  // every load (no sessionStorage skip, by design). See
   // docs/superpowers/specs/2026-08-05-app-shell-intro-page-design.md.
   const wipePanel = document.getElementById('wipePanel');
   const sidebarShell = document.getElementById('shellSidebarShell');
   if (wipePanel && sidebarShell) {
-    const HOLD_MS = 150;            // blank warm canvas, before the wipe starts
-    const WIPE_DURATION_MS = 700;   // must match .wipe-panel's transition-duration in <style> above
-    const POST_WIPE_HOLD_MS = 200;  // blank warm canvas again, after the wipe, before the nav slides in
+    const PRE_HOLD_MS = 150;        // blank warm canvas, before the panel enters
+    const ENTER_MS = 380;           // panel sweeps in, covering the viewport — must match .wipe-panel's transition-duration in <style> above
+    const HOLD_COVER_MS = 300;      // panel sits fully covering the viewport (solid Obsidian, no flashing)
+    const EXIT_MS = 380;            // panel sweeps out, uncovering the viewport — same transition-duration as ENTER_MS
+    const POST_WIPE_HOLD_MS = 200;  // blank warm canvas again, after the panel exits, before the nav slides in
     const NAV_DURATION_MS = 450;    // must match .c-sidebar-shell's transition-duration in <style> above
 
     function hideWipePanel() {
@@ -150,22 +161,28 @@
     function revealNav() {
       sidebarShell.classList.add('is-in');
     }
+    function enterCover() {
+      wipePanel.style.transform = 'translateX(0) skewX(-12deg)';
+    }
+    function exitCover() {
+      wipePanel.style.transform = 'translateX(160vw) skewX(-12deg)';
+    }
 
-    wipePanel.addEventListener('transitionend', () => {
+    setTimeout(enterCover, PRE_HOLD_MS);
+    setTimeout(exitCover, PRE_HOLD_MS + ENTER_MS + HOLD_COVER_MS);
+    setTimeout(() => {
       hideWipePanel();
       setTimeout(revealNav, POST_WIPE_HOLD_MS);
-    }, { once: true });
-
-    setTimeout(() => { wipePanel.style.transform = 'translateX(100%)'; }, HOLD_MS);
+    }, PRE_HOLD_MS + ENTER_MS + HOLD_COVER_MS + EXIT_MS);
 
     // Fallback: guarantee the wipe panel hides and the nav reveals even
-    // if transitionend never fires (e.g. a backgrounded/throttled tab
-    // suspends the transition before it starts) — both functions are
-    // idempotent, so this is harmless if the normal path already ran.
+    // if something delays a timer (e.g. a backgrounded/throttled tab)
+    // — both functions are idempotent, so this is harmless if the
+    // normal path already ran.
     setTimeout(() => {
       hideWipePanel();
       revealNav();
-    }, HOLD_MS + WIPE_DURATION_MS + POST_WIPE_HOLD_MS + 200);
+    }, PRE_HOLD_MS + ENTER_MS + HOLD_COVER_MS + EXIT_MS + POST_WIPE_HOLD_MS + 300);
   }
 })();
 </script>

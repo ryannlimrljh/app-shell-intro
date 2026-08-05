@@ -269,13 +269,39 @@
      underneath, unlike the footer-pinned account row. Wider than the
      account menu (240px vs 200px) since these are logo lockups, not
      icon+label rows, and the widest of the four ("Influencers") needs
-     the room. */
+     the room.
+
+     Row chrome is now a direct copy of .c-account-menu-item's own
+     values (gap-12, padding 0 spacing-8, radius-sm, Neutral-2 hover) —
+     same trigger family, same row recipe, so the two menus read as one
+     consistent pattern instead of two different ones stacked in the
+     same rail. The one deliberate difference: height 40px, not 36 —
+     the logo images need a hair more vertical room than a 16px icon +
+     text row does. Checkmark uses margin-left:auto (was
+     justify-content:space-between on the row) — same visual result,
+     but keeps the row a plain content-first flex line like
+     .c-account-menu-item's, not a two-column layout with its own
+     spacing model.
+
+     Logo sizing: all four source SVGs share the same viewBox height
+     (269) and the same combined ink bounding box (~162 units tall,
+     verified — "Studio"/"Sales" measure literally identical, "Content"
+     and "Influencers" are within ~3% of that, i.e. sub-pixel at this
+     size) — so scaling every <img> to the same CSS height with
+     width:auto already renders every wordmark at the same cap-height;
+     confirmed in-browser too (getBoundingClientRect().height reports
+     the identical value for all four). What differs, correctly, is
+     each logo's rendered *width* — "Influencers" is the longest word,
+     so its image is the widest; that's the wordmark being read at a
+     consistent size, not an inconsistent one. Bumped from 18px to 22px
+     ("enlarge the logos") — still comfortable in the 240px menu even
+     for the widest lockup. */
   .c-app-switcher-menu{display:none; position:fixed; width:240px; z-index:60; background:var(--color-neutral-1); border:1px solid var(--color-neutral-3); border-radius:var(--radius-md); box-shadow:var(--shadow-3); padding:var(--spacing-4); overflow:hidden;}
   .c-app-switcher-menu.is-open{display:block;}
-  .c-app-switcher-item{display:flex; align-items:center; justify-content:space-between; gap:var(--spacing-12); width:100%; height:44px; padding:0 var(--spacing-8); border:none; background:transparent; border-radius:var(--radius-sm); cursor:pointer; transition:background-color var(--duration-fast) var(--ease-standard);}
+  .c-app-switcher-item{display:flex; align-items:center; gap:var(--spacing-12); width:100%; height:40px; padding:0 var(--spacing-8); border:none; background:transparent; border-radius:var(--radius-sm); cursor:pointer; transition:background-color var(--duration-fast) var(--ease-standard);}
   .c-app-switcher-item:hover{background:var(--color-neutral-2);}
-  .c-app-switcher-item img{height:18px; width:auto; display:block;}
-  .c-app-switcher-item i{flex:none; font-size:16px; color:var(--color-obsidian); visibility:hidden;}
+  .c-app-switcher-item img{height:22px; width:auto; display:block;}
+  .c-app-switcher-item i{flex:none; margin-left:auto; font-size:16px; color:var(--color-obsidian); visibility:hidden;}
   .c-app-switcher-item.is-active i{visibility:visible;}
 </style>
 </head>

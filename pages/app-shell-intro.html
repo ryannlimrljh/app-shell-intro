@@ -139,13 +139,21 @@
   if (overlay && strips.length) {
     const HOLD_MS = 200;
     const STAGGER_MS = 70;
+    const STRIP_DURATION_MS = 650; // must match .curtain-strip's transition-duration in <style> above
     const last = strips[strips.length - 1];
-    last.addEventListener('transitionend', () => {
+    function hideOverlay() {
       overlay.style.display = 'none';
-    }, { once: true });
+    }
+    last.addEventListener('transitionend', hideOverlay, { once: true });
     strips.forEach((strip, i) => {
       setTimeout(() => { strip.style.transform = 'scaleY(0)'; }, HOLD_MS + i * STAGGER_MS);
     });
+    // Fallback: guarantee the overlay is removed even if the last strip's
+    // transitionend never fires (e.g. a backgrounded/throttled tab
+    // suspends the transition before it starts) — a stuck overlay would
+    // otherwise block the entire page forever. hideOverlay() is
+    // idempotent, so this is harmless if transitionend already fired.
+    setTimeout(hideOverlay, HOLD_MS + (strips.length - 1) * STAGGER_MS + STRIP_DURATION_MS + 100);
   }
 })();
 </script>

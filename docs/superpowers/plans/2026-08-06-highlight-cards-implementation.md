@@ -27,7 +27,7 @@ Do not touch `collabrium-dls/tokens.css` or `collabrium-dls/components.css`. Eve
 **Files:**
 - Modify: `pages/app-shell-intro.html` (style block — insert after the `.c-card-slide.is-revealed{...}` rule; markup — replace the *first* empty card div)
 
-- [ ] **Step 1: Add the foundation comment + Card 1's CSS**
+- [x] **Step 1: Add the foundation comment + Card 1's CSS**
 
 Find this exact line in the `<style>` block:
 
@@ -66,7 +66,7 @@ Insert immediately after it (before the blank line and the `/* Main nav — ...`
   .c-hcard-cta{margin-top:auto; display:flex; align-items:center; gap:var(--spacing-4); font-size:var(--text-label2-size); font-weight:700; color:var(--color-neutral-9);}
 ```
 
-- [ ] **Step 2: Replace the first placeholder card**
+- [x] **Step 2: Replace the first placeholder card**
 
 Find (the *first* occurrence, inside `.c-card-slider-track`):
 
@@ -91,7 +91,7 @@ Replace just that first occurrence with:
 
 Leave the other five `<div class="c-card c-card-slide"></div>` lines untouched — later tasks replace them one at a time.
 
-- [ ] **Step 3: Verify in the browser**
+- [x] **Step 3: Verify in the browser**
 
 Open the Browser pane at `http://localhost:8791/pages/app-shell-intro.html`, wait ~3s for the intro reveal, then run via `javascript_tool`:
 
@@ -108,7 +108,7 @@ JSON.stringify({
 
 Expected: `width:340, height:400` (unchanged card footprint), `label:"Pipeline"`, `rows:3`. Then take a screenshot and confirm visually: three rows with amber "Nd stalled" chips that do **not** stretch full-width, and "Follow up →" sitting at the card's bottom edge.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add pages/app-shell-intro.html

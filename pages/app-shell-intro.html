@@ -166,6 +166,15 @@
   .c-sidebar-shell{position:absolute; top:0; left:0; bottom:0; z-index:50; transition:transform 450ms cubic-bezier(.16,1,.3,1); transform:translateX(-120%);}
   .c-sidebar-shell.is-in{transform:translateX(0);}
 
+  /* Cast shadow on the nav itself — now that it's position:absolute and
+     paints on top of the canvas (see note above), it reads as a floating
+     panel rather than a docked column, so it should look like one.
+     shadow-3 (not the heavier shadow-4) keeps it subtle: enough lift to
+     separate it from the canvas behind it without looking like a modal.
+     Page-local, since components.css's plain .c-sidebar is still meant
+     for the flush, in-flow docked case elsewhere. */
+  .c-sidebar-shell .c-sidebar{box-shadow:var(--shadow-3);}
+
   /* Wipe intro: a single solid, slanted panel — off-screen left on load
      (so the warm canvas is what's actually visible first) — sweeps in,
      holds fully covering the viewport for a beat, then sweeps out to

@@ -148,6 +148,32 @@
   .c-card-slide{opacity:0; transform:translateY(24px); transition:opacity var(--card-reveal-duration, 650ms) cubic-bezier(.22,1,.36,1), transform var(--card-reveal-duration, 650ms) cubic-bezier(.22,1,.36,1); transition-delay:var(--card-reveal-delay, 0ms);}
   .c-card-slide.is-revealed{opacity:1; transform:translateY(0);}
 
+  /* ---- Highlight cards: personalized "next best action" content for
+     the card slider (see docs/superpowers/specs/2026-08-06-highlight-
+     cards-design.md for the approved design). Six cards, six distinct
+     internal layouts ("shapes") that match what each one is actually
+     saying, sharing one language: .c-card's own bg/border/radius-lg/
+     shadow-1/padding-16/gap-8 recipe is reused as-is (these rules only
+     add each card's *internal* layout), plus collabrium-dls's own
+     .c-badge/.c-tag/.c-stat* components wherever a card is genuinely
+     that kind of thing (Pace and Team below are Stat/KPI cards in
+     spirit, so they reuse .c-stat directly rather than reinventing
+     it). The other four cards define one page-local eyebrow class,
+     .c-hcard-label, matching the *recipe* every other DS component's
+     own label already uses (caption/700/tracking-eyebrow/uppercase/
+     Neutral-5) — deliberately not reusing .c-stat-label cross-
+     component, since the DS's own convention (SidebarNav's section
+     label, MultiSelect's group label, ElBadge's name label) is that
+     each component re-implements this recipe locally rather than
+     sharing one class across unrelated components. */
+  .c-hcard-label{font-size:var(--text-caption-size); font-weight:700; letter-spacing:var(--tracking-eyebrow); text-transform:uppercase; color:var(--color-neutral-5);}
+
+  /* Card 1/6 — Pipeline hygiene: list-shaped, ends in a text CTA. */
+  .c-hcard-list{display:flex; flex-direction:column;}
+  .c-hcard-list-row{display:flex; align-items:center; justify-content:space-between; gap:var(--spacing-12); padding:var(--spacing-8) 0; border-top:1px solid var(--color-neutral-2); font-size:var(--text-body2-size); color:var(--color-neutral-9);}
+  .c-hcard-list-row:first-child{border-top:none;}
+  .c-hcard-cta{margin-top:auto; display:flex; align-items:center; gap:var(--spacing-4); font-size:var(--text-label2-size); font-weight:700; color:var(--color-neutral-9);}
+
   /* Main nav — position:absolute, floating overlay with a top z-index,
      not a flex sibling reserving row space anymore. Canvas content
      (.c-shell-main) is now the *only* in-flow flex child of .c-shell,
@@ -352,7 +378,16 @@
         </div>
         <div class="c-card-slider" id="cardSlider" tabindex="0" role="region" aria-roledescription="carousel" aria-label="Highlights" style="margin-top:var(--spacing-32)">
           <div class="c-card-slider-track">
-            <div class="c-card c-card-slide"></div>
+            <div class="c-card c-card-slide">
+              <span class="c-hcard-label">Pipeline</span>
+              <h4>3 deals need a nudge</h4>
+              <div class="c-hcard-list">
+                <div class="c-hcard-list-row"><span>MediaCorp</span><span class="c-badge c-badge-warning">12d stalled</span></div>
+                <div class="c-hcard-list-row"><span>Genting F&amp;B</span><span class="c-badge c-badge-warning">7d stalled</span></div>
+                <div class="c-hcard-list-row"><span>AirAsia Retail</span><span class="c-badge c-badge-warning">5d stalled</span></div>
+              </div>
+              <span class="c-hcard-cta">Follow up <i class="ph ph-arrow-right"></i></span>
+            </div>
             <div class="c-card c-card-slide"></div>
             <div class="c-card c-card-slide"></div>
             <div class="c-card c-card-slide"></div>

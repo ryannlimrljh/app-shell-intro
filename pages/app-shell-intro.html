@@ -194,6 +194,17 @@
   .c-hcard-pace .c-stat-trend{align-self:flex-start;}
   .c-hcard-sparkline{display:block; margin-top:auto; width:100%; height:36px;}
 
+  /* Card 4/6 — Cross-engine upsell: media-thumbnail-shaped, the one
+     card whose content is pulled from a sister Collabrium engine
+     (Influencers) rather than Sales itself — this is the card that
+     couldn't exist without Collabrium being one platform across
+     Studio/Sales/Influencers/Content. Fire-bg-strong (still an
+     approved elemental tint, the "strong" step of it) stands in for a
+     real campaign thumbnail image. */
+  .c-hcard-thumb{position:relative; height:120px; margin-bottom:var(--spacing-4); border-radius:var(--radius-sm); background:var(--color-fire-bg-strong); display:flex; align-items:flex-end; padding:var(--spacing-8);}
+  .c-hcard-thumb i{position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); font-size:32px; color:var(--color-orange);}
+  .c-hcard-tag{display:block; margin-top:auto; font-size:var(--text-caption-size); font-weight:700; color:var(--color-orange);}
+
   /* Main nav — position:absolute, floating overlay with a top z-index,
      not a flex sibling reserving row space anymore. Canvas content
      (.c-shell-main) is now the *only* in-flow flex child of .c-shell,
@@ -426,7 +437,14 @@
                 <polyline points="0,32 30,28 60,30 90,20 120,22 150,10 180,14 200,4" fill="none" style="stroke:var(--color-green)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
             </div>
-            <div class="c-card c-card-slide"></div>
+            <div class="c-card c-card-slide">
+              <div class="c-hcard-thumb">
+                <i class="ph-fill ph-play-circle"></i>
+                <span class="c-badge c-badge-neutral">2.3x ROAS</span>
+              </div>
+              <h4>TrendCafe is crushing it 🚀</h4>
+              <span class="c-hcard-tag">via Collab Influencers</span>
+            </div>
             <div class="c-card c-card-slide"></div>
             <div class="c-card c-card-slide"></div>
           </div>

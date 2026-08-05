@@ -20,9 +20,19 @@
      the component gallery — this page is a real full-viewport shell,
      so the height is overridden here, not in components.css. */
   .c-shell{height:100dvh;}
+  .curtain-overlay{position:fixed; inset:0; z-index:100; display:flex;}
+  .curtain-strip{flex:1 0 20%; background:var(--color-obsidian); transform-origin:bottom; transition:transform 650ms cubic-bezier(.65,0,.35,1);}
 </style>
 </head>
 <body>
+
+  <div class="curtain-overlay" id="curtainOverlay" aria-hidden="true">
+    <div class="curtain-strip"></div>
+    <div class="curtain-strip"></div>
+    <div class="curtain-strip"></div>
+    <div class="curtain-strip"></div>
+    <div class="curtain-strip"></div>
+  </div>
 
   <div class="c-shell">
     <div class="c-sidebar-shell">

@@ -40,7 +40,18 @@
      resting position. transform order matters here: translateX is
      listed first (outermost), so it always shifts the *already-skewed*
      shape by a plain screen-space amount, independent of the skew. */
-  .wipe-panel{position:fixed; top:0; bottom:0; left:-14vh; right:-14vh; z-index:100; background:var(--color-obsidian); transform:translateX(-160vw) skewX(-12deg); transition:transform 380ms cubic-bezier(.65,0,.35,1);}
+  .wipe-panel{position:fixed; top:0; bottom:0; left:-14vh; right:-14vh; z-index:100; background:var(--color-amber); transform:translateX(-160vw) skewX(-12deg); transition:transform 380ms cubic-bezier(.65,0,.35,1);}
+
+  /* Sidebar footer — account row. Not a documented SidebarNav sub-part
+     yet (DESIGN-SYSTEM.md's Footer row says "sign-out, account, or help
+     slot" but specs no row anatomy of its own) — composed here from
+     UserPicker's existing avatar/name/role classes (.c-userpicker-*)
+     rather than inventing new ones, same "compose, don't invent" rule
+     App Shell follows elsewhere. Collapse behavior mirrors nav items:
+     text hides, avatar stays and re-centers. */
+  .c-sidebar-account{display:flex; align-items:center; gap:var(--spacing-12); padding:var(--spacing-8) var(--spacing-12); margin-bottom:var(--spacing-4);}
+  .c-sidebar.is-collapsed .c-sidebar-account{justify-content:center; padding:var(--spacing-8) 0;}
+  .c-sidebar.is-collapsed .c-sidebar-account .c-userpicker-text{display:none;}
 </style>
 </head>
 <body>
@@ -63,6 +74,13 @@
         <button class="c-sidebar-item active" type="button"><i class="ph-fill ph-house"></i><span class="label">Dashboard</span><span class="c-sidebar-hover-text">Dashboard</span></button>
         <button class="c-sidebar-item" type="button"><i class="ph-fill ph-chart-bar"></i><span class="label">Reports</span><span class="c-sidebar-hover-text">Reports</span></button>
         <div class="c-sidebar-footer">
+          <div class="c-sidebar-account">
+            <span class="c-userpicker-avatar">BW</span>
+            <span class="c-userpicker-text">
+              <span class="c-userpicker-name">Bryan Wong</span>
+              <span class="c-userpicker-role">Administrator</span>
+            </span>
+          </div>
           <button class="c-sidebar-item" type="button"><i class="ph-fill ph-gear"></i><span class="label">Settings</span><span class="c-sidebar-hover-text">Settings</span></button>
         </div>
       </nav>
@@ -150,7 +168,7 @@
   if (wipePanel && sidebarShell) {
     const PRE_HOLD_MS = 150;        // blank warm canvas, before the panel enters
     const ENTER_MS = 380;           // panel sweeps in, covering the viewport — must match .wipe-panel's transition-duration in <style> above
-    const HOLD_COVER_MS = 300;      // panel sits fully covering the viewport (solid Obsidian, no flashing)
+    const HOLD_COVER_MS = 700;      // panel sits fully covering the viewport (Amber, no flashing)
     const EXIT_MS = 380;            // panel sweeps out, uncovering the viewport — same transition-duration as ENTER_MS
     const POST_WIPE_HOLD_MS = 200;  // blank warm canvas again, after the panel exits, before the nav slides in
     const NAV_DURATION_MS = 450;    // must match .c-sidebar-shell's transition-duration in <style> above

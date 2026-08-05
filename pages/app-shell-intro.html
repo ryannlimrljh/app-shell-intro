@@ -21,6 +21,19 @@
      so the height is overridden here, not in components.css. */
   .c-shell{height:100dvh;}
 
+  /* Top-center canvas date — "[Day], [Date]", e.g. "Wednesday, August
+     5". position:fixed and centered on the full viewport (the DS's
+     Page canvas — the whole warm background, not just the Content
+     region to the right of the sidebar), not tied to the wipe/nav
+     choreography, so it's already there under the wipe panel from
+     first paint, same as the canvas itself. z-index sits above the
+     plain canvas but below the wipe panel (100)/account menu (20)/
+     hover label, so the wipe still sweeps over it correctly. Text/
+     styling reuses Page header's own subtitle recipe (body2,
+     Neutral-5) since there's no other "small label text on canvas"
+     precedent to draw from. */
+  .c-canvas-date{position:fixed; top:var(--spacing-24); left:50%; transform:translateX(-50%); z-index:5; margin:0; font-family:var(--font-primary); font-size:var(--text-body2-size); font-weight:var(--text-body2-weight); color:var(--color-neutral-5); pointer-events:none;}
+
   /* Main nav starts off-screen to the left and slides in on its own
      beat, after the wipe has already passed — see the wipe-intro
      script below. transform doesn't affect layout, so .c-shell-main's
@@ -102,6 +115,8 @@
 
   <div class="wipe-panel" id="wipePanel" aria-hidden="true"></div>
 
+  <p class="c-canvas-date" id="canvasDate"></p>
+
   <div class="c-shell">
     <div class="c-sidebar-shell" id="shellSidebarShell">
       <nav class="c-sidebar" id="shellSidebarNav">
@@ -149,6 +164,22 @@
 
 <script>
 (function () {
+  // Top-center canvas date — "[Day], [Date]". No explicit locale passed
+  // to toLocaleDateString, so it renders in whatever locale the user's
+  // own browser/OS is set to ("follow system setting") rather than a
+  // hardcoded "en-US" — weekday/month names and date order all follow
+  // the visitor's actual system, not an assumption baked into the page.
+  // Computed once on load, not a live-updating clock — this page has no
+  // need to notice a real midnight rollover.
+  const canvasDate = document.getElementById('canvasDate');
+  if (canvasDate) {
+    canvasDate.textContent = new Date().toLocaleDateString(undefined, {
+      weekday: 'long',
+      month: 'long',
+      day: 'numeric',
+    });
+  }
+
   // SidebarNav — collapse/expand toggle. Swaps the logo asset itself
   // and the toggle icon's arrow direction. Pulled out into a named
   // function (ported logic, unmodified) so the auto-collapse timer

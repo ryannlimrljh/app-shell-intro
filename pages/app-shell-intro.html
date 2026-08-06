@@ -355,6 +355,11 @@
      progress bar has no equivalent yet in collabrium-dls, so it's
      page-local, same as the gauge/sparkline above. */
   .c-hcard-team{align-items:center; text-align:center;}
+  /* Per the card-recommendations spec, the Team card keeps its
+     centered layout EXCEPT the terminal CTA, which left-aligns like
+     every other card's terminal element. (The rec line above it stays
+     centered with the rest of the card.) */
+  .c-hcard-team .c-hcard-cta{align-self:flex-start; text-align:left;}
   .c-hcard-avatars{display:flex;} /* block spacing comes from the card's shared 12px gap, like every other block */
   .c-hcard-avatar{width:28px; height:28px; border:2px solid var(--color-neutral-1); margin-left:-8px;}
   .c-hcard-avatar:first-child{margin-left:0;}
@@ -626,6 +631,8 @@
               </div>
               <h4>TrendCafe is crushing it 🚀</h4>
               <span class="c-hcard-tag">via Collab Influencers</span>
+              <span class="c-hcard-rec">✨ 3 of your clients fit the same influencer playbook.</span>
+              <span class="c-hcard-cta">Clone this pitch <i class="ph ph-arrow-right"></i></span>
             </div>
             <div class="c-card c-card-slide c-stat c-hcard-team">
               <span class="c-stat-label">SEA team</span>
@@ -639,6 +646,8 @@
               </div>
               <div class="c-hcard-bar"><div class="c-hcard-bar-fill"></div></div>
               <span class="c-hcard-barlabel">RM120K behind #1</span>
+              <span class="c-hcard-rec">✨ Closing PetronasBiz (RM150K) takes #1.</span>
+              <span class="c-hcard-cta">Draft outreach <i class="ph ph-arrow-right"></i></span>
             </div>
             <div class="c-card c-card-slide c-hcard-ai">
               <span class="c-hcard-label">🤖 Next best action</span>

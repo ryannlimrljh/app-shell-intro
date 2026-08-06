@@ -6,11 +6,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<!-- Mulish weights must cover the DS heading tokens: display/h1-h4
-     are all --weight-extrabold (800) in tokens.css, and without 800
-     in this list the browser faux-bolds 700 instead of using the real
-     cut Mulish ships. -->
-<link href="https://fonts.googleapis.com/css2?family=Mulish:wght@400;500;600;700;800&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet" />
+<!-- Mulish weights must cover every weight the page actually uses:
+     display/h1-h4 tokens are --weight-extrabold (800), and the hero
+     stat values use --weight-black (900) — any weight missing from
+     this list gets faux-bolded from the nearest loaded cut instead of
+     using the real face Mulish ships. -->
+<link href="https://fonts.googleapis.com/css2?family=Mulish:wght@400;500;600;700;800;900&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css" />
 <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css" />
 <link rel="stylesheet" href="../collabrium-dls/tokens.css" />
@@ -297,6 +298,15 @@
      align-self:flex-start keeps its box hugging its own content
      instead of invisibly reserving full card width. */
   .c-hcard-pace .c-stat-trend{align-self:flex-start;}
+  /* Hero stat values ("RM2.4M", the Team card's "#2") step up from the
+     DS's h1-weight (800) to --weight-black (900) — per feedback the
+     hero number should be the heaviest thing on the card. Weight
+     only; color stays .c-stat-value's own Neutral-9. 900 is in
+     Mulish's shipped range (see tokens.css's named weight scale) and
+     is loaded in the Google Fonts link above. Scoped to slide cards
+     so any future plain .c-stat elsewhere on the page keeps the stock
+     DS weight. */
+  .c-card-slide .c-stat-value.hero{font-weight:var(--weight-black);}
   .c-hcard-sparkline{display:block; margin-top:auto; width:100%; height:36px;}
 
   /* Card 4/6 — Cross-engine upsell: media-thumbnail-shaped, the one

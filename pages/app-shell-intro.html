@@ -332,6 +332,11 @@
   .c-modal-sales .panel-head h3{font-size:var(--text-h5-size); font-weight:800;}
   .c-modal-sales .panel-head-title{display:flex; align-items:center; gap:var(--spacing-8);}
   .c-modal-sales .c-stat-footer{display:flex; align-items:center; gap:var(--spacing-8);}
+  /* Rec + CTA anchor at the bottom of the reserved space (margin-top:auto
+     on the rec overrides .c-hcard-rec's own 8px; the existing
+     .c-hcard-rec + .c-hcard-cta rule already neutralizes the CTA's own
+     auto so the pair stays together). */
+  .c-modal-sales .c-hcard-rec{margin-top:auto;}
   /* Live indicator — obsidian pill, red expanding-ring pulse (red is the
      on-air/recording convention for a live indicator specifically). */
   .live-badge{display:inline-flex; align-items:center; gap:6px; height:22px; padding:0 10px; border-radius:var(--radius-pill); background:var(--color-obsidian); color:var(--color-neutral-1); font-size:var(--text-label3-size); font-weight:700; letter-spacing:var(--tracking-eyebrow); text-transform:uppercase;}
@@ -900,6 +905,14 @@
           <span class="c-badge" id="revenuePaceBadge"><i class="ph-fill ph-caret-up"></i>Ahead of pace</span>
           <span id="revenueFooterText">Trending to RM 12.40M by month end</span>
         </div>
+
+        <!-- Recommendation + CTA — same insight→recommendation→action arc as
+             the cards, but the copy here is computed in renderRevenuePeriod
+             from the chart's own numbers (pace gap, forecast vs run rate), so
+             it switches with the MTD/YTD toggle and can never contradict the
+             figures above it. -->
+        <span class="c-hcard-rec" id="revenueRec">You're RM 0.30M ahead of day-6 pace — hold this and the month lands RM 1.55M over the RM 10.85M run rate.</span>
+        <span class="c-hcard-cta" id="revenueCta">Break down this month <i class="ph ph-arrow-right"></i></span>
       </div>
     </div>
   </div>
@@ -1262,14 +1275,16 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
           trendPeriod: 'vs run-rate RM 2.10M',
           runRate: 10.85,
           series: [0, 0.55, 1.05, 1.55, 2.02, 2.40],
-          progress: 6 / 31, dayLabel: 'Day 6 of 31', forecastLabel: 'by month end'
+          progress: 6 / 31, dayLabel: 'Day 6 of 31', forecastLabel: 'by month end',
+          dayN: 6, periodNoun: 'month', ctaLabel: 'Break down this month'
         },
         ytd: {
           value: 22.10, trendPct: 8.3, trendDir: 'up',
           trendPeriod: 'vs LY RM 20.40M',
           runRate: 36.00,
           series: [0, 2.8, 5.6, 8.7, 11.5, 14.6, 18.0, 22.1],
-          progress: 218 / 365, dayLabel: 'Day 218 of 365', forecastLabel: 'by year end'
+          progress: 218 / 365, dayLabel: 'Day 218 of 365', forecastLabel: 'by year end',
+          dayN: 218, periodNoun: 'year', ctaLabel: 'Break down the year'
         }
       };
 
@@ -1417,8 +1432,27 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
         badge.className = 'c-badge ' + verdict.cls;
         badge.innerHTML = '<i class="ph-fill ph-' + verdict.icon + '"></i>' + verdict.text;
 
+        const forecast = computeForecast(d, paths.expectedByNow);
         document.getElementById('revenueFooterText').textContent =
-          'Trending to RM ' + computeForecast(d, paths.expectedByNow).toFixed(2) + 'M ' + d.forecastLabel;
+          'Trending to RM ' + forecast.toFixed(2) + 'M ' + d.forecastLabel;
+
+        // Recommendation — written FROM the numbers on screen (pace gap
+        // and forecast-vs-run-rate delta), not canned copy, so it can
+        // never contradict the chart and it re-tells the story per
+        // period. Like the badge/forecast, it stays put between live
+        // ticks — only period switches and opens re-write it.
+        const paceGap = d.value - paths.expectedByNow;
+        const forecastDelta = forecast - d.runRate;
+        let rec;
+        if (paceGap >= 0.02) {
+          rec = "You're RM " + paceGap.toFixed(2) + 'M ahead of day-' + d.dayN + ' pace — hold this and the ' + d.periodNoun + ' lands RM ' + forecastDelta.toFixed(2) + 'M over the RM ' + d.runRate.toFixed(2) + 'M run rate.';
+        } else if (paceGap <= -0.02) {
+          rec = "You're RM " + Math.abs(paceGap).toFixed(2) + 'M behind day-' + d.dayN + ' pace — closing that gap this week puts the ' + d.periodNoun + ' back on the RM ' + d.runRate.toFixed(2) + 'M run rate.';
+        } else {
+          rec = "You're tracking day-" + d.dayN + ' pace almost exactly — the ' + d.periodNoun + ' is shaping up right on the RM ' + d.runRate.toFixed(2) + 'M run rate.';
+        }
+        document.getElementById('revenueRec').textContent = rec;
+        document.getElementById('revenueCta').innerHTML = d.ctaLabel + ' <i class="ph ph-arrow-right"></i>';
 
         // Draw-on reveal: the clip-rect grows left→right so the whole
         // chart group appears to draw itself, in step with the count-up.

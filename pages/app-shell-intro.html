@@ -315,6 +315,79 @@
     .c-card-modal-panel.is-swinging-open, .c-card-modal-panel.is-swinging-closed{animation:none;}
   }
 
+  /* ---- Pace modal content: the live Sales card, ported from the
+     dashboard-home.html screen (Desktop/collabrium-screens, 2026-08-05)
+     and rescaled to this page's Pace-card story (RM2.4M MTD, +14% vs
+     run-rate). Shown ONLY when the modal was opened from the Pace card
+     (.c-card-modal.is-pace, set in openCardModal) — every other card's
+     modal keeps the blank placeholder panel. Class names below keep
+     their dashboard-home spellings on purpose (seg-toggle, live-badge,
+     chart-*) so the two files stay diffable; generic names (panel-head)
+     are scoped under .c-modal-sales to avoid colliding with future
+     modal content. All colors/sizes are DS tokens, per the source
+     file's own token discipline. */
+  .c-modal-sales{display:none; flex-direction:column; gap:var(--spacing-12); height:100%; padding:var(--spacing-32); overflow-y:auto;}
+  .c-card-modal.is-pace .c-modal-sales{display:flex;}
+  .c-modal-sales .panel-head{display:flex; align-items:center; justify-content:space-between; gap:var(--spacing-12); margin-bottom:var(--spacing-8);}
+  .c-modal-sales .panel-head h3{font-size:var(--text-h5-size); font-weight:800;}
+  .c-modal-sales .panel-head-title{display:flex; align-items:center; gap:var(--spacing-8);}
+  .c-modal-sales .c-stat-footer{display:flex; align-items:center; gap:var(--spacing-8); margin-top:auto;}
+  /* Live indicator — obsidian pill, red expanding-ring pulse (red is the
+     on-air/recording convention for a live indicator specifically). */
+  .live-badge{display:inline-flex; align-items:center; gap:6px; height:22px; padding:0 10px; border-radius:var(--radius-pill); background:var(--color-obsidian); color:var(--color-neutral-1); font-size:var(--text-label3-size); font-weight:700; letter-spacing:var(--tracking-eyebrow); text-transform:uppercase;}
+  .live-dot{width:6px; height:6px; border-radius:var(--radius-pill); background:var(--color-red); animation:live-pulse 2s ease-out infinite;}
+  @keyframes live-pulse{
+    0%{ box-shadow:0 0 0 0 rgba(253,51,67,.55); }
+    70%{ box-shadow:0 0 0 6px rgba(253,51,67,0); }
+    100%{ box-shadow:0 0 0 0 rgba(253,51,67,0); }
+  }
+  /* Segmented toggle — Neutral-2 track, sliding Neutral-1 + shadow-1
+     thumb (Switch's own thumb-slide mechanics); the inactive period
+     keeps its headline value visible inside its pill. */
+  .seg-toggle{position:relative; display:inline-flex; align-items:center; padding:3px; background:var(--color-neutral-2); border-radius:var(--radius-pill); gap:2px;}
+  .seg-toggle-thumb{position:absolute; top:3px; left:3px; height:26px; width:0; border-radius:var(--radius-pill); background:var(--color-neutral-1); box-shadow:var(--shadow-1); transition:left var(--duration-base) var(--ease-settle), width var(--duration-base) var(--ease-settle);}
+  .seg-toggle-btn{position:relative; z-index:1; display:inline-flex; align-items:center; height:26px; padding:0 14px; border:0; background:transparent; border-radius:var(--radius-pill); font-family:inherit; cursor:pointer; transition:color var(--duration-fast) var(--ease-standard);}
+  .seg-toggle-label{font-size:var(--text-caption-size); font-weight:700; color:var(--color-neutral-5);}
+  .seg-toggle-btn.active .seg-toggle-label{color:var(--color-neutral-9);}
+  .seg-toggle-value{display:none; margin-left:var(--spacing-8); font-size:var(--text-caption-size); font-weight:500; color:var(--color-neutral-4);}
+  .seg-toggle-btn:not(.active) .seg-toggle-value{display:inline;}
+  /* Pace chart — smoothed actual curve (Orange) vs straight dashed
+     run-rate projection (Salmon Pink); viewBox is set from JS to the
+     SVG's live pixel size so 1 unit = 1px (fixed-viewBox stretching is
+     what makes dots render as ellipses). Area fill never exceeds the
+     fire-bg-strong tint. */
+  /* margin-top:auto here AND on the footer: two auto margins split the
+     panel's free vertical space evenly, so head/hero/trend sit top,
+     the chart floats centered, and the footer anchors bottom. */
+  .stat-chart-wrap{position:relative; display:flex; flex-direction:column; gap:var(--spacing-8); margin-top:auto;}
+  .stat-chart-svg{width:100%; height:180px; display:block; overflow:visible; cursor:crosshair;}
+  .chart-gridline{stroke:var(--color-neutral-3); stroke-width:1;}
+  .grad-stop-start{stop-color:var(--color-fire-bg-strong); stop-opacity:1;}
+  .grad-stop-end{stop-color:var(--color-fire-bg-strong); stop-opacity:0;}
+  .chart-area{fill:url(#tdAreaGradient); stroke:none;}
+  .chart-line{fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round;}
+  .chart-line-td{stroke:var(--color-orange); stroke-width:2.5; filter:url(#tdLineGlow);}
+  .td-glow-shadow{flood-color:var(--color-orange); flood-opacity:.28;}
+  .chart-line-runrate{stroke:var(--color-salmon-pink); stroke-dasharray:5 4;}
+  /* Today/pace markers: tdDot = where we actually are, paceDot = where
+     flat run-rate pace would have us right now; the gap between them IS
+     the pacing story. */
+  .chart-gap-line{stroke:var(--color-neutral-4); stroke-width:1; stroke-dasharray:2 2; opacity:.7;}
+  .chart-dot{stroke:var(--color-neutral-1); stroke-width:1.5;}
+  .chart-dot-td{fill:var(--color-orange);}
+  .chart-dot-pace{fill:var(--color-salmon-pink);}
+  .chart-hover-dot{opacity:0; stroke-width:2; pointer-events:none; transition:opacity var(--duration-fast) var(--ease-standard);}
+  .chart-hover-dot-actual{fill:var(--color-orange);}
+  .chart-hover-dot-projected{fill:var(--color-salmon-pink);}
+  .chart-tooltip{position:absolute; transform:translate(-50%, -130%); padding:4px 8px; border-radius:var(--radius-sm); background:var(--color-neutral-7); color:var(--color-neutral-1); font-size:var(--text-caption-size); font-weight:600; white-space:nowrap; opacity:0; pointer-events:none; transition:opacity var(--duration-fast) var(--ease-standard);}
+  .chart-legend{display:flex; align-items:center; gap:var(--spacing-16);}
+  .legend-item{display:inline-flex; align-items:center; gap:6px; font-size:var(--text-caption-size); color:var(--color-neutral-5);}
+  .legend-item .dot{width:8px; height:8px; border-radius:var(--radius-pill); flex:none;}
+  .dot-td{background:var(--color-orange);}
+  .dot-runrate{background:var(--color-salmon-pink);}
+  .legend-day{margin-left:auto;}
+  @media (prefers-reduced-motion: reduce){ .live-dot{animation:none;} }
+
   /* ---- Highlight cards: personalized "next best action" content for
      the card slider (see docs/superpowers/specs/2026-08-06-highlight-
      cards-design.md for the approved design). Six cards, six distinct
@@ -758,11 +831,76 @@
     </div>
   </div>
 
-  <!-- Card detail modal — blank panel is a deliberate placeholder for
-       the upcoming detail build; see .c-card-modal CSS for behavior -->
+  <!-- Card detail modal. The Pace card opens into the live Sales card
+       below (.c-modal-sales, shown via .is-pace — ported from
+       dashboard-home.html and rescaled to the Pace story); every other
+       card still gets the blank placeholder panel, reserved for its own
+       upcoming detail build. See .c-card-modal CSS for behavior. -->
   <div class="c-card-modal" id="cardModal" aria-hidden="true">
     <div class="c-card-modal-backdrop"></div>
-    <div class="c-card-modal-panel" role="dialog" aria-modal="true" aria-label="Card detail"></div>
+    <div class="c-card-modal-panel" role="dialog" aria-modal="true" aria-label="Card detail">
+      <div class="c-modal-sales">
+        <div class="panel-head">
+          <div class="panel-head-title">
+            <span class="live-badge"><span class="live-dot" aria-hidden="true"></span>Live</span>
+            <h3>Sales</h3>
+          </div>
+          <div class="seg-toggle" id="revenuePeriodToggle" role="tablist" aria-label="Sales period">
+            <span class="seg-toggle-thumb" id="revenuePeriodThumb" aria-hidden="true"></span>
+            <button class="seg-toggle-btn active" type="button" role="tab" aria-selected="true" data-period="mtd">
+              <span class="seg-toggle-label">MTD</span><span class="seg-toggle-value" id="mtdToggleValue">RM2.40M</span>
+            </button>
+            <button class="seg-toggle-btn" type="button" role="tab" aria-selected="false" data-period="ytd">
+              <span class="seg-toggle-label">YTD</span><span class="seg-toggle-value" id="ytdToggleValue">RM22.10M</span>
+            </button>
+          </div>
+        </div>
+
+        <span class="c-stat-value hero" id="revenueStatValue">RM 2.40M</span>
+        <span class="c-stat-trend up" id="revenueStatTrend">
+          <i class="ph-fill ph-caret-up" id="revenueStatTrendIcon"></i><span id="revenueStatTrendPct">14.3%</span> <span class="period" id="revenueStatTrendPeriod">vs run-rate RM 2.10M</span>
+        </span>
+
+        <div class="stat-chart-wrap" id="revenueChartWrap">
+          <svg class="stat-chart-svg" id="revenueChartSvg" aria-hidden="true">
+            <defs>
+              <linearGradient id="tdAreaGradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" class="grad-stop-start" />
+                <stop offset="100%" class="grad-stop-end" />
+              </linearGradient>
+              <filter id="tdLineGlow" x="-20%" y="-40%" width="140%" height="180%">
+                <feDropShadow dx="0" dy="2" stdDeviation="2.5" class="td-glow-shadow" />
+              </filter>
+              <clipPath id="revenueRevealClip">
+                <rect id="revenueRevealRect" x="0" y="0" width="0" height="180" />
+              </clipPath>
+            </defs>
+            <line x1="0" y1="60" x2="100%" y2="60" class="chart-gridline" />
+            <line x1="0" y1="120" x2="100%" y2="120" class="chart-gridline" />
+            <g clip-path="url(#revenueRevealClip)">
+              <path id="chartAreaFill" class="chart-area"></path>
+              <path id="chartRunRateLine" class="chart-line chart-line-runrate"></path>
+              <path id="chartTdLine" class="chart-line chart-line-td"></path>
+              <line id="chartGapLine" class="chart-gap-line"></line>
+              <circle id="chartPaceDot" class="chart-dot chart-dot-pace" r="3"></circle>
+              <circle id="chartTdDot" class="chart-dot chart-dot-td" r="3.5"></circle>
+            </g>
+            <circle id="chartHoverDot" class="chart-dot chart-hover-dot" r="4"></circle>
+          </svg>
+          <div class="chart-tooltip" id="revenueChartTooltip" aria-hidden="true"></div>
+          <div class="chart-legend">
+            <span class="legend-item"><span class="dot dot-td"></span>Sales</span>
+            <span class="legend-item"><span class="dot dot-runrate"></span><span id="legendRunRateText">Run rate RM 10.85M</span></span>
+            <span class="legend-item legend-day" id="revenueDayLabel">Day 6 of 31</span>
+          </div>
+        </div>
+
+        <div class="c-stat-footer" id="revenueStatFooter">
+          <span class="c-badge" id="revenuePaceBadge"><i class="ph-fill ph-caret-up"></i>Ahead of pace</span>
+          <span id="revenueFooterText">Trending to RM 12.40M by month end</span>
+        </div>
+      </div>
+    </div>
   </div>
 
   <div class="c-sidebar-hover-label" id="shellSidebarHoverLabel" role="tooltip"></div>
@@ -1056,6 +1194,8 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
         modalPanel.classList.remove('is-swinging-open', 'is-swinging-closed');
         modalPanel.style.transform = '';
         modalPanel.style.opacity = '';
+        cardModal.classList.remove('is-pace');    // Sales content hides with the modal; next open re-decides
+        modalPanel.setAttribute('aria-label', 'Card detail');
       }
       function openCardModal(card) {
         clearTimeout(modalHideTimer);
@@ -1077,6 +1217,15 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
           modalPanel.classList.add('is-swinging-open');
         }
         cardModal.classList.add('is-shown');      // backdrop fades in (its own .5s ease transition)
+        // The Pace card opens into the live Sales card (.c-modal-sales);
+        // every other card keeps the blank placeholder. Render kicks off
+        // immediately, so the chart draws itself in while the panel is
+        // still swinging and the two motions land together.
+        if (card.classList.contains('c-hcard-pace')) {
+          cardModal.classList.add('is-pace');
+          modalPanel.setAttribute('aria-label', 'Sales detail');
+          openSalesModal();
+        }
       }
       function closeCardModal() {
         if (!modalSourceCard) return;
@@ -1094,6 +1243,298 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
         clearTimeout(modalHideTimer);
         modalHideTimer = setTimeout(finishModalHide, (REDUCED_MOTION ? MODAL_MORPH_MS : MODAL_SWING_CLOSE_MS) + 50);
       }
+
+      // ---- Pace modal: the live Sales card. Ported from
+      // dashboard-home.html (Desktop/collabrium-screens) and rescaled
+      // to this page's Pace-card story: RM2.4M MTD vs RM2.1M run-rate
+      // to date (+14.3%), today = Aug 6 → day 6 of 31. runRate here is
+      // the FULL-period run-rate line value (2.1 to-date × 31/6 ≈
+      // 10.85), which is what makes expectedByNow (runRate × progress)
+      // land back on 2.10 — the number the Pace card itself quotes.
+      // Element ids keep their dashboard-home spellings (revenue*) so
+      // the two files stay diffable. Everything below only runs when
+      // the modal is open on the Pace card; the live-tick interval
+      // guards on .is-pace so it never mutates a closed modal.
+      const revenuePeriods = {
+        mtd: {
+          value: 2.40, trendPct: 14.3, trendDir: 'up',
+          trendPeriod: 'vs run-rate RM 2.10M',
+          runRate: 10.85,
+          series: [0, 0.55, 1.05, 1.55, 2.02, 2.40],
+          progress: 6 / 31, dayLabel: 'Day 6 of 31', forecastLabel: 'by month end'
+        },
+        ytd: {
+          value: 22.10, trendPct: 8.3, trendDir: 'up',
+          trendPeriod: 'vs LY RM 20.40M',
+          runRate: 36.00,
+          series: [0, 2.8, 5.6, 8.7, 11.5, 14.6, 18.0, 22.1],
+          progress: 218 / 365, dayLabel: 'Day 218 of 365', forecastLabel: 'by year end'
+        }
+      };
+
+      // Catmull-Rom → cubic Bezier smoothing (tension 1/6) — the actual
+      // line reads as a natural curve; the run-rate line stays straight
+      // on purpose (smooth real data vs flat projection IS the story).
+      function smoothPath(points) {
+        if (points.length < 3) {
+          return points.map((p, i) => (i === 0 ? 'M' : 'L') + p[0].toFixed(1) + ',' + p[1].toFixed(1)).join(' ');
+        }
+        let d = 'M' + points[0][0].toFixed(1) + ',' + points[0][1].toFixed(1);
+        for (let i = 0; i < points.length - 1; i++) {
+          const p0 = points[i === 0 ? i : i - 1];
+          const p1 = points[i];
+          const p2 = points[i + 1];
+          const p3 = points[i + 2 < points.length ? i + 2 : i + 1];
+          d += ' C' + (p1[0] + (p2[0] - p0[0]) / 6).toFixed(1) + ',' + (p1[1] + (p2[1] - p0[1]) / 6).toFixed(1)
+             + ' ' + (p2[0] - (p3[0] - p1[0]) / 6).toFixed(1) + ',' + (p2[1] - (p3[1] - p1[1]) / 6).toFixed(1)
+             + ' ' + p2[0].toFixed(1) + ',' + p2[1].toFixed(1);
+        }
+        return d;
+      }
+
+      // Shared y-scale for path building AND hover, so the two can't
+      // drift apart. Baseline/topPad are in the SVG's own px space (the
+      // viewBox is pinned 1:1 to pixels in updateChartViewBox).
+      const CHART_H = 180, CHART_BASELINE = 168, CHART_TOP_PAD = 12;
+      function makeYFor(period) {
+        const maxVal = Math.max(period.runRate, period.series[period.series.length - 1]) * 1.08;
+        return (v) => CHART_TOP_PAD + (1 - v / maxVal) * (CHART_BASELINE - CHART_TOP_PAD);
+      }
+
+      function buildChartPaths(period, w) {
+        const yFor = makeYFor(period);
+        const todayX = period.progress * w;
+        const n = period.series.length;
+        const tdPoints = period.series.map((v, i) => [(i / (n - 1)) * todayX, yFor(v)]);
+        const tdD = smoothPath(tdPoints);
+        const areaD = tdD + ' L' + todayX.toFixed(1) + ',' + CHART_BASELINE + ' L0,' + CHART_BASELINE + ' Z';
+        const runRateD = 'M0,' + yFor(0).toFixed(1) + ' L' + w.toFixed(1) + ',' + yFor(period.runRate).toFixed(1);
+        const expectedByNow = period.runRate * period.progress;
+        return {
+          tdD, areaD, runRateD, expectedByNow, todayX,
+          tdDot: [todayX, yFor(period.value)],
+          paceDot: [todayX, yFor(expectedByNow)]
+        };
+      }
+
+      // Damped forecast — clamps the extrapolation to ±25% of the run
+      // rate so a 6-of-31-days sliver of data can't project an
+      // implausible month-end number.
+      function computeForecast(period, expectedByNow) {
+        const ratio = expectedByNow > 0 ? period.value / expectedByNow : 1;
+        return period.runRate * Math.min(Math.max(ratio, 0.85), 1.25);
+      }
+
+      // Ease-out-cubic driver shared by the count-up and the chart's
+      // left-to-right reveal, so they finish in step. Under reduced
+      // motion it snaps straight to the final frame.
+      function animateValue(from, to, duration, onFrame) {
+        if (REDUCED_MOTION) { onFrame(to, 1); return; }
+        const start = performance.now();
+        (function frame(now) {
+          const t = Math.min(((now || performance.now()) - start) / duration, 1);
+          onFrame(from + (to - from) * (1 - Math.pow(1 - t, 3)), t);
+          if (t < 1) requestAnimationFrame(frame);
+        })(performance.now());
+      }
+
+      function positionToggleThumb(activeBtn) {
+        // offsetLeft/offsetWidth, NOT getBoundingClientRect: the render
+        // runs while the panel is mid-swing, and client rects come back
+        // scaled by the in-flight transform. Offset geometry is layout
+        // space — transform-immune. (.seg-toggle is position:relative,
+        // so offsetLeft is already relative to the track.)
+        const thumb = document.getElementById('revenuePeriodThumb');
+        thumb.style.left = activeBtn.offsetLeft + 'px';
+        thumb.style.width = activeBtn.offsetWidth + 'px';
+      }
+
+      // viewBox is re-pinned to the SVG's layout pixel size on every
+      // render, so 1 unit = 1px in both axes — a fixed stretched
+      // viewBox is what renders dots as ellipses. Measured via computed
+      // style, not getBoundingClientRect: this runs while the panel is
+      // mid-swing, and a transformed client rect would pin the viewBox
+      // to the scaled width (the chart then renders letterboxed at the
+      // swing's start scale).
+      function updateChartViewBox() {
+        const svg = document.getElementById('revenueChartSvg');
+        const w = parseFloat(getComputedStyle(svg).width) || 300;
+        svg.setAttribute('viewBox', '0 0 ' + w.toFixed(1) + ' ' + CHART_H);
+        return w;
+      }
+
+      // Ahead/Behind/On pace vs where flat pace would be RIGHT NOW
+      // (expectedByNow), not vs the full-period figure.
+      function paceVerdict(actual, expectedByNow) {
+        const ratio = expectedByNow > 0 ? actual / expectedByNow : 1;
+        if (ratio >= 1.02) return { text: 'Ahead of pace', cls: 'c-badge-success', icon: 'caret-up' };
+        if (ratio <= 0.98) return { text: 'Behind pace', cls: 'c-badge-error', icon: 'caret-down' };
+        return { text: 'On pace', cls: 'c-badge-neutral', icon: 'minus' };
+      }
+
+      function renderRevenuePeriod(key, animate) {
+        const d = revenuePeriods[key];
+        const DURATION = 900;
+
+        document.getElementById('revenueStatTrendPeriod').textContent = d.trendPeriod;
+        document.getElementById('revenueDayLabel').textContent = d.dayLabel;
+        document.getElementById('legendRunRateText').textContent = 'Run rate RM ' + d.runRate.toFixed(2) + 'M';
+
+        const trendEl = document.getElementById('revenueStatTrend');
+        trendEl.classList.remove('up', 'down', 'flat');
+        trendEl.classList.add(d.trendDir);
+        document.getElementById('revenueStatTrendIcon').className =
+          'ph-fill ph-' + (d.trendDir === 'up' ? 'caret-up' : d.trendDir === 'down' ? 'caret-down' : 'minus');
+
+        const valueEl = document.getElementById('revenueStatValue');
+        const pctEl = document.getElementById('revenueStatTrendPct');
+        if (animate) {
+          const fromVal = parseFloat(valueEl.textContent.replace(/[^0-9.]/g, '')) || 0;
+          const fromPct = parseFloat(pctEl.textContent) || 0;
+          animateValue(fromVal, d.value, DURATION, (v) => { valueEl.textContent = 'RM ' + v.toFixed(2) + 'M'; });
+          animateValue(fromPct, d.trendPct, DURATION, (v) => { pctEl.textContent = v.toFixed(1) + '%'; });
+        } else {
+          valueEl.textContent = 'RM ' + d.value.toFixed(2) + 'M';
+          pctEl.textContent = d.trendPct.toFixed(1) + '%';
+        }
+
+        const w = updateChartViewBox();
+        const paths = buildChartPaths(d, w);
+        document.getElementById('chartAreaFill').setAttribute('d', paths.areaD);
+        document.getElementById('chartTdLine').setAttribute('d', paths.tdD);
+        document.getElementById('chartRunRateLine').setAttribute('d', paths.runRateD);
+        document.getElementById('chartTdDot').setAttribute('cx', paths.tdDot[0]);
+        document.getElementById('chartTdDot').setAttribute('cy', paths.tdDot[1]);
+        document.getElementById('chartPaceDot').setAttribute('cx', paths.paceDot[0]);
+        document.getElementById('chartPaceDot').setAttribute('cy', paths.paceDot[1]);
+        const gapLine = document.getElementById('chartGapLine');
+        gapLine.setAttribute('x1', paths.paceDot[0]); gapLine.setAttribute('y1', paths.paceDot[1]);
+        gapLine.setAttribute('x2', paths.tdDot[0]); gapLine.setAttribute('y2', paths.tdDot[1]);
+
+        const verdict = paceVerdict(d.value, paths.expectedByNow);
+        const badge = document.getElementById('revenuePaceBadge');
+        badge.className = 'c-badge ' + verdict.cls;
+        badge.innerHTML = '<i class="ph-fill ph-' + verdict.icon + '"></i>' + verdict.text;
+
+        document.getElementById('revenueFooterText').textContent =
+          'Trending to RM ' + computeForecast(d, paths.expectedByNow).toFixed(2) + 'M ' + d.forecastLabel;
+
+        // Draw-on reveal: the clip-rect grows left→right so the whole
+        // chart group appears to draw itself, in step with the count-up.
+        const revealRect = document.getElementById('revenueRevealRect');
+        if (animate) {
+          animateValue(0, w, DURATION, (rw) => { revealRect.setAttribute('width', rw.toFixed(1)); });
+        } else {
+          revealRect.setAttribute('width', w.toFixed(1));
+        }
+      }
+
+      function activePeriodKey() {
+        return document.querySelector('#revenuePeriodToggle .seg-toggle-btn.active').dataset.period;
+      }
+      function openSalesModal() {
+        // Called from openCardModal AFTER is-open is set, so the panel
+        // (and the toggle inside it) already has a layout rect to
+        // measure. Re-renders fresh on every Pace open — the reveal is
+        // part of the modal's arrival, not a one-time init.
+        positionToggleThumb(document.querySelector('#revenuePeriodToggle .seg-toggle-btn.active'));
+        renderRevenuePeriod(activePeriodKey(), true);
+      }
+
+      document.querySelectorAll('#revenuePeriodToggle .seg-toggle-btn').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          if (btn.classList.contains('active')) return;
+          document.querySelectorAll('#revenuePeriodToggle .seg-toggle-btn').forEach((b) => {
+            b.classList.remove('active');
+            b.setAttribute('aria-selected', 'false');
+          });
+          btn.classList.add('active');
+          btn.setAttribute('aria-selected', 'true');
+          positionToggleThumb(btn);
+          renderRevenuePeriod(btn.dataset.period, true);
+        });
+      });
+
+      // "Live" mock — value, trend %, and the actual line's endpoint
+      // nudge upward in step every 5s while the Pace modal is open,
+      // matching the LIVE badge. Badge/forecast stay put between ticks
+      // (re-verdicting every 5s reads as noise, not liveness). The
+      // toggle's hidden value chip for the ticked period stays in sync.
+      setInterval(() => {
+        if (!cardModal.classList.contains('is-pace') || !cardModal.classList.contains('is-open')) return;
+        const key = activePeriodKey();
+        const d = revenuePeriods[key];
+        const fromVal = d.value, fromPct = d.trendPct;
+        d.value = fromVal + (0.01 + Math.random() * 0.03);
+        d.trendPct = fromPct + Math.random() * 0.12;
+        d.series[d.series.length - 1] = d.value;
+
+        const valueEl = document.getElementById('revenueStatValue');
+        const pctEl = document.getElementById('revenueStatTrendPct');
+        const w = document.getElementById('revenueChartSvg').getBoundingClientRect().width || 300;
+        animateValue(fromVal, d.value, 700, (v) => {
+          valueEl.textContent = 'RM ' + v.toFixed(2) + 'M';
+          const tempSeries = d.series.slice();
+          tempSeries[tempSeries.length - 1] = v;
+          const paths = buildChartPaths({ runRate: d.runRate, progress: d.progress, series: tempSeries, value: v }, w);
+          document.getElementById('chartAreaFill').setAttribute('d', paths.areaD);
+          document.getElementById('chartTdLine').setAttribute('d', paths.tdD);
+          document.getElementById('chartTdDot').setAttribute('cx', paths.tdDot[0]);
+          document.getElementById('chartTdDot').setAttribute('cy', paths.tdDot[1]);
+          const gapLine = document.getElementById('chartGapLine');
+          gapLine.setAttribute('x2', paths.tdDot[0]);
+          gapLine.setAttribute('y2', paths.tdDot[1]);
+        });
+        animateValue(fromPct, d.trendPct, 700, (v) => { pctEl.textContent = v.toFixed(1) + '%'; });
+
+        const chip = document.getElementById(key + 'ToggleValue');
+        if (chip) chip.textContent = 'RM' + d.value.toFixed(2) + 'M';
+      }, 5000);
+
+      // Hover readout — snaps to the nearest real series point inside
+      // the actual-data zone (x ≤ today); past today it reads the
+      // straight run-rate projection instead, and the dot/tooltip take
+      // that series' color — the same solid-vs-dashed distinction the
+      // chart itself draws.
+      (() => {
+        const svg = document.getElementById('revenueChartSvg');
+        const tooltip = document.getElementById('revenueChartTooltip');
+        const hoverDot = document.getElementById('chartHoverDot');
+        svg.addEventListener('mousemove', (e) => {
+          const d = revenuePeriods[activePeriodKey()];
+          const rect = svg.getBoundingClientRect();
+          const w = rect.width;
+          const mouseX = Math.min(Math.max(e.clientX - rect.left, 0), w);
+          const todayX = d.progress * w;
+          const yFor = makeYFor(d);
+          let value, px, py, projected;
+          if (mouseX <= todayX) {
+            const n = d.series.length;
+            const idx = Math.min(Math.max(Math.round((mouseX / todayX) * (n - 1)), 0), n - 1);
+            value = d.series[idx];
+            px = todayX <= 0 ? 0 : (idx / (n - 1)) * todayX;
+            py = yFor(value);
+            projected = false;
+          } else {
+            value = d.runRate * (mouseX / w);
+            px = mouseX;
+            py = yFor(value);
+            projected = true;
+          }
+          hoverDot.setAttribute('cx', px);
+          hoverDot.setAttribute('cy', py);
+          hoverDot.setAttribute('class', 'chart-dot chart-hover-dot ' + (projected ? 'chart-hover-dot-projected' : 'chart-hover-dot-actual'));
+          hoverDot.style.opacity = 1;
+          tooltip.textContent = 'RM ' + value.toFixed(2) + 'M' + (projected ? ' · projected' : '');
+          tooltip.style.left = px + 'px';
+          tooltip.style.top = py + 'px';
+          tooltip.style.opacity = 1;
+        });
+        svg.addEventListener('mouseleave', () => {
+          hoverDot.style.opacity = 0;
+          tooltip.style.opacity = 0;
+        });
+      })();
 
       modalPanel.addEventListener('animationend', (e) => {
         // Fast path for the close cleanup (the timer above is the

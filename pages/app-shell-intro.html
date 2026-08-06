@@ -965,15 +965,17 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
 
     // Card detail modal — clicking a card opens the blank placeholder
     // panel as a true modal (see .c-card-modal in <style>): the panel
-    // FLIP-morphs from the clicked card's on-screen rect to its
-    // centered rest position while the backdrop dims the whole page;
-    // backdrop click or Escape reverses the morph back into the
-    // card's slot. Plain CSS transitions drive the morph (the panel
-    // is a fresh element Motion has never touched, so there's no
-    // inline-transform ownership conflict like the cards themselves
-    // have): set the card-rect transform with transitions off, force
-    // a reflow to commit it as the start state, then clear it and let
-    // the .6s cubic-bezier(.16,1,.3,1) transition run to identity.
+    // flies from the clicked card's on-screen rect to its centered
+    // rest position with a 3D perspective swing while the backdrop
+    // dims the whole page; backdrop click or Escape reverses the
+    // swing back into the card's slot. Class-driven keyframe
+    // animations (`is-swinging-open` / `is-swinging-closed`) drive the
+    // flight, parameterized by inline `--sw-dx/--sw-dy/--sw-sx/--sw-sy/
+    // --sw-dir` custom properties computed from the card and panel
+    // rects at the moment of each open/close (setSwingVars). Users who
+    // prefer reduced motion get the older straight FLIP morph instead
+    // (a plain CSS transition to/from the card-rect transform, no
+    // rotation) — see the REDUCED_MOTION branches below.
     // An earlier iteration scaled the card in place instead — it
     // couldn't work: the slider is an overflow scroll box (the
     // pop-out clipped at its edges) and the Dashboard line, pulled up
@@ -984,47 +986,103 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
     const modalPanel = cardModal ? cardModal.querySelector('.c-card-modal-panel') : null;
     const modalBackdrop = cardModal ? cardModal.querySelector('.c-card-modal-backdrop') : null;
     if (cardModal && modalPanel && modalBackdrop) {
-      const MODAL_MORPH_MS = 600; // must match .c-card-modal-panel's transform transition-duration
-      let modalSourceCard = null;  // the card the open panel morphed out of; null = modal closed
+      const MODAL_MORPH_MS = 600;       // reduced-motion fallback: must match .c-card-modal-panel's transform transition-duration
+      const MODAL_SWING_OPEN_MS = 800;  // must match c-card-modal-swing-open's animation-duration
+      const MODAL_SWING_CLOSE_MS = 550; // must match c-card-modal-swing-close's animation-duration
+      const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      let modalSourceCard = null;  // the card the open panel swung out of; null = modal closed
       let modalHideTimer = null;
 
       function cardRectTransform() {
         // Transform that lays the identity-positioned panel exactly
         // over the source card (transform-origin is top left, so a
         // translate to the rect corner + a non-uniform scale to the
-        // rect size is sufficient).
+        // rect size is sufficient). Used directly by the
+        // reduced-motion morph; the swing path reads the same numbers
+        // through the --sw-* custom properties (setSwingVars).
         const from = modalSourceCard.getBoundingClientRect();
         const to = modalPanel.getBoundingClientRect();
         return `translate(${(from.left - to.left).toFixed(1)}px, ${(from.top - to.top).toFixed(1)}px) scale(${(from.width / to.width).toFixed(4)}, ${(from.height / to.height).toFixed(4)})`;
+      }
+      function setSwingVars() {
+        // The swing keyframes are parameterized by these inline custom
+        // properties — recomputed at every open AND close (the page may
+        // have been scrolled while the modal was up, moving the card's
+        // rect). --sw-dir flips the rotation sign so the panel always
+        // turns toward the viewer: card left of the viewport centre →
+        // right edge leads (+1), card right of centre → mirrored (-1).
+        const from = modalSourceCard.getBoundingClientRect();
+        const to = modalPanel.getBoundingClientRect();
+        modalPanel.style.setProperty('--sw-dx', `${(from.left - to.left).toFixed(1)}px`);
+        modalPanel.style.setProperty('--sw-dy', `${(from.top - to.top).toFixed(1)}px`);
+        modalPanel.style.setProperty('--sw-sx', (from.width / to.width).toFixed(4));
+        modalPanel.style.setProperty('--sw-sy', (from.height / to.height).toFixed(4));
+        modalPanel.style.setProperty('--sw-dir', (from.left + from.width / 2) <= window.innerWidth / 2 ? '1' : '-1');
+      }
+      function finishModalHide() {
+        // Idempotent end-of-close cleanup — driven by BOTH animationend
+        // and a fallback timer (this page's convention: timers back up
+        // every animation event, because a backgrounded tab can miss
+        // events entirely). The swing class is removed in the same
+        // style recalc as the display flip (is-open removal), so the
+        // base transition never sees the transform revert on a visible
+        // element — no ghost re-morph.
+        cardModal.classList.remove('is-open');
+        cardModal.setAttribute('aria-hidden', 'true');
+        modalPanel.classList.remove('is-swinging-open', 'is-swinging-closed');
+        modalPanel.style.transform = '';
+        modalPanel.style.opacity = '';
       }
       function openCardModal(card) {
         clearTimeout(modalHideTimer);
         modalSourceCard = card;
         cardModal.classList.add('is-open');       // display:flex — panel gets its centered layout rect
         cardModal.setAttribute('aria-hidden', 'false');
-        modalPanel.style.transition = 'none';     // start state must not animate in
-        modalPanel.style.transform = cardRectTransform();
-        modalPanel.style.opacity = '0.4';
-        void modalPanel.offsetWidth;              // commit the start state before re-enabling transitions
-        modalPanel.style.transition = '';
-        modalPanel.style.transform = 'none';
-        modalPanel.style.opacity = '1';
-        cardModal.classList.add('is-shown');      // backdrop fades in (its own .4s ease transition)
+        if (REDUCED_MOTION) {
+          // Straight FLIP morph (the pre-swing behaviour, kept for
+          // users who've opted out of animation): commit the card-rect
+          // start state with transitions off, then release.
+          modalPanel.style.transition = 'none';
+          modalPanel.style.transform = cardRectTransform();
+          modalPanel.style.opacity = '0.4';
+          void modalPanel.offsetWidth;
+          modalPanel.style.transition = '';
+          modalPanel.style.transform = 'none';
+          modalPanel.style.opacity = '1';
+        } else {
+          setSwingVars();
+          modalPanel.classList.remove('is-swinging-closed');
+          void modalPanel.offsetWidth;            // restart cleanly if reopening right after a close
+          modalPanel.classList.add('is-swinging-open');
+        }
+        cardModal.classList.add('is-shown');      // backdrop fades in (its own .5s ease transition)
       }
       function closeCardModal() {
         if (!modalSourceCard) return;
-        modalPanel.style.transform = cardRectTransform(); // morph back into the (possibly re-scrolled) card slot
-        modalPanel.style.opacity = '0.4';
+        if (REDUCED_MOTION) {
+          modalPanel.style.transform = cardRectTransform();
+          modalPanel.style.opacity = '0.4';
+        } else {
+          setSwingVars();                          // re-read the card slot before releasing modalSourceCard
+          modalPanel.classList.remove('is-swinging-open');
+          void modalPanel.offsetWidth;
+          modalPanel.classList.add('is-swinging-closed');
+        }
         cardModal.classList.remove('is-shown');   // backdrop fades out
         modalSourceCard = null;
         clearTimeout(modalHideTimer);
-        modalHideTimer = setTimeout(() => {       // timer, not transitionend: the reverse morph must finish even if the event is missed in a backgrounded tab
-          cardModal.classList.remove('is-open');
-          cardModal.setAttribute('aria-hidden', 'true');
-          modalPanel.style.transform = '';
-          modalPanel.style.opacity = '';
-        }, MODAL_MORPH_MS + 50);
+        modalHideTimer = setTimeout(finishModalHide, (REDUCED_MOTION ? MODAL_MORPH_MS : MODAL_SWING_CLOSE_MS) + 50);
       }
+
+      modalPanel.addEventListener('animationend', (e) => {
+        // Fast path for the close cleanup (the timer above is the
+        // backgrounded-tab fallback). Filtered by name: the OPEN
+        // animation's end must not hide the modal.
+        if (e.animationName === 'c-card-modal-swing-close') {
+          clearTimeout(modalHideTimer);
+          finishModalHide();
+        }
+      });
 
       document.addEventListener('click', (e) => {
         if (didDrag) return; // a drag-release click is not an open intent (same signal the slider's own click suppressor uses)

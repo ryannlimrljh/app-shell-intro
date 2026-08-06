@@ -290,10 +290,10 @@
      makes the parameterization possible. perspective sits on .c-card-modal
      (the fixed overlay) so the rotation reads at screen scale;
      transform-origin stays top left because the FLIP math depends on it.
-     The base rule keeps its transition (still driving the current, pre-
-     swing JS morph path); a running is-swinging-* animation with `both`
-     fill wins over that transition for the same property while it plays,
-     so the two coexist safely. */
+     The base rule keeps its transition (it now drives ONLY the reduced-
+     motion straight-morph path); a running is-swinging-* animation with
+     `both` fill wins over that transition for the same property while
+     it plays, so the two coexist safely. */
   .c-card-modal-panel.is-swinging-open{animation:c-card-modal-swing-open .8s cubic-bezier(.25,.9,.35,1) both;}
   .c-card-modal-panel.is-swinging-closed{animation:c-card-modal-swing-close .55s cubic-bezier(.3,.6,.35,1) both;}
   @keyframes c-card-modal-swing-open{
@@ -987,8 +987,11 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
     const modalBackdrop = cardModal ? cardModal.querySelector('.c-card-modal-backdrop') : null;
     if (cardModal && modalPanel && modalBackdrop) {
       const MODAL_MORPH_MS = 600;       // reduced-motion fallback: must match .c-card-modal-panel's transform transition-duration
-      const MODAL_SWING_OPEN_MS = 800;  // must match c-card-modal-swing-open's animation-duration
       const MODAL_SWING_CLOSE_MS = 550; // must match c-card-modal-swing-close's animation-duration
+      // Sampled once at load, deliberately: the CSS @media(prefers-reduced-motion)
+      // block is the real backstop if the preference flips mid-session (it forces
+      // animation:none regardless of this flag), and one-shot sampling guarantees
+      // the two JS branches below never interleave mid-transaction.
       const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       let modalSourceCard = null;  // the card the open panel swung out of; null = modal closed
       let modalHideTimer = null;
@@ -1011,6 +1014,10 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
         // rect). --sw-dir flips the rotation sign so the panel always
         // turns toward the viewer: card left of the viewport centre →
         // right edge leads (+1), card right of centre → mirrored (-1).
+        // `from` is the card's current, Motion-transformed rect (hover
+        // scale/tilt included) ON PURPOSE — the swing starts from the
+        // card exactly as the user sees it. Callers must ensure `to`
+        // (the panel) is measured untransformed — see the call sites.
         const from = modalSourceCard.getBoundingClientRect();
         const to = modalPanel.getBoundingClientRect();
         modalPanel.style.setProperty('--sw-dx', `${(from.left - to.left).toFixed(1)}px`);
@@ -1050,9 +1057,9 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
           modalPanel.style.transform = 'none';
           modalPanel.style.opacity = '1';
         } else {
+          modalPanel.classList.remove('is-swinging-open', 'is-swinging-closed');
+          void modalPanel.offsetWidth;   // untransformed layout rect for the measurement below
           setSwingVars();
-          modalPanel.classList.remove('is-swinging-closed');
-          void modalPanel.offsetWidth;            // restart cleanly if reopening right after a close
           modalPanel.classList.add('is-swinging-open');
         }
         cardModal.classList.add('is-shown');      // backdrop fades in (its own .5s ease transition)
@@ -1063,9 +1070,9 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
           modalPanel.style.transform = cardRectTransform();
           modalPanel.style.opacity = '0.4';
         } else {
-          setSwingVars();                          // re-read the card slot before releasing modalSourceCard
-          modalPanel.classList.remove('is-swinging-open');
-          void modalPanel.offsetWidth;
+          modalPanel.classList.remove('is-swinging-open', 'is-swinging-closed');
+          void modalPanel.offsetWidth;   // untransformed layout rect for the measurement below
+          setSwingVars();                // re-read the card slot before releasing modalSourceCard
           modalPanel.classList.add('is-swinging-closed');
         }
         cardModal.classList.remove('is-shown');   // backdrop fades out
@@ -1077,8 +1084,14 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
       modalPanel.addEventListener('animationend', (e) => {
         // Fast path for the close cleanup (the timer above is the
         // backgrounded-tab fallback). Filtered by name: the OPEN
-        // animation's end must not hide the modal.
-        if (e.animationName === 'c-card-modal-swing-close') {
+        // animation's end must not hide the modal. Also filtered by
+        // !modalSourceCard: a queued close-end event can dispatch after
+        // the user has already reopened the modal in the sub-frame gap
+        // before it fires — without this guard it would hide the
+        // freshly reopened panel (is-open removed while modalSourceCard
+        // is non-null, leaving state and visibility out of sync).
+        if (e.target !== modalPanel) return; // future-proofing: panel children may animate someday
+        if (e.animationName === 'c-card-modal-swing-close' && !modalSourceCard) {
           clearTimeout(modalHideTimer);
           finishModalHide();
         }

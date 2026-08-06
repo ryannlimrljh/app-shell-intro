@@ -280,7 +280,7 @@
   .c-card-modal.is-open{display:flex;}
   .c-card-modal-backdrop{position:absolute; inset:0; background:var(--color-canvas-warm); opacity:0; transition:opacity .5s ease;}
   .c-card-modal.is-shown .c-card-modal-backdrop{opacity:.88;}
-  .c-card-modal-panel{position:relative; width:min(590px, calc(100vw - 64px)); height:min(680px, calc(100vh - 64px)); background:var(--color-neutral-1); border:1px solid var(--color-neutral-3); border-radius:var(--radius-lg); box-shadow:0 25px 50px -12px rgba(0,0,0,.25); transform-origin:top left;}
+  .c-card-modal-panel{position:relative; width:min(590px, calc(100vw - 64px)); height:min(680px, calc(100vh - 64px)); background:var(--color-neutral-1); border:1px solid var(--color-neutral-3); border-radius:var(--radius-lg); box-shadow:0 25px 50px -12px rgba(0,0,0,.25); transform-origin:top left; transition:transform .6s cubic-bezier(.16,1,.3,1), opacity .4s ease;}
   /* Perspective swing (2026-08-06 spec): one keyframe track serves all six
      cards and both swing directions — the flight is parameterized by inline
      custom properties set from JS at open/close time (--sw-dx/-dy/-sx/-sy =
@@ -289,24 +289,29 @@
      viewer). Keyframes evaluate var() at the element's scope, which is what
      makes the parameterization possible. perspective sits on .c-card-modal
      (the fixed overlay) so the rotation reads at screen scale;
-     transform-origin stays top left because the FLIP math depends on it. */
-  .c-card-modal-panel.is-swinging-open{animation:c-modal-swing-open .8s cubic-bezier(.25,.9,.35,1) both;}
-  .c-card-modal-panel.is-swinging-closed{animation:c-modal-swing-close .55s cubic-bezier(.3,.6,.35,1) both;}
-  @keyframes c-modal-swing-open{
-    0%{transform:translate(var(--sw-dx), var(--sw-dy)) scale(var(--sw-sx), var(--sw-sy)); opacity:.4;}
-    45%{transform:translate(calc(var(--sw-dx) * .5), calc(var(--sw-dy) * .5)) scale(.7) rotateY(calc(48deg * var(--sw-dir))) rotateZ(calc(-7deg * var(--sw-dir))); opacity:1;}
-    78%{transform:rotateY(calc(-7deg * var(--sw-dir))) rotateZ(calc(1deg * var(--sw-dir)));}
+     transform-origin stays top left because the FLIP math depends on it.
+     The base rule keeps its transition (still driving the current, pre-
+     swing JS morph path); a running is-swinging-* animation with `both`
+     fill wins over that transition for the same property while it plays,
+     so the two coexist safely. */
+  .c-card-modal-panel.is-swinging-open{animation:c-card-modal-swing-open .8s cubic-bezier(.25,.9,.35,1) both;}
+  .c-card-modal-panel.is-swinging-closed{animation:c-card-modal-swing-close .55s cubic-bezier(.3,.6,.35,1) both;}
+  @keyframes c-card-modal-swing-open{
+    0%{transform:translate(var(--sw-dx, 0px), var(--sw-dy, 0px)) scale(var(--sw-sx, 1), var(--sw-sy, 1)); opacity:.4;}
+    45%{transform:translate(calc(var(--sw-dx, 0px) * .5), calc(var(--sw-dy, 0px) * .5)) scale(.7) rotateY(calc(48deg * var(--sw-dir, 1))) rotateZ(calc(-7deg * var(--sw-dir, 1))); opacity:1;}
+    78%{transform:translate(0px, 0px) scale(1) rotateY(calc(-7deg * var(--sw-dir, 1))) rotateZ(calc(1deg * var(--sw-dir, 1)));}
     100%{transform:none; opacity:1;}
   }
-  @keyframes c-modal-swing-close{
+  @keyframes c-card-modal-swing-close{
     0%{transform:none; opacity:1;}
-    50%{transform:translate(calc(var(--sw-dx) * .5), calc(var(--sw-dy) * .5)) scale(.7) rotateY(calc(45deg * var(--sw-dir))) rotateZ(calc(-6deg * var(--sw-dir))); opacity:1;}
-    100%{transform:translate(var(--sw-dx), var(--sw-dy)) scale(var(--sw-sx), var(--sw-sy)); opacity:.35;}
+    50%{transform:translate(calc(var(--sw-dx, 0px) * .5), calc(var(--sw-dy, 0px) * .5)) scale(.7) rotateY(calc(45deg * var(--sw-dir, 1))) rotateZ(calc(-6deg * var(--sw-dir, 1))); opacity:1;}
+    100%{transform:translate(var(--sw-dx, 0px), var(--sw-dy, 0px)) scale(var(--sw-sx, 1), var(--sw-sy, 1)); opacity:.35;}
   }
-  /* Reduced motion: the pre-swing straight morph (JS branches to the old
-     inline-transition path when this media query matches). */
+  /* Reduced motion: animations are suppressed, leaving the base rule's
+     transition (the pre-swing straight morph) as the only motion; JS
+     branches to that old inline-transition path when this media query
+     matches. */
   @media (prefers-reduced-motion: reduce){
-    .c-card-modal-panel{transition:transform .6s cubic-bezier(.16,1,.3,1), opacity .4s ease;}
     .c-card-modal-panel.is-swinging-open, .c-card-modal-panel.is-swinging-closed{animation:none;}
   }
 

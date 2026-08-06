@@ -45,10 +45,13 @@ promise made explicit on all six cards, not just the AI card.
 
 - Card 1: recommendation replaces nothing (new line after the list); existing
   `.c-hcard-cta` text updates to "Nudge MediaCorp".
-- Card 2: recommendation after the supporting line; gauge stays the mid-card
-  visual; CTA new at bottom.
-- Card 3: recommendation after the trend pill; sparkline stays anchored above
-  the new CTA.
+- Card 2: gauge stays the mid-card visual; recommendation + CTA sit below it
+  as the card's new bottom cluster (rec directly above CTA).
+- Card 3: sparkline stays anchored above the new bottom cluster; recommendation
+  + CTA close the card. (In both cards the rec/CTA go *after* the SVG so the
+  gauge/sparkline keep their existing `margin-top:auto` bottom anchors — a card
+  must never have two auto anchors, or flexbox splits the free space between
+  them.)
 - Card 4: recommendation after the "via Collab Influencers" tag; CTA new at
   bottom.
 - Card 5: recommendation after the bar caption; CTA new at bottom. Card 5 keeps

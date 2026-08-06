@@ -24,7 +24,7 @@
 **Files:**
 - Modify: `pages/app-shell-intro.html` (the `<style>` block's highlight-cards section, and Card 1's markup)
 
-- [ ] **Step 1: Add the recommendation-line CSS**
+- [x] **Step 1: Add the recommendation-line CSS**
 
 Find this existing rule in the highlight-cards CSS section (Card 1's block):
 
@@ -57,7 +57,7 @@ Insert immediately AFTER it:
   .c-hcard-rec + .c-hcard-cta{margin-top:calc(-1 * var(--spacing-8));}
 ```
 
-- [ ] **Step 2: Update Card 1's markup**
+- [x] **Step 2: Update Card 1's markup**
 
 Find Card 1 (first `.c-card.c-card-slide` in `.c-card-slider-track`):
 
@@ -81,7 +81,7 @@ Replace the last line (the `.c-hcard-cta` span) with:
               <span class="c-hcard-cta">Nudge MediaCorp <i class="ph ph-arrow-right"></i></span>
 ```
 
-- [ ] **Step 3: Verify in-browser**
+- [x] **Step 3: Verify in-browser**
 
 Reload `http://localhost:8791/pages/app-shell-intro.html`, wait ~6s for the skeleton phase to resolve, then run in the browser JS tool:
 
@@ -97,7 +97,7 @@ Reload `http://localhost:8791/pages/app-shell-intro.html`, wait ~6s for the skel
 
 Expected: `recSize` 12px, `recColor` the Neutral-5 grey (`rgb(90, 90, 90)`), `ctaMarginTop` `-8px`, `ctaText` "Nudge MediaCorp", rec second-to-last child, CTA last child. Screenshot to confirm the rec+CTA sit together at the card's bottom.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add pages/app-shell-intro.html
@@ -117,7 +117,7 @@ has two auto anchors. Card 1's CTA goes from generic 'Follow up' to
 **Files:**
 - Modify: `pages/app-shell-intro.html` (Card 2 and Card 3 markup only — Task 1's CSS already covers styling)
 
-- [ ] **Step 1: Update Card 2's markup**
+- [x] **Step 1: Update Card 2's markup**
 
 Find Card 2:
 
@@ -140,7 +140,7 @@ Insert after the closing `</svg>` tag (the gauge keeps its `margin-top:auto` anc
               <span class="c-hcard-cta">Book save call <i class="ph ph-arrow-right"></i></span>
 ```
 
-- [ ] **Step 2: Update Card 3's markup**
+- [x] **Step 2: Update Card 3's markup**
 
 Find Card 3:
 
@@ -163,7 +163,7 @@ Insert after the closing `</svg>` tag (sparkline keeps its `margin-top:auto` anc
               <span class="c-hcard-cta">See closing deals <i class="ph ph-arrow-right"></i></span>
 ```
 
-- [ ] **Step 3: Verify in-browser**
+- [x] **Step 3: Verify in-browser**
 
 Reload, wait ~6s, then:
 
@@ -177,7 +177,7 @@ Reload, wait ~6s, then:
 
 Expected: card 2 CTA "Book save call", card 3 CTA "See closing deals", `ctaLast` true on both. Screenshot: on Card 2 the gauge sits above the rec/CTA cluster; on Card 3 the sparkline sits above the rec/CTA cluster; nothing overflows the 400px min-height cards (they grow if needed — flex column, min-height not fixed height).
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add pages/app-shell-intro.html
@@ -196,7 +196,7 @@ so each card still has exactly one auto anchor."
 **Files:**
 - Modify: `pages/app-shell-intro.html` (Card 4/5 markup + one Card-5 CSS rule)
 
-- [ ] **Step 1: Update Card 4's markup**
+- [x] **Step 1: Update Card 4's markup**
 
 Find Card 4:
 
@@ -219,7 +219,7 @@ Insert after the `.c-hcard-tag` span (the tag keeps its `margin-top:auto` anchor
               <span class="c-hcard-cta">Clone this pitch <i class="ph ph-arrow-right"></i></span>
 ```
 
-- [ ] **Step 2: Add Card 5's CTA alignment rule**
+- [x] **Step 2: Add Card 5's CTA alignment rule**
 
 Find this rule in the Card 5 CSS section:
 
@@ -237,7 +237,7 @@ Insert immediately AFTER it:
   .c-hcard-team .c-hcard-cta{align-self:flex-start; text-align:left;}
 ```
 
-- [ ] **Step 3: Update Card 5's markup**
+- [x] **Step 3: Update Card 5's markup**
 
 Find Card 5:
 
@@ -264,7 +264,7 @@ Insert after the `.c-hcard-barlabel` span (the bar keeps its `margin-top:auto` a
               <span class="c-hcard-cta">Draft outreach <i class="ph ph-arrow-right"></i></span>
 ```
 
-- [ ] **Step 4: Verify in-browser**
+- [x] **Step 4: Verify in-browser**
 
 Reload, wait ~6s, then:
 
@@ -277,7 +277,7 @@ Reload, wait ~6s, then:
 
 Expected: card 4 CTA "Clone this pitch" (`ctaAlign` may be normal/stretch — fine); card 5 CTA "Draft outreach" with `ctaAlign` `flex-start` and `ctaOffsetLeft` 24 (the card's padding — i.e. genuinely left-aligned despite the centered card). Screenshot both cards.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add pages/app-shell-intro.html
@@ -297,7 +297,7 @@ card's terminal element."
 **Files:**
 - Modify: none expected (fix-forward only if a check fails)
 
-- [ ] **Step 1: Full-row verification**
+- [x] **Step 1: Full-row verification**
 
 Reload, wait ~6s, then:
 
@@ -316,7 +316,7 @@ Expected: `recCount` 5, `ctaCount` 5, `aiUnchanged` true, `aiBtnLast` true, `ske
 
 Also check `read_console_messages` for errors (expect none) and take a final screenshot of both ends of the row (scroll the slider to 0 and to max).
 
-- [ ] **Step 2: Commit (only if fixes were needed)**
+- [x] **Step 2: Commit (only if fixes were needed)**
 
 ```bash
 git add pages/app-shell-intro.html

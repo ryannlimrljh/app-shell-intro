@@ -79,8 +79,19 @@
      accent on hover. Reveal: same shared .is-revealed pattern and
      550ms curve as the greeting above, but delayed 900ms so it lands
      as the last beat — after the cards (which start ~260ms in) are
-     already arriving, not before the row it's meant to follow. */
-  .c-canvas-dashlink{margin:var(--spacing-32) 0 0; text-align:center; font-family:var(--font-primary); font-size:var(--text-body1-size); font-weight:var(--text-body1-weight); color:var(--color-neutral-5); opacity:0; transform:translateY(16px); transition:opacity 550ms cubic-bezier(.16,1,.3,1), transform 550ms cubic-bezier(.16,1,.3,1);}
+     already arriving, not before the row it's meant to follow.
+     NEGATIVE top margin, on purpose: the slider track carries 96px of
+     bottom padding purely as clip-safety for the fan's rotated card
+     corners (see .c-card-slider-track), which left this line sitting
+     128px below the centre card vs the 48px between the greeting and
+     the cards. -48px pulls it up into that mostly-empty padding band
+     so the measured centre-line rhythm is symmetric (48px above the
+     row, 48px below). Safe: the dipped corners live at the row's far
+     left/right, the centre column is clear, and position:relative
+     lifts this line above the slider box it now overlaps, so the
+     link's hit target can't be shadowed by the slider's drag-to-
+     scroll surface. */
+  .c-canvas-dashlink{position:relative; margin:-48px 0 0; text-align:center; font-family:var(--font-primary); font-size:var(--text-body1-size); font-weight:var(--text-body1-weight); color:var(--color-neutral-5); opacity:0; transform:translateY(16px); transition:opacity 550ms cubic-bezier(.16,1,.3,1), transform 550ms cubic-bezier(.16,1,.3,1);}
   .c-canvas-dashlink.is-revealed{opacity:1; transform:translateY(0); transition-delay:900ms;}
   .c-canvas-dashlink a{color:var(--color-neutral-9); font-weight:700; text-decoration:underline; text-underline-offset:3px; transition:color var(--duration-fast) var(--ease-standard);}
   .c-canvas-dashlink a:hover{color:var(--color-orange);}

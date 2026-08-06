@@ -276,6 +276,26 @@
   .c-hcard-list-row{display:flex; align-items:center; justify-content:space-between; gap:var(--spacing-12); padding:var(--spacing-8) 0; border-top:1px solid var(--color-neutral-2); font-size:var(--text-body2-size); color:var(--color-neutral-9);}
   .c-hcard-list-row:first-child{border-top:none;}
   .c-hcard-cta{margin-top:auto; display:flex; align-items:center; gap:var(--spacing-4); font-size:var(--text-label2-size); font-weight:700; color:var(--color-neutral-9);}
+  /* Recommendation line — "Collabrium speaking," per the 2026-08-06
+     card-recommendations spec: every card completes insight →
+     recommendation → CTA. Caption-size Neutral-5 with a ✨ lead-in
+     glyph (in the markup, not a ::before — it's content, screen
+     readers should read it in flow). Deliberately NOT a coloured
+     background or border: the accent-as-signal rule keeps colour
+     reserved for the risk/positive/AI accents already in play. When a
+     CTA directly follows a rec line they pair tightly (gap minus 8px
+     = 4px net, the same pairing rule as headline + support) — and
+     that fixed margin also neutralizes .c-hcard-cta's own
+     margin-top:auto, which matters because two consecutive
+     margin-top:auto flex items would otherwise SPLIT the card's free
+     space between them instead of pushing both to the bottom. On
+     Card 1 the rec line itself is the bottom anchor (margin-top:auto
+     via the .c-hcard-list + sibling rule); on cards 2–5 an earlier
+     element (gauge/sparkline/tag/bar) already anchors, so the rec
+     just flows after it. */
+  .c-hcard-rec{display:block; font-size:var(--text-caption-size); line-height:var(--text-caption-lh); color:var(--color-neutral-5);}
+  .c-hcard-list + .c-hcard-rec{margin-top:auto;}
+  .c-hcard-rec + .c-hcard-cta{margin-top:calc(-1 * var(--spacing-8));}
 
   /* Card 2/6 — Client at risk: single-focus alert, warm elemental tint
      (Fire — per tokens.css's "elemental background tints... the ONLY
@@ -573,7 +593,8 @@
                 <div class="c-hcard-list-row"><span>Genting F&amp;B</span><span class="c-badge c-badge-warning">7d stalled</span></div>
                 <div class="c-hcard-list-row"><span>AirAsia Retail</span><span class="c-badge c-badge-warning">5d stalled</span></div>
               </div>
-              <span class="c-hcard-cta">Follow up <i class="ph ph-arrow-right"></i></span>
+              <span class="c-hcard-rec">✨ Start with MediaCorp — it's been quiet longest (12d).</span>
+              <span class="c-hcard-cta">Nudge MediaCorp <i class="ph ph-arrow-right"></i></span>
             </div>
             <div class="c-card c-card-slide c-hcard-risk">
               <span class="c-hcard-label"><i class="ph-fill ph-warning"></i> At risk</span>

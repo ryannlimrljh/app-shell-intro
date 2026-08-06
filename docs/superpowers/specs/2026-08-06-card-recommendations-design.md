@@ -2,7 +2,7 @@
 
 **Date:** 2026-08-06
 **Page:** `pages/app-shell-intro.html`
-**Status:** Approved by user, pending implementation plan
+**Status:** Implemented (commits 7e8f7a0, 0384d2d, 9cdc9cb; plan 2026-08-06-card-recommendations.md)
 **Builds on:** `2026-08-06-highlight-cards-design.md` (the six-card content/visual spec)
 
 ## Goal

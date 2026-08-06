@@ -216,15 +216,20 @@
      keeps the bars on .c-card's own 16px padding without restating it.
      The shimmer is one shared keyframes track — only the gradient
      colors vary on the dark AI card, where neutral-grey bars would
-     vanish against obsidian. Content entrance: when .is-loading flips
-     to .is-loaded the skeleton fades out while the real children fade/
-     rise in, each child offset by --content-delay (set inline from JS
-     per child index) for a soft top-to-bottom cascade. .is-loaded is
+     vanish against obsidian. background:inherit makes the overlay
+     opaque in each card's own colour (white / fire tint / obsidian)
+     — without it the swap double-exposes shimmer bars over the real
+     content mid-crossfade. Content entrance: when .is-loading flips
+     to .is-loaded the skeleton fades out (drifting up a touch, set
+     inline from JS) while the real children rise in from below, each
+     child offset by --content-delay (set inline from JS: a base lead
+     so content only surfaces once the skeleton is mostly gone, plus a
+     per-child-index step) for a soft top-to-bottom cascade. .is-loaded is
      removed again ~1.2s later (and --content-delay cleared) so this
      transition rule can't linger and hijack unrelated later opacity/
      transform changes on card children (e.g. the AI card CTA's own
      fast hover fade). */
-  .c-hcard-skeleton{position:absolute; inset:0; z-index:2; display:flex; flex-direction:column; gap:var(--spacing-16); padding:inherit; border-radius:inherit; transition:opacity .45s ease;}
+  .c-hcard-skeleton{position:absolute; inset:0; z-index:2; display:flex; flex-direction:column; gap:var(--spacing-16); padding:inherit; border-radius:inherit; background:inherit; transition:opacity .45s ease, transform .45s ease;}
   .c-skeleton-bar{display:block; border-radius:var(--radius-pill); background:linear-gradient(90deg, var(--color-neutral-2) 30%, var(--color-neutral-3) 50%, var(--color-neutral-2) 70%); background-size:300% 100%; animation:c-skeleton-shimmer 1.6s linear infinite;}
   .c-skeleton-bar--eyebrow{width:34%; height:10px;}
   .c-skeleton-bar--title{width:72%; height:22px;}
@@ -1243,7 +1248,16 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
     // *only* thing this needs to do — the h1→p→cards stagger itself is
     // pure CSS (transition-delay), not sequenced in JS.
     const SIDEBAR_COLLAPSE_TRANSITION_MS = 360; // must match .c-sidebar's own transition-duration in components.css
+    let canvasRevealed = false;
     function revealCanvasContent() {
+      // Run-once guard: autoCollapseNav() fires from BOTH the normal
+      // choreography and the throttled-tab fallback below, and unlike
+      // its siblings this function is NOT naturally idempotent — a
+      // second run would inject a second skeleton and re-add
+      // .is-loading, yanking freshly revealed card content back into
+      // the loading state mid-cascade.
+      if (canvasRevealed) return;
+      canvasRevealed = true;
       const h1 = document.getElementById('greetingH1');
       const subtitle = document.getElementById('greetingSubtitle');
       if (h1) h1.classList.add('is-revealed');
@@ -1275,8 +1289,9 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
       // as mechanical as the reveal stagger was built to avoid.
       const SKELETON_HOLD_MIN_MS = 350;
       const SKELETON_HOLD_MAX_MS = 900;
-      const SKELETON_FADE_MS = 450;       // must match .c-hcard-skeleton's own opacity transition in <style>
-      const CONTENT_STAGGER_STEP_MS = 70; // per-child cascade inside a card, via --content-delay
+      const SKELETON_FADE_MS = 450;        // must match .c-hcard-skeleton's own opacity transition in <style>
+      const CONTENT_BASE_DELAY_MS = 260;   // content cascade starts only once the skeleton is ~half faded — starting both at 0 double-exposes shimmer bars over the real content
+      const CONTENT_STAGGER_STEP_MS = 70;  // per-child cascade inside a card, on top of the base lead, via --content-delay
       document.querySelectorAll('.c-card-slide').forEach((card, i) => {
         const jitter = (Math.random() * 2 - 1) * CARDS_JITTER_MS;
         const delay = Math.max(0, CARDS_BASE_DELAY_MS + i * CARDS_STAGGER_STEP_MS + jitter);
@@ -1299,7 +1314,7 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
           '<span class="c-skeleton-bar c-skeleton-bar--block"></span>' +
           '<span class="c-skeleton-bar c-skeleton-bar--footer"></span>';
         const children = [...card.children];
-        children.forEach((child, ci) => child.style.setProperty('--content-delay', `${ci * CONTENT_STAGGER_STEP_MS}ms`));
+        children.forEach((child, ci) => child.style.setProperty('--content-delay', `${CONTENT_BASE_DELAY_MS + ci * CONTENT_STAGGER_STEP_MS}ms`));
         card.appendChild(skeleton);
         card.classList.add('is-loading');
 
@@ -1329,8 +1344,9 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
           card.classList.remove('is-loading');
           card.classList.add('is-loaded');
           skeleton.style.opacity = '0';
+          skeleton.style.transform = 'translateY(-6px)'; // exits upward as the content rises in from below — one continuous motion, not two unrelated fades
           setTimeout(() => skeleton.remove(), SKELETON_FADE_MS + 50);
-          const cascadeTotal = 500 + children.length * CONTENT_STAGGER_STEP_MS;
+          const cascadeTotal = 500 + CONTENT_BASE_DELAY_MS + children.length * CONTENT_STAGGER_STEP_MS;
           setTimeout(() => {
             card.classList.remove('is-loaded');
             children.forEach((child) => child.style.removeProperty('--content-delay'));

@@ -172,8 +172,37 @@
      flat 550ms), more travel (24px vs 16px), and a softer, more
      decelerated ease-out curve (cubic-bezier(.22,1,.36,1) vs the
      nav/h1's snappier cubic-bezier(.16,1,.3,1)). */
-  .c-card-slide{opacity:0; transform:translateY(calc(var(--arc-y, 0px) + 24px)) rotate(var(--arc-rotate, 0deg)); transition:opacity var(--card-reveal-duration, 650ms) cubic-bezier(.22,1,.36,1), transform var(--card-reveal-duration, 650ms) cubic-bezier(.22,1,.36,1); transition-delay:var(--card-reveal-delay, 0ms);}
-  .c-card-slide.is-revealed{opacity:1; transform:translateY(var(--arc-y, 0px)) rotate(var(--arc-rotate, 0deg));}
+  .c-card-slide{opacity:0; transform:translateY(calc(var(--arc-y, 0px) + 24px)) rotate(var(--arc-rotate, 0deg)) scale(.97); filter:blur(7px); transition:opacity var(--card-reveal-duration, 650ms) cubic-bezier(.22,1,.36,1), transform var(--card-reveal-duration, 650ms) cubic-bezier(.22,1,.36,1), filter var(--card-reveal-duration, 650ms) cubic-bezier(.22,1,.36,1); transition-delay:var(--card-reveal-delay, 0ms);}
+  .c-card-slide.is-revealed{opacity:1; transform:translateY(var(--arc-y, 0px)) rotate(var(--arc-rotate, 0deg)); filter:blur(0);}
+
+  /* ---- Skeleton loading state. Each card arrives showing shimmering
+     placeholder bars (injected from JS — one generic eyebrow/title/
+     block/footer silhouette, not six bespoke skeletons) and only then
+     resolves into its real content, so the row reads as "loading in"
+     rather than popping fully-formed. The skeleton is an absolutely-
+     positioned overlay (the cards' real children are hidden underneath
+     via .is-loading, so card height never jumps); padding:inherit
+     keeps the bars on .c-card's own 16px padding without restating it.
+     The shimmer is one shared keyframes track — only the gradient
+     colors vary on the dark AI card, where neutral-grey bars would
+     vanish against obsidian. Content entrance: when .is-loading flips
+     to .is-loaded the skeleton fades out while the real children fade/
+     rise in, each child offset by --content-delay (set inline from JS
+     per child index) for a soft top-to-bottom cascade. .is-loaded is
+     removed again ~1.2s later (and --content-delay cleared) so this
+     transition rule can't linger and hijack unrelated later opacity/
+     transform changes on card children (e.g. the AI card CTA's own
+     fast hover fade). */
+  .c-hcard-skeleton{position:absolute; inset:0; z-index:2; display:flex; flex-direction:column; gap:var(--spacing-16); padding:inherit; border-radius:inherit; transition:opacity .45s ease;}
+  .c-skeleton-bar{display:block; border-radius:var(--radius-pill); background:linear-gradient(90deg, var(--color-neutral-2) 30%, var(--color-neutral-3) 50%, var(--color-neutral-2) 70%); background-size:300% 100%; animation:c-skeleton-shimmer 1.6s linear infinite;}
+  .c-skeleton-bar--eyebrow{width:34%; height:10px;}
+  .c-skeleton-bar--title{width:72%; height:22px;}
+  .c-skeleton-bar--block{width:100%; flex:1; border-radius:var(--radius-sm);}
+  .c-skeleton-bar--footer{width:46%; height:12px;}
+  .c-hcard-ai .c-skeleton-bar{background:linear-gradient(90deg, rgba(255,255,255,.08) 30%, rgba(255,255,255,.16) 50%, rgba(255,255,255,.08) 70%); background-size:300% 100%;}
+  @keyframes c-skeleton-shimmer{from{background-position:100% 0;} to{background-position:-200% 0;}}
+  .c-card-slide.is-loading > :not(.c-hcard-skeleton){opacity:0; transform:translateY(10px); transition:none;}
+  .c-card-slide.is-loaded > :not(.c-hcard-skeleton){transition:opacity .5s ease, transform .5s cubic-bezier(.22,1,.36,1); transition-delay:var(--content-delay, 0ms);}
 
   /* Hover on the fanned cards. .is-settled is added from JS once a
      card's entrance transition has finished; from that point Motion
@@ -1005,21 +1034,75 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
       const CARDS_JITTER_MS = 50;         // +/- randomness on top of the step, so the spacing itself isn't perfectly even
       const CARDS_DURATION_MIN_MS = 600;
       const CARDS_DURATION_MAX_MS = 820;
+      // Skeleton phase timings: how long a card keeps showing its
+      // shimmer bars after its own entrance has finished, before
+      // resolving into real content. Randomized per card (like the
+      // reveal itself) so the row resolves card by card, unevenly —
+      // six skeletons snapping to content in unison would look exactly
+      // as mechanical as the reveal stagger was built to avoid.
+      const SKELETON_HOLD_MIN_MS = 350;
+      const SKELETON_HOLD_MAX_MS = 900;
+      const SKELETON_FADE_MS = 450;       // must match .c-hcard-skeleton's own opacity transition in <style>
+      const CONTENT_STAGGER_STEP_MS = 70; // per-child cascade inside a card, via --content-delay
       document.querySelectorAll('.c-card-slide').forEach((card, i) => {
         const jitter = (Math.random() * 2 - 1) * CARDS_JITTER_MS;
         const delay = Math.max(0, CARDS_BASE_DELAY_MS + i * CARDS_STAGGER_STEP_MS + jitter);
         const duration = CARDS_DURATION_MIN_MS + Math.random() * (CARDS_DURATION_MAX_MS - CARDS_DURATION_MIN_MS);
         card.style.setProperty('--card-reveal-delay', `${delay.toFixed(0)}ms`);
         card.style.setProperty('--card-reveal-duration', `${duration.toFixed(0)}ms`);
+
+        // Skeleton overlay: injected here (not hand-written six times
+        // in the markup) since every card shares the same generic
+        // eyebrow/title/block/footer silhouette. Added BEFORE
+        // .is-revealed so the card fades in already wearing the
+        // skeleton; .is-loading hides the card's real children
+        // underneath the overlay (see the skeleton CSS block above).
+        const skeleton = document.createElement('div');
+        skeleton.className = 'c-hcard-skeleton';
+        skeleton.setAttribute('aria-hidden', 'true');
+        skeleton.innerHTML =
+          '<span class="c-skeleton-bar c-skeleton-bar--eyebrow"></span>' +
+          '<span class="c-skeleton-bar c-skeleton-bar--title"></span>' +
+          '<span class="c-skeleton-bar c-skeleton-bar--block"></span>' +
+          '<span class="c-skeleton-bar c-skeleton-bar--footer"></span>';
+        const children = [...card.children];
+        children.forEach((child, ci) => child.style.setProperty('--content-delay', `${ci * CONTENT_STAGGER_STEP_MS}ms`));
+        card.appendChild(skeleton);
+        card.classList.add('is-loading');
+
         card.classList.add('is-revealed');
         // Once the entrance transition ends, mark the card settled so
-        // hover uses the short no-delay transition (see .is-settled in
-        // CSS). transitionend fires per property (opacity + transform),
-        // once:true takes the first; the setTimeout is a fallback in
-        // case the event is missed (e.g. tab backgrounded mid-reveal).
+        // Motion can take over its transform for the pointer tilt (see
+        // .is-settled in CSS + enableCardTilt above). transitionend
+        // fires per property (opacity + transform), once:true takes
+        // the first; the setTimeout is a fallback in case the event is
+        // missed (e.g. tab backgrounded mid-reveal).
         const settle = () => card.classList.add('is-settled');
         card.addEventListener('transitionend', settle, { once: true });
         setTimeout(settle, delay + duration + 100);
+
+        // Content swap: skeleton fades out while the real children
+        // cascade in (opacity/translate, per-child --content-delay).
+        // Scheduled off this card's own entrance end + a randomized
+        // hold, so cards resolve one by one. .is-loaded (which carries
+        // the cascade transition) is deliberately temporary — removed
+        // once the cascade is over, together with the inline
+        // --content-delay values, so the stagger transition can't
+        // linger and slow down unrelated later changes on card
+        // children (e.g. the AI card CTA's own fast hover fade).
+        const hold = SKELETON_HOLD_MIN_MS + Math.random() * (SKELETON_HOLD_MAX_MS - SKELETON_HOLD_MIN_MS);
+        const contentAt = delay + duration + hold;
+        setTimeout(() => {
+          card.classList.remove('is-loading');
+          card.classList.add('is-loaded');
+          skeleton.style.opacity = '0';
+          setTimeout(() => skeleton.remove(), SKELETON_FADE_MS + 50);
+          const cascadeTotal = 500 + children.length * CONTENT_STAGGER_STEP_MS;
+          setTimeout(() => {
+            card.classList.remove('is-loaded');
+            children.forEach((child) => child.style.removeProperty('--content-delay'));
+          }, cascadeTotal + 200);
+        }, contentAt);
       });
     }
     // Auto-collapse the main nav a couple seconds after it's settled —

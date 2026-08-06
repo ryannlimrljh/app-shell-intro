@@ -228,15 +228,21 @@
      .c-badge/.c-tag/.c-stat* components wherever a card is genuinely
      that kind of thing (Pace and Team below are Stat/KPI cards in
      spirit, so they reuse .c-stat directly rather than reinventing
-     it). The other four cards define one page-local eyebrow class,
-     .c-hcard-label, matching the *recipe* every other DS component's
-     own label already uses (caption/700/tracking-eyebrow/uppercase/
-     Neutral-5) — deliberately not reusing .c-stat-label cross-
-     component, since the DS's own convention (SidebarNav's section
-     label, MultiSelect's group label, ElBadge's name label) is that
-     each component re-implements this recipe locally rather than
-     sharing one class across unrelated components. */
-  .c-hcard-label{font-size:var(--text-caption-size); font-weight:700; letter-spacing:var(--tracking-eyebrow); text-transform:uppercase; color:var(--color-neutral-5);}
+     it). The other four cards define one page-local label class,
+     .c-hcard-label. Originally this was the DS eyebrow recipe
+     (caption/700/tracking-eyebrow/uppercase); per feedback the labels
+     are now h3-sized headings instead — the h3 type tokens
+     (22px/30px/800/tracking 0), no uppercase — while keeping each
+     card's label *color* as the accent signal (Neutral-5 default,
+     orange on the risk card, amber on the AI card). Left-aligned
+     explicitly (align-self:flex-start + text-align:left) because the
+     Team card centers everything (.c-hcard-team) and the label must
+     not follow it. The same treatment is mirrored onto .c-stat-label
+     *scoped inside slide cards only* — Pace/Team reuse the DS Stat
+     component wholesale, and their labels have to match the other
+     four without touching components.css (off-limits). */
+  .c-hcard-label,
+  .c-card-slide .c-stat-label{font-size:var(--text-h3-size); line-height:var(--text-h3-lh); font-weight:var(--text-h3-weight); letter-spacing:var(--text-h3-tracking); text-transform:none; color:var(--color-neutral-5); align-self:flex-start; text-align:left;}
 
   /* Card 1/6 — Pipeline hygiene: list-shaped, ends in a text CTA. */
   .c-hcard-list{display:flex; flex-direction:column;}

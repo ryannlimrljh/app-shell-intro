@@ -175,17 +175,19 @@
   .c-card-slide{opacity:0; transform:translateY(calc(var(--arc-y, 0px) + 24px)) rotate(var(--arc-rotate, 0deg)); transition:opacity var(--card-reveal-duration, 650ms) cubic-bezier(.22,1,.36,1), transform var(--card-reveal-duration, 650ms) cubic-bezier(.22,1,.36,1); transition-delay:var(--card-reveal-delay, 0ms);}
   .c-card-slide.is-revealed{opacity:1; transform:translateY(var(--arc-y, 0px)) rotate(var(--arc-rotate, 0deg));}
 
-  /* Hover lift on the fanned cards. .is-settled is added from JS once
-     a card's entrance transition has finished — hover can't just reuse
-     the entrance transition, because its per-card transition-delay
-     (up to ~800ms, set for the staggered reveal) would also delay
-     every hover in/out, making the cards feel unresponsive. Settled
-     cards swap to a short flat ease with no delay. The hovered card
-     also jumps above the whole fan (z-index:10 beats the 1–6 stack
-     above) so its scaled edges aren't clipped by an overlapping
+  /* Hover on the fanned cards. .is-settled is added from JS once a
+     card's entrance transition has finished; from that point Motion
+     (see enableCardTilt in the script below) owns the card's whole
+     inline transform — arc pose, pointer tilt, and hover scale are all
+     spring-animated there, so the CSS transition is switched off
+     entirely: Motion writes style per frame, and leaving the entrance
+     transition active (with its per-card delay of up to ~800ms) would
+     re-smooth every frame into mush. Only z-index stays CSS: the
+     hovered card jumps above the whole fan (10 beats the 1–6 stack
+     above) so its scaled/tilted edges aren't clipped by an overlapping
      neighbour. */
-  .c-card-slide.is-settled{transition:transform .3s ease; transition-delay:0ms;}
-  .c-card-slide.is-settled:hover{transform:translateY(var(--arc-y, 0px)) rotate(var(--arc-rotate, 0deg)) scale(1.05); z-index:10;}
+  .c-card-slide.is-settled{transition:none;}
+  .c-card-slide.is-settled:hover{z-index:10;}
 
   /* ---- Highlight cards: personalized "next best action" content for
      the card slider (see docs/superpowers/specs/2026-08-06-highlight-
@@ -687,7 +689,26 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
     // since both listen on overlapping pointer events. Also skipped
     // outright while an actual slider drag is in progress.
     function enableCardTilt(card) {
+      if (card.dataset.tiltEnabled) return; // both the transitionend path and the setTimeout fallback below call this — enable once
+      card.dataset.tiltEnabled = 'true';
       const MAX_TILT_DEG = 12;
+      // From here on Motion owns this card's whole inline transform.
+      // The arc-fan pose (translateY + rotate from the --arc-* custom
+      // properties in <style>) has to be re-stated as Motion values at
+      // duration 0 first: Motion composes its own transform string, so
+      // animating only rotateX/rotateY later would otherwise silently
+      // drop the fan pose the CSS put the card in. Values are read from
+      // computed style so this can never drift from the CSS nth-child
+      // definitions. The inline transform this writes overrides the
+      // class pose with identical values — no visual jump at enable.
+      const style = getComputedStyle(card);
+      const arcY = parseFloat(style.getPropertyValue('--arc-y')) || 0;
+      const arcRotate = parseFloat(style.getPropertyValue('--arc-rotate')) || 0;
+      animate(card, { y: arcY, rotate: arcRotate, rotateX: 0, rotateY: 0, scale: 1 }, { duration: 0 });
+      card.addEventListener('pointerenter', (e) => {
+        if (e.pointerType !== 'mouse' || cardSlider.classList.contains('is-dragging')) return;
+        animate(card, { scale: 1.05 }, { type: 'spring', stiffness: 300, damping: 22, mass: 0.6 });
+      });
       card.addEventListener('pointermove', (e) => {
         if (e.pointerType !== 'mouse' || cardSlider.classList.contains('is-dragging')) return;
         const rect = card.getBoundingClientRect();
@@ -699,13 +720,25 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
       });
       card.addEventListener('pointerleave', (e) => {
         if (e.pointerType !== 'mouse') return;
-        animate(card, { rotateX: 0, rotateY: 0 }, { type: 'spring', stiffness: 220, damping: 18 });
+        animate(card, { rotateX: 0, rotateY: 0, scale: 1 }, { type: 'spring', stiffness: 220, damping: 18 });
       });
     }
     document.querySelectorAll('.c-card-slide').forEach((card) => {
-      card.addEventListener('transitionend', (e) => {
-        if (e.propertyName === 'transform') enableCardTilt(card);
-      }, { once: true });
+      // The previous version used {once:true} here — a real race:
+      // transitionend fires once per transitioned property (opacity AND
+      // transform), and once:true detached the listener on whichever
+      // landed first, so when opacity won, tilt never enabled. Filter
+      // manually and detach only after the transform one arrives; the
+      // setTimeout is a fallback in case the event is missed entirely
+      // (e.g. tab backgrounded mid-reveal — reveal delay+duration tops
+      // out around 1.7s, so 2.5s is safely after).
+      const onEnd = (e) => {
+        if (e.propertyName !== 'transform') return;
+        card.removeEventListener('transitionend', onEnd);
+        enableCardTilt(card);
+      };
+      card.addEventListener('transitionend', onEnd);
+      setTimeout(() => enableCardTilt(card), 2500);
     });
   }
 

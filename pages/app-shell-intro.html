@@ -129,7 +129,7 @@
   .c-card-slider{overflow-x:auto; overflow-anchor:none; scroll-snap-type:x proximity; cursor:grab; outline:none; -webkit-overflow-scrolling:touch; scrollbar-width:none; margin-right:calc(-1 * var(--page-gutter));}
   .c-card-slider::-webkit-scrollbar{display:none;}
   .c-card-slider.is-dragging{cursor:grabbing; scroll-snap-type:none; user-select:none;}
-  .c-card-slider-track{display:flex; gap:0; width:max-content; padding:16px 16px 56px 240px; perspective:900px;}
+  .c-card-slider-track{display:flex; gap:0; width:max-content; padding:16px 64px 96px 240px; perspective:900px;}
   .c-card-slide{flex:0 0 340px; width:340px; min-height:400px; scroll-snap-align:start; position:relative;}
 
   /* ---- Convex-arc fan layout (per reference: cards splayed like a
@@ -145,9 +145,12 @@
      steeper to cover the extra card. Overlap comes from gap:0 on the
      track plus a negative margin here; z-index stacks so cards tuck
      behind their neighbour toward the centre (1 < 2 < 3 > 4 > 5 > 6),
-     and the track's top/bottom padding was widened (16px/56px) so the
-     40px dip and the hover scale don't clip against the slider's
-     overflow box. */
+     and the track's padding was widened (16px top, 64px right, 96px
+     bottom) so nothing clips against the slider's overflow box: a
+     12deg-rotated 340x400 card's corners extend ~31px past its layout
+     box on every side, so the outermost cards need 40px (dip) + ~31px
+     (rotation) + hover-scale headroom below, and ~31px + headroom to
+     the right of the last card. */
   .c-card-slide + .c-card-slide{margin-left:-26px;}
   .c-card-slide:nth-child(1){--arc-rotate:-12deg; --arc-y:40px; z-index:1;}
   .c-card-slide:nth-child(2){--arc-rotate:-6deg;  --arc-y:15px; z-index:2;}

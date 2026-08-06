@@ -967,8 +967,10 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
     // panel as a true modal (see .c-card-modal in <style>): the panel
     // flies from the clicked card's on-screen rect to its centered
     // rest position with a 3D perspective swing while the backdrop
-    // dims the whole page; backdrop click or Escape reverses the
-    // swing back into the card's slot. Class-driven keyframe
+    // dims the whole page; backdrop click or Escape closes the panel
+    // back into the card's slot via its own shorter close keyframe
+    // track (not a replay of the open swing in reverse — no
+    // overshoot on the way back). Class-driven keyframe
     // animations (`is-swinging-open` / `is-swinging-closed`) drive the
     // flight, parameterized by inline `--sw-dx/--sw-dy/--sw-sx/--sw-sy/
     // --sw-dir` custom properties computed from the card and panel
@@ -1003,6 +1005,14 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
         // rect size is sufficient). Used directly by the
         // reduced-motion morph; the swing path reads the same numbers
         // through the --sw-* custom properties (setSwingVars).
+        // Same contract as setSwingVars: measure the panel
+        // untransformed — suppress the base transition, clear any
+        // in-flight inline transform, and commit via reflow before
+        // reading rects. Callers re-enable the transition when they
+        // want the morph to actually run.
+        modalPanel.style.transition = 'none';
+        modalPanel.style.transform = 'none';
+        void modalPanel.offsetWidth;
         const from = modalSourceCard.getBoundingClientRect();
         const to = modalPanel.getBoundingClientRect();
         return `translate(${(from.left - to.left).toFixed(1)}px, ${(from.top - to.top).toFixed(1)}px) scale(${(from.width / to.width).toFixed(4)}, ${(from.height / to.height).toFixed(4)})`;
@@ -1016,8 +1026,13 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
         // right edge leads (+1), card right of centre → mirrored (-1).
         // `from` is the card's current, Motion-transformed rect (hover
         // scale/tilt included) ON PURPOSE — the swing starts from the
-        // card exactly as the user sees it. The function itself
-        // enforces that `to` (the panel) is measured untransformed.
+        // card's current on-screen rect. Note `getBoundingClientRect`
+        // returns the axis-aligned bounding box of the (possibly
+        // rotated/tilted) projected card, not its actual quad — a
+        // 12°-rotated card's AABB is noticeably wider than the card
+        // face — and hover scale is included on open but may have
+        // eased out by close. The function itself enforces that `to`
+        // (the panel) is measured untransformed.
         modalPanel.classList.remove('is-swinging-open', 'is-swinging-closed');
         void modalPanel.offsetWidth;   // measure the panel untransformed — a mid-flight swing pose would corrupt the FLIP math
         const from = modalSourceCard.getBoundingClientRect();
@@ -1051,8 +1066,7 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
           // Straight FLIP morph (the pre-swing behaviour, kept for
           // users who've opted out of animation): commit the card-rect
           // start state with transitions off, then release.
-          modalPanel.style.transition = 'none';
-          modalPanel.style.transform = cardRectTransform();
+          modalPanel.style.transform = cardRectTransform(); // suppresses the transition + commits an untransformed measure
           modalPanel.style.opacity = '0.4';
           void modalPanel.offsetWidth;
           modalPanel.style.transition = '';
@@ -1067,7 +1081,9 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
       function closeCardModal() {
         if (!modalSourceCard) return;
         if (REDUCED_MOTION) {
-          modalPanel.style.transform = cardRectTransform();
+          const closeTransform = cardRectTransform(); // suppresses transition; panel is committed at identity after this call
+          modalPanel.style.transition = '';
+          modalPanel.style.transform = closeTransform;
           modalPanel.style.opacity = '0.4';
         } else {
           setSwingVars();                // re-read the card slot before releasing modalSourceCard

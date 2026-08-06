@@ -1,12 +1,36 @@
 # Modal Perspective-Swing Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [x]`) syntax for tracking.
 
 **Goal:** Replace the card modal's straight FLIP morph with a rigid 3D perspective swing (open ~800ms with corner-leading trapezoid pose and overshoot; close ~550ms reverse without overshoot), per `docs/superpowers/specs/2026-08-06-modal-perspective-swing-design.md`.
 
 **Architecture:** Pure CSS `@keyframes` on the modal panel, parameterized by inline custom properties (`--sw-dx/--sw-dy/--sw-sx/--sw-sy/--sw-dir`) that JS computes from the clicked card's rect (the existing FLIP math). JS switches from inline-transition juggling to class toggling (`is-swinging-open` / `is-swinging-closed`). A `prefers-reduced-motion` branch keeps the pre-existing straight transition morph.
 
 **Tech Stack:** Static HTML/CSS/vanilla JS, single file `pages/app-shell-intro.html`. No test framework — verification is in-browser assertions via the Browser pane (`javascript_tool`) plus **real pointer clicks** (`computer` tool; synthetic dispatched clicks false-pass on this page — see the pointer-capture incident in git history around commit `b86ac62`). Dev server: `python3 -m http.server 8791` serving the worktree root; page at `http://localhost:8791/pages/app-shell-intro.html`.
+
+## Deviations from this plan (applied during code review)
+
+- Keyframes shipped renamed with the full component prefix —
+  `c-card-modal-swing-open` / `c-card-modal-swing-close` — instead of the
+  plan's `c-modal-swing-open` / `c-modal-swing-close`, per this page's
+  namespacing convention.
+- The base `.c-card-modal-panel` rule's `.6s` `transform` transition was
+  **kept**, not stripped down to the reduced-motion media block as Task 1
+  Step 1 shows. The media block only adds `animation:none` on the swing
+  classes; a `both`-fill animation wins over the transition while it plays,
+  so the transition stays harmlessly inert on the swing path.
+- `MODAL_SWING_OPEN_MS` (Task 2 Step 1) was dropped — it was never read
+  anywhere in the shipped JS.
+- The 78% keyframe pose spells out the full transform function list
+  (`translate(0px, 0px) scale(1) rotateY(...) rotateZ(...)`) instead of the
+  plan's rotation-only shorthand, and every `var(--sw-*)` reference carries a
+  fallback (`0px`/`1`), so each keyframe segment interpolates per-function
+  and an unset custom property degrades safely.
+- The untransformed-measure prologue (`classList.remove(...)` +
+  `void offsetWidth`) that Task 2's `openCardModal`/`closeCardModal` bodies
+  repeat inline now lives inside `setSwingVars()` and `cardRectTransform()`
+  themselves, so every caller gets an untransformed measurement without
+  duplicating the prologue at each call site.
 
 **Context you need before touching anything:**
 - Worktree: `/Users/kwlkokho/Documents/GitHub/Collabrium-DS/.worktrees/app-shell-intro-page`, branch `app-shell-intro-page`. The `collabrium-dls/` directory is READ-ONLY — never modify it.
@@ -21,7 +45,7 @@
 **Files:**
 - Modify: `pages/app-shell-intro.html` — the modal CSS block (currently lines ~262-280, find with `grep -n "c-card-modal{" pages/app-shell-intro.html`)
 
-- [ ] **Step 1: Replace the modal CSS block**
+- [x] **Step 1: Replace the modal CSS block**
 
 Find this exact CSS (5 rules):
 
@@ -76,7 +100,7 @@ transition morph) — it should now say the open/close flight is the
 perspective swing per the 2026-08-06 spec, with the FLIP-morph description
 moved to the reduced-motion note.
 
-- [ ] **Step 2: Verify the CSS parses and the keyframes resolve**
+- [x] **Step 2: Verify the CSS parses and the keyframes resolve**
 
 Serve the page (`python3 -m http.server 8791` from the worktree root if not already running), load `http://localhost:8791/pages/app-shell-intro.html` in the Browser pane, then run via `javascript_tool`:
 
@@ -94,7 +118,7 @@ Serve the page (`python3 -m http.server 8791` from the worktree root if not alre
 
 Expected: `{ name: "c-modal-swing-open", dur: "0.8s", persp: "1200px" }`.
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add pages/app-shell-intro.html
@@ -108,7 +132,7 @@ git commit -m "feat: perspective-swing keyframes for the card modal (CSS)"
 **Files:**
 - Modify: `pages/app-shell-intro.html` — the modal JS block (find with `grep -n "cardRectTransform" pages/app-shell-intro.html`, currently lines ~929-1004)
 
-- [ ] **Step 1: Replace the modal JS**
+- [x] **Step 1: Replace the modal JS**
 
 Find the block starting at the comment `// Card detail modal — clicking a card opens the blank placeholder` down to (and including) the `document.addEventListener('keydown', …)` listener and its closing `}` of the `if (cardModal && modalPanel && modalBackdrop) {` guard. Replace the guard's body (keep the three `const cardModal/modalPanel/modalBackdrop` lookups and the `if` line as they are) with:
 
@@ -232,7 +256,7 @@ animation for the close animation, whose 0% pose is identity — the panel
 jumps to identity before swinging back. The old code had the equivalent
 discontinuity; smoothing it is out of scope.
 
-- [ ] **Step 2: Verify with REAL pointer clicks in the Browser pane**
+- [x] **Step 2: Verify with REAL pointer clicks in the Browser pane**
 
 Reload `http://localhost:8791/pages/app-shell-intro.html`. Wait ~6s for the reveal to finish. Then, using the **`computer` tool** (real pointer input — do NOT dispatch synthetic click events; they bypass the pointer pipeline and false-passed before):
 
@@ -266,7 +290,7 @@ Expected: `open: true`, `shown: true`, `ariaHidden: "false"`, `swingClass: true`
 
 6. `read_console_messages` with onlyErrors — must be empty.
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add pages/app-shell-intro.html
@@ -280,15 +304,15 @@ git commit -m "feat: card modal opens with a 3D perspective swing"
 **Files:**
 - Modify: `docs/superpowers/specs/2026-08-06-modal-perspective-swing-design.md` (status line)
 
-- [ ] **Step 1: Update spec status**
+- [x] **Step 1: Update spec status**
 
 Change `**Status:** Approved by user, pending implementation plan` to `**Status:** Implemented (see plan 2026-08-06-modal-perspective-swing.md)` and, if any motion values changed during implementation (angles, durations), true the spec's tables up to what shipped.
 
-- [ ] **Step 2: Re-run the full click matrix once more**
+- [x] **Step 2: Re-run the full click matrix once more**
 
 Repeat Task 2 Step 2's checks 1-6 end-to-end on a fresh reload (regressions from the doc edit are impossible, but the matrix doubles as the final acceptance record). All pass.
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add docs/superpowers/specs/2026-08-06-modal-perspective-swing-design.md

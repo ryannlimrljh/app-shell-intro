@@ -331,7 +331,7 @@
   .c-modal-sales .panel-head{display:flex; align-items:center; justify-content:space-between; gap:var(--spacing-12); margin-bottom:var(--spacing-8);}
   .c-modal-sales .panel-head h3{font-size:var(--text-h5-size); font-weight:800;}
   .c-modal-sales .panel-head-title{display:flex; align-items:center; gap:var(--spacing-8);}
-  .c-modal-sales .c-stat-footer{display:flex; align-items:center; gap:var(--spacing-8); margin-top:auto;}
+  .c-modal-sales .c-stat-footer{display:flex; align-items:center; gap:var(--spacing-8);}
   /* Live indicator — obsidian pill, red expanding-ring pulse (red is the
      on-air/recording convention for a live indicator specifically). */
   .live-badge{display:inline-flex; align-items:center; gap:6px; height:22px; padding:0 10px; border-radius:var(--radius-pill); background:var(--color-obsidian); color:var(--color-neutral-1); font-size:var(--text-label3-size); font-weight:700; letter-spacing:var(--tracking-eyebrow); text-transform:uppercase;}
@@ -356,10 +356,11 @@
      SVG's live pixel size so 1 unit = 1px (fixed-viewBox stretching is
      what makes dots render as ellipses). Area fill never exceeds the
      fire-bg-strong tint. */
-  /* margin-top:auto here AND on the footer: two auto margins split the
-     panel's free vertical space evenly, so head/hero/trend sit top,
-     the chart floats centered, and the footer anchors bottom. */
-  .stat-chart-wrap{position:relative; display:flex; flex-direction:column; gap:var(--spacing-8); margin-top:auto;}
+  /* Content stacks top-down (chart directly after the trend line, footer
+     directly after the chart) — the panel's free space is deliberately
+     left at the BOTTOM, reserved for the upcoming recommendation + CTA
+     block. */
+  .stat-chart-wrap{position:relative; display:flex; flex-direction:column; gap:var(--spacing-8); margin-top:var(--spacing-8);}
   .stat-chart-svg{width:100%; height:180px; display:block; overflow:visible; cursor:crosshair;}
   .chart-gridline{stroke:var(--color-neutral-3); stroke-width:1;}
   .grad-stop-start{stop-color:var(--color-fire-bg-strong); stop-opacity:1;}

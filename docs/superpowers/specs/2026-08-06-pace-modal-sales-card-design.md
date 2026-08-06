@@ -42,9 +42,10 @@ combined MTD/YTD revenue stat card, extracted and rescaled.
   (Salmon Pink); fire-bg-strong gradient area; today/pace dots + gap line;
   damped forecast (±25% of run rate); pace verdict badge
   (Ahead/Behind/On, ratio thresholds 1.02/0.98).
-- Vertical rhythm: `margin-top:auto` on BOTH the chart wrap and the footer
-  splits the 680px panel's free space evenly — head/hero/trend top, chart
-  centered, footer anchored bottom.
+- Vertical rhythm: content stacks top-down (head/hero/trend/chart/footer),
+  and the panel's free space is deliberately left at the BOTTOM — reserved
+  for an upcoming recommendation + CTA block (user request, 2026-08-06;
+  replaced an earlier centered-chart distribution).
 - Live tick guards on `.is-pace` + `.is-open`, so it never mutates a closed
   modal; `animateValue` snaps to the final frame under reduced motion.
 - Class names and element ids keep their dashboard-home spellings

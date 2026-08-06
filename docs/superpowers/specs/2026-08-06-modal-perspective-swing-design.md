@@ -2,7 +2,7 @@
 
 **Date:** 2026-08-06
 **Page:** `pages/app-shell-intro.html`
-**Status:** Approved by user, pending implementation plan
+**Status:** Implemented (plan 2026-08-06-modal-perspective-swing.md; commits dfda9cb, 30aa617, 17cbe04, f7cfa8a + final-pass commit)
 **Builds on:** the card modal introduced in commit `cb0b587` (fixed top-layer modal
 with FLIP morph); reference motion: fff.cmiscm.com card-open transition (user's
 screen recording, frame-analyzed 2026-08-06; visual companion demo D chosen over
@@ -66,13 +66,30 @@ keep the current straight transition morph (the pre-this-spec behaviour).
 
 - Keyframes read `var()` at element scope, so a single track serves all six
   cards and both directions; JS only sets the five `--sw-*` custom properties
-  and toggles classes (`is-swinging-open` / `is-swinging-closed` or similar).
+  and toggles classes (`is-swinging-open` / `is-swinging-closed`). The
+  keyframes carry the full component prefix — `c-card-modal-swing-open` /
+  `c-card-modal-swing-close` — per this page's namespacing convention. Every
+  `var(--sw-*)` reference carries a fallback (`0px` for the translate axes,
+  `1` for the scale axes) so an unset custom property degrades to the
+  identity pose instead of an invalid transform.
+- The 78% pose spells out the full transform function list —
+  `translate(0px, 0px) scale(1) rotateY(...) rotateZ(...)` — rather than
+  omitting the settled functions, so every keyframe segment interpolates
+  per-function instead of jumping where a function drops out of the list.
 - The panel stays Motion-free (plain CSS animation; no ownership conflict with
   motion.dev, which owns the cards' transforms, not the panel's).
-- The existing reflow-commit pattern (`void offsetWidth`) is replaced by
-  animation start/end handling: keyframes don't need a committed start frame,
-  but `animationend` (with a `setTimeout` fallback, per this page's
-  backgrounded-tab convention) drives the end-of-close cleanup.
+- The existing reflow-commit pattern (`void offsetWidth`) is kept, but moved
+  inside `setSwingVars()` itself: the function unconditionally strips the
+  swing classes and forces a reflow before reading the panel's rect, so every
+  caller gets an untransformed measurement without repeating the prologue.
+  `animationend` (with a `setTimeout` fallback, per this page's
+  backgrounded-tab convention) still drives the end-of-close cleanup.
+- The base `.c-card-modal-panel` rule keeps its pre-swing `.6s` `transform`
+  transition; the reduced-motion media block only sets `animation:none` on
+  the swing classes. A `both`-fill animation always wins over a transition
+  while it's playing, so the transition is inert on the swing path and only
+  becomes live again — intentionally — once reduced motion suppresses the
+  animation.
 - Page-local classes documented inline, per the established pattern.
 
 ## Non-goals

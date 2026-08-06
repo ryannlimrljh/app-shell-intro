@@ -1016,8 +1016,10 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
         // right edge leads (+1), card right of centre → mirrored (-1).
         // `from` is the card's current, Motion-transformed rect (hover
         // scale/tilt included) ON PURPOSE — the swing starts from the
-        // card exactly as the user sees it. Callers must ensure `to`
-        // (the panel) is measured untransformed — see the call sites.
+        // card exactly as the user sees it. The function itself
+        // enforces that `to` (the panel) is measured untransformed.
+        modalPanel.classList.remove('is-swinging-open', 'is-swinging-closed');
+        void modalPanel.offsetWidth;   // measure the panel untransformed — a mid-flight swing pose would corrupt the FLIP math
         const from = modalSourceCard.getBoundingClientRect();
         const to = modalPanel.getBoundingClientRect();
         modalPanel.style.setProperty('--sw-dx', `${(from.left - to.left).toFixed(1)}px`);
@@ -1057,8 +1059,6 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
           modalPanel.style.transform = 'none';
           modalPanel.style.opacity = '1';
         } else {
-          modalPanel.classList.remove('is-swinging-open', 'is-swinging-closed');
-          void modalPanel.offsetWidth;   // untransformed layout rect for the measurement below
           setSwingVars();
           modalPanel.classList.add('is-swinging-open');
         }
@@ -1070,8 +1070,6 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
           modalPanel.style.transform = cardRectTransform();
           modalPanel.style.opacity = '0.4';
         } else {
-          modalPanel.classList.remove('is-swinging-open', 'is-swinging-closed');
-          void modalPanel.offsetWidth;   // untransformed layout rect for the measurement below
           setSwingVars();                // re-read the card slot before releasing modalSourceCard
           modalPanel.classList.add('is-swinging-closed');
         }

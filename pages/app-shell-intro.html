@@ -2074,50 +2074,70 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
     }, PRE_HOLD_MS + ENTER_MS + HOLD_COVER_MS + EXIT_MS + POST_WIPE_HOLD_MS + 300);
   }
 
-  // Ask box — placeholder cycles through a few prompts with a type/
-  // delete effect instead of sitting static on "Ask anything" (ported
-  // from dashboard-home.html). Pauses whenever the input is focused so
-  // it never fights real typing; under reduced motion the placeholder
-  // stays static instead.
+  // Ask box — one-shot placeholder choreography (user-specified,
+  // replacing the source's endless prompt cycling): type "Everything
+  // else lives right here.", pulse the caret on it for 5s, delete,
+  // type the assistant line, then stop indefinitely — the final
+  // message is the box's resting state, not a loop frame. Every step
+  // pauses while the input is focused so it never fights real typing;
+  // under reduced motion the placeholder just sits on the final line.
   (() => {
     const askInput = document.querySelector('.floating-ask input');
-    if (!askInput || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    const messages = [
-      "Hey Bryan, I'm your Collabrium assistant",
-      'Ask me anything',
-      'Try "Create a sale brief"',
-      '"Summarise sale performance"'
-    ];
-    let msgIndex = 0, charIndex = 0, deleting = false;
-    const TYPE_MS = 45, DELETE_MS = 22, HOLD_MS = 1500, GAP_MS = 350, IDLE_CHECK_MS = 300;
-    function tick() {
-      if (document.activeElement === askInput) {
-        setTimeout(tick, IDLE_CHECK_MS);
-        return;
-      }
-      const current = messages[msgIndex];
-      if (!deleting) {
-        charIndex++;
-        askInput.placeholder = current.slice(0, charIndex) + (charIndex < current.length ? '|' : '');
-        if (charIndex >= current.length) {
-          deleting = true;
-          setTimeout(tick, HOLD_MS);
-          return;
-        }
-        setTimeout(tick, TYPE_MS);
-      } else {
-        charIndex--;
-        askInput.placeholder = current.slice(0, charIndex);
-        if (charIndex <= 0) {
-          deleting = false;
-          msgIndex = (msgIndex + 1) % messages.length;
-          setTimeout(tick, GAP_MS);
-          return;
-        }
-        setTimeout(tick, DELETE_MS);
-      }
+    if (!askInput) return;
+    const FIRST_MSG = 'Everything else lives right here.';
+    const FINAL_MSG = 'I am your Collabrium assistant, let me help you';
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      askInput.placeholder = FINAL_MSG;
+      return;
     }
-    tick();
+    const TYPE_MS = 45, DELETE_MS = 22, CARET_BLINK_MS = 500, PULSE_MS = 5000, GAP_MS = 350, IDLE_CHECK_MS = 300;
+    function whenIdle(fn) {
+      if (document.activeElement === askInput) { setTimeout(() => whenIdle(fn), IDLE_CHECK_MS); return; }
+      fn();
+    }
+    function typeMsg(msg, keepCaret, done) {
+      let i = 0;
+      (function step() { whenIdle(() => {
+        i++;
+        askInput.placeholder = msg.slice(0, i) + (i < msg.length || keepCaret ? '|' : '');
+        if (i < msg.length) { setTimeout(step, TYPE_MS); } else { done(); }
+      }); })();
+    }
+    function pulseCaret(msg, totalMs, done) {
+      const blinks = Math.round(totalMs / CARET_BLINK_MS);
+      let n = 0;
+      (function step() { whenIdle(() => {
+        n++;
+        askInput.placeholder = msg + (n % 2 ? '' : '|');
+        if (n < blinks) { setTimeout(step, CARET_BLINK_MS); } else { askInput.placeholder = msg; done(); }
+      }); })();
+    }
+    function deleteMsg(msg, done) {
+      let i = msg.length;
+      (function step() { whenIdle(() => {
+        i--;
+        askInput.placeholder = msg.slice(0, i);
+        if (i > 0) { setTimeout(step, DELETE_MS); } else { done(); }
+      }); })();
+    }
+    function runSequence() {
+      typeMsg(FIRST_MSG, true, () =>
+        pulseCaret(FIRST_MSG, PULSE_MS, () =>
+          setTimeout(() => deleteMsg(FIRST_MSG, () =>
+            setTimeout(() => typeMsg(FINAL_MSG, false, () => {}), GAP_MS)
+          ), GAP_MS)
+        )
+      );
+    }
+    // Start only once the box's own reveal has finished (is-revealed +
+    // its 1150ms delay + 550ms rise) — the whole point of a one-shot
+    // choreography is that the user actually sees the first line, so
+    // typing must not burn through it while the box is still invisible.
+    (function waitForReveal() {
+      const box = document.getElementById('askBox');
+      if (box && box.classList.contains('is-revealed')) { setTimeout(runSequence, 1700); return; }
+      setTimeout(waitForReveal, 300);
+    })();
   })();
 })();
 </script>

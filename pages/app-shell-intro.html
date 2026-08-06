@@ -287,12 +287,15 @@
   /* Card 3/6 — Pace (centre card): reuses collabrium-dls's own .c-stat
      component wholesale (.c-stat-label/.c-stat-value.hero/
      .c-stat-trend.up) rather than reinventing a "big number" card.
-     Border emphasizes it as the row's anchor, per the approved
-     design. .c-stat-trend has no background of its own, but it's
-     still a flex item of a flex-column card with default
-     align-items:stretch — align-self:flex-start keeps its box hugging
-     its own content instead of invisibly reserving full card width. */
-  .c-hcard-pace{border-color:var(--color-obsidian);}
+     No chrome override: it originally carried an obsidian border as
+     the row's anchor mark, but per feedback white cards keep the
+     stock DS .c-card chrome (Neutral-1 bg / Neutral-3 border /
+     shadow-1) untouched — its anchor role is carried by position
+     (centre) and the hero value alone. .c-stat-trend has no
+     background of its own, but it's still a flex item of a
+     flex-column card with default align-items:stretch —
+     align-self:flex-start keeps its box hugging its own content
+     instead of invisibly reserving full card width. */
   .c-hcard-pace .c-stat-trend{align-self:flex-start;}
   .c-hcard-sparkline{display:block; margin-top:auto; width:100%; height:36px;}
 
@@ -1031,7 +1034,7 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
     const EXIT_MS = 380;            // panel sweeps out, uncovering the viewport — same transition-duration as ENTER_MS
     const POST_WIPE_HOLD_MS = 200;  // blank warm canvas again, after the panel exits, before the nav slides in
     const NAV_DURATION_MS = 450;    // must match .c-sidebar-shell's transition-duration in <style> above
-    const AUTO_COLLAPSE_DELAY_MS = 2500; // how long the nav stays expanded, once fully settled, before auto-collapsing
+    const AUTO_COLLAPSE_DELAY_MS = 900; // how long the nav stays expanded, once fully settled, before auto-collapsing — short on purpose (was 2500ms; per feedback the collapse should come quicker so the canvas content isn't kept waiting)
 
     function hideWipePanel() {
       wipePanel.style.display = 'none';

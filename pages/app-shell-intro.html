@@ -333,24 +333,24 @@
   .c-hcard-cta{margin-top:auto; display:flex; align-items:center; gap:var(--spacing-4); font-size:var(--text-label2-size); font-weight:700; color:var(--color-neutral-9);}
   /* Recommendation line — "Collabrium speaking," per the 2026-08-06
      card-recommendations spec: every card completes insight →
-     recommendation → CTA. Caption-size Neutral-5 with a ✨ lead-in
-     glyph (in the markup, not a ::before — it's content, screen
-     readers should read it in flow). Deliberately NOT a coloured
-     background or border: the accent-as-signal rule keeps colour
-     reserved for the risk/positive/AI accents already in play. When a
-     CTA directly follows a rec line they pair tightly (gap minus 8px
-     = 4px net, the same pairing rule as headline + support) — and
-     that fixed margin also neutralizes .c-hcard-cta's own
+     recommendation → CTA. Caption-size Neutral-5, deliberately NOT a
+     coloured background or border: the accent-as-signal rule keeps
+     colour reserved for the risk/positive/AI accents already in play.
+     The bottom cluster breathes more than the card's base 12px gap:
+     the rec sits 20px below the visual above it (gap + 8px margin) so
+     the chart/gauge/bar doesn't crowd it, and the CTA follows at the
+     plain 12px gap (margin-top:0 rather than the tight -8px pairing).
+     That explicit margin-top:0 also neutralizes .c-hcard-cta's own
      margin-top:auto, which matters because two consecutive
      margin-top:auto flex items would otherwise SPLIT the card's free
      space between them instead of pushing both to the bottom. On
      Card 1 the rec line itself is the bottom anchor (margin-top:auto
-     via the .c-hcard-list + sibling rule); on cards 2–5 an earlier
-     element (gauge/sparkline/tag/bar) already anchors, so the rec
-     just flows after it. */
-  .c-hcard-rec{display:block; font-size:var(--text-caption-size); line-height:var(--text-caption-lh); color:var(--color-neutral-5);}
+     via the .c-hcard-list + sibling rule, which outranks the 8px
+     margin below); on cards 2–5 an earlier element (gauge/sparkline/
+     tag/bar) already anchors, so the rec just flows after it. */
+  .c-hcard-rec{display:block; margin-top:var(--spacing-8); font-size:var(--text-caption-size); line-height:var(--text-caption-lh); color:var(--color-neutral-5);}
   .c-hcard-list + .c-hcard-rec{margin-top:auto;}
-  .c-hcard-rec + .c-hcard-cta{margin-top:calc(-1 * var(--spacing-8));}
+  .c-hcard-rec + .c-hcard-cta{margin-top:0;}
 
   /* Card 2/6 — Client at risk: single-focus alert, warm elemental tint
      (Fire — per tokens.css's "elemental background tints... the ONLY
@@ -653,7 +653,7 @@
                 <div class="c-hcard-list-row"><span>Genting F&amp;B</span><span class="c-badge c-badge-warning">7d stalled</span></div>
                 <div class="c-hcard-list-row"><span>AirAsia Retail</span><span class="c-badge c-badge-warning">5d stalled</span></div>
               </div>
-              <span class="c-hcard-rec">✨ Start with MediaCorp — it's been quiet longest (12d).</span>
+              <span class="c-hcard-rec">Start with MediaCorp — it's been quiet longest (12d).</span>
               <span class="c-hcard-cta">Nudge MediaCorp <i class="ph ph-arrow-right"></i></span>
             </div>
             <div class="c-card c-card-slide c-hcard-risk">
@@ -664,7 +664,7 @@
                 <path d="M5 47 A40 40 0 0 1 85 47" style="stroke:var(--color-fire-bg-strong)" stroke-width="8" fill="none" stroke-linecap="round"/>
                 <path d="M5 47 A40 40 0 0 1 58 12" style="stroke:var(--color-orange)" stroke-width="8" fill="none" stroke-linecap="round"/>
               </svg>
-              <span class="c-hcard-rec">✨ Renewal is in 21 days — a save call this week beats a discount later.</span>
+              <span class="c-hcard-rec">Renewal is in 21 days — a save call this week beats a discount later.</span>
               <span class="c-hcard-cta">Book save call <i class="ph ph-arrow-right"></i></span>
             </div>
             <div class="c-card c-card-slide c-stat c-hcard-pace">
@@ -675,7 +675,7 @@
               <svg class="c-hcard-sparkline" viewBox="0 0 200 40" preserveAspectRatio="none" aria-hidden="true">
                 <polyline points="0,32 30,28 60,30 90,20 120,22 150,10 180,14 200,4" fill="none" style="stroke:var(--color-green)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
-              <span class="c-hcard-rec">✨ Two deals close this week — land them and October starts ahead too.</span>
+              <span class="c-hcard-rec">Two deals close this week — land them and October starts ahead too.</span>
               <span class="c-hcard-cta">See closing deals <i class="ph ph-arrow-right"></i></span>
             </div>
             <div class="c-card c-card-slide">
@@ -686,7 +686,7 @@
               </div>
               <h4>TrendCafe is crushing it 🚀</h4>
               <span class="c-hcard-tag">via Collab Influencers</span>
-              <span class="c-hcard-rec">✨ 3 of your clients fit the same influencer playbook.</span>
+              <span class="c-hcard-rec">3 of your clients fit the same influencer playbook.</span>
               <span class="c-hcard-cta">Clone this pitch <i class="ph ph-arrow-right"></i></span>
             </div>
             <div class="c-card c-card-slide c-stat c-hcard-team">
@@ -701,7 +701,7 @@
               </div>
               <div class="c-hcard-bar"><div class="c-hcard-bar-fill"></div></div>
               <span class="c-hcard-barlabel">RM120K behind #1</span>
-              <span class="c-hcard-rec">✨ Closing PetronasBiz (RM150K) takes #1.</span>
+              <span class="c-hcard-rec">Closing PetronasBiz (RM150K) takes #1.</span>
               <span class="c-hcard-cta">Draft outreach <i class="ph ph-arrow-right"></i></span>
             </div>
             <div class="c-card c-card-slide c-hcard-ai">

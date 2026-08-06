@@ -35,9 +35,13 @@ promise made explicit on all six cards, not just the AI card.
   icon). The filled orange button stays **AI-card-only** — it preserves the AI
   card's "different in kind" outlier status from the original design.
 - **Recommendation line styling:** visually distinct from card body copy so it
-  reads as "Collabrium speaking": a ✨ lead-in glyph and Neutral-5 at caption
-  size. Not a coloured background, not a border — the accent-as-signal rule
-  stays reserved for the risk/positive/AI accents already in play.
+  reads as "Collabrium speaking": Neutral-5 at caption size. (An earlier ✨
+  lead-in glyph was removed at user request, 2026-08-06.) Not a coloured
+  background, not a border — the accent-as-signal rule stays reserved for the
+  risk/positive/AI accents already in play. The rec/CTA bottom cluster breathes
+  beyond the card's base 12px gap: 20px between the card's visual and the rec
+  line, 12px between rec and CTA (also user-requested, replacing the original
+  tight 4px rec→CTA pairing).
 - **Interaction:** CTAs remain visual-only (no routes/actions exist on this
   static page), same non-goal as the parent spec.
 

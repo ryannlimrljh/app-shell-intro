@@ -129,8 +129,32 @@
   .c-card-slider{overflow-x:auto; overflow-anchor:none; scroll-snap-type:x proximity; cursor:grab; outline:none; -webkit-overflow-scrolling:touch; scrollbar-width:none; margin-right:calc(-1 * var(--page-gutter));}
   .c-card-slider::-webkit-scrollbar{display:none;}
   .c-card-slider.is-dragging{cursor:grabbing; scroll-snap-type:none; user-select:none;}
-  .c-card-slider-track{display:flex; gap:var(--spacing-16); width:max-content; padding:4px 16px var(--spacing-8) 240px; perspective:900px;}
-  .c-card-slide{flex:0 0 340px; width:340px; min-height:400px; scroll-snap-align:start;}
+  .c-card-slider-track{display:flex; gap:0; width:max-content; padding:16px 16px 56px 240px; perspective:900px;}
+  .c-card-slide{flex:0 0 340px; width:340px; min-height:400px; scroll-snap-align:start; position:relative;}
+
+  /* ---- Convex-arc fan layout (per reference: cards splayed like a
+     hand of book covers). Each card carries two custom properties —
+     --arc-rotate (tilt, growing outward from the centre) and --arc-y
+     (parabolic vertical dip, centre highest) — which the entrance-
+     animation transforms below COMPOSE via calc()/var() rather than a
+     separate transform rule, because `transform` doesn't stack across
+     rules: a second transform declaration would silently replace the
+     reveal glide, not add to it. Six cards, and the Pace card
+     (position 3) is the designed anchor of the row, so the apex sits
+     at card 3 (0deg / 0px) with the right side fanning slightly
+     steeper to cover the extra card. Overlap comes from gap:0 on the
+     track plus a negative margin here; z-index stacks so cards tuck
+     behind their neighbour toward the centre (1 < 2 < 3 > 4 > 5 > 6),
+     and the track's top/bottom padding was widened (16px/56px) so the
+     40px dip and the hover scale don't clip against the slider's
+     overflow box. */
+  .c-card-slide + .c-card-slide{margin-left:-26px;}
+  .c-card-slide:nth-child(1){--arc-rotate:-12deg; --arc-y:40px; z-index:1;}
+  .c-card-slide:nth-child(2){--arc-rotate:-6deg;  --arc-y:15px; z-index:2;}
+  .c-card-slide:nth-child(3){--arc-rotate:0deg;   --arc-y:0px;  z-index:6;}
+  .c-card-slide:nth-child(4){--arc-rotate:4deg;   --arc-y:8px;  z-index:5;}
+  .c-card-slide:nth-child(5){--arc-rotate:8deg;   --arc-y:22px; z-index:4;}
+  .c-card-slide:nth-child(6){--arc-rotate:12deg;  --arc-y:40px; z-index:3;}
 
   /* Card entrance — each card fades/glides in independently, not the
      slider as one block, per feedback ("each card randomly move in
@@ -145,8 +169,20 @@
      flat 550ms), more travel (24px vs 16px), and a softer, more
      decelerated ease-out curve (cubic-bezier(.22,1,.36,1) vs the
      nav/h1's snappier cubic-bezier(.16,1,.3,1)). */
-  .c-card-slide{opacity:0; transform:translateY(24px); transition:opacity var(--card-reveal-duration, 650ms) cubic-bezier(.22,1,.36,1), transform var(--card-reveal-duration, 650ms) cubic-bezier(.22,1,.36,1); transition-delay:var(--card-reveal-delay, 0ms);}
-  .c-card-slide.is-revealed{opacity:1; transform:translateY(0);}
+  .c-card-slide{opacity:0; transform:translateY(calc(var(--arc-y, 0px) + 24px)) rotate(var(--arc-rotate, 0deg)); transition:opacity var(--card-reveal-duration, 650ms) cubic-bezier(.22,1,.36,1), transform var(--card-reveal-duration, 650ms) cubic-bezier(.22,1,.36,1); transition-delay:var(--card-reveal-delay, 0ms);}
+  .c-card-slide.is-revealed{opacity:1; transform:translateY(var(--arc-y, 0px)) rotate(var(--arc-rotate, 0deg));}
+
+  /* Hover lift on the fanned cards. .is-settled is added from JS once
+     a card's entrance transition has finished — hover can't just reuse
+     the entrance transition, because its per-card transition-delay
+     (up to ~800ms, set for the staggered reveal) would also delay
+     every hover in/out, making the cards feel unresponsive. Settled
+     cards swap to a short flat ease with no delay. The hovered card
+     also jumps above the whole fan (z-index:10 beats the 1–6 stack
+     above) so its scaled edges aren't clipped by an overlapping
+     neighbour. */
+  .c-card-slide.is-settled{transition:transform .3s ease; transition-delay:0ms;}
+  .c-card-slide.is-settled:hover{transform:translateY(var(--arc-y, 0px)) rotate(var(--arc-rotate, 0deg)) scale(1.05); z-index:10;}
 
   /* ---- Highlight cards: personalized "next best action" content for
      the card slider (see docs/superpowers/specs/2026-08-06-highlight-
@@ -940,6 +976,14 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
         card.style.setProperty('--card-reveal-delay', `${delay.toFixed(0)}ms`);
         card.style.setProperty('--card-reveal-duration', `${duration.toFixed(0)}ms`);
         card.classList.add('is-revealed');
+        // Once the entrance transition ends, mark the card settled so
+        // hover uses the short no-delay transition (see .is-settled in
+        // CSS). transitionend fires per property (opacity + transform),
+        // once:true takes the first; the setTimeout is a fallback in
+        // case the event is missed (e.g. tab backgrounded mid-reveal).
+        const settle = () => card.classList.add('is-settled');
+        card.addEventListener('transitionend', settle, { once: true });
+        setTimeout(settle, delay + duration + 100);
       });
     }
     // Auto-collapse the main nav a couple seconds after it's settled —

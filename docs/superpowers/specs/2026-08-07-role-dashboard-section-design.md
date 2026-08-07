@@ -3,6 +3,9 @@
 **Date:** 2026-08-07
 **Page:** `pages/app-shell-intro.html`
 **Status:** Implemented (plan 2026-08-07-ideal-board-dashboard-section.md)
+**Builds on:** the six-card highlight row (`2026-08-06-highlight-cards-design.md`),
+its recommendation + CTA pass (`2026-08-06-card-recommendations-design.md`), and
+the top-3 focus ribbons (`2026-08-07-top3-focus-ribbons-design.md`).
 
 ## Scope amendment (user, 2026-08-07, after the tracker artifact)
 
@@ -24,9 +27,6 @@ future pass (the CSS `data-view` filtering was proven leak-free in the quick
 views). The tracker page remains the standalone reference implementation; the
 in-page section adapts its panels to the page's existing visual language
 (linked DS stylesheets, not inlined; no embedded font).
-**Builds on:** the six-card highlight row (`2026-08-06-highlight-cards-design.md`),
-its recommendation + CTA pass (`2026-08-06-card-recommendations-design.md`), and
-the top-3 focus ribbons (`2026-08-07-top3-focus-ribbons-design.md`).
 
 ## Goal
 

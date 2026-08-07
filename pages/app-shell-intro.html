@@ -40,7 +40,9 @@
      styling reuses Page header's own subtitle recipe (body2,
      Neutral-5) since there's no other "small label text on canvas"
      precedent to draw from. */
-  .c-canvas-date{position:fixed; top:var(--spacing-24); left:50%; transform:translateX(-50%); z-index:5; margin:0; font-family:var(--font-primary); font-size:var(--text-body2-size); font-weight:var(--text-body2-weight); color:var(--color-neutral-5); pointer-events:none;}
+  .c-canvas-date{position:fixed; top:var(--spacing-24); left:50%; transform:translateX(-50%); z-index:5; margin:0; font-family:var(--font-primary); font-size:var(--text-body2-size); font-weight:var(--text-body2-weight); color:var(--color-neutral-5); pointer-events:none; transition:opacity var(--duration-base) var(--ease-standard);}
+  /* Fixed date predates the page scrolling; it collided with card text at scrollTop ~520, so it fades once the container scrolls. */
+  .c-canvas-date.is-scrolled-away{opacity:0; pointer-events:none;}
 
   /* Content region — personalized greeting. Centered, unlike Page
      header (left-aligned title/subtitle, App Shell's documented
@@ -146,6 +148,7 @@
     .c-shell-content{scroll-behavior:auto;}
     .c-dash .c-dash-w{opacity:1; transform:none; transition:none;}
     .c-canvas-askbox{transition:none;}
+    .c-canvas-date{transition:none;}
   }
   /* ── Ideal-board grid + panels. 12-col grid, spans set per panel.
      Panels are stock DS .c-card (padding/radius/shadow all its own);
@@ -2508,8 +2511,18 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
         askBox.classList.remove('is-parked');
       }
     });
-  }, { root: shellContent, threshold: 0.12 }); // assumes the section stays < ~8x the container height, else 12% is never visible at once
+  }, { root: shellContent, threshold: 0 }); // threshold 0 = any-pixel semantics: the section is many viewports tall on narrow screens (375×667 renders it ~8,000px, max ratio ~0.08), so any fractional threshold is unreachable there. isIntersecting flips true at first pixel (reveal + park) and false only when fully out of view (unpark).
   io.observe(dash);
+
+  // Date banner — fade once the container scrolls. WHY: the fixed date predates
+  // the page scrolling at all; once Section 2 made the container scroll, it
+  // floated over card text (collision at scrollTop ~520), so hide it off-top.
+  const canvasDate = document.querySelector('.c-canvas-date');
+  if (canvasDate) {
+    shellContent.addEventListener('scroll', () => {
+      canvasDate.classList.toggle('is-scrolled-away', shellContent.scrollTop > 40);
+    }, { passive: true });
+  }
 })();
 
 // ── Ideal-board charts. Fixed-viewBox SVG built as strings — zero layout
@@ -2521,6 +2534,8 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
 // (a 3px threshold let visually-jammed pairs through; see the tracker's
 // history). Data must stay entity-free — txt() does no escaping, so a name
 // containing & or < would truncate the SVG.
+// Diverged copy of the chart module in pages/leadership-dashboard-tracker.html
+// (ids d- vs c-prefixed, colours DS tokens vs --art-*): port fixes both ways.
 (function () {
   var C = { ink:'var(--color-neutral-9)', mut:'var(--color-neutral-5)', fnt:'var(--color-neutral-4)',
             rule:'var(--color-neutral-3)', good:'var(--color-green)', warn:'var(--color-amber)',

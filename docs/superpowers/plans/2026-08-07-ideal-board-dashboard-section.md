@@ -216,6 +216,8 @@ git commit -m "feat: dashboard section shell — anchor, smooth scroll, reveal o
 
 ### Task 2: Panels markup, answer strip, provenance system, grid
 
+> Note: figures (74.5/222.7/17.3) and the toggle's tablist semantics in this task body were amended during execution — see Deviations.
+
 **Files:**
 - Modify: `pages/app-shell-intro.html` (CSS after Task 1's block; section inner markup)
 
@@ -522,6 +524,8 @@ git commit -m "feat: ideal-board panels — answer strip, provenance dots, table
 ---
 
 ### Task 3: The nine chart renderers
+
+> Note: figures (74.5/222.7/17.3) and the toggle's tablist semantics in this task body were amended during execution — see Deviations.
 
 **Files:**
 - Modify: `pages/app-shell-intro.html` (script tail, after the observer IIFE)
@@ -991,3 +995,15 @@ Recorded during subagent-driven execution, 2026-08-07/08:
 4. **Churn-table thead approach:** `.c-dash-vh` applied to the `<thead>`
    element directly — verified it collapses out of flow with zero layout shift
    while exposing headers to the accessibility tree.
+5. **Holistic-review fixes (2026-08-08):** the reveal/parking observer's
+   `threshold: 0.12` could never fire on phone portrait (at 375×667 the
+   single-column section is ~8,000px tall, max intersection ratio ~0.08) —
+   changed to `threshold: 0` (any-pixel semantics), which also improves
+   parking: the ask box stays parked while any of the section is visible and
+   unparks only when it fully leaves. The fixed date banner (`.c-canvas-date`)
+   now fades via `.is-scrolled-away` once the container scrolls past 40px
+   (it predates the page scrolling and collided with card text at
+   scrollTop ~520; instant under reduced motion). Both chart modules
+   (`pages/app-shell-intro.html`, `pages/leadership-dashboard-tracker.html`)
+   gained header pointers naming each other as diverged copies: port fixes
+   both ways.

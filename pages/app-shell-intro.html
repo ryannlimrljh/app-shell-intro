@@ -475,7 +475,17 @@
      cascade, the hover tilt, and the modal swing with no JS of its own.
      It has to be a DIRECT child of .c-card-slide for that to hold (the
      skeleton rules select with `>`), and it takes a slot in the reveal
-     stagger's --content-delay sequence like any other child.
+     stagger's --content-delay sequence like any other child. It is
+     deliberately the FIRST child: the rank then precedes the card's own
+     label in reading order, which is what a screen-reader user wants,
+     and the flag surfaces first as the card resolves. The cost is that
+     every later child's --content-delay shifts one 70ms step — well
+     under the page's own deliberate timing jitter (per-card reveal
+     jitter is +/-50ms and the skeleton hold is randomised across
+     550ms), so flagged and unflagged cards do not read as differently
+     timed. The "of 3" in each aria-label is hand-maintained across the
+     three cards: flag a fourth and all of them have to change in
+     lockstep or the count silently lies.
      GEOMETRY (do not re-tune by eye): the band's usable text length is
      the CHORD it cuts across the corner box, not the box's width — for
      a box of side S whose centreline meets each edge at distance `a`
@@ -843,7 +853,7 @@
       <div class="c-shell-content">
         <div class="c-canvas-greeting">
           <h1 id="greetingH1"><span id="greetingText"></span> <span aria-hidden="true">🌻</span>.</h1>
-          <p id="greetingSubtitle">Here's what needs your eyes across the business today.</p>
+          <p id="greetingSubtitle">Here's what needs your eyes today — I've flagged your top 3.</p>
         </div>
         <div class="c-card-slider" id="cardSlider" tabindex="0" role="region" aria-roledescription="carousel" aria-label="Highlights" style="margin-top:var(--spacing-32)">
           <div class="c-card-slider-track">

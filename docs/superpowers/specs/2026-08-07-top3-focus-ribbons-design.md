@@ -2,7 +2,7 @@
 
 **Date:** 2026-08-07
 **Page:** `pages/app-shell-intro.html`
-**Status:** Approved by user, pending implementation plan
+**Status:** Implemented (plan 2026-08-07-top3-focus-ribbons.md)
 **Builds on:** the six-card highlight row (`2026-08-06-highlight-cards-design.md`) and
 its recommendation + CTA pass (`2026-08-06-card-recommendations-design.md`).
 

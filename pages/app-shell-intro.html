@@ -137,13 +137,15 @@
      transition-delay that .is-revealed carries for the load choreography —
      it is added on the observer's FIRST fire (necessarily after load), and
      its rule sits after .is-revealed's so the source-order tie-break wins.
-     (2) pointer-events:none so the invisible box never blocks table rows. */
+     (2) pointer-events:none so the invisible box never blocks table rows.
+     (3) the same source-order tie-break makes .is-parked's opacity:0 beat
+     .is-revealed's opacity:1 — keep both parking rules after .is-revealed. */
   .c-canvas-askbox.is-settled{transition-delay:0ms;}
   .c-canvas-askbox.is-parked{opacity:0; transform:translate(-50%, 24px); pointer-events:none;}
   @media (prefers-reduced-motion: reduce){
     .c-shell-content{scroll-behavior:auto;}
     .c-dash .c-dash-w{opacity:1; transform:none; transition:none;}
-    .c-canvas-askbox.is-parked{transition:none;}
+    .c-canvas-askbox{transition:none;}
   }
   /* Ambient backlight — deliberately off-token (the DS has no gradient
      token; these are the source file's literal pastels). Two layers,
@@ -2266,7 +2268,7 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
   const dash = document.getElementById('dashboard');
   const askBox = document.getElementById('askBox');
   if (!shellContent || !dash || !('IntersectionObserver' in window)) {
-    if (dash) dash.classList.add('is-revealed'); // ancient-browser fallback: just show it
+    if (dash) dash.classList.add('is-revealed'); // ancient-browser fallback: just show it (the ask box then never parks and overlaps the section — accepted degradation; any browser running this module has IO)
     return;
   }
   const io = new IntersectionObserver((entries) => {
@@ -2278,7 +2280,7 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
         askBox.classList.remove('is-parked');
       }
     });
-  }, { root: shellContent, threshold: 0.12 });
+  }, { root: shellContent, threshold: 0.12 }); // assumes the section stays < ~8x the container height, else 12% is never visible at once
   io.observe(dash);
 })();
 </script>

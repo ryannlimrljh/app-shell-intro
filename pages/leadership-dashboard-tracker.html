@@ -1297,27 +1297,27 @@ table.d tr.tot td{font-weight:900; border-top:1.5px solid var(--art-ink); border
 
     <div class="w s7" data-mode-only="next"><div class="p">
       <div class="ph"><div><h3 class="pt">Which reps are actually at risk</h3>
-        <p class="sub">Attainment today against pipeline cover for the rest of the year</p></div>
+        <p class="sub">All 14 reps — attainment today against pipeline cover for the rest of the year</p></div>
         <span class="prov-s"><i class="dot dot-c"></i>source 3 <i class="dot dot-p" style="margin-left:7px"></i>pipeline</span></div>
-      <div class="cw"><svg id="cQuad" viewBox="0 0 640 300" width="100%" role="img" aria-label="Quadrant chart of sales rep attainment versus pipeline coverage"></svg></div>
+      <div class="cw"><svg id="cQuad" viewBox="0 0 640 312" width="100%" role="img" aria-label="Quadrant chart of sales rep attainment versus pipeline coverage"></svg></div>
       <p class="note"><b>This settles the Daniel question, and the answer is the worse of the two.</b> He is at 85% <em>and</em> carries only 0.8× cover — behind with a thin pipeline, so it is a prospecting problem, not slow closes. Coaching him on closing technique would have been the wrong quarter's work. Aisyah is the mirror image: ahead, with 2.4× cover behind her.</p>
     </div></div>
 
     <!-- ── Inventory + margin ── -->
     <div class="w s6" data-mode-only="next"><div class="p">
       <div class="ph"><div><h3 class="pt">Sold against what we had to sell</h3>
-        <p class="sub">Fill rate and target attainment, side by side</p></div>
+        <p class="sub">Sold against sellable, with target attainment beneath</p></div>
         <span class="prov-s"><i class="dot dot-c"></i>source 2 <i class="dot dot-p" style="margin-left:7px"></i>inventory</span></div>
-      <div class="cw"><svg id="cFill" viewBox="0 0 480 250" width="100%" role="img" aria-label="Fill rate versus target attainment by media type"></svg></div>
-      <p class="note"><b>Two lines that move together mean demand, not capacity.</b> Digital sold 62% of its inventory and hit 75% of target — the shelves were full, so it is a demand problem. Addressable is the exception: 97% sold, so its 109% is <b>capped by supply</b>. Sell Digital harder; buy more addressable.</p>
+      <div class="cw"><svg id="cFill" viewBox="0 0 480 324" width="100%" role="img" aria-label="Fill rate versus target attainment by media type"></svg></div>
+      <p class="note"><b>The solid bar is what we sold; the pale remainder is shelf we never filled.</b> Digital sold 62% of its inventory and reached 75% of target — the stock was there, so it is a demand problem. Addressable is the opposite at 97% sold out, so its 109% is <b>capped by supply</b>. Sell Digital harder; buy more addressable. Across all four lines we sold RM 148.2M of RM 174.0M sellable.</p>
     </div></div>
 
     <div class="w s6" data-mode-only="next"><div class="p">
       <div class="ph"><div><h3 class="pt">Revenue against contribution</h3>
-        <p class="sub">Bubble size is gross profit — the ranking that matters</p></div>
+        <p class="sub">14 accounts — bubble size is gross profit, the ranking that matters</p></div>
         <span class="prov-s"><i class="dot dot-c"></i>source 4 <i class="dot dot-p" style="margin-left:7px"></i>margin</span></div>
-      <div class="cw"><svg id="cBubble" viewBox="0 0 480 250" width="100%" role="img" aria-label="Scatter of advertiser revenue against margin percentage, sized by contribution"></svg></div>
-      <p class="note"><b>The league table inverts.</b> ZUS brings a third of Lazada's revenue at 41% margin and delivers 78% of its contribution. On spend, Lazada is the quarter's win; on profit they are near-equals — and the SME segment stops reading as small change.</p>
+      <div class="cw"><svg id="cBubble" viewBox="0 0 500 274" width="100%" role="img" aria-label="Scatter of advertiser revenue against margin percentage, sized by contribution"></svg></div>
+      <p class="note"><b>Two of the four biggest profit contributors are sub-RM 1M accounts.</b> 99 Speedmart bills RM 0.85M at 44% margin and out-earns Lazada's RM 1.80M on contribution. The whole green band — 99 Speedmart, Secret Recipe, ZUS and Tealive just beneath it — sits in the bottom-left of any spend-ranked report and would never be prioritised. Revenue rank and profit rank are different league tables.</p>
     </div></div>
 
     <!-- ── Churn + concentration ── -->
@@ -1538,7 +1538,7 @@ table.d tr.tot td{font-weight:900; border-top:1.5px solid var(--art-ink); border
     s+=txt(X(7)+5,T+9,'PROJECTED',{s:8.5,w:800,f:C.fnt,st:'letter-spacing:.1em'});
     // endpoint callouts
     s+=txt(R+5,Y(240)-5,'plan 240.0',{s:9.5,w:800,f:C.ink});
-    s+=txt(R+5,Y(222.7)+2,'weighted',{s:9,w:700,f:C.pur});
+    s+=txt(R+5,Y(222.7)-2,'weighted',{s:9,w:700,f:C.pur});
     s+=txt(R+5,Y(222.7)+13,'222.7',{s:10.5,w:900,f:C.pur});
     for(var x=0;x<12;x+=1){ s+=txt(X(x),B+15,M[x],{s:9,f:C.fnt,a:'middle'}); }
     s+=ln(L,B,R,B,{c:C.rule,w:1.5});
@@ -1595,73 +1595,136 @@ table.d tr.tot td{font-weight:900; border-top:1.5px solid var(--art-ink); border
 
   /* ── 4 · Rep risk quadrant ────────────────────────────── */
   (function(){
-    var reps=[{n:'Aisyah Rahman',x:110,y:2.4,r:false},{n:'Bryan Wong',x:105,y:1.9,r:false},
-              {n:'Siti Marina',x:96,y:1.4,r:false},{n:'Daniel Tan',x:85,y:0.8,r:true}];
-    var L=52,R=470,T=24,B=246;
-    var X=function(v){return L+((v-78)/(118-78))*(R-L);}, Y=function(v){return B-((v-0.4)/(2.8-0.4))*(B-T);};
+    var reps=[
+      {n:'Aisyah Rahman',x:118,y:2.5},{n:'Kavitha Raj',x:112,y:2.2},
+      {n:'Bryan Wong',x:106,y:1.9},{n:'Wei Ling Ho',x:101,y:1.75},
+      {n:'Hafiz Osman',x:121,y:1.45},{n:'Nurul Izzah',x:108,y:1.15},
+      {n:'Arvind Kumar',x:103,y:0.85},{n:'Siti Marina',x:97,y:1.35},
+      {n:'Mei Chen',x:88,y:2.4},{n:'Faizal Hamid',x:92,y:2.05},
+      {n:'Zarina Yusof',x:74,y:1.85},{n:'Jason Lim',x:78,y:1.1},
+      {n:'Priya Menon',x:95,y:0.65},{n:'Daniel Tan',x:85,y:0.8,r:true}];
+    var L=54,R=486,T=26,B=266;
+    var X=function(v){return L+((v-70)/(126-70))*(R-L);}, Y=function(v){return B-((v-0.3)/(2.8-0.3))*(B-T);};
     var s='';
-    s+=rect(X(78),T,X(100)-X(78),Y(1.5)-T,{f:C.warn,o:.06,r:0});
-    s+=rect(X(78),Y(1.5),X(100)-X(78),B-Y(1.5),{f:C.crit,o:.09,r:0});
+    s+=rect(X(70),T,X(100)-X(70),Y(1.5)-T,{f:C.warn,o:.06,r:0});
+    s+=rect(X(70),Y(1.5),X(100)-X(70),B-Y(1.5),{f:C.crit,o:.09,r:0});
     s+=rect(X(100),T,R-X(100),Y(1.5)-T,{f:C.good,o:.08,r:0});
     s+=ln(X(100),T,X(100),B,{c:C.fnt,d:'3 4'});
     s+=ln(L,Y(1.5),R,Y(1.5),{c:C.fnt,d:'3 4'});
     s+=ln(L,B,R,B,{c:C.rule,w:1.5}); s+=ln(L,T,L,B,{c:C.rule,w:1.5});
-    [80,90,100,110].forEach(function(v){s+=txt(X(v),B+15,v+'%',{s:9,f:C.fnt,a:'middle'});});
+    [80,90,100,110,120].forEach(function(v){s+=txt(X(v),B+15,v+'%',{s:9,f:C.fnt,a:'middle'});});
     [0.5,1.0,1.5,2.0,2.5].forEach(function(v){s+=txt(L-7,Y(v)+3.5,v.toFixed(1)+'×',{s:9,f:C.fnt,a:'end'});});
     s+=txt(L+(R-L)/2,B+31,'Attainment today',{s:10,w:800,f:C.mut,a:'middle'});
-    s+='<text transform="translate(15,'+((T+B)/2)+') rotate(-90)" font-size="10" font-weight="800" fill="'+C.mut+'" text-anchor="middle">Pipeline cover</text>';
+    s+='<text transform="translate(16,'+((T+B)/2)+') rotate(-90)" font-size="10" font-weight="800" fill="'+C.mut+'" text-anchor="middle">Pipeline cover</text>';
     s+=txt(X(101),T+13,'AHEAD · WELL COVERED',{s:8,w:800,f:C.good,st:'letter-spacing:.08em'});
-    s+=txt(X(79),B-8,'AT RISK · BEHIND AND THIN',{s:8,w:800,f:C.crit,st:'letter-spacing:.08em'});
+    s+=txt(X(70.6),B-8,'AT RISK · BEHIND AND THIN',{s:8,w:800,f:C.crit,st:'letter-spacing:.08em'});
+    s+=txt(X(70.6),T+13,'BEHIND · COVERED',{s:8,w:800,f:C.warn,st:'letter-spacing:.08em'});
+
+    // label placement: try right, then left, then above, then below — first fit wins
+    var placed=[{x:X(101)-2,y:T+4,w:120,h:13},{x:X(70.6)-2,y:B-19,w:140,h:13},{x:X(70.6)-2,y:T+4,w:96,h:13}];
+    function free(bx,by,bw,bh){
+      return !placed.some(function(q){
+        return !(bx+bw < q.x-1 || bx > q.x+q.w+1 || by+bh < q.y-1 || by > q.y+q.h+1);
+      }) && bx>2 && bx+bw<636 && by>2 && by+bh<B+34;
+    }
     reps.forEach(function(p){
-      var col=p.r?C.crit:C.der, cx=X(p.x), cy=Y(p.y);
-      if(p.r) s+='<circle cx="'+cx.toFixed(1)+'" cy="'+cy.toFixed(1)+'" r="14" fill="'+C.crit+'" opacity="0.16"/>';
-      s+='<circle cx="'+cx.toFixed(1)+'" cy="'+cy.toFixed(1)+'" r="7" fill="'+col+'"/>';
-      s+=txt(cx+12,cy-2,p.n,{s:10.5,w:800,f:p.r?C.crit:C.ink});
-      s+=txt(cx+12,cy+11,p.x+'% · '+p.y.toFixed(1)+'× cover',{s:9,w:600,f:C.fnt});
+      var cx=X(p.x), cy=Y(p.y), col=p.r?C.crit:C.der, rad=p.r?6:4.2;
+      if(p.r) s+='<circle cx="'+cx.toFixed(1)+'" cy="'+cy.toFixed(1)+'" r="12" fill="'+C.crit+'" opacity="0.15"/>';
+      s+='<circle cx="'+cx.toFixed(1)+'" cy="'+cy.toFixed(1)+'" r="'+rad+'" fill="'+col+'"/>';
+      var fs=p.r?9.5:8.4, h=p.r?22:11;
+      var w=Math.max(p.n.length*fs*0.55, p.r?78:0)+2;
+      var cands=[[cx+rad+4,cy-h/2],[cx-rad-4-w,cy-h/2],
+                 [cx-w/2,cy-rad-h-2],[cx-w/2,cy+rad+2],
+                 [cx+rad+4,cy-h-3],[cx+rad+4,cy+3],
+                 [cx-rad-4-w,cy-h-3],[cx-rad-4-w,cy+3]];
+      for(var i=0;i<cands.length;i++){
+        if(free(cands[i][0],cands[i][1],w,h)){
+          placed.push({x:cands[i][0],y:cands[i][1],w:w,h:h});
+          s+=txt(cands[i][0],cands[i][1]+8.5,p.n,{s:fs,w:p.r?900:700,f:p.r?C.crit:C.ink});
+          if(p.r) s+=txt(cands[i][0],cands[i][1]+19.5,'85% · 0.8× cover',{s:8.6,w:700,f:C.crit});
+          break;
+        }
+      }
     });
+    s+=txt(R+6,T+4,'14 reps',{s:9,w:800,f:C.fnt});
     set('cQuad',s);
   })();
 
   /* ── 5 · Fill vs attainment ───────────────────────────── */
   (function(){
-    var d=[{l:'TV',f:90,a:97},{l:'Addressable',f:97,a:109},{l:'Radio',f:80,a:88},{l:'Digital',f:62,a:75}];
-    var L=92,W=306,top=34,rh=48,s='';
-    s+=txt(L,16,'0',{s:9,f:C.fnt,a:'middle'});
-    [25,50,75,100].forEach(function(v){ s+=txt(L+(v/110)*W,16,v+'%',{s:9,f:C.fnt,a:'middle'}); s+=ln(L+(v/110)*W,22,L+(v/110)*W,top+rh*4-14,{d:'3 5'}); });
+    var d=[{l:'TV',cap:88.0,sold:79.4,fill:90,att:97},
+           {l:'Addressable',cap:27.0,sold:26.1,fill:97,att:109},
+           {l:'Radio',cap:34.0,sold:27.2,fill:80,att:88},
+           {l:'Digital',cap:25.0,sold:15.5,fill:62,att:75}];
+    var L=14,W=440,max=88,top=30,rh=58,s='';
+    s+=txt(L,16,'SELLABLE INVENTORY',{s:8.5,w:800,f:C.fnt,st:'letter-spacing:.1em'});
+    s+=txt(L+W,16,'RM 174.0M CAPACITY',{s:8.5,w:800,f:C.fnt,a:'end',st:'letter-spacing:.06em'});
     d.forEach(function(r,i){
-      var y=top+rh*i;
-      s+=txt(L-9,y+11,r.l,{s:11,w:800,f:C.ink,a:'end'});
-      s+=rect(L,y,(r.f/110)*W,13,{f:C.der,r:2});
-      s+=txt(L+(r.f/110)*W+6,y+11,r.f+'% sold',{s:9.5,w:800,f:C.der});
-      s+=rect(L,y+17,(r.a/110)*W,13,{f:'none',s:r.a>=100?C.good:C.warn,sw:1.6,r:2});
-      s+=txt(L+(r.a/110)*W+6,y+28,r.a+'% of target',{s:9.5,w:800,f:r.a>=100?C.good:C.warn});
+      var y=top+rh*i, cw=(r.cap/max)*W, sw=(r.sold/max)*W;
+      s+=rect(L,y,cw,30,{f:C.pur,o:.20,r:3});
+      s+=rect(L,y,sw,30,{f:C.der,r:3});
+      s+=txt(L+8,y+20,r.l,{s:11.5,w:800,f:'#fff'});
+      if(sw>110) s+=txt(L+sw-8,y+20,r.sold.toFixed(1),{s:11.5,w:900,f:'#fff',a:'end'});
+      else       s+=txt(L+sw+7,y+20,r.sold.toFixed(1),{s:11.5,w:900,f:C.der});
+      s+=txt(L,y+45,r.fill+'% of '+r.cap.toFixed(1)+' sellable',{s:10,w:700,f:C.der});
+      s+=txt(L+156,y+45,r.att+'% of target',{s:10,w:800,f:r.att>=100?C.good:C.warn});
     });
-    var ly=top+rh*4-4;
-    s+=rect(L,ly,11,11,{f:C.der,r:2}); s+=txt(L+17,ly+9.5,'Fill rate — sold ÷ sellable',{s:9.5,w:600,f:C.mut});
-    s+=rect(L+186,ly,11,11,{f:'none',s:C.warn,sw:1.6,r:2}); s+=txt(L+203,ly+9.5,'Target attainment',{s:9.5,w:600,f:C.mut});
+    var y2=top+rh*3+62;
+    s+=ln(L,y2,L+W,y2,{c:C.rule,w:1.2});
+    s+=txt(L,y2+18,'Sold',{s:11,w:800,f:C.ink});
+    s+=txt(L+W,y2+18,'RM 148.2M · 85% fill',{s:12,w:900,f:C.der,a:'end'});
+    s+=rect(L,y2+28,11,11,{f:C.der,r:2}); s+=txt(L+17,y2+37.5,'Sold',{s:9.5,w:600,f:C.mut});
+    s+=rect(L+62,y2+28,11,11,{f:C.pur,o:.20,r:2}); s+=txt(L+79,y2+37.5,'Unsold capacity',{s:9.5,w:600,f:C.mut});
     set('cFill',s);
   })();
 
   /* ── 6 · Revenue vs contribution ──────────────────────── */
   (function(){
-    var d=[{n:'Lazada MY',x:1.8,y:18,c:0.32},{n:'ZUS Coffee',x:0.6,y:41,c:0.25},
-           {n:'MyKasih',x:0.9,y:22,c:0.20},{n:'Farm Fresh',x:0.5,y:34,c:0.17}];
-    var L=54,R=430,T=26,B=200;
-    var X=function(v){return L+((v-0.3)/(2.0-0.3))*(R-L);}, Y=function(v){return B-((v-13)/(46-13))*(B-T);};
+    var d=[{n:'Maggi Malaysia',x:2.10,y:26},{n:'Shopee',x:1.95,y:16},
+           {n:'Lazada MY',x:1.80,y:18},{n:'Petronas Retail',x:1.55,y:21},
+           {n:'Maxis',x:1.40,y:29},{n:'Grab MY',x:1.10,y:24},
+           {n:'MyKasih',x:0.90,y:22},{n:'99 Speedmart',x:0.85,y:44},
+           {n:'Watsons MY',x:0.75,y:31},{n:'Mamee',x:0.65,y:36},
+           {n:'ZUS Coffee',x:0.60,y:41},{n:'Farm Fresh',x:0.50,y:34},
+           {n:'Tealive',x:0.45,y:38},{n:'Secret Recipe',x:0.35,y:46}];
+    d.forEach(function(p){ p.c = +(p.x*p.y/100).toFixed(3); });
+    var L=56,R=440,T=30,B=228;
+    var X=function(v){return L+((v-0.20)/(2.30-0.20))*(R-L);}, Y=function(v){return B-((v-12)/(50-12))*(B-T);};
     var s='';
-    [20,30,40].forEach(function(v){ s+=ln(L,Y(v),R,Y(v),{d:'3 5'}); s+=txt(L-7,Y(v)+3.5,v+'%',{s:9,f:C.fnt,a:'end'}); });
-    [0.5,1.0,1.5,2.0].forEach(function(v){ s+=txt(X(v),B+15,'RM '+v.toFixed(1)+'M',{s:9,f:C.fnt,a:'middle'}); });
+    [20,30,40,50].forEach(function(v){ s+=ln(L,Y(v),R,Y(v),{d:'3 5'}); s+=txt(L-7,Y(v)+3.5,v+'%',{s:9,f:C.fnt,a:'end'}); });
+    [0.5,1.0,1.5,2.0].forEach(function(v){ s+=txt(X(v),B+15,v.toFixed(1),{s:9,f:C.fnt,a:'middle'}); s+=ln(X(v),T,X(v),B,{d:'3 5'}); });
     s+=ln(L,B,R,B,{c:C.rule,w:1.5}); s+=ln(L,T,L,B,{c:C.rule,w:1.5});
-    s+=txt((L+R)/2,B+31,'Revenue',{s:10,w:800,f:C.mut,a:'middle'});
-    s+='<text transform="translate(16,'+((T+B)/2)+') rotate(-90)" font-size="10" font-weight="800" fill="'+C.mut+'" text-anchor="middle">Gross margin</text>';
+    s+=txt((L+R)/2,B+31,'Revenue, RM million',{s:10,w:800,f:C.mut,a:'middle'});
+    s+='<text transform="translate(17,'+((T+B)/2)+') rotate(-90)" font-size="10" font-weight="800" fill="'+C.mut+'" text-anchor="middle">Gross margin</text>';
+    s+=txt(R+4,T-14,'Bubble = gross profit',{s:9,w:600,f:C.fnt,a:'end'});
+    // high-margin band callout
+    s+=rect(L,T,R-L,Y(40)-T,{f:C.good,o:.06,r:0});
+    s+=txt(R-6,Y(40)-6,'40%+ MARGIN',{s:8,w:800,f:C.good,a:'end',st:'letter-spacing:.09em'});
+
+    var placed=[];
+    function free(bx,by,bw,bh){
+      return !placed.some(function(q){ return !(bx+bw<q.x-1||bx>q.x+q.w+1||by+bh<q.y-1||by>q.y+q.h+1); })
+             && bx>2 && bx+bw<496 && by>2 && by+bh<B+30;
+    }
+    d.sort(function(a,b){return b.c-a.c;});
     d.forEach(function(p){
-      var r=10+p.c*46, hi=p.n==='ZUS Coffee';
-      s+='<circle cx="'+X(p.x).toFixed(1)+'" cy="'+Y(p.y).toFixed(1)+'" r="'+r.toFixed(1)+'" fill="'+(hi?C.good:C.pur)+'" opacity="'+(hi?.3:.22)+'"/>';
-      s+='<circle cx="'+X(p.x).toFixed(1)+'" cy="'+Y(p.y).toFixed(1)+'" r="'+r.toFixed(1)+'" fill="none" stroke="'+(hi?C.good:C.pur)+'" stroke-width="1.8"/>';
-      s+=txt(X(p.x),Y(p.y)-r-6,p.n,{s:10,w:800,f:hi?C.good:C.ink,a:'middle'});
-      s+=txt(X(p.x),Y(p.y)+3.5,p.c.toFixed(2),{s:9.5,w:900,f:hi?C.good:C.pur,a:'middle'});
+      var hi=p.y>=40, cx=X(p.x), cy=Y(p.y), r=7+p.c*34;
+      var col=hi?C.good:C.pur;
+      s+='<circle cx="'+cx.toFixed(1)+'" cy="'+cy.toFixed(1)+'" r="'+r.toFixed(1)+'" fill="'+col+'" opacity="'+(hi?.30:.20)+'"/>';
+      s+='<circle cx="'+cx.toFixed(1)+'" cy="'+cy.toFixed(1)+'" r="'+r.toFixed(1)+'" fill="none" stroke="'+col+'" stroke-width="1.6"/>';
+      if(r>=15){ s+=txt(cx,cy+3.4,p.c.toFixed(2),{s:9,w:900,f:col,a:'middle'});
+                 placed.push({x:cx-15,y:cy-6,w:30,h:13}); }
+      var w=p.n.length*4.9+2, h=10.5;
+      var cands=[[cx-w/2,cy-r-h-2],[cx+r+4,cy-h/2],[cx-r-4-w,cy-h/2],[cx-w/2,cy+r+2],
+                 [cx+r+4,cy-h-3],[cx+r+4,cy+3],[cx-r-4-w,cy-h-3],[cx-r-4-w,cy+3]];
+      for(var i=0;i<cands.length;i++){
+        if(free(cands[i][0],cands[i][1],w,h)){
+          placed.push({x:cands[i][0],y:cands[i][1],w:w,h:h});
+          s+=txt(cands[i][0],cands[i][1]+8,p.n,{s:8.6,w:hi?800:700,f:hi?C.good:C.ink});
+          break;
+        }
+      }
     });
-    s+=txt(R,T-10,'Bubble = gross profit, RM million',{s:9,w:600,f:C.fnt,a:'end'});
     set('cBubble',s);
   })();
 

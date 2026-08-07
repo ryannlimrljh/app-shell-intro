@@ -95,6 +95,65 @@ Studio/Sales/Influencers/Content. The app switcher's engine axis therefore does
   rounds** — no creator, campaign, or production data exists. These survive only
   inside the two explicitly illustrative roles.
 
+## Answering the leadership review
+
+A leadership review of the first quick view asked for seven things. Six of the
+seven need data that does not exist. Building them anyway would repeat the
+mistake already retracted above, so the response splits in two: build what the
+six datasets genuinely support, and turn the rest into a ranked ask that ships
+**as a panel in the dashboard itself**.
+
+**Built, because it is derivable** (each carries a `Derived` badge naming its
+sources, so a reader can tell computed figures from pulled ones):
+
+1. **Is the gap widening or closing?** Monthly shortfall against target. Answers
+   the review's central question — blip or trend — without pipeline data. The
+   finding is real: the monthly miss shrinks from RM 2.4M in January to RM 0.2M
+   in August, so the *cumulative* gap grows to RM 9.4M while the trend is
+   recovery. A single 94% tile cannot show that.
+2. **Projected year-end.** Two run-rates — trailing-8 (RM 222.3M) and last-3-month
+   (RM 228.1M) — against a RM 240.0M full-year target. Labelled
+   **run-rate projection, not a pipeline forecast**. The *spread between the two
+   rates* is the signal, and it corroborates the gap trend independently.
+3. **Concentration risk.** Segment share (68% Key & Agency), tier share (61%
+   Tier 1), and lapse concentration (top 2 = 41% of all lapsed). Explicitly
+   labelled as **structural, not account-level** — no dataset gives total revenue
+   per advertiser, so "top 5 clients = X%" stays unanswerable. Naming that limit
+   on the widget is the point.
+4. **Lapse timing.** All four top lapses went quiet in Q1. There are no reason
+   codes, but the clustering is itself a lead: four unrelated advertisers lapsing
+   in one quarter points at a common cause rather than four account problems.
+   Presented as a hypothesis to test, never as a cause.
+
+**Ranked ask, shipped as a panel.** Ordered by how many open questions each
+source closes, not by how loudly it was requested:
+
+| # | Source needed | Why it ranks here |
+|---|---|---|
+| 1 | **Pipeline by deal stage** | One source, three answers: real forecast, rep pipeline health, and certainty on blip-vs-trend. Highest leverage available. |
+| 2 | **Margin / gross profit by advertiser and product** | Changes which revenue is worth chasing, and makes concentration meaningful — concentrated *and* low-margin is materially worse than concentrated. |
+| 3 | **Sellable inventory vs sold** (TV/Radio/Digital) | Resolves the loudest anomaly on the board: Digital at 75% is either a demand problem or a supply/rate-card constraint, which need opposite responses. |
+| 4 | **Churn reason codes** | Turns the lapsed list from a bill into a win-back playbook. |
+| 5 | **Total revenue by advertiser** | Smallest ask, largest unlock per unit of effort — completes account concentration. |
+| 6 | **Market adspend benchmark** | Says whether +6.4% beats the market. Ranks last only on feasibility: the one item needing a purchased third-party source. |
+
+Ask 1 is worth pressing hardest precisely because it is not one widget's input —
+it converts three existing widgets from rear-view to forward-looking.
+
+**Arithmetic must reconcile.** The review would have caught a real defect in the
+first quick view: the monthly chart summed to RM 125.7M while the stat row claimed
+RM 148.2M. Every figure now ties — months sum to 148.2, media actuals sum to
+148.2, target 157.6, and the cumulative monthly gap lands on exactly −9.4,
+matching the "RM 9.4M behind plan" tile. This is a verification item, not a
+nicety: a leadership audience checks totals, and one broken sum discredits the
+whole board.
+
+**`AA` is labelled in full** as *Addressable advertising*, not abbreviated. The
+review noted the ambiguity changes interpretation, and it does: as a newer
+targeted product, its 109% is the only line beating plan while linear TV and
+Radio trail — actionable. As a channel name, the same number would read as
+ordinary mix shift.
+
 ## Architecture
 
 One container, one attribute, no JavaScript for content:
@@ -139,6 +198,9 @@ tagged block.
 | Widget | Component | Source |
 |---|---|---|
 | Stat row: Gross revenue YTD · **Net new business** · Target attainment · Tier 1 share | `.c-stat`, hero tile for net new | ①, ④−⑤, ②, ⑥ |
+| **Is the gap widening or closing?** — monthly shortfall vs target | inline SVG bars | ① + ② *(derived)* |
+| **Projected year-end** — two run-rates vs full-year target | `.c-stat` pair + progress track | ① + ② *(derived)* |
+| **Concentration risk** — segment, tier and lapse concentration | `.c-chartmap`-style tracks | ③ + ⑤ + ⑥ *(derived)* |
 | Gross revenue by month vs last year | inline SVG, 2 series | ① |
 | Target vs actual by media | `.c-table` + `td.num` | ② |
 | Top 20 new advertisers | `.c-datatable` + `td.num` | ④ |
@@ -258,3 +320,10 @@ on this page — plus layout-space measurement, since transforms are often activ
 7. Console clean; reduced-motion branch verified.
 8. Section 1 unchanged — re-verify the six cards still measure 400px and the
    ribbons still read.
+9. **Arithmetic audit.** Assert in-page that the monthly series sums to the YTD
+   tile, that media actuals sum to the same figure, and that the cumulative
+   monthly gap equals target minus actual. A leadership reader checks totals;
+   one contradiction discredits every other number on the board.
+10. Every computed figure carries a `Derived` badge naming its sources, and every
+    unsourced figure carries an `Illustrative` badge. Assert no widget has both,
+    and none has neither.

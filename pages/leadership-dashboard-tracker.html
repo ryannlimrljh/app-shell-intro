@@ -1789,8 +1789,11 @@ table.d tr.tot td{font-weight:900; border-top:1.5px solid var(--art-ink); border
     s+=ln(L,B,R,B,{c:C.rule,w:1.5});
     for(var i=0;i<8;i++){ s+=txt(X(i),B+15,M[i],{s:9,f:C.fnt,a:'middle'}); }
     function mkp(a){var p=''; for(var k=0;k<a.length;k++){p+=(k?' L':'M')+X(k).toFixed(1)+' '+Y(a[k]).toFixed(1);} return p;}
-    // gap band = the share we did not take
-    s+=path(mkp(mk)+' L'+X(7).toFixed(1)+' '+Y(us[7]).toFixed(1)+' '+mkp(us).replace('M','L').split('L').reverse().join('L').replace(/^L/,'')+' Z',{f:C.crit,o:.10});
+    function revp(a){var p=''; for(var k=a.length-1;k>=0;k--){p+=' L'+X(k).toFixed(1)+' '+Y(a[k]).toFixed(1);} return p;}
+    // gap band = the share we did not take. Return leg built explicitly — a
+    // split/reverse/join splice left a trailing bare "L" (SVG parse error)
+    // that silently dropped this band.
+    s+=path(mkp(mk)+revp(us)+' Z',{f:C.crit,o:.10});
     s+=path(mkp(mk),{s:C.fnt,w:2.4,d:'6 4'});
     s+=path(mkp(us),{s:C.der,w:3.4});
     s+=txt(R+4,Y(108.1)+3.5,'market +8.1%',{s:9.5,w:800,f:C.mut});

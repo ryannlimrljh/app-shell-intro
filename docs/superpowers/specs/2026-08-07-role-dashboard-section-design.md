@@ -2,7 +2,28 @@
 
 **Date:** 2026-08-07
 **Page:** `pages/app-shell-intro.html`
-**Status:** Approved, not yet planned
+**Status:** Approved; scope amended same day (see Scope amendment), planned
+
+## Scope amendment (user, 2026-08-07, after the tracker artifact)
+
+The buildable content for section 2 is **the ideal board** — the nine-chart
+leadership view iterated in `pages/leadership-dashboard-tracker.html` (Mode 2)
+— not the earlier table-heavy Mode 1 widget set this spec first described.
+User's words: "we are good to build items under [ideal board] into
+app-shell-intro.html", with three requirements: the `Dashboard ↓` link anchors
+down to the section, transitions/animations are smooth, and the build follows
+the Collabrium design system's components and rules.
+
+What carries over from this spec unchanged: the anchor mechanics (scroll
+container is `.c-shell-content`), reveal-on-scroll-in, the ask box sliding away,
+reduced motion, accessibility, arithmetic reconciliation, and the provenance
+dot system. What is superseded: the **View as** role switcher and the four-role
+widget inventory below — section 2 is the leadership ideal board only, and the
+role-filtered variant remains recorded here as the validated pattern for a
+future pass (the CSS `data-view` filtering was proven leak-free in the quick
+views). The tracker page remains the standalone reference implementation; the
+in-page section adapts its panels to the page's existing visual language
+(linked DS stylesheets, not inlined; no embedded font).
 **Builds on:** the six-card highlight row (`2026-08-06-highlight-cards-design.md`),
 its recommendation + CTA pass (`2026-08-06-card-recommendations-design.md`), and
 the top-3 focus ribbons (`2026-08-07-top3-focus-ribbons-design.md`).

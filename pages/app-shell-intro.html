@@ -468,6 +468,28 @@
   .c-hcard-label,
   .c-card-slide .c-stat-label{font-size:var(--text-h3-size); line-height:var(--text-h3-lh); font-weight:var(--weight-medium); letter-spacing:var(--text-h3-tracking); text-transform:none; color:var(--color-neutral-5); align-self:flex-start; text-align:left; margin-bottom:var(--spacing-4);} /* h3 size but --weight-medium (500), not the h3 token's 800 — per feedback the labels sit back as quiet section titles while the headline/hero carries the weight */
 
+  /* ---- Top-3 focus ribbon (2026-08-07 spec). A folded corner band on
+     the three cards Collabrium ranks highest, so the row reads as a
+     priority order rather than six equal tiles. Authored in the markup
+     like all other card content, so it inherits the skeleton/reveal
+     cascade, the hover tilt, and the modal swing with no JS of its own.
+     GEOMETRY (do not re-tune by eye): the band's usable text length is
+     the CHORD it cuts across the corner box, not the box's width — for
+     a box of side S whose centreline meets each edge at distance `a`
+     from the corner, chord = a x root-2, and S must clear
+     a + (band height / 2) x root-2 so the band's far edge stays inside
+     the box. Here S=80, a=56, height=22 -> chord ~79px against ~58px of
+     text (~10px clear each side); a first attempt at S=56 gave only
+     ~45px and clipped the word at both ends. The band's own offsets
+     fall straight out of those numbers: top = (a - height)/2 = 17px,
+     right = -(width - a)/2 = -36px. The box clips to the card's own
+     radius-lg corner, so nothing overflows into the fan's rotated-
+     corner gutter and the slider track's clip-safety padding is
+     untouched. pointer-events:none so it never swallows a card click
+     (the whole card opens the modal). */
+  .c-hcard-ribbon{position:absolute; top:0; right:0; width:80px; height:80px; overflow:hidden; border-top-right-radius:var(--radius-lg); pointer-events:none;}
+  .c-hcard-ribbon i{position:absolute; top:17px; right:-36px; width:128px; height:22px; background:var(--color-orange); color:var(--color-neutral-1); font-family:var(--font-primary); font-size:var(--text-label3-size); line-height:22px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; text-align:center; white-space:nowrap; font-style:normal; transform:rotate(45deg);}
+
   /* Shared card rhythm — one spacing system across all six layouts
      instead of each card carrying its own ad-hoc margins. Blocks are
      separated by the card's flex gap (12px, up from .c-card's 8px —

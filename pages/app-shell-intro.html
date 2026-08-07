@@ -473,22 +473,36 @@
      priority order rather than six equal tiles. Authored in the markup
      like all other card content, so it inherits the skeleton/reveal
      cascade, the hover tilt, and the modal swing with no JS of its own.
+     It has to be a DIRECT child of .c-card-slide for that to hold (the
+     skeleton rules select with `>`), and it takes a slot in the reveal
+     stagger's --content-delay sequence like any other child.
      GEOMETRY (do not re-tune by eye): the band's usable text length is
      the CHORD it cuts across the corner box, not the box's width — for
      a box of side S whose centreline meets each edge at distance `a`
      from the corner, chord = a x root-2, and S must clear
      a + (band height / 2) x root-2 so the band's far edge stays inside
-     the box. Here S=80, a=56, height=22 -> chord ~79px against ~58px of
-     text (~10px clear each side); a first attempt at S=56 gave only
-     ~45px and clipped the word at both ends. The band's own offsets
+     the box. Here S=80, a=56, height=22 -> chord ~79px, against ~58px
+     for the label this carries ("FOCUS 1" at the settings below): ~10px
+     clear each side. Reword against that ~79px ceiling — "FOCUS NOW"
+     already measures ~78px. An earlier S=56 (a=32) gave only a ~45px
+     chord and clipped the word at both ends. The band's own offsets
      fall straight out of those numbers: top = (a - height)/2 = 17px,
-     right = -(width - a)/2 = -36px. The box clips to the card's own
-     radius-lg corner, so nothing overflows into the fan's rotated-
-     corner gutter and the slider track's clip-safety padding is
-     untouched. pointer-events:none so it never swallows a card click
-     (the whole card opens the modal). */
-  .c-hcard-ribbon{position:absolute; top:0; right:0; width:80px; height:80px; overflow:hidden; border-top-right-radius:var(--radius-lg); pointer-events:none;}
-  .c-hcard-ribbon i{position:absolute; top:17px; right:-36px; width:128px; height:22px; background:var(--color-orange); color:var(--color-neutral-1); font-family:var(--font-primary); font-size:var(--text-label3-size); line-height:22px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; text-align:center; white-space:nowrap; font-style:normal; transform:rotate(45deg);}
+     right = -(width - a)/2 = -36px. letter-spacing is deliberately
+     double label3's own 0.04em — the band reads better wide, and the
+     ~58px figure above assumes it.
+     Containment is entirely `overflow:clip`: the rotated band overhangs
+     the box at both ends and clip is what cuts it. The corner radius is
+     insurance only — at a=56 the nearest painted pixel sits ~29px from
+     the corner and never reaches the 20px arc (if `a` ever shrinks far
+     enough to meet it, the honest value is calc(var(--radius-lg) - 1px),
+     matching the card's INNER curve inside its 1px border). clip rather
+     than hidden because hidden would leave this a programmatically
+     scrollable box holding ~25px of hidden overhang, which a stray
+     scrollIntoView on a descendant could shift out of place.
+     pointer-events:none so it never swallows a card click (the whole
+     card opens the modal). */
+  .c-hcard-ribbon{display:block; position:absolute; top:0; right:0; width:80px; height:80px; overflow:clip; border-top-right-radius:var(--radius-lg); pointer-events:none;}
+  .c-hcard-ribbon-band{position:absolute; top:17px; right:-36px; width:128px; height:22px; background:var(--color-orange); color:var(--color-neutral-1); font-family:var(--font-primary); font-size:var(--text-label3-size); line-height:22px; font-weight:var(--weight-extrabold); letter-spacing:.08em; text-transform:uppercase; text-align:center; white-space:nowrap; transform:rotate(45deg);}
 
   /* Shared card rhythm — one spacing system across all six layouts
      instead of each card carrying its own ad-hoc margins. Blocks are

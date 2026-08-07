@@ -632,6 +632,15 @@
      progress bar has no equivalent yet in collabrium-dls, so it's
      page-local, same as the gauge/sparkline above. */
   .c-hcard-team{align-items:center; text-align:center;}
+  /* Trophy above the "#2" hero figure. Centred by the card's own
+     align-items:center, and spaced by the card's shared 12px gap, so it
+     needs no margin of its own. line-height:1 is the point of the rule:
+     emoji carry large intrinsic leading, so without it the glyph's box
+     is ~1.4x taller than the mark and reads as a gap above the number
+     rather than a pairing with it. aria-hidden because "#2 this month"
+     already states the standing — a lone announced "trophy" would add
+     nothing and arrives before the figure it decorates. */
+  .c-hcard-trophy{font-size:40px; line-height:1;}
   /* Per the card-recommendations spec, the Team card keeps its
      centered layout EXCEPT the terminal CTA, which left-aligns like
      every other card's terminal element. (The rec line above it stays
@@ -884,7 +893,7 @@
               <span class="c-hcard-label"><i class="ph-fill ph-warning"></i> At risk</span>
               <h4>Sunway Retail</h4>
               <p>Engagement down 30% · renews in 21 days</p>
-              <svg class="c-hcard-gauge" viewBox="0 0 90 52" width="90" height="52" aria-hidden="true">
+              <svg class="c-hcard-gauge" viewBox="0 0 90 52" width="180" height="104" aria-hidden="true">
                 <path d="M5 47 A40 40 0 0 1 85 47" style="stroke:var(--color-fire-bg-strong)" stroke-width="8" fill="none" stroke-linecap="round"/>
                 <path d="M5 47 A40 40 0 0 1 58 12" style="stroke:var(--color-orange)" stroke-width="8" fill="none" stroke-linecap="round"/>
               </svg>
@@ -915,6 +924,7 @@
             </div>
             <div class="c-card c-card-slide c-stat c-hcard-team">
               <span class="c-stat-label">SEA team</span>
+              <span class="c-hcard-trophy" aria-hidden="true">🏆</span>
               <div class="c-stat-value hero">#2</div>
               <p>this month</p>
               <div class="c-hcard-avatars">

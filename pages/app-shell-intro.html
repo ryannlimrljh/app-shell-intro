@@ -481,15 +481,16 @@
      a box of side S whose centreline meets each edge at distance `a`
      from the corner, chord = a x root-2, and S must clear
      a + (band height / 2) x root-2 so the band's far edge stays inside
-     the box. Here S=80, a=56, height=22 -> chord ~79px, against ~58px
-     for the label this carries ("FOCUS 1" at the settings below): ~10px
-     clear each side. Reword against that ~79px ceiling — "FOCUS NOW"
-     already measures ~78px. An earlier S=56 (a=32) gave only a ~45px
+     the box. Here S=80, a=56, height=22 -> chord ~79px, against ~53px
+     measured for the label this carries ("FOCUS 1" at the settings
+     below): ~13px clear each side. Reword against that ~79px ceiling —
+     "FOCUS NOW" already measures ~78px, i.e. flush against it. An
+     earlier S=56 (a=32) gave only a ~45px
      chord and clipped the word at both ends. The band's own offsets
      fall straight out of those numbers: top = (a - height)/2 = 17px,
      right = -(width - a)/2 = -36px. letter-spacing is deliberately
      double label3's own 0.04em — the band reads better wide, and the
-     ~58px figure above assumes it.
+     ~53px figure above assumes it.
      Containment is entirely `overflow:clip`: the rotated band overhangs
      the box at both ends and clip is what cuts it. The corner radius is
      insurance only — at a=56 the nearest painted pixel sits ~29px from

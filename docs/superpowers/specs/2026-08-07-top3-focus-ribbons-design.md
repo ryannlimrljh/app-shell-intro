@@ -37,7 +37,7 @@ distance `a` from the corner:
   inside the box
 
 Chosen values: **S = 80px, a = 56px, band height 22px, band width 128px** →
-chord ≈ 79px against ≈ 58px of text, i.e. ~10px clearance each side.
+chord ≈ 79px against ≈ 53px measured for "FOCUS 1", i.e. ~13px clearance each side.
 
 Positioning (derived from the above, not tuned by eye):
 
@@ -45,16 +45,24 @@ Positioning (derived from the above, not tuned by eye):
 - band `right: −36px` — from `(width − a) ÷ 2`
 - `transform: rotate(45deg)`
 
-The box is `position:absolute; top:0; right:0; width:80px; height:80px;
-overflow:hidden; border-top-right-radius: var(--radius-lg)` (20px, matching
-`.c-card`), and `pointer-events:none` so it never intercepts a card click.
+The box is `display:block; position:absolute; top:0; right:0; width:80px;
+height:80px; overflow:clip; border-top-right-radius: var(--radius-lg)` (20px,
+matching `.c-card`), and `pointer-events:none` so it never intercepts a card
+click. `clip` rather than `hidden`: both clip visually, but `hidden` would leave
+the box programmatically scrollable over ~25px of hidden band overhang. The
+containment is entirely `overflow`'s doing — measured, the corner radius never
+meets a painted pixel at `a = 56`, so it is insurance for future tuning only.
 
 ## Visual treatment
 
 - Band: `--color-orange` fill, `--color-neutral-1` text.
-- Text: `Focus n`, uppercase via `text-transform`, at `--text-label3-size`
-  (11px) / weight 800 / `letter-spacing: .08em`, `line-height: 22px`
-  (= the band height), centred, `white-space: nowrap`.
+- Text: `Focus n` in a `.c-hcard-ribbon-band` span (a class, not a bare `<i>` —
+  in this file `<i>` means "Phosphor icon glyph", and a descendant selector
+  would have caught any icon later placed inside a ribbon), uppercase via
+  `text-transform`, at `--text-label3-size` (11px) /
+  `--weight-extrabold` / `letter-spacing: .08em` — deliberately double
+  label3's own 0.04em tracking, which the ~53px measurement assumes —
+  `line-height: 22px` (= the band height), centred, `white-space: nowrap`.
 - Identical on all three cards, including the obsidian AI card — the ribbon is
   a rank marker, so it must not vary by card. Orange on the AI card is
   acceptable: the ribbon sits at the top-right corner and the card's orange CTA

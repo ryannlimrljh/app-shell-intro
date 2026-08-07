@@ -21,6 +21,41 @@
 
 **Hard constraint — the cards themselves do not change.** The user was explicit: no extra shadow or border on the flagged cards, no dimming or desaturating of the unflagged three, no layout shift, no re-ordering of the row. The only additions are the ribbon rules, the three ribbon spans, and the subtitle copy. If you find yourself editing a `.c-card`, `.c-card-slide`, `.c-hcard-risk`, or `.c-hcard-ai` rule, stop — that is out of scope.
 
+## Deviations from this plan (applied during code review)
+
+Task 1's CSS shipped differently from the block written in Task 1 Step 1 below.
+Code review caught the first item as a blocker specifically because it had to be
+settled *before* Task 2 wrote markup on three cards; the rest were folded into
+the same fix commit. **Task 1's own text below is left as originally written —
+it is the historical record. Task 2's markup snippets have been corrected in
+place, since that work was still ahead.**
+
+- **The band element is `<span class="c-hcard-ribbon-band">`, not `<i>`.** In
+  this file `<i>` means "Phosphor icon glyph" (~20 existing uses, and both
+  existing precedents for that selector shape — `.c-hcard-thumb i`,
+  `.c-account-menu-item i` — target icons). A descendant selector
+  `.c-hcard-ribbon i` would also have matched any icon later added inside a
+  ribbon, silently rendering it as a second rotated orange band stacked on the
+  first. The classed span also matches the file's habit of naming page-local
+  parts (`c-hcard-label`, `c-hcard-rec`, `c-skeleton-bar`), and lets
+  `font-style:normal` go — that declaration existed only to undo `<i>`.
+- **`overflow:clip` rather than `overflow:hidden`.** `hidden` clips visually but
+  leaves the box programmatically scrollable, holding ~25px of hidden band
+  overhang that a stray `scrollIntoView` on a descendant could shift out of
+  place. `clip` clips identically, respects the radius, and creates no scroll
+  container. `display:block` added alongside it, since `overflow` only applies
+  to the span because `position:absolute` blockifies it.
+- **`font-weight:var(--weight-extrabold)`** instead of a raw `800`.
+- **The geometry comment was corrected on three counts:** containment is credited
+  to `overflow`, not the corner radius (measured, the radius is inert at a=56 —
+  the nearest painted pixel sits ~29px from the corner against the arc's ~8px);
+  the text budget now names its anchor word ("FOCUS 1", measured at ~53px, not
+  the ~58px first assumed) and states the ~79px ceiling, so a maintainer rewording the label can tell whether the new
+  word fits; and the rejected S=56 attempt now gives its `a=32` so the quoted
+  ~45px chord is reproducible from the formula. It also records the tracking
+  deviation (0.08em is double label3's own 0.04em, deliberately) and the
+  direct-child precondition the skeleton/reveal inheritance depends on.
+
 ---
 
 ### Task 1: Ribbon CSS
@@ -118,7 +153,7 @@ Replace with:
 
 ```html
             <div class="c-card c-card-slide">
-              <span class="c-hcard-ribbon" role="img" aria-label="Focus 1 of 3"><i aria-hidden="true">Focus 1</i></span>
+              <span class="c-hcard-ribbon" role="img" aria-label="Focus 1 of 3"><span class="c-hcard-ribbon-band" aria-hidden="true">Focus 1</span></span>
               <span class="c-hcard-label">Pipeline</span>
 ```
 
@@ -135,7 +170,7 @@ Replace with:
 
 ```html
             <div class="c-card c-card-slide c-hcard-risk">
-              <span class="c-hcard-ribbon" role="img" aria-label="Focus 2 of 3"><i aria-hidden="true">Focus 2</i></span>
+              <span class="c-hcard-ribbon" role="img" aria-label="Focus 2 of 3"><span class="c-hcard-ribbon-band" aria-hidden="true">Focus 2</span></span>
               <span class="c-hcard-label"><i class="ph-fill ph-warning"></i> At risk</span>
 ```
 
@@ -152,7 +187,7 @@ Replace with:
 
 ```html
             <div class="c-card c-card-slide c-hcard-ai">
-              <span class="c-hcard-ribbon" role="img" aria-label="Focus 3 of 3"><i aria-hidden="true">Focus 3</i></span>
+              <span class="c-hcard-ribbon" role="img" aria-label="Focus 3 of 3"><span class="c-hcard-ribbon-band" aria-hidden="true">Focus 3</span></span>
               <span class="c-hcard-label">🤖 Next best action</span>
 ```
 
@@ -171,7 +206,7 @@ Reload `http://localhost:8791/pages/app-shell-intro.html`, wait ~6s for the load
       return {
         card: label ? label.textContent.trim().slice(0, 18) : '?',
         ribbon: rib ? rib.getAttribute('aria-label') : null,
-        bandText: rib ? rib.querySelector('i').textContent : null,
+        bandText: rib ? rib.querySelector('.c-hcard-ribbon-band').textContent : null,
         // The ribbon is a direct child, so the page's skeleton rules
         // (.is-loading > :not(.c-hcard-skeleton){opacity:0}) hide it during
         // load and the .is-loaded cascade brings it back. This asserts the
@@ -195,7 +230,7 @@ The whole point of the 80px sizing is that the word fits. Measure the band's ren
 (() => {
   const r = new Range();
   return [...document.querySelectorAll('.c-hcard-ribbon')].map(rib => {
-    const band = rib.querySelector('i');
+    const band = rib.querySelector('.c-hcard-ribbon-band');
     r.selectNodeContents(band);
     return {
       label: rib.getAttribute('aria-label'),

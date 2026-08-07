@@ -114,6 +114,37 @@
   .c-canvas-askbox{position:fixed; left:50%; bottom:var(--spacing-24); z-index:20; width:min(620px, calc(100vw - var(--spacing-32))); opacity:0; transform:translate(-50%, 16px); transition:opacity 550ms cubic-bezier(.16,1,.3,1), transform 550ms cubic-bezier(.16,1,.3,1);}
   .c-canvas-askbox.is-revealed{opacity:1; transform:translate(-50%, 0); transition-delay:1150ms;}
   .c-shell-content{padding-bottom:184px;} /* box height (~138) + its 24px bottom offset + breathing room — keeps the dashlink scrollable clear of the fixed box */
+  /* ── Section 2 — the leadership "ideal board" (spec 2026-08-07, as amended).
+     .c-shell-content is the page's scroll container (components.css:282
+     gives it overflow-y:auto inside a 100dvh shell), so smooth scrolling
+     MUST live here — on html it fails silently. The existing 184px
+     padding-bottom stays: it was sized for the fixed ask box, and below
+     the new section it is plain breathing room (the box parks itself
+     while the section is in view, see .is-parked). */
+  .c-shell-content{scroll-behavior:smooth;}
+  .c-dash{margin-top:var(--section-gap); scroll-margin-top:var(--spacing-32);}
+  .c-dash-head{display:flex; align-items:flex-end; justify-content:space-between; gap:var(--spacing-16); flex-wrap:wrap; padding-bottom:var(--spacing-12); border-bottom:1px solid var(--color-neutral-3); margin-bottom:var(--spacing-16);}
+  .c-dash-head h2{margin:0; font-size:var(--text-h2-size); line-height:var(--text-h2-lh); font-weight:800; letter-spacing:-.01em;}
+  .c-dash-head p{margin:2px 0 0; font-size:var(--text-body1-size); color:var(--color-neutral-5);}
+  /* Scroll-in reveal — same arrive-don't-exist convention as the cards.
+     Widgets stagger off a per-widget --dw-i index (set inline in markup).
+     The reduced-motion block sets the END state directly: with the base
+     state opacity:0, merely removing the transition would hide the whole
+     section from reduced-motion users forever. */
+  .c-dash .c-dash-w{opacity:0; transform:translateY(18px); transition:opacity var(--duration-slow) var(--ease-settle), transform var(--duration-slow) var(--ease-settle); transition-delay:calc(var(--dw-i, 0) * 70ms);}
+  .c-dash.is-revealed .c-dash-w{opacity:1; transform:none;}
+  /* Ask box parking. Two subtleties: (1) .is-settled zeroes the 1150ms
+     transition-delay that .is-revealed carries for the load choreography —
+     it is added on the observer's FIRST fire (necessarily after load), and
+     its rule sits after .is-revealed's so the source-order tie-break wins.
+     (2) pointer-events:none so the invisible box never blocks table rows. */
+  .c-canvas-askbox.is-settled{transition-delay:0ms;}
+  .c-canvas-askbox.is-parked{opacity:0; transform:translate(-50%, 24px); pointer-events:none;}
+  @media (prefers-reduced-motion: reduce){
+    .c-shell-content{scroll-behavior:auto;}
+    .c-dash .c-dash-w{opacity:1; transform:none; transition:none;}
+    .c-canvas-askbox.is-parked{transition:none;}
+  }
   /* Ambient backlight — deliberately off-token (the DS has no gradient
      token; these are the source file's literal pastels). Two layers,
      the technique real AI-glow UIs use: a soft wide outer bloom + a
@@ -951,7 +982,7 @@
             </div>
           </div>
         </div>
-        <p class="c-canvas-dashlink" id="dashLink">Get more done, straight to your <a href="#">Dashboard &#8595;</a> | <a href="#">Clean up cards</a></p>
+        <p class="c-canvas-dashlink" id="dashLink">Get more done, straight to your <a href="#dashboard">Dashboard &#8595;</a> | <a href="#">Clean up cards</a></p>
 
         <!-- Ask box — assistant entry point, ported from dashboard-home's
              floating-ask; in flow after the Dashboard line (see the
@@ -979,6 +1010,19 @@
             </div>
           </div>
         </div>
+
+        <!-- ── Section 2 — leadership ideal board. Reached via #dashboard
+             from the dashlink; content arrives on scroll-in (see .c-dash
+             CSS). Chart panels are filled by the dashboard chart module
+             at the end of the page script. -->
+        <section id="dashboard" class="c-dash" aria-labelledby="dashTitle">
+          <div class="c-dash-head">
+            <div>
+              <h2 id="dashTitle">Across the business</h2>
+              <p>Every media line, rolled up — exceptions first</p>
+            </div>
+          </div>
+        </section>
       </div>
     </div>
   </div>
@@ -2210,6 +2254,32 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
       setTimeout(waitForReveal, 300);
     })();
   })();
+})();
+
+// ── Section 2: scroll-in reveal + ask-box parking. One observer does both.
+// Reveal is one-way (class add is idempotent — the revealCanvasContent()
+// double-fire bug is the precedent for being paranoid here); parking is
+// two-way so the box returns when the user scrolls back up to the cards.
+// root is the real scroll container, not the viewport.
+(function () {
+  const shellContent = document.querySelector('.c-shell-content');
+  const dash = document.getElementById('dashboard');
+  const askBox = document.getElementById('askBox');
+  if (!shellContent || !dash || !('IntersectionObserver' in window)) {
+    if (dash) dash.classList.add('is-revealed'); // ancient-browser fallback: just show it
+    return;
+  }
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        dash.classList.add('is-revealed');
+        if (askBox) askBox.classList.add('is-settled', 'is-parked');
+      } else if (askBox) {
+        askBox.classList.remove('is-parked');
+      }
+    });
+  }, { root: shellContent, threshold: 0.12 });
+  io.observe(dash);
 })();
 </script>
 

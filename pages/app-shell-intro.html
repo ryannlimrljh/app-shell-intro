@@ -185,9 +185,10 @@
   .c-dash .c-stat{height:100%;}
   .c-dash .c-stat.is-lead{border-color:var(--color-purple);}
   .c-dash .c-stat.is-lead .c-stat-value{color:var(--color-purple); font-size:28px;}
-  .c-dash-up{color:var(--color-green);} .c-dash-dn{color:var(--color-red);} .c-dash-wn{color:#8A5A00;}
-  /* Chart tables reuse DS .c-table / .c-datatable as-is; num cells right-align. */
-  .c-dash .c-table td.num,.c-dash .c-table th.num,.c-dash .c-datatable td.num,.c-dash .c-datatable th.num{text-align:right; font-variant-numeric:tabular-nums;}
+  .c-dash-up{color:var(--color-green);} .c-dash-dn{color:var(--color-red);}
+  /* Chart tables reuse DS .c-table / .c-datatable as-is; td.num alignment
+     already comes from components.css:148/365 — only th.num needs it here. */
+  .c-dash .c-table th.num,.c-dash .c-datatable th.num{text-align:right; font-variant-numeric:tabular-nums;}
   .c-dash .c-table tr.tot td{font-weight:900; border-top:1.5px solid var(--color-neutral-9); border-bottom:0;}
   .c-dash-key{display:flex; gap:15px; flex-wrap:wrap; margin-top:var(--spacing-8); font-size:var(--text-caption-size); font-weight:700; color:var(--color-neutral-5);}
   .c-dash-key span{display:inline-flex; align-items:center; gap:6px;}
@@ -1073,11 +1074,17 @@
               <h2 id="dashTitle">Across the business</h2>
               <p>Every media line, rolled up — exceptions first</p>
             </div>
-            <div class="seg-toggle" id="dashPeriodToggle" role="tablist" aria-label="Dashboard period">
+            <!-- radiogroup, not tablist: no tabpanels exist and there's no
+                 arrow-key roving-tabindex behaviour, so tab/tabpanel
+                 semantics would over-promise. Matches the app switcher's
+                 menuitemradio idiom and the spec's accessibility section.
+                 The Pace modal's #revenuePeriodToggle keeps its original
+                 tablist markup — pre-existing, out of this task's scope. -->
+            <div class="seg-toggle" id="dashPeriodToggle" role="radiogroup" aria-label="Dashboard period">
               <span class="seg-toggle-thumb" aria-hidden="true"></span>
-              <button class="seg-toggle-btn active" type="button" role="tab" aria-selected="true"><span class="seg-toggle-label">MTD</span></button>
-              <button class="seg-toggle-btn" type="button" role="tab" aria-selected="false"><span class="seg-toggle-label">QTD</span></button>
-              <button class="seg-toggle-btn" type="button" role="tab" aria-selected="false"><span class="seg-toggle-label">YTD</span></button>
+              <button class="seg-toggle-btn active" type="button" role="radio" aria-checked="true"><span class="seg-toggle-label">MTD</span></button>
+              <button class="seg-toggle-btn" type="button" role="radio" aria-checked="false"><span class="seg-toggle-label">QTD</span></button>
+              <button class="seg-toggle-btn" type="button" role="radio" aria-checked="false"><span class="seg-toggle-label">YTD</span></button>
             </div>
           </div>
           <div class="c-dash-grid">
@@ -1173,6 +1180,7 @@
               <div class="c-dash-chart"><svg id="dChurn" viewBox="0 0 480 216" height="216" role="img" aria-label="Lapsed revenue split by reason, showing recoverable versus structural loss"></svg></div>
               <div class="c-dash-scroll"><table class="c-table">
                 <caption class="c-dash-vh">Lapsed advertisers with churn reason and recommended play</caption>
+                <thead class="c-dash-vh"><tr><th>Advertiser</th><th>Lost, RM million</th><th>Reason</th><th>Play</th></tr></thead>
                 <tbody>
                   <tr><td>Petronas Retail</td><td class="num">2.10</td><td><span class="c-badge c-badge-warning">Budget cycle</span></td><td style="color:var(--color-neutral-5)">Re-pitch at Q3 reset</td></tr>
                   <tr><td>AirAsia</td><td class="num">1.40</td><td><span class="c-badge c-badge-error">Competitive</span></td><td style="color:var(--color-neutral-5)">Rate review</td></tr>
@@ -2485,7 +2493,7 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
       periodToggle.querySelectorAll('.seg-toggle-btn').forEach((b) => {
         const on = b === btn;
         b.classList.toggle('active', on);
-        b.setAttribute('aria-selected', String(on));
+        b.setAttribute('aria-checked', String(on));
       });
       positionDashThumb();
     });

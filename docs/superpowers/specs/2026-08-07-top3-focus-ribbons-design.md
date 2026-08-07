@@ -117,8 +117,12 @@ restores its whole ribbon, which is why the row reads fine in motion.
 
 Nothing looks broken — the digits are never clipped, and the ribbons still read
 as ranked flags — but the approved mockup showed three symmetric folded corners,
-and that is not what ships. Left as-is pending a user call, because every fix
-touches something the spec's own constraints protect:
+and that is not what ships.
+
+**Decision: accepted as-is** (user, 2026-08-07). The ranks read, the asymmetry is
+confined to the ribbon's outer tip, and hover restores the full corner. This is a
+deliberate trade, not an oversight — the alternatives were weighed and each costs
+something the spec's own constraints protect:
 
 - **Raise the flagged cards' z-index** — restores all three corners, but changes
   the fan's deliberate stacking arc (Pace as apex).
@@ -127,7 +131,9 @@ touches something the spec's own constraints protect:
   three.
 - **Pull the band inboard** so the text sits inside the ~66px visible region —
   keeps the fan untouched, at the cost of a smaller corner flag.
-- **Accept as-is** — the flags read, and hover reveals the full corner.
+
+The practical consequence to remember is the rewording budget above (`w ≤ ~54px`),
+which is tighter than the 79px box chord and is what actually binds.
 
 ## Accessibility
 

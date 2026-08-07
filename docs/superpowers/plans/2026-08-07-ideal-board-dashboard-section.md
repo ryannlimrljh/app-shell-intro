@@ -30,7 +30,7 @@
 **Files:**
 - Modify: `pages/app-shell-intro.html` (CSS block ~line 116, dashlink ~line 954, markup after ask box ~line 981, script tail ~line 2213)
 
-- [ ] **Step 1: Add the section + behaviour CSS**
+- [x] **Step 1: Add the section + behaviour CSS**
 
 Edit `pages/app-shell-intro.html`. Find this exact rule (with its comment):
 
@@ -74,7 +74,7 @@ Immediately AFTER it, insert:
   }
 ```
 
-- [ ] **Step 2: Point the Dashboard link at the section**
+- [x] **Step 2: Point the Dashboard link at the section**
 
 Replace:
 
@@ -88,7 +88,7 @@ with:
         <p class="c-canvas-dashlink" id="dashLink">Get more done, straight to your <a href="#dashboard">Dashboard &#8595;</a> | <a href="#">Clean up cards</a></p>
 ```
 
-- [ ] **Step 3: Insert the empty section shell**
+- [x] **Step 3: Insert the empty section shell**
 
 Find this exact run (end of the ask box, closes of shell-content/main/shell, start of the modal comment):
 
@@ -127,7 +127,7 @@ Replace with (the section slots in between the ask box's close and `.c-shell-con
   </div>
 ```
 
-- [ ] **Step 4: Add the observer JS**
+- [x] **Step 4: Add the observer JS**
 
 At the very end of the page's `<script type="module">`, replace:
 
@@ -169,7 +169,7 @@ with:
 </script>
 ```
 
-- [ ] **Step 5: Verify in the browser**
+- [x] **Step 5: Verify in the browser**
 
 Load `http://localhost:8791/pages/app-shell-intro.html`, wait 6s, then run via `javascript_tool`:
 
@@ -204,7 +204,7 @@ Then click the Dashboard link with REAL pointer input (`computer` tool — compu
 
 Then `sc.scrollTop = 0` via JS, wait 700ms, assert `is-parked` was removed and the box's computed opacity is heading back to 1 (class assertion is sufficient — the sandbox can stall transitions). Console must be clean.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 cd /Users/kwlkokho/Documents/GitHub/Collabrium-DS/.worktrees/app-shell-intro-page
@@ -219,7 +219,7 @@ git commit -m "feat: dashboard section shell — anchor, smooth scroll, reveal o
 **Files:**
 - Modify: `pages/app-shell-intro.html` (CSS after Task 1's block; section inner markup)
 
-- [ ] **Step 1: Add the panel/grid/provenance CSS**
+- [x] **Step 1: Add the panel/grid/provenance CSS**
 
 Immediately AFTER Task 1's `@media (prefers-reduced-motion: reduce){...}` block, insert:
 
@@ -276,7 +276,7 @@ Immediately AFTER Task 1's `@media (prefers-reduced-motion: reduce){...}` block,
   .c-dash-vh{position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; border:0;}
 ```
 
-- [ ] **Step 2: Fill the section with the panels markup**
+- [x] **Step 2: Fill the section with the panels markup**
 
 Replace the Task-1 section (from `<section id="dashboard"` through `</section>`) with the full markup below. Every widget carries `class="c-dash-w"` and an inline `--dw-i` stagger index. SVGs are empty shells here — Task 3 fills them.
 
@@ -435,7 +435,7 @@ Replace the Task-1 section (from `<section id="dashboard"` through `</section>`)
         </section>
 ```
 
-- [ ] **Step 3: Wire the period toggle thumb**
+- [x] **Step 3: Wire the period toggle thumb**
 
 The `.seg-toggle` recipe needs its thumb positioned by JS. Reuse the page's proven transform-immune pattern (`offsetLeft`/`offsetWidth`, NEVER `getBoundingClientRect` — renders can run mid-animation). In the observer IIFE from Task 1, extend the `isIntersecting` branch and add the click handler. Replace the whole Task-1 IIFE body with:
 
@@ -488,7 +488,7 @@ The `.seg-toggle` recipe needs its thumb positioned by JS. Reuse the page's prov
 })();
 ```
 
-- [ ] **Step 4: Verify**
+- [x] **Step 4: Verify**
 
 Reload, wait 6s, scroll the container to the section via JS (`document.getElementById('dashboard').scrollIntoView()` on `.c-shell-content` is fine for this check), then assert:
 
@@ -511,7 +511,7 @@ Reload, wait 6s, scroll the container to the section via JS (`document.getElemen
 
 Console clean. Real-click one seg-toggle button (computer tool) and assert `active` moved and thumb `left` changed.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 cd /Users/kwlkokho/Documents/GitHub/Collabrium-DS/.worktrees/app-shell-intro-page
@@ -526,7 +526,7 @@ git commit -m "feat: ideal-board panels — answer strip, provenance dots, table
 **Files:**
 - Modify: `pages/app-shell-intro.html` (script tail, after the observer IIFE)
 
-- [ ] **Step 1: Add the chart module**
+- [x] **Step 1: Add the chart module**
 
 Insert AFTER the observer IIFE's closing `})();` (still before `</script>`). This is the tracker's final, collision-audited chart code with DS-token colours and `d`-prefixed ids. Data is the reconciled set — months sum to 148.2, media actuals sum to 148.2, cumulative gap −9.4.
 
@@ -838,7 +838,7 @@ Insert AFTER the observer IIFE's closing `})();` (still before `</script>`). Thi
 })();
 ```
 
-- [ ] **Step 2: Verify — content, collisions, arithmetic**
+- [x] **Step 2: Verify — content, collisions, arithmetic**
 
 Reload, wait 6s, run:
 
@@ -880,11 +880,11 @@ Reload, wait 6s, run:
 
 Expected: every chart `ok`, `defects:'none'`, `reconciles:true`, 15 quad circles, 14 bubbles. Console clean.
 
-- [ ] **Step 3: Visual check**
+- [x] **Step 3: Visual check**
 
 Scroll to the section (JS), take a screenshot. If the pane serves a blank/stale frame (known quirk), temporarily `display:none` the content above the section via JS, screenshot at scroll 0, then reload to discard the debug state.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 cd /Users/kwlkokho/Documents/GitHub/Collabrium-DS/.worktrees/app-shell-intro-page
@@ -901,7 +901,7 @@ git commit -m "feat: render the nine ideal-board charts from reconciled data"
 - Modify: `docs/superpowers/specs/2026-08-07-role-dashboard-section-design.md` (Status line)
 - Modify: `docs/superpowers/plans/2026-08-07-ideal-board-dashboard-section.md` (checkboxes)
 
-- [ ] **Step 1: End-to-end journey with real pointer input**
+- [x] **Step 1: End-to-end journey with real pointer input**
 
 Fresh load, wait 6s. Then, using the `computer` tool for every interaction (synthetic clicks false-pass here):
 
@@ -910,7 +910,7 @@ Fresh load, wait 6s. Then, using the `computer` tool for every interaction (synt
 3. Scroll back down. Assert widgets remain revealed (one-way), box parks again.
 4. Click a period-toggle segment. Assert `active`/`aria-selected` moved and the thumb's `left` changed (offset-based).
 
-- [ ] **Step 2: Section-1 regression**
+- [x] **Step 2: Section-1 regression**
 
 The section must not have disturbed the approved page above it:
 
@@ -929,7 +929,7 @@ The section must not have disturbed the approved page above it:
 
 Also real-click the Pace card and confirm its modal still opens with the swing (class assertions + offset geometry, not mid-flight poses), then Escape to close.
 
-- [ ] **Step 3: Reduced-motion inspection**
+- [x] **Step 3: Reduced-motion inspection**
 
 No emulation toggle is available for RM in this pane; verify by CSS assertion instead:
 
@@ -949,19 +949,45 @@ No emulation toggle is available for RM in this pane; verify by CSS assertion in
 
 All three true. Critically, confirm the RM widget rule sets `opacity:1` (end state), not merely `transition:none`.
 
-- [ ] **Step 4: Console + no sideways scroll + narrow width**
+- [x] **Step 4: Console + no sideways scroll + narrow width**
 
 `read_console_messages` clean. `document.documentElement.scrollWidth <= clientWidth` at 1280 and at 900 (resize_window; tables must scroll inside `.c-dash-scroll`, never the body).
 
-- [ ] **Step 5: Docs true-up**
+- [x] **Step 5: Docs true-up**
 
 - Spec: change `**Status:** Approved; scope amended same day (see Scope amendment), planned` → `**Status:** Implemented (plan 2026-08-07-ideal-board-dashboard-section.md)`.
 - This plan: tick all completed checkboxes; record any deviations in a `## Deviations` section at the bottom (create it only if there are any).
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 cd /Users/kwlkokho/Documents/GitHub/Collabrium-DS/.worktrees/app-shell-intro-page
 git add pages/app-shell-intro.html docs/superpowers/specs/2026-08-07-role-dashboard-section-design.md docs/superpowers/plans/2026-08-07-ideal-board-dashboard-section.md
 git commit -m "test: full verification matrix for the dashboard section; docs true-up"
 ```
+
+## Deviations
+
+Recorded during subagent-driven execution, 2026-08-07/08:
+
+1. **Task 3's dShare band path splice was a plan bug.** The plan's
+   `split('L').reverse().join('L')` construction leaves a trailing bare `L`
+   before `Z` — an SVG parse error. Replaced with an explicit `revp()`
+   reverse-path builder (same coordinates). The same latent bug was found
+   and fixed in the reference tracker page (`pages/leadership-dashboard-tracker.html`),
+   where the band had been silently failing to render.
+2. **The plan's weighted-pipeline figures did not reconcile.** Stages
+   25.6 + 22.1 + 27.0 sum to 74.7, not the plan's 74.5 total — which fed
+   148.2 + 74.5 = 222.7. Fixed forward: total RM 74.7M, forecast RM 222.9M,
+   shortfall RM 17.1M, in both the page and the tracker.
+3. **Review-driven polish beyond the plan text:** reduced-motion unpark made
+   instant (`.c-canvas-askbox{transition:none}` under RM); churn table gained a
+   visually-hidden `<thead>`; the period toggle uses `role="radiogroup"`/`radio`
+   + `aria-checked` instead of the plan's `tablist` (honest semantics; the Pace
+   modal's tablist toggle is pre-existing and out of scope); dead `.c-dash-wn`
+   rule deleted; redundant `td.num` restatement trimmed; dBridge's separator
+   rule fitted to its viewBox; silent-drop and entity-escaping caveats
+   documented in the chart module.
+4. **Churn-table thead approach:** `.c-dash-vh` applied to the `<thead>`
+   element directly — verified it collapses out of flow with zero layout shift
+   while exposing headers to the accessibility tree.

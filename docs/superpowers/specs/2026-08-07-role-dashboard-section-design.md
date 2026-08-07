@@ -2,7 +2,7 @@
 
 **Date:** 2026-08-07
 **Page:** `pages/app-shell-intro.html`
-**Status:** Approved; scope amended same day (see Scope amendment), planned
+**Status:** Implemented (plan 2026-08-07-ideal-board-dashboard-section.md)
 
 ## Scope amendment (user, 2026-08-07, after the tracker artifact)
 

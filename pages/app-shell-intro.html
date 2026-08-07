@@ -493,13 +493,23 @@
      a + (band height / 2) x root-2 so the band's far edge stays inside
      the box. Here S=80, a=56, height=22 -> chord ~79px, against ~53px
      measured for the labels this carries — "FOCUS 1/2/3" all come out
-     at 53.8px, the digits having equal advance in Mulish at this weight
-     — so ~13px clear each side. Reword against that ~79px ceiling:
-     "FOCUS NOW" already measures ~78px, i.e. flush against it. An
-     earlier S=56 (a=32) gave only a ~45px chord and clipped the word at
-     both ends. The band's own offsets
-     fall straight out of those numbers: top = (a - height)/2 = 17px,
-     right = -(width - a)/2 = -36px. letter-spacing is deliberately
+     at 53.8px, the digits having equal advance in Mulish at this weight.
+     An earlier S=56 (a=32) gave only a ~45px chord and clipped the word
+     at both ends. The band's own offsets fall straight out of those
+     numbers: top = (a - height)/2 = 17px, right = -(width - a)/2 =
+     -36px.
+     REWORDING BUDGET — the 79px chord is the BOX's ceiling, not the
+     visible one. The fan overlaps each card 26px onto its neighbour
+     (.c-card-slide + .c-card-slide) and cards 1 and 2 sit UNDER the card
+     to their right (z 1, 2, 6, 5, 4, 3), which is the very corner the
+     ribbon occupies — so on Pipeline and At risk the band is occluded
+     from ~68px and ~66px along the chord, while the AI card (nothing to
+     its right) shows the full folded corner. Text is centred, so a label
+     of width w ends at (79 + w) / 2: the real budget is w <= ~54px on At
+     risk and ~57px on Pipeline. "FOCUS 1" at 53.8px is therefore already
+     at the limit, NOT at two-thirds of it — "FOCUS NOW" (78px) would fit
+     the box but bury its tail under the next card on two of the three.
+     letter-spacing is deliberately
      double label3's own 0.04em — the band reads better wide, and the
      ~53px figure above assumes it.
      Containment is entirely `overflow:clip`: the rotated band overhangs

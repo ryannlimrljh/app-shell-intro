@@ -63,7 +63,7 @@ place, since that work was still ahead.**
 **Files:**
 - Modify: `pages/app-shell-intro.html` — insert a new CSS block immediately **after** the shared-label rule that ends at line 469 (find it with `grep -n "c-hcard-label,-\?$" pages/app-shell-intro.html`, or search for the line starting `.c-card-slide .c-stat-label{font-size:var(--text-h3-size)`). Insert after that rule's closing `}` and its trailing comment, before the `/* Shared card rhythm` comment block.
 
-- [ ] **Step 1: Add the ribbon CSS block**
+- [x] **Step 1: Add the ribbon CSS block**
 
 Insert exactly this (the comment is required — it carries the geometry derivation a future maintainer would otherwise have to re-derive):
 
@@ -95,7 +95,7 @@ Note `font-style:normal` — the band uses `<i>` as a neutral inline element (ma
 
 > **⚠ SUPERSEDED — do not run the snippet in Step 2 below.** Both the CSS block above and the probe in Step 2 predate code review; see **Deviations** at the top of this file. The shipped band selector is `.c-hcard-ribbon-band` (not `.c-hcard-ribbon i`), overflow is `clip` (not `hidden`), the weight comes from `var(--weight-extrabold)`, and there is no `font-style:normal` — that declaration only ever existed to undo `<i>`. Run against the shipped CSS, Step 2's probe returns `bandTop: "auto"`, `bandBg: "rgba(0, 0, 0, 0)"`, `bandTransform: "none"` and reads as though the CSS were broken when it is correct. The equivalent probe for the shipped CSS is the one recorded in commit `3515419`'s verification: build the band as `<span class="c-hcard-ribbon-band">`, and test scroll-container status by writing `probe.scrollLeft = 50` and asserting it stays `0` — `scrollWidth > clientWidth` cannot distinguish `clip` from `hidden`, since it reports layout overflow either way.
 
-- [ ] **Step 2: Verify the CSS parses and resolves** *(superseded — see the warning above)*
+- [x] **Step 2: Verify the CSS parses and resolves** *(superseded — see the warning above)*
 
 Ensure a dev server is running (from the worktree root: `python3 -m http.server 8791`, backgrounded). Load `http://localhost:8791/pages/app-shell-intro.html` in the Browser pane, then run via `javascript_tool`:
 
@@ -123,7 +123,7 @@ Expected: `boxW: "80px"`, `boxH: "80px"`, `boxOverflow: "hidden"`, `boxRadiusTR:
 
 Then check `read_console_messages` with `onlyErrors: true` — must be empty.
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add pages/app-shell-intro.html
@@ -142,7 +142,7 @@ Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>
 **Files:**
 - Modify: `pages/app-shell-intro.html` — three card blocks. Locate them with `grep -n 'class="c-card c-card-slide' pages/app-shell-intro.html`; the three targets are the first card (plain `.c-card-slide`, contains `<span class="c-hcard-label">Pipeline</span>`), the `.c-hcard-risk` card, and the `.c-hcard-ai` card.
 
-- [ ] **Step 1: Add the ribbon to the Pipeline card**
+- [x] **Step 1: Add the ribbon to the Pipeline card**
 
 Find:
 
@@ -159,7 +159,7 @@ Replace with:
               <span class="c-hcard-label">Pipeline</span>
 ```
 
-- [ ] **Step 2: Add the ribbon to the At risk card**
+- [x] **Step 2: Add the ribbon to the At risk card**
 
 Find:
 
@@ -176,7 +176,7 @@ Replace with:
               <span class="c-hcard-label"><i class="ph-fill ph-warning"></i> At risk</span>
 ```
 
-- [ ] **Step 3: Add the ribbon to the AI next-best-action card**
+- [x] **Step 3: Add the ribbon to the AI next-best-action card**
 
 Find:
 
@@ -195,7 +195,7 @@ Replace with:
 
 Why `role="img"` + `aria-label` with the band `aria-hidden`: a rotated "FOCUS 1" fragment read in isolation is meaningless, and a bare `<span aria-label>` may be skipped by screen readers, whereas `role="img"` + `aria-label` is reliably announced. The label wording matches the visible word rather than paraphrasing it.
 
-- [ ] **Step 4: Verify all three render, and that the unflagged three do not**
+- [x] **Step 4: Verify all three render, and that the unflagged three do not**
 
 Reload `http://localhost:8791/pages/app-shell-intro.html`, wait ~6s for the load choreography, then run:
 
@@ -224,7 +224,11 @@ Reload `http://localhost:8791/pages/app-shell-intro.html`, wait ~6s for the load
 
 Expected exactly: Pipeline → `"Focus 1 of 3"` / `"Focus 1"`; At risk → `"Focus 2 of 3"` / `"Focus 2"`; Pace → `null`; Upsell → `null`; SEA team → `null`; Next best action → `"Focus 3 of 3"` / `"Focus 3"`. Every flagged card must additionally show `opacity: "1"` and `loadClassesCleared: true`.
 
-- [ ] **Step 5: Verify the band is fully visible (not clipped) on all three**
+> **⚠ Steps 5 and 6 below are geometrically invalid — do not trust their numbers.** Both measure a band that is rotated 45° inside a card rotated −12°/−6°/+12°, so `Range.getBoundingClientRect().width` returns the axis-aligned bounding box of rotated text rather than the text's width (it reports 52.8 / 50.6 / 41.1px, failing Step 5's own stated range while the CSS is correct), and Step 6's `cardR.width` is the rotated card's outer AABB (~422px, not the 340px the arithmetic assumes) with a hardcoded `24` where the band's leftmost box-x at `y=0` is 8.44px. Step 6 returned `clear: true` only because the real margins are 70–185px. **To measure the band's true text width, clone it with `transform:none; width:auto` and measure the clone** — that gives 53.82px on all three, which is what the shipped CSS comment records.
+>
+> Both probes also missed the real constraint, which the final holistic review caught: the fan's 26px card overlap occludes the ribbon on cards 1 and 2. See **Known limitation** in the spec.
+
+- [x] **Step 5: Verify the band is fully visible (not clipped) on all three** *(superseded — see the warning above)*
 
 The whole point of the 80px sizing is that the word fits. Measure the band's rendered text width against its chord:
 
@@ -246,7 +250,7 @@ The whole point of the 80px sizing is that the word fits. Measure the band's ren
 
 Expected: `textW` around 55–62px on each, comfortably under `chord` ≈ 79.2, and `bandVisibleInBox: true`. If any `textW` exceeds ~75px, STOP and report — the type is rendering wider than the spec assumed and the box needs revisiting rather than silently clipping.
 
-- [ ] **Step 6: Check the label-collision question the spec deliberately left open**
+- [x] **Step 6: Check the label-collision question the spec deliberately left open** *(superseded arithmetic — see the warning above Step 5; the conclusion held, and no padding rule was needed)*
 
 The spec adds **no** pre-emptive right padding on the eyebrow labels, because the band only intrudes across the label row and the current labels look far too short to reach it. Verify that empirically rather than assuming:
 
@@ -284,7 +288,7 @@ Expected: `clear: true` on all three. **If any is `false`**, add this rule direc
 
 Then report in the task summary whether the padding was needed, so the spec can be trued up either way.
 
-- [ ] **Step 7: Verify the ribbons don't break the card interactions**
+- [x] **Step 7: Verify the ribbons don't break the card interactions**
 
 Using the **`computer` tool** (real pointer input — not synthetic events):
 
@@ -304,7 +308,7 @@ Using the **`computer` tool** (real pointer input — not synthetic events):
 5. Screenshot the card row for visual sign-off — all three ribbons should read cleanly, clipped to the rounded corner, on white, fire-tint, and obsidian.
 6. `read_console_messages` with `onlyErrors: true` — must be empty.
 
-- [ ] **Step 8: Commit**
+- [x] **Step 8: Commit**
 
 ```bash
 git add pages/app-shell-intro.html
@@ -324,7 +328,7 @@ Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>
 - Modify: `pages/app-shell-intro.html:808` — the greeting subtitle
 - Modify: `docs/superpowers/specs/2026-08-07-top3-focus-ribbons-design.md` — status line, and the label-collision note if Task 2 Step 6 needed the padding
 
-- [ ] **Step 1: Reword the subtitle**
+- [x] **Step 1: Reword the subtitle**
 
 Find:
 
@@ -340,7 +344,7 @@ Replace with:
 
 This is what makes three ribbons read as deliberate prioritization rather than ornament. Do not touch the `<h1>` above it, and do not touch `revealCanvasContent()` — the subtitle's reveal is driven by its existing `#greetingSubtitle` id and needs no change.
 
-- [ ] **Step 2: Verify the subtitle renders and still reveals**
+- [x] **Step 2: Verify the subtitle renders and still reveals**
 
 Reload, wait ~6s, then:
 
@@ -351,7 +355,7 @@ Reload, wait ~6s, then:
 
 Expected: `text: "Here's what needs your eyes today — I've flagged your top 3."`, `revealed: true`, `opacity: "1"`.
 
-- [ ] **Step 3: Update the spec's status line**
+- [x] **Step 3: Update the spec's status line**
 
 In `docs/superpowers/specs/2026-08-07-top3-focus-ribbons-design.md`, change:
 
@@ -367,11 +371,11 @@ to:
 
 If Task 2 Step 6 found a real label collision and you added the `padding-right` rule, also update the spec's **Label collision** bullet to say the padding was measured as necessary and applied, replacing the "no right padding is added pre-emptively" wording. If no collision was found, leave that bullet as-is — it correctly describes what shipped.
 
-- [ ] **Step 4: Final pass — re-run the full check set**
+- [x] **Step 4: Final pass — re-run the full check set**
 
 On a fresh reload (wait ~6s), confirm all of: the three ribbons present with correct aria-labels and unclipped text (Task 2 Steps 4–5), the three unflagged cards ribbon-free, label clearance `true` (or padding applied), the subtitle's new copy revealed, a real-pointer card click still opening and Escape closing the modal (Task 2 Step 7), and a clean console. Take one final screenshot of the full card row plus greeting.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add pages/app-shell-intro.html docs/superpowers/specs/2026-08-07-top3-focus-ribbons-design.md

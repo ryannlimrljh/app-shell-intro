@@ -37,7 +37,18 @@ distance `a` from the corner:
   inside the box
 
 Chosen values: **S = 80px, a = 56px, band height 22px, band width 128px** →
-chord ≈ 79px against ≈ 53px measured for "FOCUS 1", i.e. ~13px clearance each side.
+chord ≈ 79px against ≈ 53px measured for "FOCUS 1" (all three labels measure
+identically — the digits have equal advance in Mulish at this weight).
+
+**The 79px chord is the box's ceiling, not the visible one.** Found during the
+final holistic review: the fan overlaps each card 26px onto its neighbour, and
+cards 1 and 2 sit *under* the card to their right (z-order 1, 2, 6, 5, 4, 3) —
+which is exactly the corner the ribbon occupies. Measured, the band is occluded
+from ~68px along the chord on Pipeline and ~66px on At risk; the AI card has
+nothing to its right and shows the full folded corner. Since the text is centred,
+a label of width `w` ends at `(79 + w) / 2`, so the real rewording budget is
+`w ≤ ~54px` on At risk and `~57px` on Pipeline. "FOCUS 1" at 53.8px is already at
+that limit. See **Known limitation** below.
 
 Positioning (derived from the above, not tuned by eye):
 
@@ -64,9 +75,11 @@ meets a painted pixel at `a = 56`, so it is insurance for future tuning only.
   label3's own 0.04em tracking, which the ~53px measurement assumes —
   `line-height: 22px` (= the band height), centred, `white-space: nowrap`.
 - Identical on all three cards, including the obsidian AI card — the ribbon is
-  a rank marker, so it must not vary by card. Orange on the AI card is
-  acceptable: the ribbon sits at the top-right corner and the card's orange CTA
-  button at the bottom-left, far apart.
+  a rank marker, so it must not vary by card. Identical *in CSS*; see **Known
+  limitation** for how the fan's overlap makes them render differently. Orange
+  on the AI card is acceptable: the nearest other orange there is the card's own
+  `🤖 Next best action` eyebrow label, ~70px to the ribbon's left on the same
+  row, and the two read as separate elements rather than one smear.
 
 ## Integration with existing card machinery
 
@@ -83,12 +96,38 @@ inherits the existing behaviour rather than needing new code paths:
 - **Hover tilt and modal swing:** it is a child of the card, so it tilts with
   it under Motion's transform and needs no involvement of its own.
 - **Label collision:** the band only reaches into the card's content area
-  across the eyebrow-label row (roughly the first 30px of content); it has
-  fully exited the content box by ~55px down. Current labels ("Pipeline",
-  "⚠ At risk", "🤖 Next best action") are all well short of the band, so **no
-  right padding is added pre-emptively** — implementation must measure the
-  rendered labels and add `padding-right` only if one actually reaches the
-  band's zone.
+  across the eyebrow-label row; it has fully exited the content box ~48px down.
+  Current labels ("Pipeline", "⚠ At risk", "🤖 Next best action") are all well
+  short of the band, so **no right padding is added pre-emptively** —
+  implementation must measure the rendered labels and add `padding-right` only
+  if one actually reaches the band's zone. Measured during implementation: all
+  three clear it by 70–185px, so **no padding rule was added**.
+
+## Known limitation — the fan occludes two of the three ribbons
+
+Found in the final holistic review, after both per-task reviews had passed,
+because it only exists in the assembled row rather than in any single card.
+
+The fan overlaps each card 26px onto its neighbour and stacks them z 1, 2, 6, 5,
+4, 3 (the Pace card is the apex). Cards 1 and 2 therefore sit *under* the card to
+their right — the same corner the ribbon occupies. Rendered: **Pipeline and At
+risk show the band cut off just past the digit; only the AI card shows the full
+symmetric folded corner.** Hovering lifts a card to `z-index:10` and momentarily
+restores its whole ribbon, which is why the row reads fine in motion.
+
+Nothing looks broken — the digits are never clipped, and the ribbons still read
+as ranked flags — but the approved mockup showed three symmetric folded corners,
+and that is not what ships. Left as-is pending a user call, because every fix
+touches something the spec's own constraints protect:
+
+- **Raise the flagged cards' z-index** — restores all three corners, but changes
+  the fan's deliberate stacking arc (Pace as apex).
+- **Move the ribbon to the top-left** — fixes cards 1 and 2, but breaks the AI
+  card, whose *left* edge is the overlapped one. No single corner is free on all
+  three.
+- **Pull the band inboard** so the text sits inside the ~66px visible region —
+  keeps the fan untouched, at the cost of a smaller corner flag.
+- **Accept as-is** — the flags read, and hover reveals the full corner.
 
 ## Accessibility
 

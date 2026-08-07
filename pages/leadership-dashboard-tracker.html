@@ -1241,8 +1241,8 @@ table.d tr.tot td{font-weight:900; border-top:1.5px solid var(--art-ink); border
     <div class="w s12" data-mode-only="next"><div class="strip">
       <div class="st st-lead">
         <span class="tile-k">Will we hit RM 240.0M?</span>
-        <span class="st-v pu">RM 222.7M</span>
-        <span class="tile-s">Weighted forecast · <b class="dn">RM 17.3M short</b> · reachable only at best case</span>
+        <span class="st-v pu">RM 222.9M</span>
+        <span class="tile-s">Weighted forecast · <b class="dn">RM 17.1M short</b> · reachable only at best case</span>
         <span class="prov-s"><i class="dot dot-p"></i>needs pipeline</span>
       </div>
       <div class="st">
@@ -1274,7 +1274,7 @@ table.d tr.tot td{font-weight:900; border-top:1.5px solid var(--art-ink); border
         <span class="prov-s"><i class="dot dot-c"></i>1 + 2 <i class="dot dot-p" style="margin-left:7px"></i>pipeline</span></div>
       <div class="cw"><svg id="cFan" viewBox="0 0 700 300" width="100%" role="img" aria-label="Cumulative revenue against target with commit, weighted and best-case projections to December"></svg></div>
       <div class="key"><span><i class="sw" style="background:var(--art-derived)"></i>Actual to date</span><span><i class="sw" style="background:var(--art-imagined)"></i>Weighted forecast</span><span><i class="sw sw-band"></i>Commit 210.2 &rarr; best case 239.4</span><span><i class="sw sw-plan"></i>Plan</span></div>
-      <p class="note"><b>The plan line is only touched by best case.</b> Weighted lands RM 17.3M short and commit RM 29.8M short — so the question stops being "are we behind" and becomes "which of these 73 open deals must close". That is the difference between a dashboard that reports and one that directs.</p>
+      <p class="note"><b>The plan line is only touched by best case.</b> Weighted lands RM 17.1M short and commit RM 29.8M short — so the question stops being "are we behind" and becomes "which of these 73 open deals must close". That is the difference between a dashboard that reports and one that directs.</p>
     </div></div>
 
     <!-- ── Revenue bridge ── -->
@@ -1511,7 +1511,7 @@ table.d tr.tot td{font-weight:900; border-top:1.5px solid var(--art-ink); border
   (function(){
     var act=[16.2,33.3,51.7,68.7,88.3,108.5,127.6,148.2];
     var tgt=[18.6,37.6,57.0,76.2,96.2,116.6,136.8,157.6,178.2,199.0,219.4,240.0];
-    var com=[148.2,163.2,178.6,194.2,210.2], wtd=[148.2,166.2,184.6,203.4,222.7], bst=[148.2,170.2,192.8,215.9,239.4];
+    var com=[148.2,163.2,178.6,194.2,210.2], wtd=[148.2,166.2,184.6,203.4,222.9], bst=[148.2,170.2,192.8,215.9,239.4];
     var L=48,R=634,T=22,B=252,max=260;
     var X=function(i){return L+(R-L)*(i/11);}, Y=function(v){return B-(v/max)*(B-T);};
     var s='';
@@ -1538,8 +1538,8 @@ table.d tr.tot td{font-weight:900; border-top:1.5px solid var(--art-ink); border
     s+=txt(X(7)+5,T+9,'PROJECTED',{s:8.5,w:800,f:C.fnt,st:'letter-spacing:.1em'});
     // endpoint callouts
     s+=txt(R+5,Y(240)-5,'plan 240.0',{s:9.5,w:800,f:C.ink});
-    s+=txt(R+5,Y(222.7)-2,'weighted',{s:9,w:700,f:C.pur});
-    s+=txt(R+5,Y(222.7)+13,'222.7',{s:10.5,w:900,f:C.pur});
+    s+=txt(R+5,Y(222.9)-2,'weighted',{s:9,w:700,f:C.pur});
+    s+=txt(R+5,Y(222.9)+13,'222.9',{s:10.5,w:900,f:C.pur});
     for(var x=0;x<12;x+=1){ s+=txt(X(x),B+15,M[x],{s:9,f:C.fnt,a:'middle'}); }
     s+=ln(L,B,R,B,{c:C.rule,w:1.5});
     set('cFan',s);
@@ -1589,7 +1589,7 @@ table.d tr.tot td{font-weight:900; border-top:1.5px solid var(--art-ink); border
     var y2=top+rh*3-14;
     s+=ln(L,y2,L+W,y2,{c:C.rule,w:1.2});
     s+=txt(L,y2+18,'Weighted total',{s:11,w:800,f:C.ink});
-    s+=txt(L+W,y2+18,'RM 74.5M',{s:12.5,w:900,f:C.pur,a:'end'});
+    s+=txt(L+W,y2+18,'RM 74.7M',{s:12.5,w:900,f:C.pur,a:'end'});
     set('cFunnel',s);
   })();
 

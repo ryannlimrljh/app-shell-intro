@@ -1,0 +1,5 @@
+{
+  "rewrites": [
+    { "source": "/", "destination": "/pages/app-shell-intro.html" }
+  ]
+}

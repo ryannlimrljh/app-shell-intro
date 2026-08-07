@@ -2519,7 +2519,8 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
 // against 157.6 target (94%, gap exactly 9.4). Label placement in the two
 // scatters is first-fit against a running collision map — audited at 1px
 // (a 3px threshold let visually-jammed pairs through; see the tracker's
-// history).
+// history). Data must stay entity-free — txt() does no escaping, so a name
+// containing & or < would truncate the SVG.
 (function () {
   var C = { ink:'var(--color-neutral-9)', mut:'var(--color-neutral-5)', fnt:'var(--color-neutral-4)',
             rule:'var(--color-neutral-3)', good:'var(--color-green)', warn:'var(--color-amber)',
@@ -2582,7 +2583,7 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
       s+=txt(x+w-7,y+14,(r.v>0?'+':'')+r.v.toFixed(1),{s:10.5,w:900,f:'#fff',a:'end'});
     });
     var ny=top+rh*3+2;
-    s+=ln(L-4,ny-8,L+W+40,ny-8,{c:C.rule,w:1.2});
+    s+=ln(L-4,ny-8,L+W+32,ny-8,{c:C.rule,w:1.2});
     s+=rect(zero,ny,8.9*sc,22,{f:C.ink,r:2});
     s+=txt(L-8,ny+15,'Net growth',{s:11,w:900,f:C.ink,a:'end'});
     s+=txt(zero+8.9*sc-7,ny+15,'+8.9',{s:11,w:900,f:'#fff',a:'end'});
@@ -2654,6 +2655,7 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
       var w=Math.max(p.n.length*fs*0.55, p.r?78:0)+2;
       var cands=[[cx+rad+4,cy-h/2],[cx-rad-4-w,cy-h/2],[cx-w/2,cy-rad-h-2],[cx-w/2,cy+rad+2],
                  [cx+rad+4,cy-h-3],[cx+rad+4,cy+3],[cx-rad-4-w,cy-h-3],[cx-rad-4-w,cy+3]];
+      // no free slot ⇒ label silently dropped — re-run the 1px audit after ANY data edit
       for(var i=0;i<cands.length;i++){
         if(free(cands[i][0],cands[i][1],w,h)){
           placed.push({x:cands[i][0],y:cands[i][1],w:w,h:h});
@@ -2731,6 +2733,7 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
       var w=p.n.length*4.9+2, h=10.5;
       var cands=[[cx-w/2,cy-r-h-2],[cx+r+4,cy-h/2],[cx-r-4-w,cy-h/2],[cx-w/2,cy+r+2],
                  [cx+r+4,cy-h-3],[cx+r+4,cy+3],[cx-r-4-w,cy-h-3],[cx-r-4-w,cy+3]];
+      // no free slot ⇒ label silently dropped — re-run the 1px audit after ANY data edit
       for(var i=0;i<cands.length;i++){
         if(free(cands[i][0],cands[i][1],w,h)){
           placed.push({x:cands[i][0],y:cands[i][1],w:w,h:h});

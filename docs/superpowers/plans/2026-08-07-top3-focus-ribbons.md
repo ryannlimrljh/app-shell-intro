@@ -93,7 +93,9 @@ Insert exactly this (the comment is required — it carries the geometry derivat
 
 Note `font-style:normal` — the band uses `<i>` as a neutral inline element (matching how the page already uses `<i>` for Phosphor icons), so the browser's default italic must be cancelled.
 
-- [ ] **Step 2: Verify the CSS parses and resolves**
+> **⚠ SUPERSEDED — do not run the snippet in Step 2 below.** Both the CSS block above and the probe in Step 2 predate code review; see **Deviations** at the top of this file. The shipped band selector is `.c-hcard-ribbon-band` (not `.c-hcard-ribbon i`), overflow is `clip` (not `hidden`), the weight comes from `var(--weight-extrabold)`, and there is no `font-style:normal` — that declaration only ever existed to undo `<i>`. Run against the shipped CSS, Step 2's probe returns `bandTop: "auto"`, `bandBg: "rgba(0, 0, 0, 0)"`, `bandTransform: "none"` and reads as though the CSS were broken when it is correct. The equivalent probe for the shipped CSS is the one recorded in commit `3515419`'s verification: build the band as `<span class="c-hcard-ribbon-band">`, and test scroll-container status by writing `probe.scrollLeft = 50` and asserting it stays `0` — `scrollWidth > clientWidth` cannot distinguish `clip` from `hidden`, since it reports layout overflow either way.
+
+- [ ] **Step 2: Verify the CSS parses and resolves** *(superseded — see the warning above)*
 
 Ensure a dev server is running (from the worktree root: `python3 -m http.server 8791`, backgrounded). Load `http://localhost:8791/pages/app-shell-intro.html` in the Browser pane, then run via `javascript_tool`:
 

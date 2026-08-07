@@ -1,5 +1,5 @@
 {
-  "rewrites": [
-    { "source": "/", "destination": "/pages/app-shell-intro.html" }
+  "redirects": [
+    { "source": "/", "destination": "/pages/app-shell-intro.html", "permanent": false }
   ]
 }

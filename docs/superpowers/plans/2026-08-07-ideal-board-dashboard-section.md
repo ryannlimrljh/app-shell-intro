@@ -995,15 +995,23 @@ Recorded during subagent-driven execution, 2026-08-07/08:
 4. **Churn-table thead approach:** `.c-dash-vh` applied to the `<thead>`
    element directly — verified it collapses out of flow with zero layout shift
    while exposing headers to the accessibility tree.
-5. **Holistic-review fixes (2026-08-08):** the reveal/parking observer's
-   `threshold: 0.12` could never fire on phone portrait (at 375×667 the
-   single-column section is ~8,000px tall, max intersection ratio ~0.08) —
-   changed to `threshold: 0` (any-pixel semantics), which also improves
-   parking: the ask box stays parked while any of the section is visible and
-   unparks only when it fully leaves. The fixed date banner (`.c-canvas-date`)
-   now fades via `.is-scrolled-away` once the container scrolls past 40px
-   (it predates the page scrolling and collided with card text at
-   scrollTop ~520; instant under reduced motion). Both chart modules
-   (`pages/app-shell-intro.html`, `pages/leadership-dashboard-tracker.html`)
-   gained header pointers naming each other as diverged copies: port fixes
-   both ways.
+5. **Holistic-review fixes (2026-08-08):** the reveal and parking jobs were
+   split apart after both intersection-based approaches failed one geometry
+   each. The original `threshold: 0.12` was unreachable on phone portrait
+   (at 375×667 the single-column section is ~8,000px tall, max intersection
+   ratio ~0.08 — the section never revealed at all); the first fix,
+   `threshold: 0` doing both jobs, parked the ask box AT LOAD on any window
+   taller than the section's offsetTop (~742px — most desktops), because the
+   section head peeks above the fold and the observer's first fire parked a
+   box the user was still watching type. Final mechanism: the observer keeps
+   only the one-way reveal at `threshold: 0` (mobile-safe, any-pixel), and
+   parking moved to the passive scroll listener as deterministic scrollTop
+   math — park once ~240px of the section is visible
+   (`scrollTop > dash.offsetTop - clientHeight + 240`), unpark below that,
+   evaluated once at setup so load state is correct. The fixed date banner
+   (`.c-canvas-date`) fades via `.is-scrolled-away` on the same listener once
+   the container scrolls past 40px (it predates the page scrolling and
+   collided with card text at scrollTop ~520; instant under reduced motion).
+   Both chart modules (`pages/app-shell-intro.html`,
+   `pages/leadership-dashboard-tracker.html`) gained header pointers naming
+   each other as diverged copies: port fixes both ways.

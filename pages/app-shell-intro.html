@@ -2463,10 +2463,11 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
   })();
 })();
 
-// ── Section 2: scroll-in reveal + ask-box parking. One observer does both.
-// Reveal is one-way (class add is idempotent — the revealCanvasContent()
-// double-fire bug is the precedent for being paranoid here); parking is
-// two-way so the box returns when the user scrolls back up to the cards.
+// ── Section 2: scroll-in reveal (observer) + ask-box parking (scroll listener).
+// The observer does ONE job now — reveal, one-way (class add is idempotent —
+// the revealCanvasContent() double-fire bug is the precedent for being
+// paranoid here). Parking is two-way and lives on the scroll listener below:
+// see the WHY comment there for why it left the observer.
 // root is the real scroll container, not the viewport.
 (function () {
   const shellContent = document.querySelector('.c-shell-content');
@@ -2506,23 +2507,32 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
       if (entry.isIntersecting) {
         dash.classList.add('is-revealed');
         positionDashThumb();
-        if (askBox) askBox.classList.add('is-settled', 'is-parked');
-      } else if (askBox) {
-        askBox.classList.remove('is-parked');
       }
     });
-  }, { root: shellContent, threshold: 0 }); // threshold 0 = any-pixel semantics: the section is many viewports tall on narrow screens (375×667 renders it ~8,000px, max ratio ~0.08), so any fractional threshold is unreachable there. isIntersecting flips true at first pixel (reveal + park) and false only when fully out of view (unpark).
+  }, { root: shellContent, threshold: 0 }); // threshold 0 = any-pixel semantics: the section is many viewports tall on narrow screens (375×667 renders it ~8,000px, max ratio ~0.08), so any fractional threshold is unreachable there. Reveal fires at first pixel; it is one-way, so no else branch.
   io.observe(dash);
 
   // Date banner — fade once the container scrolls. WHY: the fixed date predates
   // the page scrolling at all; once Section 2 made the container scroll, it
   // floated over card text (collision at scrollTop ~520), so hide it off-top.
   const canvasDate = document.querySelector('.c-canvas-date');
-  if (canvasDate) {
-    shellContent.addEventListener('scroll', () => {
+  function onShellScroll() {
+    if (canvasDate) {
       canvasDate.classList.toggle('is-scrolled-away', shellContent.scrollTop > 40);
-    }, { passive: true });
+    }
+    // Ask-box parking: park once ~240px of the section is visible, unpark when
+    // it drops below that. Deterministic scrollTop math instead of the observer:
+    // threshold 0 parks AT LOAD on any window taller than the section's offsetTop
+    // (~742px — most desktops), because the section head peeks above the fold.
+    // clientHeight read per-event so window resizes stay correct.
+    if (askBox && dash) {
+      const shouldPark = shellContent.scrollTop > dash.offsetTop - shellContent.clientHeight + 240;
+      if (shouldPark) askBox.classList.add('is-settled', 'is-parked');
+      else askBox.classList.remove('is-parked');
+    }
   }
+  shellContent.addEventListener('scroll', onShellScroll, { passive: true });
+  onShellScroll(); // evaluate initial state — at scrollTop 0 this must NOT park on any window height
 })();
 
 // ── Ideal-board charts. Fixed-viewBox SVG built as strings — zero layout

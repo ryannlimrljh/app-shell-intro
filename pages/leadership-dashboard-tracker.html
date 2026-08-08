@@ -773,6 +773,15 @@
   --art-derived:#1473E6; --art-derived-bg:#E8F1FD; --art-derived-ink:#0B4FA8;
   --art-imagined:#9F56FF; --art-imagined-bg:#F3EBFF; --art-imagined-ink:#5B21B6;
   --art-illus-bg:#FFF6E9; --art-illus-ink:#8A5A00; --art-accent-bg:#FFEEE7;
+  /* -ink variants: readable text counterparts to the saturated status fills.
+     Never point chart fills/bars/dots at these — they exist so text can
+     clear 4.5:1 without re-valuing the fills that already ship in Modes 1/2. */
+  --art-good-ink:#00875A; --art-warn-ink:#8A5A00; --art-crit-ink:#D01427;
+  /* Tier system gets its own hue, separate from --art-imagined (which means
+     "invented / not-yet-real data" elsewhere in this file — dot-p, t-imagined,
+     the Mode 2 banner). A filled strategic-tier dot must not be mistaken for
+     a hollow pending ring. */
+  --art-strategic:#7C3AED;
   --art-shadow:0 1px 2px rgba(140,130,110,.28);
 }
 @media (prefers-color-scheme: dark){
@@ -782,6 +791,8 @@
     --art-derived-bg:#132A47; --art-derived-ink:#8FC0FF;
     --art-imagined-bg:#2A1D45; --art-imagined-ink:#C9A6FF;
     --art-illus-bg:#33260F; --art-illus-ink:#F0C173; --art-accent-bg:#3A1C10;
+    --art-good-ink:#5BE0A2; --art-warn-ink:#F0C173; --art-crit-ink:#FF8A94;
+    --art-strategic:#C9A6FF;
     --art-shadow:0 1px 2px rgba(0,0,0,.5);
     /* re-value the DS's own tokens so .c-stat / .c-table / .c-datatable follow */
     --color-neutral-1:#1D1B17; --color-neutral-2:#252218; --color-neutral-3:#36322B;
@@ -795,6 +806,8 @@
   --art-derived-bg:#132A47; --art-derived-ink:#8FC0FF;
   --art-imagined-bg:#2A1D45; --art-imagined-ink:#C9A6FF;
   --art-illus-bg:#33260F; --art-illus-ink:#F0C173; --art-accent-bg:#3A1C10;
+  --art-good-ink:#5BE0A2; --art-warn-ink:#F0C173; --art-crit-ink:#FF8A94;
+  --art-strategic:#C9A6FF;
   --art-shadow:0 1px 2px rgba(0,0,0,.5);
   --color-neutral-1:#1D1B17; --color-neutral-2:#252218; --color-neutral-3:#36322B;
   --color-neutral-4:#6C6659; --color-neutral-5:#ABA69A; --color-neutral-9:#F3F0E9;
@@ -806,6 +819,8 @@
   --art-derived-bg:#E8F1FD; --art-derived-ink:#0B4FA8;
   --art-imagined-bg:#F3EBFF; --art-imagined-ink:#5B21B6;
   --art-illus-bg:#FFF6E9; --art-illus-ink:#8A5A00; --art-accent-bg:#FFEEE7;
+  --art-good-ink:#00875A; --art-warn-ink:#8A5A00; --art-crit-ink:#D01427;
+  --art-strategic:#7C3AED;
   --art-shadow:0 1px 2px rgba(140,130,110,.28);
   --color-neutral-1:#FFFFFF; --color-neutral-2:#F0F0F0; --color-neutral-3:#D8D8D8;
   --color-neutral-4:#BDBDBD; --color-neutral-5:#5A5A5A; --color-neutral-9:#080808;
@@ -1388,6 +1403,8 @@ table.d tr.tot td{font-weight:900; border-top:1.5px solid var(--art-ink); border
       </div>
     </div></div>
 
+    <!-- m3Health and its m3Due/m3Stalled/m3Closed spans below are hooks wired
+         by the Task 5 closure loop — inert until then, do not delete as dead ids. -->
     <div class="w s12" data-mode-only="decide"><div class="m3-health" id="m3Health">
       <div class="m3-hm">
         <span class="m3-hm-k">Forecast to plan</span>
@@ -1646,35 +1663,71 @@ table.d tr.tot td{font-weight:900; border-top:1.5px solid var(--art-ink); border
 /* ── Health strip: calm context. Six metrics, no charts, nothing that
    competes with the decisions below. Each carries direction AND velocity —
    a leader needs to know whether something is deteriorating, not only
-   where it stands. ── */
+   where it stands.
+   Each breakpoint below is a SELF-CONTAINED reset of border-right/border-bottom
+   for every .m3-hm before applying its own row/column overrides — relying on
+   :last-child (or leftover rules from a wider breakpoint) misgroups the strip
+   at the 3- and 2-column steps, since the vertical rule between columns then
+   runs uninterrupted through multiple rows. ── */
 .m3-health{display:grid; grid-template-columns:repeat(6,1fr); gap:0;
   background:var(--art-surface); border:1px solid var(--art-rule); border-radius:3px;
   box-shadow:var(--art-shadow); overflow:hidden;}
-@media (max-width:1150px){ .m3-health{grid-template-columns:repeat(3,1fr);} }
-@media (max-width:680px){ .m3-health{grid-template-columns:repeat(2,1fr);} }
-.m3-hm{padding:14px 15px; border-right:1px solid var(--art-rule); display:flex; flex-direction:column; gap:4px;}
-.m3-hm:last-child{border-right:0;}
-.m3-hm-k{font-size:9.5px; font-weight:800; letter-spacing:.12em; text-transform:uppercase; color:var(--art-faint);}
+.m3-hm{padding:14px 15px; display:flex; flex-direction:column; gap:4px;
+  border-right:1px solid var(--art-rule); border-bottom:0;}
+.m3-hm:nth-child(6n){border-right:0;}
+@media (max-width:1150px){
+  .m3-health{grid-template-columns:repeat(3,1fr);}
+  .m3-hm{border-right:1px solid var(--art-rule); border-bottom:0;}
+  .m3-hm:nth-child(3n){border-right:0;}
+  .m3-hm:nth-child(-n+3){border-bottom:1px solid var(--art-rule);}
+}
+@media (max-width:680px){
+  .m3-health{grid-template-columns:repeat(2,1fr);}
+  .m3-hm{border-right:1px solid var(--art-rule); border-bottom:0;}
+  /* Explicit odd/even pair, not a bare .m3-hm reset — the 1150px block's
+     nth-child(3n) rule has the same specificity as a plain nth-child
+     selector, so a lower-specificity .m3-hm{border-right:1px} reset here
+     cannot out-rank it for item 3 (nth-child(3) is odd, missed by nth(2n)).
+     Restating col1 explicitly at equal specificity is what actually wins. */
+  .m3-hm:nth-child(2n+1){border-right:1px solid var(--art-rule);}
+  .m3-hm:nth-child(2n){border-right:0;}
+  .m3-hm:nth-child(-n+4){border-bottom:1px solid var(--art-rule);}
+}
+.m3-hm-k{font-size:9.5px; font-weight:800; letter-spacing:.12em; text-transform:uppercase; color:var(--art-muted);}
 .m3-hm-v{font-size:21px; font-weight:900; letter-spacing:-.02em; line-height:1.1; font-variant-numeric:tabular-nums;}
 .m3-hm-d{font-size:11.5px; color:var(--art-muted); line-height:1.45;}
 .m3-hm-d b{color:var(--art-ink);}
-.m3-up{color:var(--art-good);} .m3-dn{color:var(--art-crit);}
+/* Raised specificity (.m3-hm-d b.m3-up/.m3-dn) so the delta colour actually
+   wins over the plain `.m3-hm-d b{color:ink}` descendant rule instead of
+   losing to it silently — and -ink tokens, not the saturated fills that
+   chart bars/dots/fills use elsewhere, so this clears 4.5:1 in both themes
+   without re-valuing those shared fills. */
+.m3-up{color:var(--art-good-ink);} .m3-dn{color:var(--art-crit-ink);}
+.m3-hm-d b.m3-up{color:var(--art-good-ink);} .m3-hm-d b.m3-dn{color:var(--art-crit-ink);}
 
 /* ── Tier system. Weight is a function of stakes, assigned by the page —
-   a RM 56.3M exposure physically cannot look like an interesting aside. ── */
+   a RM 56.3M exposure physically cannot look like an interesting aside.
+   Dot SHAPE, not just hue, carries the tier so it reads before the label
+   is read, and so the strategic tier's purple can never be mistaken for
+   this file's existing purple = "invented / not-yet-real data" (dot-p,
+   t-imagined, the Mode 2 banner) — hence its own --art-strategic token,
+   never --art-imagined. ── */
 .m3-tier{font-size:9.5px; font-weight:800; letter-spacing:.14em; text-transform:uppercase;
   display:inline-flex; align-items:center; gap:6px;}
-.m3-tier::before{content:''; width:8px; height:8px; border-radius:50%; background:currentColor;}
-.m3-t-urgent{color:var(--art-crit);}
-.m3-t-risk{color:var(--art-warn);}
-.m3-t-opp{color:var(--art-good);}
-.m3-t-strategic{color:var(--art-imagined);}
+.m3-tier::before{content:''; width:8px; height:8px; border-radius:50%; background:currentColor; flex:none;}
+.m3-t-urgent{color:var(--art-crit-ink);} /* filled circle (default) */
+.m3-t-risk{color:var(--art-warn-ink);}
+.m3-t-risk::before{border-radius:1px; transform:rotate(45deg);} /* filled diamond */
+.m3-t-opp{color:var(--art-good-ink);}
+.m3-t-opp::before{background:transparent; border:1.5px solid currentColor; width:6.5px; height:6.5px;} /* ring */
+.m3-t-strategic{color:var(--art-strategic);}
+.m3-t-strategic::before{border-radius:2px;} /* filled square */
 
 /* Section rules — quiet labels, not cards, so the tiers below them read as
    the page's structure rather than as more boxes. */
 .m3-srule{display:flex; align-items:baseline; gap:12px; margin:8px 0 -2px;}
 .m3-srule h3{margin:0; font-size:13px; font-weight:900; letter-spacing:.1em; text-transform:uppercase; color:var(--art-ink);}
-.m3-srule p{margin:0; font-size:12px; color:var(--art-faint);}
+.m3-srule p{margin:0; font-size:12px; color:var(--art-muted);}
 
 /* ── Watch: compact, threshold-only, and deliberately BUTTONLESS. Every
    tier having actions is how the page went flat in the first place. The
@@ -1686,10 +1739,14 @@ table.d tr.tot td{font-weight:900; border-top:1.5px solid var(--art-ink); border
   box-shadow:var(--art-shadow); padding:13px 15px; display:flex; flex-direction:column; gap:6px;}
 .m3-wcard h4{margin:0; font-size:12.5px; font-weight:800; color:var(--art-ink);}
 .m3-wv{font-size:15px; font-weight:900; letter-spacing:-.01em; font-variant-numeric:tabular-nums;}
+.m3-wv.m3-up{color:var(--art-good-ink);} .m3-wv.m3-dn{color:var(--art-crit-ink);}
 .m3-wcard p{margin:0; font-size:11.5px; color:var(--art-muted); line-height:1.5;}
-.m3-thr{margin-top:auto !important; padding-top:8px; border-top:1px dashed var(--art-rule);
-  font-size:11px !important; color:var(--art-faint) !important;}
-.m3-thr b{color:var(--art-warn);}
+/* Scoped to .m3-wcard p instead of fighting `.m3-wcard p` with !important —
+   also leaves Task 3's decision cards free to reuse .m3-thr without a
+   specificity fight. */
+.m3-wcard p.m3-thr{margin-top:auto; padding-top:8px; border-top:1px dashed var(--art-rule);
+  font-size:11px; color:var(--art-muted);}
+.m3-thr b{color:var(--art-warn-ink);}
 </style>
 
 <script>

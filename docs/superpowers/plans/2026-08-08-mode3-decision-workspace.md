@@ -1490,4 +1490,37 @@ Republishing the artifact is a **separate act** from pushing the repo, and also 
 Artifact(file_path: <built body>, url: "https://claude.ai/code/artifact/886c79d5-fc33-4625-ac36-13a32ba2aa1a")
 ```
 
-Note the artifact body is a *derived* file, not `pages/leadership-dashboard-tracker.html` itself: the artifact publishes without `<!doctype>`/`<html>`/`<head>`/`<body>` wrappers and with the DS CSS and the Mulish font already inlined as a data URI, because a strict CSP blocks every external host. The previous build lives at `scratchpad/artifact-body.html`; regenerate it the same way rather than uploading the page file directly.
+### The publish step is a wrapper strip, not a rebuild
+
+Verified at commit `b20bd73`. `pages/leadership-dashboard-tracker.html` is **already fully self-contained** — DS CSS inlined, Mulish embedded as a `data:font/ttf;base64` URI, and **zero external requests**: no `<link>`, no `<script src>`, no `<img>`, no `@import`, no remote `url()`. The single `components.css` occurrence in the file is inside a code comment on line 198. So the CSP that blocks external hosts is already satisfied by the page as committed.
+
+The only thing publishing needs is removing the document wrapper, because the Artifact tool supplies its own. **Keep `<title>`** — the tool reads it for the tab and gallery name.
+
+```bash
+cd /Users/kwlkokho/Documents/GitHub/Collabrium-DS/.worktrees/app-shell-intro-page
+SCRATCH=/private/tmp/claude-502/-Users-kwlkokho-Documents-GitHub-Collabrium-DS/a61b8061-3b61-4e4b-8d91-684c2d5fcaab/scratchpad
+sed -E '/^<!DOCTYPE html>$/d; /^<html lang="en">$/d; /^<head>$/d; /^<\/head>$/d; /^<body>$/d; /^<\/body>$/d; /^<\/html>$/d; /^<meta /d' \
+  pages/leadership-dashboard-tracker.html > "$SCRATCH/mode3-artifact-body.html"
+grep -cE '^<!DOCTYPE|^<html|^<head|^<body|^<meta ' "$SCRATCH/mode3-artifact-body.html"   # expect 0
+grep -c '<title>' "$SCRATCH/mode3-artifact-body.html"                                    # expect 1
+```
+
+Then publish to the existing URL so the link stays stable:
+
+```
+Artifact(file_path: "$SCRATCH/mode3-artifact-body.html",
+         url: "https://claude.ai/code/artifact/886c79d5-fc33-4625-ac36-13a32ba2aa1a",
+         favicon: <the artifact's existing emoji — do NOT change it>)
+```
+
+### Scratchpad files: which is which
+
+Three older copies exist and only one is a useful reference. Do not publish any of them.
+
+| File | What it is |
+|---|---|
+| `scratchpad/artifact-body.html` (80KB) | A **template**, not a build — it carries the literal string `__FONT_B64__` where the font belongs. This is what the 425KB publish copy was generated *from*. |
+| `scratchpad/collabrium-leadership-tracker.html` (425KB) | The **last published body**. Differs from the current git-tracked page by exactly one thing: a two-line code comment added to the chart module after publishing. Nothing visible. |
+| `scratchpad/Collabrium-Leadership-Dashboard-Tracker.html` (399KB) | **Stale export** — only 12 Mode 2 widgets against the current 13. Ignore it. |
+
+Because the live artifact is one comment behind the committed page and nothing else, publishing after this work ships Mode 3 and that comment, with no other drift.

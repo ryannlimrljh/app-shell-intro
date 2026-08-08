@@ -855,7 +855,26 @@ body{margin:0; background:var(--art-canvas); color:var(--art-ink);
 .modes .m-t{display:block; font-size:15px; font-weight:800; margin-top:3px;}
 .modes .m-d{display:block; font-size:12px; color:var(--art-muted); margin-top:2px;}
 .modes button[aria-pressed="true"]{background:var(--art-ink); color:var(--art-canvas);}
-.modes button[aria-pressed="true"] .m-k,.modes button[aria-pressed="true"] .m-d{color:rgba(252,250,245,.72);}
+/* Pressed sub-text. One rule per pressed background, because a single
+   translucent white assumed a dark pressed surface — true only for Mode 1 in
+   light. Mode 1 in dark was 1.09:1 (invisible) and Mode 3 3.02:1.
+   Modes 2/3 sit on saturated backgrounds (--art-imagined #9F56FF,
+   --art-accent #FF5825) that are NOT redefined in the dark theme, so the
+   fix must be theme-invariant too. Measured: opaque white gives only
+   4.00:1 on #9F56FF and 3.15:1 on #FF5825 — both fail AA at these font
+   sizes (10px/12px, neither qualifies as "large text"). Opaque black
+   measures 5.25:1 and 6.67:1 respectively, so black is the correct fix,
+   not white — the plan's snippet got the polarity backwards. .m-t (the
+   button title) sat on the same fixed near-white --art-canvas value with
+   the same failure and is corrected alongside .m-k/.m-d for consistency. */
+.modes button[aria-pressed="true"] .m-k,
+.modes button[aria-pressed="true"] .m-d{color:var(--art-canvas); opacity:.82;}
+[data-mode="next"]   .modes button[aria-pressed="true"] .m-k,
+[data-mode="next"]   .modes button[aria-pressed="true"] .m-d,
+[data-mode="next"]   .modes button[aria-pressed="true"] .m-t,
+[data-mode="decide"] .modes button[aria-pressed="true"] .m-k,
+[data-mode="decide"] .modes button[aria-pressed="true"] .m-d,
+[data-mode="decide"] .modes button[aria-pressed="true"] .m-t{color:#000000; opacity:1;}
 [data-mode="next"] .modes button[aria-pressed="true"]{background:var(--art-imagined); border-color:var(--art-imagined);}
 [data-mode="next"] .modes{border-color:var(--art-imagined);}
 [data-mode="next"] .modes button{border-right-color:var(--art-imagined);}
@@ -1634,9 +1653,50 @@ table.d tr.tot td{font-weight:900; border-top:1.5px solid var(--art-ink); border
 
     </div></div>
 
+    <div class="w s12" data-mode-only="decide"><div class="m3-asks">
+      <span class="m3-hz-lbl">Questions this board can now answer</span>
+      <span class="m3-ask">Which eight deals close the RM 17.1M gap?</span>
+      <span class="m3-ask">Draft the board note on the 0.4pt share decline.</span>
+      <span class="m3-ask">Who owns the top-five sponsor gap?</span>
+      <span class="m3-ask">What did we decide last month that has not moved?</span>
+    </div></div>
+
+    <div class="w s12" data-mode-only="decide"><div class="m3-srule">
+      <h3>Evidence</h3><p>The nine analytical panels, one click away in Mode 2 — kept there so there is one source of truth</p>
+    </div></div>
+
+    <div class="w s12" data-mode-only="decide"><div class="m3-ev">
+      <button type="button" class="m3-ev-row" data-panel="cFan">Cumulative revenue against plan, with the three closes<span>Mode 2 &rarr;</span></button>
+      <button type="button" class="m3-ev-row" data-panel="cBridge">Where the RM 8.9M of growth came from<span>Mode 2 &rarr;</span></button>
+      <button type="button" class="m3-ev-row" data-panel="cFunnel">Pipeline by stage<span>Mode 2 &rarr;</span></button>
+      <button type="button" class="m3-ev-row" data-panel="cQuad">Which reps are actually at risk<span>Mode 2 &rarr;</span></button>
+      <button type="button" class="m3-ev-row" data-panel="cFill">Sold against what we had to sell<span>Mode 2 &rarr;</span></button>
+      <button type="button" class="m3-ev-row" data-panel="cBubble">Revenue against contribution<span>Mode 2 &rarr;</span></button>
+      <button type="button" class="m3-ev-row" data-panel="cChurn">Why RM 4.4M walked<span>Mode 2 &rarr;</span></button>
+      <button type="button" class="m3-ev-row" data-panel="cConc">How much rests on how few<span>Mode 2 &rarr;</span></button>
+      <button type="button" class="m3-ev-row" data-panel="cShare">Us against the market<span>Mode 2 &rarr;</span></button>
+    </div></div>
+
+    <div class="w s12" data-mode-only="decide"><div class="m3-srule">
+      <h3>Decision log</h3><p>What was decided, when, and what has happened since</p>
+    </div></div>
+
+    <div class="w s12" data-mode-only="decide"><div class="p">
+      <div class="cw"><table class="m3-log" id="m3Log">
+        <thead><tr><th>Decision</th><th>Decided</th><th>By</th><th>Outcome</th></tr></thead>
+        <tbody>
+          <tr><td><b>Diarise Petronas for the Q3 budget reset</b></td><td>5 Aug</td><td>Aisyah Rahman</td><td><span class="o-open">Scheduled</span> — still no meeting in the diary, 7 days</td></tr>
+          <tr><td><b>Rate review for AirAsia</b></td><td>1 Aug</td><td>Sales lead</td><td><span class="o-wait">Awaiting client</span></td></tr>
+          <tr><td><b>Restructure the Tealive package</b></td><td>28 Jul</td><td>Aisyah Rahman</td><td><span class="o-done">Closed</span> — won back RM 0.3M of RM 0.5M</td></tr>
+          <tr><td><b>Coach Daniel on closing technique</b></td><td>21 Jul</td><td>Sales lead</td><td><span class="o-moot">Moot</span> — the rep quadrant showed a prospecting gap, not a closing one</td></tr>
+        </tbody>
+      </table></div>
+      <p class="note"><span class="prov-s"><i class="dot dot-p"></i>pending</span> <b>Every row here is an operating layer no dataset supplies.</b> The last one is the point of the whole mode: a decision retired by evidence. Coaching Daniel on closing would have been the wrong quarter's work, and the board is what proved it.</p>
+    </div></div>
+
   </div>
 
-  <p class="foot"><b>Mode 1</b> is built only from the six confirmed datasets; computed values are tagged <span class="tag t-derived">Derived</span> and unsourced views <span class="tag t-illus">Illustrative</span>. <b>Mode 2</b> is the target state: confirmed data properly visualised alongside the sources still outstanding. Panels are marked <i class="dot dot-c" style="display:inline-block;vertical-align:middle"></i> confirmed, <i class="dot dot-d" style="display:inline-block;vertical-align:middle"></i> computed, or <i class="dot dot-p" style="display:inline-block;vertical-align:middle"></i> pending a source. Only the pending panels are invented; do not quote those as fact.<br>Built on the Collabrium design system · figures reconcile to RM 148.2M YTD against a RM 157.6M target.</p>
+  <p class="foot"><b>Mode 1</b> is built only from the six confirmed datasets; computed values are tagged <span class="tag t-derived">Derived</span> and unsourced views <span class="tag t-illus">Illustrative</span>. <b>Mode 2</b> is the target state: confirmed data properly visualised alongside the sources still outstanding. <b>Mode 3</b> is an experience study, not new analysis: it proves that the same content ordered by decision reads differently from the same content ordered by chart. Panels are marked <i class="dot dot-c" style="display:inline-block;vertical-align:middle"></i> confirmed, <i class="dot dot-d" style="display:inline-block;vertical-align:middle"></i> computed, or <i class="dot dot-p" style="display:inline-block;vertical-align:middle"></i> pending a source. Only the pending panels are invented; do not quote those as fact.<br>Built on the Collabrium design system · figures reconcile to RM 148.2M YTD against a RM 157.6M target.</p>
 </div>
 
 <script>
@@ -2088,6 +2148,41 @@ table.d tr.tot td{font-weight:900; border-top:1.5px solid var(--art-ink); border
   background:none; border:0; padding:0; font-family:inherit;}
 .dec-dlink:hover{color:var(--art-accent);}
 .dec-dlink:focus-visible{outline:2px solid var(--art-accent); outline-offset:2px;}
+
+/* ── Evidence tray: no cards at all, just titled rows. This is the calm
+   area. The nine panels stay in Mode 2 — one source of truth. ── */
+.m3-ev{background:var(--art-surface); border:1px solid var(--art-rule); border-radius:3px;
+  box-shadow:var(--art-shadow); overflow:hidden;}
+.m3-ev-row{display:flex; align-items:center; gap:12px; width:100%; padding:12px 16px;
+  border:0; border-top:1px solid var(--art-rule); background:none; font:inherit;
+  font-size:13px; font-weight:700; color:var(--art-ink); text-align:left; cursor:pointer;}
+.m3-ev-row:first-child{border-top:0;}
+.m3-ev-row:hover{background:var(--art-sunk); color:var(--art-accent);}
+.m3-ev-row:focus-visible{outline:2px solid var(--art-accent); outline-offset:-2px;}
+.m3-ev-row span{margin-left:auto; font-size:11px; font-weight:700; color:var(--art-faint);}
+
+/* ── Prompt chips. Inert on purpose: the tracker has no assistant composer
+   (that lives on app-shell-intro.html), so a working-looking one would be
+   the dead affordance the interaction budget exists to avoid. ── */
+.m3-asks{display:flex; gap:9px; flex-wrap:wrap; align-items:center;}
+.m3-ask{border:1px dashed var(--art-rule); border-radius:999px; padding:6px 13px;
+  font-size:11.5px; font-weight:700; color:var(--art-muted); background:var(--art-surface);}
+
+/* ── Decision log: the closure loop. Plain, muted, dated. Outcome classes
+   use the -ink variants (not the saturated fills) per this file's token
+   discipline for text — see DESIGN-SYSTEM.md notes above on --art-*-ink. ── */
+.m3-log{width:100%; border-collapse:collapse; font-size:12.5px;}
+.m3-log th{text-align:left; padding:8px 12px; font-size:9.5px; font-weight:800;
+  letter-spacing:.12em; text-transform:uppercase; color:var(--art-faint);
+  border-bottom:1px solid var(--art-rule);}
+.m3-log td{padding:9px 12px; border-bottom:1px solid var(--art-rule); color:var(--art-muted); vertical-align:top;}
+.m3-log tr:last-child td{border-bottom:0;}
+.m3-log td b{color:var(--art-ink);}
+.m3-log .o-open{color:var(--art-warn-ink); font-weight:800;}
+.m3-log .o-wait{color:var(--art-derived-ink); font-weight:800;}
+.m3-log .o-done{color:var(--art-good-ink); font-weight:800;}
+.m3-log .o-moot{color:var(--art-faint); font-weight:800;}
+.m3-log tr.is-new td{background:rgba(255,88,37,.06);}
 </style>
 
 <script>
@@ -2655,6 +2750,75 @@ table.d tr.tot td{font-weight:900; border-top:1.5px solid var(--art-ink); border
       }
     }
   });
+
+  // ── Status cycling: the closure thesis made tangible. Changing a status
+  // recomputes the health strip's three counts and writes a log row, so the
+  // page visibly knows something happened. Fully reversible by cycling round.
+  var STATUSES=['Not started','Scheduled','Awaiting client','Closed','Moot'];
+  var CLS={'Not started':'o-open','Scheduled':'o-open','Awaiting client':'o-wait',
+           'Closed':'o-done','Moot':'o-moot'};
+
+  function recount(){
+    var decs=Array.prototype.slice.call(document.querySelectorAll('.dec'));
+    var live=function(d){ var s=d.querySelector('.m3-chip').dataset.status;
+                          return s!=='Closed'&&s!=='Moot'; };
+    var due=decs.filter(function(d){ return d.dataset.h.indexOf('week')>-1 && live(d); }).length;
+    var stalled=decs.filter(function(d){ return d.dataset.stalled==='true' && live(d); }).length;
+    var closed=decs.filter(function(d){ return d.querySelector('.m3-chip').dataset.status==='Closed'; }).length;
+    document.getElementById('m3Due').textContent=due+' due';
+    document.getElementById('m3Stalled').textContent=stalled;
+    document.getElementById('m3Closed').textContent=closed;
+  }
+
+  function logRow(dec,status){
+    var body=document.querySelector('#m3Log tbody');
+    var name=dec.querySelector('.dec-h').textContent;
+    var tr=document.createElement('tr');
+    tr.className='is-new';
+    tr.innerHTML='<td><b>'+name+'</b></td><td>today</td><td>Bryan Wong</td>'+
+                 '<td><span class="'+CLS[status]+'">'+status+'</span> — set from the board</td>';
+    body.insertBefore(tr,body.firstChild);
+  }
+
+  // Accessible name on the status chip: the visible text mutates as it
+  // cycles, and a self-relabelling <button> with no aria-label is announced
+  // inconsistently across screen readers. All seven chips get a correct
+  // aria-label at init, and cycleStatus keeps it in sync on every change,
+  // using the same handle Task 3 gave each card's Approve/Evidence buttons
+  // so all three controls on a card agree.
+  function chipHandle(chip){
+    var ev=chip.closest('.dec').querySelector('.dec-ev');
+    return ev.getAttribute('aria-label').replace(/^Evidence — /,'');
+  }
+  function labelChip(chip){
+    chip.setAttribute('aria-label','Status: '+chip.dataset.status+', activate to change — '+chipHandle(chip));
+  }
+  Array.prototype.slice.call(document.querySelectorAll('.m3-chip')).forEach(labelChip);
+
+  function cycleStatus(chip){
+    var next=STATUSES[(STATUSES.indexOf(chip.dataset.status)+1)%STATUSES.length];
+    chip.dataset.status=next;
+    chip.textContent=next;
+    labelChip(chip);
+    recount();
+    logRow(chip.closest('.dec'),next);
+  }
+
+  document.addEventListener('click',function(e){
+    var chip=e.target.closest('.m3-chip'); if(!chip)return;
+    cycleStatus(chip);
+  });
+
+  // Evidence tray rows: same deep link as the drawer's, one handler apart
+  // because the tray rows carry data-panel directly.
+  document.addEventListener('click',function(e){
+    var r=e.target.closest('.m3-ev-row'); if(!r)return;
+    var btn=document.getElementById('mNext'); if(btn) btn.click();
+    var svg=document.getElementById(r.dataset.panel);
+    if(svg){ var w=svg.closest('.w'); if(w) w.scrollIntoView({block:'center'}); }
+  });
+
+  recount();
 })();
 </script>
 

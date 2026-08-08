@@ -82,14 +82,14 @@ Open `http://localhost:8791/pages/leadership-dashboard-tracker.html` in the Brow
     .filter(w => getComputedStyle(w).display !== 'none');
   const counts = {};
   ['now','next','decide'].forEach(m => {
-    root.setAttribute('data-mode', m);
+    root.setAttribute('data-mode',m); root.parentElement.setAttribute('data-mode',m);
     root.parentElement.setAttribute('data-mode', m);
     counts[m] = {
       total: vis().length,
       leaked: vis().filter(w => w.dataset.modeOnly && w.dataset.modeOnly !== m).length
     };
   });
-  root.setAttribute('data-mode','now');
+  root.setAttribute('data-mode','now'); root.parentElement.setAttribute('data-mode','now');
   root.parentElement.setAttribute('data-mode','now');
   return JSON.stringify({
     counts,
@@ -205,7 +205,7 @@ Replace the two `copy` entries' closing and the whole `setMode` block. Find:
               next:['The ideal board','Everything available today, plus the six sources still to land']};
   function setMode(mode){
     root.parentElement.setAttribute('data-mode',mode);
-    root.setAttribute('data-mode',mode);
+    root.setAttribute('data-mode',mode); root.parentElement.setAttribute('data-mode',mode);
     document.getElementById('mNow').setAttribute('aria-pressed',String(mode==='now'));
     document.getElementById('mNext').setAttribute('aria-pressed',String(mode==='next'));
     bText.innerHTML=copy[mode];
@@ -227,7 +227,7 @@ Replace with:
   // fourth mode now costs zero JS.
   function setMode(mode){
     root.parentElement.setAttribute('data-mode',mode);
-    root.setAttribute('data-mode',mode);
+    root.setAttribute('data-mode',mode); root.parentElement.setAttribute('data-mode',mode);
     document.querySelectorAll('.modes button').forEach(function(b){
       b.setAttribute('aria-pressed',String(b.dataset.m===mode));
     });
@@ -260,7 +260,7 @@ Append after those two lines, inside the same IIFE:
 ```js
   // Mode 3 horizon default. Same attribute-filtering philosophy as data-mode
   // and data-view — CSS does the re-tiering, JS only writes the attribute.
-  root.setAttribute('data-horizon','week');
+  root.setAttribute('data-horizon','week'); root.parentElement.setAttribute('data-horizon','week');
   root.parentElement.setAttribute('data-horizon','week');
   var hzGroup=document.querySelector('.m3-hz');
   if(hzGroup){
@@ -269,7 +269,7 @@ Append after those two lines, inside the same IIFE:
       hzGroup.querySelectorAll('button[data-hz]').forEach(function(x){
         x.setAttribute('aria-pressed',String(x===b));
       });
-      root.setAttribute('data-horizon',b.dataset.hz);
+      root.setAttribute('data-horizon',b.dataset.hz); root.parentElement.setAttribute('data-horizon',b.dataset.hz);
       root.parentElement.setAttribute('data-horizon',b.dataset.hz);
     });
   }
@@ -327,7 +327,7 @@ Six health metrics and four watch cards, plus the visual tier CSS both depend on
 ```js
 (() => {
   const root = document.getElementById('root');
-  root.setAttribute('data-mode','decide');
+  root.setAttribute('data-mode','decide'); root.parentElement.setAttribute('data-mode','decide');
   root.parentElement.setAttribute('data-mode','decide');
   const hm = [...document.querySelectorAll('.m3-hm')];
   const wc = [...document.querySelectorAll('.m3-wcard')];
@@ -524,16 +524,16 @@ The mode's actual product. Seven cards, eight fields each, re-tiered by horizon 
 ```js
 (() => {
   const root = document.getElementById('root');
-  root.setAttribute('data-mode','decide');
+  root.setAttribute('data-mode','decide'); root.parentElement.setAttribute('data-mode','decide');
   root.parentElement.setAttribute('data-mode','decide');
   const decs = [...document.querySelectorAll('.dec')];
   const FIELDS = ['Because','At stake','Owner','By','Success','Escalation'];
   const promoted = h => {
-    root.setAttribute('data-horizon', h);
+    root.setAttribute('data-horizon',h); root.parentElement.setAttribute('data-horizon',h);
     return decs.filter(d => getComputedStyle(d).order === '1').map(d => d.dataset.id);
   };
   const out = { week: promoted('week'), quarter: promoted('quarter'), fy: promoted('fy') };
-  root.setAttribute('data-horizon','week');
+  root.setAttribute('data-horizon','week'); root.parentElement.setAttribute('data-horizon','week');
   return JSON.stringify({
     cards: decs.length,
     ids: decs.map(d => d.dataset.id),
@@ -836,7 +836,7 @@ That last object is the spec's §5 horizon column. If it disagrees, a `data-h` a
 ```js
 (() => {
   const root = document.getElementById('root');
-  root.setAttribute('data-mode','decide'); root.setAttribute('data-horizon','week');
+  root.setAttribute('data-mode','decide'); root.parentElement.setAttribute('data-mode','decide'); root.setAttribute('data-horizon','week'); root.parentElement.setAttribute('data-horizon','week');
   const now = document.querySelector('.dec[data-id="D1"]');
   const off = document.querySelector('.dec[data-id="D7"]');
   const cs = el => getComputedStyle(el);
@@ -880,7 +880,7 @@ git commit -m "feat: seven decision objects with horizon re-tiering"
 ```js
 (() => {
   const root = document.getElementById('root');
-  root.setAttribute('data-mode','decide');
+  root.setAttribute('data-mode','decide'); root.parentElement.setAttribute('data-mode','decide');
   const trigs = [...document.querySelectorAll('.dec-ev')];
   return JSON.stringify({
     triggers: trigs.length,
@@ -1120,7 +1120,7 @@ Reload, wait 2s, screenshot, then run the Step 1 assertion plus this drawer audi
 ```js
 (() => {
   const root = document.getElementById('root');
-  root.setAttribute('data-mode','decide');
+  root.setAttribute('data-mode','decide'); root.parentElement.setAttribute('data-mode','decide');
   document.querySelectorAll('.dec-ev').forEach(t => t.click());
   const drawers = [...document.querySelectorAll('.dec-drawer')];
   const overflow = [];
@@ -1175,7 +1175,7 @@ The closure loop — the most important interaction in the mode — plus the evi
 ```js
 (() => {
   const root = document.getElementById('root');
-  root.setAttribute('data-mode','decide');
+  root.setAttribute('data-mode','decide'); root.parentElement.setAttribute('data-mode','decide');
   const chip = document.querySelector('.dec[data-id="D1"] .m3-chip');
   const before = {
     due: document.getElementById('m3Due')?.textContent,
@@ -1349,7 +1349,7 @@ Then check the intermediate state explicitly — cycle D1 three times only and a
 ```js
 (() => {
   const root = document.getElementById('root');
-  root.setAttribute('data-mode','decide');
+  root.setAttribute('data-mode','decide'); root.parentElement.setAttribute('data-mode','decide');
   const chip = document.querySelector('.dec[data-id="D1"] .m3-chip');
   while (chip.dataset.status !== 'Not started') chip.click();
   chip.click(); chip.click(); chip.click();   // → Closed
@@ -1430,7 +1430,7 @@ Every value must be `true`. `noStaleFigures` guards against the 74.5/222.7 arith
 ```js
 (() => {
   const root = document.getElementById('root');
-  root.setAttribute('data-mode','decide'); root.setAttribute('data-horizon','week');
+  root.setAttribute('data-mode','decide'); root.parentElement.setAttribute('data-mode','decide'); root.setAttribute('data-horizon','week'); root.parentElement.setAttribute('data-horizon','week');
   return JSON.stringify([...document.querySelectorAll('.dec')].map(d => ({
     id: d.dataset.id, tier: d.dataset.tier,
     border: getComputedStyle(d).borderTopColor,
@@ -1446,7 +1446,7 @@ Every `border` must be a real colour, and every card must carry a text `tierLabe
 ```js
 (() => {
   const root = document.getElementById('root');
-  root.setAttribute('data-mode','decide');
+  root.setAttribute('data-mode','decide'); root.parentElement.setAttribute('data-mode','decide');
   const d = document.querySelector('.dec[data-id="D1"]');
   const drawer = d.querySelector('.dec-drawer');
   const cs = getComputedStyle(drawer);
@@ -1602,3 +1602,15 @@ Recorded as work lands. Task text above is left intact as the record of what was
 15. **Two notes for later, neither actionable now.** `--art-warn-ink` is value-identical to `--art-illus-ink` in both themes (`#8A5A00` / `#F0C173`), which is harmless but means the two will not track each other if either is re-tinted. And the health strip's row rules encode a fixed six items via `nth-child(-n+3)` / `(-n+4)`; a seventh metric would need them revisited.
 
 16. **A reported anomaly that was not one.** The re-run assertion returned `"Cash &amp; delivery risk"`, suggesting a double-escape that would render as visible corrupted copy. It was a report-formatting artefact — the agent HTML-escaped its own write-up. The markup is correctly single-escaped, `textContent` returns exactly one ampersand, and the diff never touched that line. Worth recording because "escaped entity in a test result" is a cheap check that would have been expensive to discover after publishing.
+
+### Task 3 (`1896068`)
+
+17. **The plan's own horizon test was broken, and it was broken in a way that reports success as failure.** `promoted(h)` in Task 3's Step 1 wrote `data-horizon` to `#root` only, never to `root.parentElement`. Both nodes carry the attribute — `setMode` and the horizon handler always write both, because the published artifact wraps the page and the wrapper needs it too. Since the CSS selectors are descendant selectors, a card matches if **either** ancestor holds the value. Updating one and leaving the other stale makes two horizons simultaneously active, so the results accumulate monotonically: `quarter` returned `["D1","D2","D3","D4","D5","D6"]` instead of `["D4","D5","D6"]`.
+
+    The implementation was correct throughout. The implementer diagnosed the script rather than the page, verified the real handler writes both nodes, re-ran a corrected version, got the exact expected sets, and **left the page alone** — the right call. Bending correct code to satisfy a broken assertion is the failure mode this would have invited.
+
+    **Fixed everywhere:** 19 single-node attribute writes in the plan and 7 across the Task 4 and Task 5 briefs are now paired. The bug only bites where a snippet *cycles* a value — Task 1's mode loop happened to pair its writes and so was never affected, and snippets that set an attribute to the value it already holds are no-ops. That is why it survived two task rounds undetected.
+
+    **Standing rule for any future test in this file:** never write `data-mode` or `data-horizon` to one node. Write both, always, or the selector matches through the stale ancestor.
+
+18. **`--art-strategic`, not `--art-imagined`.** The plan's Step 3 CSS still pointed `.dec[data-tier="strategic"]` at `--art-imagined`, the purple that means "invented data" in this file. Corrected during implementation per deviation 14. The plan text above is stale on this line; the shipped code is right.

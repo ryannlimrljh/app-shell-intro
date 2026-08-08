@@ -227,7 +227,9 @@ This is the closure thesis made tangible and the single most important interacti
 
 Cards at `order:1` get the Now treatment; everything else falls below the divider with the compact treatment. `order` takes integers only, hence 1/2/3 rather than a fraction. Same attribute-filtering philosophy as the existing `data-mode`/`data-view` switches, which is why it costs almost nothing.
 
-**I4 · Screen-aware assistant prompts.** Static text, but specific to what is on screen: *"Which eight deals close the RM 17.1M gap?"* · *"Draft the board note on the 0.4pt share decline."* · *"Who owns the top-five sponsor gap?"* Replaces the generic pills. Honest about being static — it changes the copy, not the capability.
+**I4 · Screen-aware assistant prompts.** A Mode-3-only row of static chips under the decision list, headed *"Questions this board can now answer"*: *"Which eight deals close the RM 17.1M gap?"* · *"Draft the board note on the 0.4pt share decline."* · *"Who owns the top-five sponsor gap?"* · *"What did we decide last month that has not moved?"*
+
+**Correction to the review's framing:** there is nothing to "replace the generic pills" with here — the tracker has no assistant box at all; the *"Ask anything"* composer with generic pills lives on `pages/app-shell-intro.html`, not in this file. So this is new content, and it is honest about being inert: the chips are not buttons and carry no hover or press affordance. Their job is to show the product team what contextual prompting would look like when the composer is wired to a board, which is the reviewable idea. A fake working composer would be exactly the dead affordance §6's drop-list exists to avoid.
 
 ### Dropped, and why
 
@@ -323,6 +325,10 @@ Mode 3 is a third value on the existing attribute switch. No refactor.
 - generalise the two hardcoded `aria-pressed` writes into a loop over `.modes button`, keyed on `data-m` — currently it names `mNow` and `mNext` explicitly and would need a third line per mode added forever
 - add `decide` entries to the existing `copy` and `titles` maps
 - both existing writes stay: `root.setAttribute` and `root.parentElement.setAttribute`, because the artifact wrapper needs the attribute too
+
+**Class namespace.** Every new class is prefixed `m3-`, except the decision-card trio `.dec` / `.decs` / `.dec-split` which read better unprefixed and collide with nothing. The file already uses `.st`, `.st-lead`, `.st-v`, `.st-warn`, `.stack` and `.strip`, so **status-chip classes must not use an `st-` prefix** — they are `.m3-chip` with a `data-status` attribute carrying the state.
+
+**Mini-chart renderers live inside the existing chart-module IIFE** (script block opening at line 1490) so they reuse its `C` colour map and its `txt` / `ln` / `rect` / `path` helpers rather than duplicating them. That IIFE is closed, so it exposes them for the interaction module as `window.M3CHARTS = { mGap, mConc, mFill, mQuad, mChurn, mShare }`.
 
 **New markup**, all inside `.dash` as `data-mode-only="decide"` widgets using the existing 12-column span classes:
 

@@ -500,7 +500,7 @@ Expected: `nrrComputed: 97.3`, and every boolean `true`. Arithmetic is a first-c
 
 - [ ] **Step 7: Verify Mode 1 and Mode 2 are unaffected**
 
-Re-run Task 1 Step 1. `counts.now.total` and `counts.next.total` must still equal the Task 1 baseline; `counts.decide.total` is now 5 with `leaked: 0`.
+Re-run Task 1 Step 1. `counts.now.total` and `counts.next.total` must still equal the Task 1 baseline; `counts.decide.total` is now **4** with `leaked: 0` — posture from Task 1 plus the three widgets this task adds (health strip, the Watch section label, the Watch grid). The running totals are 1 → 4 → 6 → 6 → 11: Task 4 adds no widgets, because its drawers live inside the decision cards Task 3 creates.
 
 - [ ] **Step 8: Commit**
 
@@ -1394,7 +1394,7 @@ Expected: `true`.
 
 Spec §11, all eight checks plus the reduced-motion check from §10. Record actual output for each.
 
-1. **Mode isolation and regression** — Task 1 Step 1 assertion. `leaked: 0` in all three modes; `now` and `next` totals equal to the Task 1 baseline; `decide` total 12.
+1. **Mode isolation and regression** — Task 1 Step 1 assertion. `leaked: 0` in all three modes; `now` and `next` totals equal to the Task 1 baseline (**15** and **12**); `decide` total **11**.
 2. **Arithmetic** — run:
 
 ```js
@@ -1572,3 +1572,11 @@ Recorded as work lands. Task text above is left intact as the record of what was
    The culprit is the hardcoded `rgba(252,250,245,.72)` on the pressed sub-text: it assumes a dark pressed background, which is true only for Mode 1 in the light theme. Mode 3 joins a broken pattern rather than creating one, and the worst instance (Mode 1 in dark) is outside this feature entirely — but Mode 3's own button is the second-worst, so this is our accessibility bug too, not only inherited debt. **Fixed in Task 5** with a theme-aware token, which clears all three instances at once rather than papering over the one we introduced.
 
 9. **Verification trap for the remaining tasks.** Reading `backgroundColor` on `.modes button` immediately after a click returns the *pre-transition* value (`rgba(0,0,0,0)`), because `transition:background .18s` never advances in a pane that delivers zero animation frames. Inject `transition:none` before reading any transitioned property. This does not affect `.mbanner` (no transition on it), but it will silently lie about anything on `.modes`, and about the decision cards' own hover and border transitions in Tasks 3–5.
+
+### Task 2 (`4b7a8a6`)
+
+10. **The plan's Mode 3 widget counts were wrong, and the implementer was right not to satisfy them.** Task 2's step text expected `counts.decide.total` to reach 5; the correct figure is **4**. Task 2's own markup adds exactly three widgets — health strip, the Watch section label, the Watch grid — on top of Task 1's posture. The downstream projection was wrong for the same reason: the real running totals are **1 → 4 → 6 → 6 → 11**, and Task 5's matrix claimed 12.
+
+    The implementer built the specified markup, found the count short, and **declined to invent a fifth widget to make the assertion pass** — noting that nothing in the step's code implied one and that manufacturing it risked straying into Task 3's scope. That is the correct call. A number in a plan is a prediction, and when a prediction and working code disagree it is usually the prediction that is wrong; forcing agreement would have put a junk widget in the page to satisfy my arithmetic. `leaked: 0` — the assertion that actually guards isolation correctness — held throughout.
+
+    Note for Task 4: it adds **no** `.w` widgets at all. Its evidence drawers are nested inside the decision cards Task 3 creates, so an unchanged count of 6 is the expected result there, not a sign that nothing landed.

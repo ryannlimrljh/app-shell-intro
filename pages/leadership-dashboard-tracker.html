@@ -2492,13 +2492,21 @@ table.d tr.tot td{font-weight:900; border-top:1.5px solid var(--art-ink); border
     // (attainPct) — they only agree for today's two lines by coincidence.
     // Bar colour follows `beat`; the caption follows `soldOut`, so the two
     // can never contradict each other even when a future line splits them.
+    // 95, not 100: a sub-5% remainder sits inside normal reserve and make-good
+    // buffer, which the trade already calls sold out. 100 for `beat` is not a
+    // judgement — hitting target is the boundary by definition.
     var soldOut=soldPct>=95, beat=attainPct>=100;
     s+=rect(x0,70,(x1-x0)*Math.min(attainPct,130)/130,14,{f:beat?C.good:C.warn,r:2});
     s+=ln(x0+(x1-x0)*100/130,66,x0+(x1-x0)*100/130,88,{c:C.ink,w:1.4,d:'3 3'});
     s+=txt(x0+(x1-x0)*100/130+5,98,'100%',{s:8,f:C.fnt});
     s+=txt(x1,81,attainPct+'%',{a:'end',s:11,w:900,f:beat?C.goodInk:C.warnInk});
+    // "had room", not "was full": the drawer's own claim line sits ~10px above
+    // this and says the remainder is "shelf we never filled". Both were true —
+    // "full" meant fully stocked with sellable inventory — but read cold, one
+    // inch apart, they land as a contradiction. "had room" also pairs cleanly
+    // against "Sold out", which is the actual axis this sentence turns on.
     s+=txt(x0,116,soldOut?'Sold out — this ceiling is supply, not selling.'
-                        :'Shelf was full — the constraint is demand, not supply.',
+                        :'Shelf had room — the constraint is demand, not supply.',
            {s:10,w:700,f:C.ink});
     return wrap(s);
   }

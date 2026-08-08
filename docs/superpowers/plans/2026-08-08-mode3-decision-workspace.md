@@ -1558,3 +1558,17 @@ Recorded as work lands. Task text above is left intact as the record of what was
 6. **Minor cleanups from the same review:** four `!important` on `.m3-delta` replaced by the higher-specificity `.m3-posture .m3-delta`; a cargo-culted `if(hzGroup)` guard dropped to match the unguarded `#roleTabs` handler and to let a class-rename typo throw instead of silently producing an inert control; and two comments that described future state in the present tense reworded, since a reader would have grepped for CSS that did not exist yet.
 
 7. **Environment note for later tasks:** the Browser pane serves a stale cached copy after an edit, and a plain reload does not clear it. Append a cache-buster (`?cb=1`) on the first navigation after editing; subsequent reloads then track the file. Confirmed by `curl` against the dev server, which was serving the updated file correctly the whole time.
+
+### Found during Task 1 review, carried into Task 5
+
+8. **Pre-existing WCAG AA failure on the pressed mode button's sub-text.** Measured contrast of the 10px `.m-k` kicker and 12px `.m-d` description against the pressed background, at `.modes` (the shared pattern, not Mode 3's addition):
+
+   | Mode | Pressed background | Contrast | Verdict |
+   |---|---|---|---|
+   | Mode 2 | `--art-imagined` `#9F56FF` | 3.84:1 | fails 4.5:1 — pre-existing |
+   | Mode 3 | `--art-accent` `#FF5825` | 3.02:1 | fails — same family, slightly worse |
+   | Mode 1, **dark theme** | `--art-ink` `#F3F0E9` | **1.09:1** | effectively invisible — pre-existing |
+
+   The culprit is the hardcoded `rgba(252,250,245,.72)` on the pressed sub-text: it assumes a dark pressed background, which is true only for Mode 1 in the light theme. Mode 3 joins a broken pattern rather than creating one, and the worst instance (Mode 1 in dark) is outside this feature entirely — but Mode 3's own button is the second-worst, so this is our accessibility bug too, not only inherited debt. **Fixed in Task 5** with a theme-aware token, which clears all three instances at once rather than papering over the one we introduced.
+
+9. **Verification trap for the remaining tasks.** Reading `backgroundColor` on `.modes button` immediately after a click returns the *pre-transition* value (`rgba(0,0,0,0)`), because `transition:background .18s` never advances in a pane that delivers zero animation frames. Inject `transition:none` before reading any transitioned property. This does not affect `.mbanner` (no transition on it), but it will silently lie about anything on `.modes`, and about the decision cards' own hover and border transitions in Tasks 3–5.

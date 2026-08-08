@@ -782,6 +782,12 @@
      the Mode 2 banner). A filled strategic-tier dot must not be mistaken for
      a hollow pending ring. */
   --art-strategic:#7C3AED;
+  /* Text colour for the two mode-switch surfaces (--art-imagined, --art-accent)
+     that are NOT redefined in the dark theme below — so the text sitting on
+     them needs one theme-invariant value too, not a token that inverts with
+     --art-ink. Measured: opaque white gives 4.00:1/3.15:1 on these two
+     backgrounds (fails AA); opaque black gives 5.25:1/6.67:1 (passes both). */
+  --art-on-saturated:#000000;
   --art-shadow:0 1px 2px rgba(140,130,110,.28);
 }
 @media (prefers-color-scheme: dark){
@@ -855,26 +861,25 @@ body{margin:0; background:var(--art-canvas); color:var(--art-ink);
 .modes .m-t{display:block; font-size:15px; font-weight:800; margin-top:3px;}
 .modes .m-d{display:block; font-size:12px; color:var(--art-muted); margin-top:2px;}
 .modes button[aria-pressed="true"]{background:var(--art-ink); color:var(--art-canvas);}
-/* Pressed sub-text. One rule per pressed background, because a single
-   translucent white assumed a dark pressed surface — true only for Mode 1 in
-   light. Mode 1 in dark was 1.09:1 (invisible) and Mode 3 3.02:1.
-   Modes 2/3 sit on saturated backgrounds (--art-imagined #9F56FF,
-   --art-accent #FF5825) that are NOT redefined in the dark theme, so the
-   fix must be theme-invariant too. Measured: opaque white gives only
-   4.00:1 on #9F56FF and 3.15:1 on #FF5825 — both fail AA at these font
-   sizes (10px/12px, neither qualifies as "large text"). Opaque black
-   measures 5.25:1 and 6.67:1 respectively, so black is the correct fix,
-   not white — the plan's snippet got the polarity backwards. .m-t (the
-   button title) sat on the same fixed near-white --art-canvas value with
-   the same failure and is corrected alongside .m-k/.m-d for consistency. */
+/* Pressed sub-text. Mode 1's dark --art-ink surface gets a translucent
+   canvas colour below. Modes 2/3 sit on saturated backgrounds
+   (--art-imagined #9F56FF, --art-accent #FF5825) that are NOT redefined in
+   the dark theme, so their fix must be theme-invariant too: applied to the
+   pressed BUTTON itself via --art-on-saturated, so .m-t (the button title)
+   inherits it for free instead of needing its own listed override — only
+   .m-k/.m-d need an explicit rule, because they declare their own colour
+   above and inheritance can't reach through that. Measured: opaque white
+   gave only 4.00:1/3.15:1 on these two backgrounds (fails AA at 10–15px,
+   none of which qualifies as "large text"); opaque black gives
+   5.25:1/6.67:1 (passes both) — see --art-on-saturated's definition for
+   why black, not white, is the correct fix here. Six selectors (m-k, m-d,
+   m-t × two modes) become three by merging next/decide with :is() and
+   dropping m-t. */
 .modes button[aria-pressed="true"] .m-k,
 .modes button[aria-pressed="true"] .m-d{color:var(--art-canvas); opacity:.82;}
-[data-mode="next"]   .modes button[aria-pressed="true"] .m-k,
-[data-mode="next"]   .modes button[aria-pressed="true"] .m-d,
-[data-mode="next"]   .modes button[aria-pressed="true"] .m-t,
-[data-mode="decide"] .modes button[aria-pressed="true"] .m-k,
-[data-mode="decide"] .modes button[aria-pressed="true"] .m-d,
-[data-mode="decide"] .modes button[aria-pressed="true"] .m-t{color:#000000; opacity:1;}
+:is([data-mode="next"],[data-mode="decide"]) .modes button[aria-pressed="true"]{color:var(--art-on-saturated);}
+:is([data-mode="next"],[data-mode="decide"]) .modes button[aria-pressed="true"] .m-k,
+:is([data-mode="next"],[data-mode="decide"]) .modes button[aria-pressed="true"] .m-d{color:var(--art-on-saturated); opacity:1;}
 [data-mode="next"] .modes button[aria-pressed="true"]{background:var(--art-imagined); border-color:var(--art-imagined);}
 [data-mode="next"] .modes{border-color:var(--art-imagined);}
 [data-mode="next"] .modes button{border-right-color:var(--art-imagined);}
@@ -1511,6 +1516,7 @@ table.d tr.tot td{font-weight:900; border-top:1.5px solid var(--art-ink); border
         </div>
         <div class="dec-status">
           <button type="button" class="m3-chip" data-status="Not started">Not started</button>
+          <span class="m3-chip-h" data-live aria-live="polite"></span>
           <button type="button" class="dec-ev" aria-expanded="false" aria-controls="d1-drawer" aria-label="Evidence — close the RM 17.1M gap" data-chart="mGap"><span aria-hidden="true">&#9656;</span> Evidence</button>
         </div>
         <div class="dec-drawer" id="d1-drawer" hidden></div>
@@ -1533,6 +1539,7 @@ table.d tr.tot td{font-weight:900; border-top:1.5px solid var(--art-ink); border
         </div>
         <div class="dec-status">
           <button type="button" class="m3-chip" data-status="Not started">Not started</button>
+          <span class="m3-chip-h" data-live aria-live="polite"></span>
           <button type="button" class="dec-ev" aria-expanded="false" aria-controls="d2-drawer" aria-label="Evidence — top-five sponsors" data-chart="mConc"><span aria-hidden="true">&#9656;</span> Evidence</button>
         </div>
         <div class="dec-drawer" id="d2-drawer" hidden></div>
@@ -1555,6 +1562,7 @@ table.d tr.tot td{font-weight:900; border-top:1.5px solid var(--art-ink); border
         </div>
         <div class="dec-status">
           <button type="button" class="m3-chip" data-status="Not started">Not started</button>
+          <span class="m3-chip-h" data-live aria-live="polite"></span>
           <button type="button" class="dec-ev" aria-expanded="false" aria-controls="d3-drawer" aria-label="Evidence — fund Digital demand" data-chart="mFillDigital"><span aria-hidden="true">&#9656;</span> Evidence</button>
         </div>
         <div class="dec-drawer" id="d3-drawer" hidden></div>
@@ -1579,6 +1587,7 @@ table.d tr.tot td{font-weight:900; border-top:1.5px solid var(--art-ink); border
         </div>
         <div class="dec-status">
           <button type="button" class="m3-chip" data-status="Not started">Not started</button>
+          <span class="m3-chip-h" data-live aria-live="polite"></span>
           <button type="button" class="dec-ev" aria-expanded="false" aria-controls="d4-drawer" aria-label="Evidence — buy addressable inventory" data-chart="mFillAddressable"><span aria-hidden="true">&#9656;</span> Evidence</button>
         </div>
         <div class="dec-drawer" id="d4-drawer" hidden></div>
@@ -1601,6 +1610,7 @@ table.d tr.tot td{font-weight:900; border-top:1.5px solid var(--art-ink); border
         </div>
         <div class="dec-status">
           <button type="button" class="m3-chip" data-status="Not started">Not started</button>
+          <span class="m3-chip-h" data-live aria-live="polite"></span>
           <button type="button" class="dec-ev" aria-expanded="false" aria-controls="d5-drawer" aria-label="Evidence — move Daniel to prospecting" data-chart="mQuad"><span aria-hidden="true">&#9656;</span> Evidence</button>
         </div>
         <div class="dec-drawer" id="d5-drawer" hidden></div>
@@ -1623,7 +1633,7 @@ table.d tr.tot td{font-weight:900; border-top:1.5px solid var(--art-ink); border
         </div>
         <div class="dec-status">
           <button type="button" class="m3-chip" data-status="Scheduled">Scheduled</button>
-          <span class="m3-chip-h">stalled 7 days</span>
+          <span class="m3-chip-h" data-live aria-live="polite">stalled 7 days</span>
           <button type="button" class="dec-ev" aria-expanded="false" aria-controls="d6-drawer" aria-label="Evidence — diarise Petronas" data-chart="mChurn"><span aria-hidden="true">&#9656;</span> Evidence</button>
         </div>
         <div class="dec-drawer" id="d6-drawer" hidden></div>
@@ -1646,6 +1656,7 @@ table.d tr.tot td{font-weight:900; border-top:1.5px solid var(--art-ink); border
         </div>
         <div class="dec-status">
           <button type="button" class="m3-chip" data-status="Not started">Not started</button>
+          <span class="m3-chip-h" data-live aria-live="polite"></span>
           <button type="button" class="dec-ev" aria-expanded="false" aria-controls="d7-drawer" aria-label="Evidence — take share question to board" data-chart="mShare"><span aria-hidden="true">&#9656;</span> Evidence</button>
         </div>
         <div class="dec-drawer" id="d7-drawer" hidden></div>
@@ -2159,7 +2170,7 @@ table.d tr.tot td{font-weight:900; border-top:1.5px solid var(--art-ink); border
 .m3-ev-row:first-child{border-top:0;}
 .m3-ev-row:hover{background:var(--art-sunk); color:var(--art-accent);}
 .m3-ev-row:focus-visible{outline:2px solid var(--art-accent); outline-offset:-2px;}
-.m3-ev-row span{margin-left:auto; font-size:11px; font-weight:700; color:var(--art-faint);}
+.m3-ev-row span{margin-left:auto; font-size:11px; font-weight:700; color:var(--art-muted);}
 
 /* ── Prompt chips. Inert on purpose: the tracker has no assistant composer
    (that lives on app-shell-intro.html), so a working-looking one would be
@@ -2178,10 +2189,16 @@ table.d tr.tot td{font-weight:900; border-top:1.5px solid var(--art-ink); border
 .m3-log td{padding:9px 12px; border-bottom:1px solid var(--art-rule); color:var(--art-muted); vertical-align:top;}
 .m3-log tr:last-child td{border-bottom:0;}
 .m3-log td b{color:var(--art-ink);}
+/* Five states, one colour each, shared verbatim with .m3-chip's own
+   data-status mapping below — "Not started" and "Moot" both repoint to
+   --art-muted (not --art-faint, and not folded into --art-warn-ink) so the
+   same word never renders in two different colours between the chip that
+   sets it and the log row it writes. */
+.m3-log .o-none{color:var(--art-muted); font-weight:800;}
 .m3-log .o-open{color:var(--art-warn-ink); font-weight:800;}
 .m3-log .o-wait{color:var(--art-derived-ink); font-weight:800;}
 .m3-log .o-done{color:var(--art-good-ink); font-weight:800;}
-.m3-log .o-moot{color:var(--art-faint); font-weight:800;}
+.m3-log .o-moot{color:var(--art-muted); font-weight:800; text-decoration:line-through;}
 .m3-log tr.is-new td{background:rgba(255,88,37,.06);}
 </style>
 
@@ -2732,31 +2749,48 @@ table.d tr.tot td{font-weight:900; border-top:1.5px solid var(--art-ink); border
     drawer.hidden=open;
   });
 
-  // Deep link: switch to Mode 2 and bring the full panel into view. The nine
-  // panels already carry svg ids, so no markup change to Mode 2 is needed.
+  // Deep link: switch to Mode 2 and bring the full panel into view, moving
+  // focus there too — the activated control lives inside Mode 3 content,
+  // which the mode switch just display:none'd, so without an explicit
+  // focus move a keyboard user's focus silently resets to <body>. Shared by
+  // both entry points (the drawer's .dec-dlink and the tray's .m3-ev-row)
+  // so a third one can't independently drop the focus half of the fix.
+  function deepLink(panelId){
+    var btn=document.getElementById('mNext'); if(btn) btn.click();
+    var svg=document.getElementById(panelId); if(!svg) return;
+    var w=svg.closest('.w'); if(!w) return;
+    w.scrollIntoView({block:'center'});
+    w.setAttribute('tabindex','-1');
+    w.focus({preventScroll:true});
+  }
+
   document.addEventListener('click',function(e){
     var l=e.target.closest('.dec-dlink'); if(!l)return;
-    var btn=document.getElementById('mNext'); if(btn) btn.click();
-    var svg=document.getElementById(l.dataset.panel);
-    if(svg){
-      var w=svg.closest('.w');
-      if(w){
-        w.scrollIntoView({block:'center'});
-        // The link just activated lives inside Mode 3 content, which the
-        // mode switch above just display:none'd — without an explicit
-        // focus move a keyboard user's focus silently resets to <body>.
-        w.setAttribute('tabindex','-1');
-        w.focus({preventScroll:true});
-      }
-    }
+    deepLink(l.dataset.panel);
+  });
+
+  // Evidence tray rows: same deep link as the drawer's, one handler apart
+  // because the tray rows carry data-panel directly.
+  document.addEventListener('click',function(e){
+    var r=e.target.closest('.m3-ev-row'); if(!r)return;
+    deepLink(r.dataset.panel);
   });
 
   // ── Status cycling: the closure thesis made tangible. Changing a status
   // recomputes the health strip's three counts and writes a log row, so the
   // page visibly knows something happened. Fully reversible by cycling round.
+  // recount() is a pure recompute from DOM state every time, never an
+  // increment/decrement — that's what makes a five-step cycle land back on
+  // the exact starting counts and keeps rapid clicking from ever drifting.
   var STATUSES=['Not started','Scheduled','Awaiting client','Closed','Moot'];
-  var CLS={'Not started':'o-open','Scheduled':'o-open','Awaiting client':'o-wait',
+  // One colour per state, shared verbatim with .m3-chip[data-status]'s own
+  // mapping (below in the stylesheet) — "Not started" and "Scheduled" used
+  // to collapse onto the same o-open class, which rendered "Not started" in
+  // amber in the log while the chip showed it neutral. o-none matches the
+  // chip's own un-styled default (--art-muted).
+  var CLS={'Not started':'o-none','Scheduled':'o-open','Awaiting client':'o-wait',
            'Closed':'o-done','Moot':'o-moot'};
+  var LOG_CAP=6; // generated rows only; the four seed rows are never eligible
 
   function recount(){
     var decs=Array.prototype.slice.call(document.querySelectorAll('.dec'));
@@ -2768,16 +2802,29 @@ table.d tr.tot td{font-weight:900; border-top:1.5px solid var(--art-ink); border
     document.getElementById('m3Due').textContent=due+' due';
     document.getElementById('m3Stalled').textContent=stalled;
     document.getElementById('m3Closed').textContent=closed;
+    return due;
   }
 
   function logRow(dec,status){
     var body=document.querySelector('#m3Log tbody');
+    // At most one row carries .is-new — it means "newest", not "ever
+    // machine-generated" — so the previous one is cleared before this one
+    // is marked, a lookup rather than a loop since the invariant is single.
+    var prevNew=body.querySelector('tr.is-new');
+    if(prevNew) prevNew.classList.remove('is-new');
     var name=dec.querySelector('.dec-h').textContent;
     var tr=document.createElement('tr');
     tr.className='is-new';
+    tr.dataset.gen='1';
     tr.innerHTML='<td><b>'+name+'</b></td><td>today</td><td>Bryan Wong</td>'+
                  '<td><span class="'+CLS[status]+'">'+status+'</span> — set from the board</td>';
     body.insertBefore(tr,body.firstChild);
+    // Cap generated rows only, evicting the oldest generated row — the
+    // four hand-written seed rows (no data-gen) are never eligible, so the
+    // Moot seed that is the editorial point of the whole mode can't be
+    // pushed out by a determined clicker.
+    var gen=body.querySelectorAll('tr[data-gen]');
+    if(gen.length>LOG_CAP) gen[gen.length-1].remove();
   }
 
   // Accessible name on the status chip: the visible text mutates as it
@@ -2785,37 +2832,39 @@ table.d tr.tot td{font-weight:900; border-top:1.5px solid var(--art-ink); border
   // inconsistently across screen readers. All seven chips get a correct
   // aria-label at init, and cycleStatus keeps it in sync on every change,
   // using the same handle Task 3 gave each card's Approve/Evidence buttons
-  // so all three controls on a card agree.
+  // so all three controls on a card agree. Falls back to the card's own
+  // heading text if .dec-ev's aria-label is ever reworded or removed, so a
+  // change in one feature can't silently break another's accessible name.
   function chipHandle(chip){
-    var ev=chip.closest('.dec').querySelector('.dec-ev');
-    return ev.getAttribute('aria-label').replace(/^Evidence — /,'');
+    var dec=chip.closest('.dec');
+    var ev=dec.querySelector('.dec-ev');
+    var label=ev&&ev.getAttribute('aria-label');
+    if(label&&/^Evidence — /.test(label)) return label.replace(/^Evidence — /,'');
+    return dec.querySelector('.dec-h').textContent;
   }
   function labelChip(chip){
     chip.setAttribute('aria-label','Status: '+chip.dataset.status+', activate to change — '+chipHandle(chip));
   }
   Array.prototype.slice.call(document.querySelectorAll('.m3-chip')).forEach(labelChip);
 
+  // D6's live span ships with the static "stalled 7 days" claim as its
+  // initial content — the first status click replaces it, so the strip and
+  // the card can never disagree about whether D6 is still stalled the way
+  // the old always-on span could once D6 was cycled to Closed.
   function cycleStatus(chip){
     var next=STATUSES[(STATUSES.indexOf(chip.dataset.status)+1)%STATUSES.length];
     chip.dataset.status=next;
     chip.textContent=next;
     labelChip(chip);
-    recount();
+    var due=recount();
     logRow(chip.closest('.dec'),next);
+    var h=chip.closest('.dec').querySelector('.m3-chip-h[data-live]');
+    if(h) h.textContent='logged · '+due+' due';
   }
 
   document.addEventListener('click',function(e){
     var chip=e.target.closest('.m3-chip'); if(!chip)return;
     cycleStatus(chip);
-  });
-
-  // Evidence tray rows: same deep link as the drawer's, one handler apart
-  // because the tray rows carry data-panel directly.
-  document.addEventListener('click',function(e){
-    var r=e.target.closest('.m3-ev-row'); if(!r)return;
-    var btn=document.getElementById('mNext'); if(btn) btn.click();
-    var svg=document.getElementById(r.dataset.panel);
-    if(svg){ var w=svg.closest('.w'); if(w) w.scrollIntoView({block:'center'}); }
   });
 
   recount();

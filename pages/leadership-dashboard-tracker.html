@@ -2096,7 +2096,14 @@ table.d tr.tot td{font-weight:900; border-top:1.5px solid var(--art-ink); border
 (function(){
   var C={ink:'var(--art-ink)',mut:'var(--art-muted)',fnt:'var(--art-faint)',rule:'var(--art-rule)',
          good:'var(--art-good)',warn:'var(--art-warn)',crit:'var(--art-crit)',
-         der:'var(--art-derived)',pur:'var(--art-imagined)'};
+         der:'var(--art-derived)',pur:'var(--art-imagined)',
+         // -ink variants: re-valued per theme so saturated fills used as TEXT
+         // (not fills) still clear 4.5:1. Used only by the two Mode 3 drawer
+         // call sites that had text-on-sunk contrast failures in light theme
+         // (mFill's attainment % and mChurn's "recoverable" tag) — every
+         // other saturated-token-as-text call site in the file is unchanged,
+         // by design; see the Task 4 review notes.
+         goodInk:'var(--art-good-ink)',warnInk:'var(--art-warn-ink)'};
   var M=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   function el(id){return document.getElementById(id);}
   function set(id,s){var n=el(id); if(n) n.innerHTML=s;}
@@ -2479,14 +2486,18 @@ table.d tr.tot td{font-weight:900; border-top:1.5px solid var(--art-ink); border
     s+=rect(x0,24,x1-x0,20,{f:C.rule,o:.55,r:2});
     s+=rect(x0,24,(x1-x0)*soldPct/100,20,{f:C.der,r:2});
     s+=txt(x0+6,38,soldPct+'% sold',{s:10,w:800,f:'#fff'});
-    s+=txt(x1,38,'unsold shelf '+(100-soldPct)+'%',{a:'end',s:9,f:C.mut});
+    s+=txt(x1,38,'unsold shelf '+Math.max(0,100-soldPct)+'%',{a:'end',s:9,f:C.mut});
     s+=txt(x0,64,'target attainment',{s:9,w:800,f:C.fnt});
-    var capped=attainPct>100;
-    s+=rect(x0,70,(x1-x0)*Math.min(attainPct,130)/130,14,{f:capped?C.good:C.warn,r:2});
+    // "Sold out" is a supply fact (soldPct), "beat target" is a demand fact
+    // (attainPct) — they only agree for today's two lines by coincidence.
+    // Bar colour follows `beat`; the caption follows `soldOut`, so the two
+    // can never contradict each other even when a future line splits them.
+    var soldOut=soldPct>=95, beat=attainPct>=100;
+    s+=rect(x0,70,(x1-x0)*Math.min(attainPct,130)/130,14,{f:beat?C.good:C.warn,r:2});
     s+=ln(x0+(x1-x0)*100/130,66,x0+(x1-x0)*100/130,88,{c:C.ink,w:1.4,d:'3 3'});
     s+=txt(x0+(x1-x0)*100/130+5,98,'100%',{s:8,f:C.fnt});
-    s+=txt(x1,81,attainPct+'%',{a:'end',s:11,w:900,f:capped?C.good:C.warn});
-    s+=txt(x0,116,capped?'Sold out — this ceiling is supply, not selling.'
+    s+=txt(x1,81,attainPct+'%',{a:'end',s:11,w:900,f:beat?C.goodInk:C.warnInk});
+    s+=txt(x0,116,soldOut?'Sold out — this ceiling is supply, not selling.'
                         :'Shelf was full — the constraint is demand, not supply.',
            {s:10,w:700,f:C.ink});
     return wrap(s);
@@ -2514,7 +2525,10 @@ table.d tr.tot td{font-weight:900; border-top:1.5px solid var(--art-ink); border
       s+=txt(toLeft?cx-9:cx+9,cy+4,p[0]+' · '+p[1]+'% · '+p[2]+'×',
              {s:10,w:800,f:C.ink,a:toLeft?'end':undefined});
     });
-    s+=txt(x0,y0+28,'attainment →   ↑ pipeline cover · all 14 reps plotted in Mode 2',{s:9,f:C.fnt});
+    // y0+24 not y0+28 — the caption's descenders (e.g. 'pipeline') left only
+    // ~0.1px of headroom in the 130-tall viewBox on MulishArt's metrics; a
+    // fallback font with deeper descenders would clip. y0+24 buys 4px back.
+    s+=txt(x0,y0+24,'attainment →   ↑ pipeline cover · all 14 reps plotted in Mode 2',{s:9,f:C.fnt});
     return wrap(s);
   }
 
@@ -2525,13 +2539,15 @@ table.d tr.tot td{font-weight:900; border-top:1.5px solid var(--art-ink); border
               ['Watsons MY',0.4,'Service',false]];
     // x1 pulled in from 300 to 280 — the trailing 'recoverable' tag at x1+34
     // ran past the 380-wide viewBox; the shorter row leaves it room instead.
-    var x0=110,x1=280,s='';
+    var x0=110,x1=280,mx=2.4,s=''; // mx: bar-scale max — named so a future
+                                    // row above 2.4 is an obvious edit, not a
+                                    // silent overflow past x1 under the label.
     rows.forEach(function(r,i){
       var y=16+i*24;
       s+=txt(x0-8,y+10,r[0],{a:'end',s:9.5,f:C.mut});
-      s+=rect(x0,y,(x1-x0)*r[1]/2.4,13,{f:r[3]?C.warn:C.crit,o:r[3]?.9:.55,r:2});
+      s+=rect(x0,y,(x1-x0)*r[1]/mx,13,{f:r[3]?C.warn:C.crit,o:r[3]?.9:.55,r:2});
       s+=txt(x1+6,y+10,r[1].toFixed(1),{s:9.5,w:800,f:C.ink});
-      if(r[3]) s+=txt(x1+30,y+10,'recoverable',{s:8.5,w:800,f:C.warn});
+      if(r[3]) s+=txt(x1+30,y+10,'recoverable',{s:8.5,w:800,f:C.warnInk});
     });
     s+=txt(x0-8,120,'RM 4.4M total',{a:'end',s:10,w:900,f:C.ink});
     s+=txt(x0,120,'— RM 2.1M was timing, not a loss',{s:10,f:C.mut});
@@ -2571,7 +2587,12 @@ table.d tr.tot td{font-weight:900; border-top:1.5px solid var(--art-ink); border
 
 <!-- Mode 3 interactions: separate IIFE from the chart module, which is why
      the mini-charts are handed over on window.M3CHARTS rather than closed
-     over. -->
+     over. This is a second <script> tag, not just a second IIFE, on purpose:
+     it buys error isolation. If a chart-module IIFE throws (a bad panel id,
+     a malformed path string), that failure cannot take this module down with
+     it — drawers still open, claim text still renders, and the deep link
+     still works, because this tag only starts executing once the previous
+     one has finished (successfully or not). -->
 <script>
 (function(){
   var CLAIMS={
@@ -2590,14 +2611,21 @@ table.d tr.tot td{font-weight:900; border-top:1.5px solid var(--art-ink); border
     var t=e.target.closest('.dec-ev'); if(!t)return;
     var dec=t.closest('.dec'), drawer=dec.querySelector('.dec-drawer');
     var open=t.getAttribute('aria-expanded')==='true';
-    if(!open && !drawer.querySelector('svg')){
+    // dataset.built, not "has an svg", guards the rebuild — a renderer that
+    // is missing from M3CHARTS (key typo, script load order) would leave no
+    // <svg> behind and re-run fn() on every single open otherwise.
+    if(!open && !drawer.dataset.built){
       var key=t.dataset.chart, fn=window.M3CHARTS&&window.M3CHARTS[key];
       drawer.innerHTML='<p class="dec-dclaim">'+(CLAIMS[key]||'')+'</p>'+
         (fn?fn():'')+
         '<button type="button" class="dec-dlink" data-panel="'+PANEL[key]+'">Full analysis in Mode 2 →</button>';
+      drawer.dataset.built='1';
     }
     t.setAttribute('aria-expanded',String(!open));
-    t.innerHTML=(open?'&#9656;':'&#9662;')+' Evidence';
+    // Rebuild the aria-hidden wrapper rather than dropping in a bare glyph —
+    // the markup's own intent (icon hidden from AT, aria-label carries the
+    // name) should stay true after the first toggle, not just before it.
+    t.innerHTML='<span aria-hidden="true">'+(open?'&#9656;':'&#9662;')+'</span> Evidence';
     drawer.hidden=open;
   });
 
@@ -2607,7 +2635,17 @@ table.d tr.tot td{font-weight:900; border-top:1.5px solid var(--art-ink); border
     var l=e.target.closest('.dec-dlink'); if(!l)return;
     var btn=document.getElementById('mNext'); if(btn) btn.click();
     var svg=document.getElementById(l.dataset.panel);
-    if(svg){ var w=svg.closest('.w'); if(w) w.scrollIntoView({block:'center'}); }
+    if(svg){
+      var w=svg.closest('.w');
+      if(w){
+        w.scrollIntoView({block:'center'});
+        // The link just activated lives inside Mode 3 content, which the
+        // mode switch above just display:none'd — without an explicit
+        // focus move a keyboard user's focus silently resets to <body>.
+        w.setAttribute('tabindex','-1');
+        w.focus({preventScroll:true});
+      }
+    }
   });
 })();
 </script>

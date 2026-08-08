@@ -772,7 +772,7 @@
   --art-accent:#FF5825; --art-good:#00C26E; --art-warn:#FFA425; --art-crit:#FD3343;
   --art-derived:#1473E6; --art-derived-bg:#E8F1FD; --art-derived-ink:#0B4FA8;
   --art-imagined:#9F56FF; --art-imagined-bg:#F3EBFF; --art-imagined-ink:#5B21B6;
-  --art-illus-bg:#FFF6E9; --art-illus-ink:#8A5A00;
+  --art-illus-bg:#FFF6E9; --art-illus-ink:#8A5A00; --art-accent-bg:#FFEEE7;
   --art-shadow:0 1px 2px rgba(140,130,110,.28);
 }
 @media (prefers-color-scheme: dark){
@@ -781,7 +781,7 @@
     --art-ink:#F3F0E9; --art-muted:#ABA69A; --art-faint:#807B70; --art-rule:#36322B;
     --art-derived-bg:#132A47; --art-derived-ink:#8FC0FF;
     --art-imagined-bg:#2A1D45; --art-imagined-ink:#C9A6FF;
-    --art-illus-bg:#33260F; --art-illus-ink:#F0C173;
+    --art-illus-bg:#33260F; --art-illus-ink:#F0C173; --art-accent-bg:#3A1C10;
     --art-shadow:0 1px 2px rgba(0,0,0,.5);
     /* re-value the DS's own tokens so .c-stat / .c-table / .c-datatable follow */
     --color-neutral-1:#1D1B17; --color-neutral-2:#252218; --color-neutral-3:#36322B;
@@ -794,7 +794,7 @@
   --art-ink:#F3F0E9; --art-muted:#ABA69A; --art-faint:#807B70; --art-rule:#36322B;
   --art-derived-bg:#132A47; --art-derived-ink:#8FC0FF;
   --art-imagined-bg:#2A1D45; --art-imagined-ink:#C9A6FF;
-  --art-illus-bg:#33260F; --art-illus-ink:#F0C173;
+  --art-illus-bg:#33260F; --art-illus-ink:#F0C173; --art-accent-bg:#3A1C10;
   --art-shadow:0 1px 2px rgba(0,0,0,.5);
   --color-neutral-1:#1D1B17; --color-neutral-2:#252218; --color-neutral-3:#36322B;
   --color-neutral-4:#6C6659; --color-neutral-5:#ABA69A; --color-neutral-9:#F3F0E9;
@@ -805,7 +805,7 @@
   --art-ink:#080808; --art-muted:#5A5A5A; --art-faint:#8E8A80; --art-rule:#E3DED2;
   --art-derived-bg:#E8F1FD; --art-derived-ink:#0B4FA8;
   --art-imagined-bg:#F3EBFF; --art-imagined-ink:#5B21B6;
-  --art-illus-bg:#FFF6E9; --art-illus-ink:#8A5A00;
+  --art-illus-bg:#FFF6E9; --art-illus-ink:#8A5A00; --art-accent-bg:#FFEEE7;
   --art-shadow:0 1px 2px rgba(140,130,110,.28);
   --color-neutral-1:#FFFFFF; --color-neutral-2:#F0F0F0; --color-neutral-3:#D8D8D8;
   --color-neutral-4:#BDBDBD; --color-neutral-5:#5A5A5A; --color-neutral-9:#080808;
@@ -879,8 +879,9 @@ body{margin:0; background:var(--art-canvas); color:var(--art-ink);
 /* the filtering pattern the spec specifies */
 .dash{display:grid; grid-template-columns:repeat(12,1fr); gap:14px; align-items:start;}
 .w{display:block;}
-[data-mode="now"] .w[data-mode-only="next"]{display:none;}
-[data-mode="next"] .w[data-mode-only="now"]{display:none;}
+[data-mode="now"]    .w[data-mode-only]:not([data-mode-only~="now"]){display:none;}
+[data-mode="next"]   .w[data-mode-only]:not([data-mode-only~="next"]){display:none;}
+[data-mode="decide"] .w[data-mode-only]:not([data-mode-only~="decide"]){display:none;}
 [data-mode="now"][data-view="leadership"] .w[data-roles]:not([data-roles~="leadership"]){display:none;}
 [data-mode="now"][data-view="sales"]      .w[data-roles]:not([data-roles~="sales"]){display:none;}
 [data-mode="now"][data-view="kol"]        .w[data-roles]:not([data-roles~="kol"]){display:none;}
@@ -1379,11 +1380,11 @@ table.d tr.tot td{font-weight:900; border-top:1.5px solid var(--art-ink); border
     <div class="w s12" data-mode-only="decide"><div class="m3-posture">
       <p>Revenue is growing and margin is improving, but plan and share are both at risk. RM&nbsp;111.2M of pipeline is open against a RM&nbsp;17.1M gap, so the shortfall is a conversion question — while Digital's unsold shelf and RM&nbsp;4.4M of lapsed revenue say the demand underneath it is thinner than the growth rate suggests.</p>
       <p class="m3-delta"><span class="prov-s"><i class="dot dot-p"></i>pending</span> &nbsp;Since Monday: weighted forecast +RM&nbsp;1.2M · one negotiation-stage deal slipped to Q4 · the Petronas Q3 reset is 7 days undiarised · no decisions closed.</p>
-      <div class="m3-hz" role="group" aria-label="Decision horizon">
-        <span class="m3-hz-lbl">Horizon</span>
-        <button type="button" data-hz="week" aria-pressed="true">This week</button>
-        <button type="button" data-hz="quarter" aria-pressed="false">This quarter</button>
-        <button type="button" data-hz="fy" aria-pressed="false">FY outlook</button>
+      <div class="m3-hz" role="radiogroup" aria-label="Decision horizon">
+        <span class="m3-hz-lbl" aria-hidden="true">Horizon</span>
+        <button type="button" role="radio" data-hz="week" aria-checked="true">This week</button>
+        <button type="button" role="radio" data-hz="quarter" aria-checked="false">This quarter</button>
+        <button type="button" role="radio" data-hz="fy" aria-checked="false">FY outlook</button>
       </div>
     </div></div>
 
@@ -1434,8 +1435,10 @@ table.d tr.tot td{font-weight:900; border-top:1.5px solid var(--art-ink); border
               decide:['Three decisions this week','Ordered by what is at stake, not by what is easy to chart']};
   // Loop over .modes button keyed on data-m rather than naming each button:
   // the two-button version needed one more line per mode forever, and a
-  // fourth mode now costs zero JS.
+  // fourth mode now costs only its copy[] and titles[] entries — the
+  // wiring below is free, but those two map entries are not optional.
   function setMode(mode){
+    if(!copy[mode]||!titles[mode])return; // missing entry: stay on the current mode wholesale, don't half-switch
     root.parentElement.setAttribute('data-mode',mode);
     root.setAttribute('data-mode',mode);
     document.querySelectorAll('.modes button').forEach(function(b){
@@ -1474,21 +1477,21 @@ table.d tr.tot td{font-weight:900; border-top:1.5px solid var(--art-ink); border
   root.setAttribute('data-view','leadership');
   root.parentElement.setAttribute('data-view','leadership');
 
-  // Mode 3 horizon default. Same attribute-filtering philosophy as data-mode
-  // and data-view — CSS does the re-tiering, JS only writes the attribute.
+  // Mode 3 horizon default. Same attribute-writing philosophy as data-mode
+  // and data-view, but asymmetric for now: JS only writes data-horizon,
+  // nothing reads it yet. The decision cards added in the next task carry
+  // the per-horizon CSS that consumes this attribute.
   root.setAttribute('data-horizon','week');
   root.parentElement.setAttribute('data-horizon','week');
   var hzGroup=document.querySelector('.m3-hz');
-  if(hzGroup){
-    hzGroup.addEventListener('click',function(e){
-      var b=e.target.closest('button[data-hz]'); if(!b)return;
-      hzGroup.querySelectorAll('button[data-hz]').forEach(function(x){
-        x.setAttribute('aria-pressed',String(x===b));
-      });
-      root.setAttribute('data-horizon',b.dataset.hz);
-      root.parentElement.setAttribute('data-horizon',b.dataset.hz);
+  hzGroup.addEventListener('click',function(e){
+    var b=e.target.closest('button[data-hz]'); if(!b)return;
+    hzGroup.querySelectorAll('button[data-hz]').forEach(function(x){
+      x.setAttribute('aria-checked',String(x===b));
     });
-  }
+    root.setAttribute('data-horizon',b.dataset.hz);
+    root.parentElement.setAttribute('data-horizon',b.dataset.hz);
+  });
 })();
 </script>
 
@@ -1531,14 +1534,11 @@ table.d tr.tot td{font-weight:900; border-top:1.5px solid var(--art-ink); border
 
 /* ══════════ Mode 3 · decision workspace ══════════
    A third value on the same data-mode switch Modes 1 and 2 already use —
-   isolation is attribute filtering, not new plumbing. Every new class is
-   m3-* prefixed except the .dec trio; note the file already owns .st,
-   .st-lead, .st-v, .st-warn, .stack and .strip, so status chips are
-   .m3-chip[data-status] and must never take an st- prefix. */
-[data-mode="now"]    .w[data-mode-only="decide"],
-[data-mode="next"]   .w[data-mode-only="decide"]{display:none;}
-[data-mode="decide"] .w[data-mode-only="now"],
-[data-mode="decide"] .w[data-mode-only="next"]{display:none;}
+   isolation is attribute filtering, not new plumbing (the O(modes) rule
+   living up in the "filtering pattern" block covers all three). Every new
+   class is m3-* prefixed except the future .dec trio; note the file already
+   owns .st, .st-lead, .st-v, .st-warn, .stack and .strip, so status chips
+   to come will be .m3-chip[data-status] and must never take an st- prefix. */
 
 /* Mode 3 is leadership-level and implements no filtering, so the role tabs
    and the media/segment chips would be dead affordances. The MTD/QTD/YTD
@@ -1553,7 +1553,7 @@ table.d tr.tot td{font-weight:900; border-top:1.5px solid var(--art-ink); border
 [data-mode="decide"] .modes{border-color:var(--art-accent);}
 [data-mode="decide"] .modes button{border-right-color:var(--art-accent);}
 [data-mode="decide"] .modes button[aria-pressed="true"]{background:var(--art-accent); border-color:var(--art-accent);}
-[data-mode="decide"] .mbanner{border-left-color:var(--art-accent); background:rgba(255,88,37,.07);}
+[data-mode="decide"] .mbanner{border-left-color:var(--art-accent); background:var(--art-accent-bg);}
 
 /* Three buttons no longer fit one row on a narrow viewport. */
 @media (max-width:860px){
@@ -1569,14 +1569,14 @@ table.d tr.tot td{font-weight:900; border-top:1.5px solid var(--art-ink); border
 .m3-posture{background:var(--art-surface); border:1px solid var(--art-rule); border-radius:3px;
   box-shadow:var(--art-shadow); padding:18px 20px;}
 .m3-posture p{margin:0; font-size:15.5px; line-height:1.55; color:var(--art-ink); font-weight:600;}
-.m3-delta{margin:12px 0 0 !important; padding-top:12px; border-top:1px solid var(--art-rule);
-  font-size:12.5px !important; font-weight:600 !important; color:var(--art-muted) !important;}
+.m3-posture .m3-delta{margin:12px 0 0; padding-top:12px; border-top:1px solid var(--art-rule);
+  font-size:12.5px; font-weight:600; color:var(--art-muted);}
 .m3-hz{display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-top:14px;}
 .m3-hz-lbl{font-size:10px; font-weight:800; letter-spacing:.13em; text-transform:uppercase; color:var(--art-faint);}
 .m3-hz button{border:1px solid var(--art-rule); background:var(--art-surface); border-radius:999px;
   padding:5px 13px; font:inherit; font-size:12px; font-weight:700; color:var(--art-muted); cursor:pointer;}
 .m3-hz button:hover{border-color:var(--art-faint); color:var(--art-ink);}
-.m3-hz button[aria-pressed="true"]{background:var(--art-ink); border-color:var(--art-ink); color:var(--art-canvas);}
+.m3-hz button[aria-checked="true"]{background:var(--art-ink); border-color:var(--art-ink); color:var(--art-canvas);}
 .m3-hz button:focus-visible{outline:2px solid var(--art-accent); outline-offset:1px;}
 </style>
 

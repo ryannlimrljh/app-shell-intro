@@ -1524,3 +1524,37 @@ Three older copies exist and only one is a useful reference. Do not publish any 
 | `scratchpad/Collabrium-Leadership-Dashboard-Tracker.html` (399KB) | **Stale export** — only 12 Mode 2 widgets against the current 13. Ignore it. |
 
 Because the live artifact is one comment behind the committed page and nothing else, publishing after this work ships Mode 3 and that comment, with no other drift.
+
+---
+
+## Deviations
+
+Recorded as work lands. Task text above is left intact as the record of what was planned; this section is what was actually built and why it differs.
+
+### Task 1 (`f50d27a`, fixes in `c8f99f7`)
+
+1. **The plan's illustrative widget counts were wrong.** Task 1 Step 2 guessed `now: 19, next: 13`. The file's real baseline is **Mode 1 = 15, Mode 2 = 12**, and Mode 3 = 1 after the shell lands. Those are the regression numbers for every later task. The plan said to record the actual output rather than trust the example, and that is what caught it.
+
+2. **The horizon filter ships as a `radiogroup`, not `aria-pressed` toggles** — a correction to the plan, not a deviation from it in spirit. The control is single-choice with exactly one always on, and the file had already made this decision for the identical shape at `#roleTabs` (`role="radiogroup"` / `role="radio"` / `aria-checked`). As originally specified, a screen-reader user would hear three independent toggles with no indication they were exclusive. `.period` is not a counter-precedent: those buttons drive no state at all and are decorative.
+
+   Shipped: `role="radiogroup"` on `.m3-hz`, `role="radio"` + `aria-checked` per button, `aria-hidden="true"` on the label span, the handler writing `aria-checked`, and the CSS selector `.m3-hz button[aria-checked="true"]`.
+
+   **Known gap, deliberate:** `role="radio"` sets an arrow-key navigation expectation that plain focusable buttons do not meet. `#roleTabs` already ships with that same gap, so matching it keeps the file internally consistent. A future accessibility pass should add roving tabindex and arrow handling to **both** groups together, not just this one. Task 3's verification step was updated to check `aria-checked` rather than `aria-pressed`.
+
+3. **`setMode` gained a guard.** Without it, a mode whose `copy`/`titles` entry is missing writes the literal string `undefined` into the banner and *then* throws on `titles[mode][0]` — after `data-mode` and every `aria-pressed` have already been written. The result is one mode's widgets under another mode's heading: half-applied and misleading rather than visibly broken. `if(!copy[mode]||!titles[mode])return;` is now the first statement, so a bad key leaves the page wholly on the previous mode. The comment claiming a fourth mode "costs zero JS" was the invitation to that bug and now states the real cost: two map entries, wiring free.
+
+4. **`--art-accent-bg` token added** (`#FFEEE7` light, `#3A1C10` dark, in all four theme blocks). Mode 3's banner wash was a literal `rgba(255,88,37,.07)`. The hue was right — `--art-accent` is `#FF5825` in both themes — but the alpha was the problem: over the light canvas it composites near `#FEEDE4`, comparable to Mode 2's tint, while over the dark canvas it lands near `#251812` against Mode 2's purpose-built `#2A1D45`. Mode 3's wash would have all but vanished in dark while Mode 2's stayed legible, against the file's convention that every wash is theme-valued.
+
+5. **Mode isolation collapsed from O(modes²) to O(modes).** The plan enumerated mode *pairs*, so three modes needed six rules and a fourth would have needed twelve. The file's own `data-roles` filtering already used the linear form. Shipped as three rules replacing six, including the two that predated this work:
+
+   ```css
+   [data-mode="now"]    .w[data-mode-only]:not([data-mode-only~="now"]){display:none;}
+   [data-mode="next"]   .w[data-mode-only]:not([data-mode-only~="next"]){display:none;}
+   [data-mode="decide"] .w[data-mode-only]:not([data-mode-only~="decide"]){display:none;}
+   ```
+
+   Equivalent because every `data-mode-only` value is a single token. This was the riskiest change in the fix round — it rewrote rules Modes 1 and 2 depend on — so the 15/12/1 zero-leak assertion was re-run as its gate.
+
+6. **Minor cleanups from the same review:** four `!important` on `.m3-delta` replaced by the higher-specificity `.m3-posture .m3-delta`; a cargo-culted `if(hzGroup)` guard dropped to match the unguarded `#roleTabs` handler and to let a class-rename typo throw instead of silently producing an inert control; and two comments that described future state in the present tense reworded, since a reader would have grepped for CSS that did not exist yet.
+
+7. **Environment note for later tasks:** the Browser pane serves a stale cached copy after an edit, and a plain reload does not clear it. Append a cache-buster (`?cb=1`) on the first navigation after editing; subsequent reloads then track the file. Confirmed by `curl` against the dev server, which was serving the updated file correctly the whole time.

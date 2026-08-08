@@ -309,16 +309,19 @@ Mode 3 is a third value on the existing attribute switch. No refactor.
 **CSS additions:**
 
 ```css
-[data-mode="now"]    .w[data-mode-only="decide"],
-[data-mode="next"]   .w[data-mode-only="decide"]{display:none;}
-[data-mode="decide"] .w[data-mode-only="now"],
-[data-mode="decide"] .w[data-mode-only="next"]{display:none;}
+/* One rule per mode, negated — not one per mode PAIR. Three modes would
+   otherwise need six rules and a fourth twelve. Equivalent because every
+   data-mode-only value is a single token; this also replaces the two
+   pair-enumeration rules that predated Mode 3. */
+[data-mode="now"]    .w[data-mode-only]:not([data-mode-only~="now"]){display:none;}
+[data-mode="next"]   .w[data-mode-only]:not([data-mode-only~="next"]){display:none;}
+[data-mode="decide"] .w[data-mode-only]:not([data-mode-only~="decide"]){display:none;}
 [data-mode="decide"] .roles,
 [data-mode="decide"] .filters,
 [data-mode="decide"] .period{display:none;}
 [data-mode="decide"] .modes button[aria-pressed="true"]{background:var(--art-accent); border-color:var(--art-accent);}
 [data-mode="decide"] .modes{border-color:var(--art-accent);}
-[data-mode="decide"] .mbanner{border-left-color:var(--art-accent);}
+[data-mode="decide"] .mbanner{border-left-color:var(--art-accent); background:var(--art-accent-bg);}
 ```
 
 **JS changes** to `setMode(mode)` in the tracker's script tail:

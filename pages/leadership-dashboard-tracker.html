@@ -2039,10 +2039,20 @@ table.d tr.tot td{font-weight:900; border-top:1.5px solid var(--art-ink); border
 
 /* Share-of-market's Watch card claims that at FY horizon it "becomes a
    decision" — true only once D7 exists and is promoted, which is exactly
-   what the FY horizon does. Dim the card and surface the note only then,
-   so the copy is true instead of permanently aspirational. */
-.m3-fy-note{display:none; margin:0; font-size:10.5px; font-weight:800; color:var(--art-accent);}
-[data-horizon="fy"] .m3-watch .m3-wcard:nth-child(3){opacity:.55;}
+   what the FY horizon does. Demote the card and surface the note only then,
+   so the copy is true instead of permanently aspirational.
+   NOT opacity: it composites through every descendant, and this card's own
+   threshold line ("escalates if it falls a further 0.2pt") is still a real,
+   live figure — dimming it to 2.51:1 would have hidden the one number the
+   demotion note exists to point at. Use the same border-only demotion the
+   .dec "Also open" treatment already uses elsewhere in this file, which
+   costs nothing in contrast because it never touches text color. */
+/* .m3-wcard p at (0,1,1) beats a bare .m3-fy-note class at (0,1,0), so the
+   note was silently inheriting muted body-text grey instead of the accent
+   it declares — same trap as .dec-fk elsewhere in this file. Scoped as
+   .m3-wcard p.m3-fy-note (0,2,1) rather than reaching for !important. */
+.m3-wcard p.m3-fy-note{display:none; margin:0; font-size:10.5px; font-weight:800; color:var(--art-accent);}
+[data-horizon="fy"] .m3-watch .m3-wcard:nth-child(3){border-style:dashed; border-color:var(--art-rule);}
 [data-horizon="fy"] .m3-watch .m3-wcard:nth-child(3) .m3-fy-note{display:block;}
 
 /* ── Decision objects. The unit the whole mode is built from: a decision is

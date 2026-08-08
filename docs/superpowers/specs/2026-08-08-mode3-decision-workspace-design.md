@@ -1,6 +1,6 @@
 # Mode 3 — The Decision Workspace
 
-**Status:** Approved, not yet implemented
+**Status:** In implementation — see `docs/superpowers/plans/2026-08-08-mode3-decision-workspace.md` and its Deviations section for what has shipped
 **Date:** 2026-08-08
 **File:** `pages/leadership-dashboard-tracker.html` (git-tracked canonical; publishes to artifact `886c79d5-fc33-4625-ac36-13a32ba2aa1a`)
 **Supersedes nothing.** Modes 1 and 2 stay exactly as they are.

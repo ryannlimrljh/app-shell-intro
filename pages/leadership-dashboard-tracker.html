@@ -1388,6 +1388,70 @@ table.d tr.tot td{font-weight:900; border-top:1.5px solid var(--art-ink); border
       </div>
     </div></div>
 
+    <div class="w s12" data-mode-only="decide"><div class="m3-health" id="m3Health">
+      <div class="m3-hm">
+        <span class="m3-hm-k">Forecast to plan</span>
+        <span class="m3-hm-v">RM 222.9M</span>
+        <span class="m3-hm-d">of RM 240.0M · <b class="m3-dn">RM 17.1M short</b><br><span class="prov-s"><i class="dot dot-p"></i>pending</span> +RM 1.2M since Monday</span>
+      </div>
+      <div class="m3-hm">
+        <span class="m3-hm-k">Gross margin</span>
+        <span class="m3-hm-v">31.4%</span>
+        <span class="m3-hm-d"><b class="m3-up">+0.8pt</b> vs LY<br>the only headline metric improving</span>
+      </div>
+      <div class="m3-hm">
+        <span class="m3-hm-k">Net revenue retention</span>
+        <span class="m3-hm-v">97.3%</span>
+        <span class="m3-hm-d"><span class="prov-s"><i class="dot dot-d"></i>derived</span> from the growth bridge<br>lapsed RM 4.4M YTD</span>
+      </div>
+      <div class="m3-hm">
+        <span class="m3-hm-k">Share of market</span>
+        <span class="m3-hm-v m3-dn">13.8%</span>
+        <span class="m3-hm-d"><b class="m3-dn">−0.4pt</b> YTD<br><span class="prov-s"><i class="dot dot-p"></i>pending</span> accelerating, −0.2pt in 60 days</span>
+      </div>
+      <div class="m3-hm">
+        <span class="m3-hm-k">Cash &amp; delivery risk</span>
+        <span class="m3-hm-v">RM 12.4M</span>
+        <span class="m3-hm-d"><span class="prov-s"><i class="dot dot-p"></i>pending</span> overdue &gt; 60 days<br>booked-to-billed 94%</span>
+      </div>
+      <div class="m3-hm">
+        <span class="m3-hm-k">Decisions</span>
+        <span class="m3-hm-v" id="m3Due">3 due</span>
+        <span class="m3-hm-d"><span class="prov-s"><i class="dot dot-p"></i>pending</span> this week · <span id="m3Stalled">1</span> stalled<br><span id="m3Closed">0</span> closed since last review</span>
+      </div>
+    </div></div>
+
+    <div class="w s12" data-mode-only="decide"><div class="m3-srule">
+      <h3>Watch</h3><p>Material, not yet actionable — each carries the threshold that would promote it</p>
+    </div></div>
+
+    <div class="w s12" data-mode-only="decide"><div class="m3-watch">
+      <div class="m3-wcard">
+        <h4>Negotiation-stage ageing</h4>
+        <span class="m3-wv">41 days</span>
+        <p>37 deals · RM 51.2M at 50% — the oldest cohort in the pipeline.</p>
+        <p class="m3-thr">Escalates if <b>the average passes 45 days</b></p>
+      </div>
+      <div class="m3-wcard">
+        <h4>Contracted, not booked</h4>
+        <span class="m3-wv">RM 28.4M</span>
+        <p>At 95% and averaging 11 days. A billing question, not a selling one.</p>
+        <p class="m3-thr">Escalates if <b>average ageing doubles</b></p>
+      </div>
+      <div class="m3-wcard">
+        <h4>Share of market</h4>
+        <span class="m3-wv m3-dn">13.8%</span>
+        <p>Down 0.4pt YTD. At FY horizon this stops being a threshold and becomes a decision.</p>
+        <p class="m3-thr">Escalates if <b>it falls a further 0.2pt at H1 close</b></p>
+      </div>
+      <div class="m3-wcard">
+        <h4>Gross margin</h4>
+        <span class="m3-wv m3-up">31.4%</span>
+        <p>Up 0.8pt vs LY — the only headline metric moving the right way.</p>
+        <p class="m3-thr">Escalates if <b>it drops below 30.5%</b></p>
+      </div>
+    </div></div>
+
   </div>
 
   <p class="foot"><b>Mode 1</b> is built only from the six confirmed datasets; computed values are tagged <span class="tag t-derived">Derived</span> and unsourced views <span class="tag t-illus">Illustrative</span>. <b>Mode 2</b> is the target state: confirmed data properly visualised alongside the sources still outstanding. Panels are marked <i class="dot dot-c" style="display:inline-block;vertical-align:middle"></i> confirmed, <i class="dot dot-d" style="display:inline-block;vertical-align:middle"></i> computed, or <i class="dot dot-p" style="display:inline-block;vertical-align:middle"></i> pending a source. Only the pending panels are invented; do not quote those as fact.<br>Built on the Collabrium design system · figures reconcile to RM 148.2M YTD against a RM 157.6M target.</p>
@@ -1578,6 +1642,54 @@ table.d tr.tot td{font-weight:900; border-top:1.5px solid var(--art-ink); border
 .m3-hz button:hover{border-color:var(--art-faint); color:var(--art-ink);}
 .m3-hz button[aria-checked="true"]{background:var(--art-ink); border-color:var(--art-ink); color:var(--art-canvas);}
 .m3-hz button:focus-visible{outline:2px solid var(--art-accent); outline-offset:1px;}
+
+/* ── Health strip: calm context. Six metrics, no charts, nothing that
+   competes with the decisions below. Each carries direction AND velocity —
+   a leader needs to know whether something is deteriorating, not only
+   where it stands. ── */
+.m3-health{display:grid; grid-template-columns:repeat(6,1fr); gap:0;
+  background:var(--art-surface); border:1px solid var(--art-rule); border-radius:3px;
+  box-shadow:var(--art-shadow); overflow:hidden;}
+@media (max-width:1150px){ .m3-health{grid-template-columns:repeat(3,1fr);} }
+@media (max-width:680px){ .m3-health{grid-template-columns:repeat(2,1fr);} }
+.m3-hm{padding:14px 15px; border-right:1px solid var(--art-rule); display:flex; flex-direction:column; gap:4px;}
+.m3-hm:last-child{border-right:0;}
+.m3-hm-k{font-size:9.5px; font-weight:800; letter-spacing:.12em; text-transform:uppercase; color:var(--art-faint);}
+.m3-hm-v{font-size:21px; font-weight:900; letter-spacing:-.02em; line-height:1.1; font-variant-numeric:tabular-nums;}
+.m3-hm-d{font-size:11.5px; color:var(--art-muted); line-height:1.45;}
+.m3-hm-d b{color:var(--art-ink);}
+.m3-up{color:var(--art-good);} .m3-dn{color:var(--art-crit);}
+
+/* ── Tier system. Weight is a function of stakes, assigned by the page —
+   a RM 56.3M exposure physically cannot look like an interesting aside. ── */
+.m3-tier{font-size:9.5px; font-weight:800; letter-spacing:.14em; text-transform:uppercase;
+  display:inline-flex; align-items:center; gap:6px;}
+.m3-tier::before{content:''; width:8px; height:8px; border-radius:50%; background:currentColor;}
+.m3-t-urgent{color:var(--art-crit);}
+.m3-t-risk{color:var(--art-warn);}
+.m3-t-opp{color:var(--art-good);}
+.m3-t-strategic{color:var(--art-imagined);}
+
+/* Section rules — quiet labels, not cards, so the tiers below them read as
+   the page's structure rather than as more boxes. */
+.m3-srule{display:flex; align-items:baseline; gap:12px; margin:8px 0 -2px;}
+.m3-srule h3{margin:0; font-size:13px; font-weight:900; letter-spacing:.1em; text-transform:uppercase; color:var(--art-ink);}
+.m3-srule p{margin:0; font-size:12px; color:var(--art-faint);}
+
+/* ── Watch: compact, threshold-only, and deliberately BUTTONLESS. Every
+   tier having actions is how the page went flat in the first place. The
+   tier is the guidance: Now means act, Watch means not yet. ── */
+.m3-watch{display:grid; grid-template-columns:repeat(4,1fr); gap:14px;}
+@media (max-width:1000px){ .m3-watch{grid-template-columns:repeat(2,1fr);} }
+@media (max-width:560px){ .m3-watch{grid-template-columns:1fr;} }
+.m3-wcard{background:var(--art-surface); border:1px solid var(--art-rule); border-radius:3px;
+  box-shadow:var(--art-shadow); padding:13px 15px; display:flex; flex-direction:column; gap:6px;}
+.m3-wcard h4{margin:0; font-size:12.5px; font-weight:800; color:var(--art-ink);}
+.m3-wv{font-size:15px; font-weight:900; letter-spacing:-.01em; font-variant-numeric:tabular-nums;}
+.m3-wcard p{margin:0; font-size:11.5px; color:var(--art-muted); line-height:1.5;}
+.m3-thr{margin-top:auto !important; padding-top:8px; border-top:1px dashed var(--art-rule);
+  font-size:11px !important; color:var(--art-faint) !important;}
+.m3-thr b{color:var(--art-warn);}
 </style>
 
 <script>

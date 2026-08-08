@@ -2112,26 +2112,31 @@ table.d tr.tot td{font-weight:900; border-top:1.5px solid var(--art-ink); border
 .m3-chip[data-status="Awaiting client"]{color:var(--art-derived-ink); border-color:var(--art-derived);}
 .m3-chip[data-status="Closed"]{color:var(--art-good-ink); border-color:var(--art-good);}
 .m3-chip[data-status="Moot"]{color:var(--art-muted); text-decoration:line-through;}
-.m3-chip-h{margin-left:auto; font-size:10px; font-weight:800; letter-spacing:.1em;
+/* No margin-left:auto here, deliberately. This span is the live confirmation
+   slot, so it has to sit NEXT TO the chip that wrote it — an auto margin ate
+   all the row's free space and threw the text ~825px right at 1280px wide,
+   where it read as belonging to the Evidence button 9px away rather than to
+   the chip 825px away. The auto margin lives on .dec-ev instead, which is
+   what actually wants to be flush right. */
+.m3-chip-h{font-size:10px; font-weight:800; letter-spacing:.1em;
   text-transform:uppercase; color:var(--art-muted);}
 
 /* Evidence trigger — was unstyled, rendering as raw UA button chrome that
    ignored the theme entirely. This rule fixes it. Styled to sit beside
    .m3-chip without competing with it — outline, not filled, since it opens
    a drawer rather than committing a decision. */
-.dec-ev{border:1px solid var(--art-rule); background:var(--art-surface); border-radius:2px;
+.dec-ev{margin-left:auto; border:1px solid var(--art-rule); background:var(--art-surface); border-radius:2px;
   padding:5px 10px; font:inherit; font-size:11px; font-weight:800; color:var(--art-muted); cursor:pointer;}
 .dec-ev:hover{border-color:var(--art-accent); color:var(--art-accent);}
 .dec-ev:focus-visible{outline:2px solid var(--art-accent); outline-offset:2px;}
 .dec-ev[aria-expanded="true"]{color:var(--art-ink); border-color:var(--art-faint);}
-/* .m3-chip-h's margin-left:auto pushes .dec-ev onto its own line once the
-   status row can no longer fit both on 375px; drop the auto margin there.
-   That alone still overflows by a few px on a stalled card (chip + hint +
-   evidence trigger, three items), so the same rule trims gap and padding
-   just enough to bring the row back under one line without touching any
-   other viewport. */
+/* At 375px a stalled card's status row carries three items — chip, live hint
+   and evidence trigger — and overflows by a few px. Trim the gap and the
+   control padding just enough to bring it back onto one line, without
+   touching any other viewport. (There is no margin-left override here any
+   more: the auto margin now lives on .dec-ev, which wants to be flush right
+   at every width.) */
 @media (max-width:400px){
-  .m3-chip-h{margin-left:0;}
   .dec-status{gap:6px;}
   .m3-chip{padding:5px 9px; font-size:10.5px;}
   .dec-ev{padding:5px 8px; font-size:10.5px;}

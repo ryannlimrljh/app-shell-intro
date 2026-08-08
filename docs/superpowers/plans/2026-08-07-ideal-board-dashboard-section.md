@@ -1015,3 +1015,48 @@ Recorded during subagent-driven execution, 2026-08-07/08:
    Both chart modules (`pages/app-shell-intro.html`,
    `pages/leadership-dashboard-tracker.html`) gained header pointers naming
    each other as diverged copies: port fixes both ways.
+6. **Post-delivery revisions (2026-08-08, user-directed).** Four changes that
+   supersede parts of the plan above; the plan text is left intact as the
+   record of what was built first.
+   - **Data provenance removed entirely.** The legend strip widget, all 14
+     per-panel/per-stat `.c-dash-src` badges and the `.c-dash-prov*` /
+     `.c-dash-src` / `.c-dash-dot` CSS are gone; the 16-widget grid is now 15
+     and `--dw-i` renumbered 0–14. Two notes that framed figures as
+     source-dependent ("the reason to buy the data", "none of them is
+     derivable without the outstanding sources") were reworded. Spec sections
+     on provenance are therefore historical, not current.
+   - **Section 2 starts below the fold.** Greeting + card row + hand-off line
+     are wrapped in `.c-canvas-hero` with
+     `min-height:calc(100dvh - var(--section-gap))`. The arithmetic is exact,
+     not a guessed `vh`: `--section-gap` is `.c-shell-content`'s padding-top,
+     so the hero's bottom edge lands on the fold and `.c-dash`'s own
+     `margin-top` starts the section one gap below it. Verified at 48px below
+     the fold on 1280×720 and 1440×1100, 255px on 375×667.
+   - **Ask-box parking deleted.** The assistant is permanent: `.is-parked` /
+     `.is-settled` CSS and the parking branch of the scroll listener are gone,
+     which retires the whole mechanism deviation 5 above describes fixing. The
+     listener now does only the date-banner fade. The box moved from
+     `position:fixed` on the viewport to `position:absolute` on
+     `.c-shell-main`, so it centres on the content column instead of the
+     whole window.
+   - **Main nav back in flow.** `.c-sidebar-shell`'s `position:absolute`
+     overlay is removed — that overlay was the cause of the bento grid
+     rendering underneath the rail, since the grid measured a row width the
+     nav claimed none of. `.c-shell-main` becomes `position:relative` as the
+     containing block for the date banner and ask box. The card slider's
+     JS-driven 240px/72px nav-clearance inset is deleted along with
+     `updateCardSliderInset()` and its scroll-snap-suppression workaround —
+     a static 64px matching the trailing padding is enough now that nothing
+     floats over the row. Trade accepted on purpose: canvas content
+     re-centres when the rail collapses.
+   - **Known, pre-existing, not fixed:** on viewports shorter than ~856px the
+     permanent ask box covers the "Dashboard ↓" hand-off line (hero content
+     is ~674px tall and the box owns the bottom 162px). `elementFromPoint`
+     at the link's centre returns `.floating-ask`, so the link is not
+     clickable there. It behaved the same way before these changes — parking
+     only cleared the box once you had already reached the section — but the
+     occlusion is now permanent rather than transient. Clear and hit-testable
+     at 1440×1100. Fixing it needs the hero's vertical rhythm re-tuned under
+     a height media query (greeting padding, slider top margin, card
+     min-height, track bottom padding), which is a design change, not a
+     spacing tweak.

@@ -2066,6 +2066,28 @@ table.d tr.tot td{font-weight:900; border-top:1.5px solid var(--art-ink); border
   .dec-ev{padding:5px 8px; font-size:10.5px;}
   .m3-chip-h{font-size:9px;}
 }
+
+/* ── Evidence drawer. The narrative captions were never the problem — they
+   were stated at equal volume, all at once. Here the claim and its chart
+   are one click away from the decision they produced, which is placement,
+   not less conclusiveness. ── */
+/* .dec-ev is ALREADY fully styled — border, radius, font, hover, :focus-visible
+   and an [aria-expanded="true"] state were added during the Task 3 review round,
+   because the plan had left the trigger with no rule at all and it rendered as a
+   raw browser button. Do NOT re-declare it here. If you need the trigger pushed
+   to the end of its row, add margin-left:auto to the EXISTING rule rather than
+   writing a second one that will sit in a different block and drift. */
+.dec-drawer{margin-top:14px; padding:14px 16px; background:var(--art-sunk);
+  border:1px solid var(--art-rule); border-radius:3px;}
+.dec-drawer[hidden]{display:none;}
+.dec-drawer svg{display:block; width:100%; max-width:420px; height:auto;}
+.dec-dclaim{margin:0 0 10px; font-size:12.5px; color:var(--art-muted); line-height:1.5;}
+.dec-dclaim b{color:var(--art-ink);}
+.dec-dlink{display:inline-block; margin-top:10px; font-size:12px; font-weight:800;
+  color:var(--art-ink); text-decoration:underline; text-underline-offset:3px; cursor:pointer;
+  background:none; border:0; padding:0; font-family:inherit;}
+.dec-dlink:hover{color:var(--art-accent);}
+.dec-dlink:focus-visible{outline:2px solid var(--art-accent); outline-offset:2px;}
 </style>
 
 <script>
@@ -2393,6 +2415,200 @@ table.d tr.tot td{font-weight:900; border-top:1.5px solid var(--art-ink); border
     s+=txt(X(7)-4,SY(13.8)-7,'13.8%',{s:9.5,w:900,f:C.crit,a:'end'});
     set('cShare',s);
   })();
+
+  /* ── Mode 3 mini-charts ──────────────────────────────────
+     Drawer-sized evidence, not copies of the nine big panels: duplicating
+     those would mean two sources of truth and about 175KB. Fixed viewBox,
+     no measurement. Exposed on window because the Mode 3 interaction module
+     is a separate IIFE and these helpers are closed over in here. */
+  var VB='0 0 380 130';
+  function wrap(s){ return '<svg viewBox="'+VB+'" role="img">'+s+'</svg>'; }
+
+  function mGap(){
+    var x0=100,x1=330,lo=200,hi=246,H=130;
+    function X(v){ return x0+(v-lo)/(hi-lo)*(x1-x0); }
+    var rows=[['Commit',210.2,C.crit],['Weighted',222.9,C.pur],['Best case',239.4,C.good]];
+    var s='';
+    rows.forEach(function(r,i){
+      var y=20+i*30;
+      s+=txt(x0-9,y+11,r[0],{a:'end',s:10,f:C.mut});
+      s+=rect(x0,y,X(r[1])-x0,15,{f:r[2],o:.85,r:2});
+      s+=txt(X(r[1])+6,y+11,r[1].toFixed(1),{s:10,w:800,f:C.ink});
+    });
+    s+=ln(X(240),12,X(240),H-22,{c:C.ink,w:1.6,d:'3 3'});
+    s+=txt(X(240),H-8,'plan 240.0',{a:'middle',s:9,w:800,f:C.ink});
+    return wrap(s);
+  }
+
+  function mConc(){
+    // Copied verbatim from Mode 2's cConc IIFE — that renderer's series is a
+    // sparse set of (rank, cumulative%) control points [0,1,2,3,5,10,20], not
+    // a dense cum[0..9] array as an earlier draft of this task assumed, so the
+    // real sparse points are copied here rather than fabricating ten values
+    // Mode 2 never computed. Endpoints: largest advertiser 9.2% (pts[1][1]),
+    // top-5 cumulative 38% (pts[4][1] — rank 5 is stored at index 4).
+    var pts=[[0,0],[1,9.2],[2,16.1],[3,22.4],[5,38],[10,54],[20,71]];
+    var x0=42,x1=350,y0=104,y1=18;
+    function X(v){ return x0+(v/20)*(x1-x0); }
+    function Y(v){ return y0-(v/80)*(y0-y1); }
+    var s='';
+    [20,40,60].forEach(function(v){
+      s+=ln(x0,Y(v),x1,Y(v),{c:C.rule});
+      s+=txt(x0-6,Y(v)+3,v+'%',{a:'end',s:8,f:C.fnt});
+    });
+    var band='M'+X(0).toFixed(1)+' '+y0;
+    for(var i=0;i<=4;i++) band+=' L'+X(pts[i][0]).toFixed(1)+' '+Y(pts[i][1]).toFixed(1);
+    band+=' L'+X(5).toFixed(1)+' '+y0+' Z';
+    s+=path(band,{f:C.crit,o:.13});
+    var d='M'+X(pts[0][0]).toFixed(1)+' '+Y(pts[0][1]).toFixed(1);
+    for(var j=1;j<pts.length;j++) d+=' L'+X(pts[j][0]).toFixed(1)+' '+Y(pts[j][1]).toFixed(1);
+    s+=path(d,{s:C.ink,w:2});
+    s+='<circle cx="'+X(5).toFixed(1)+'" cy="'+Y(38).toFixed(1)+'" r="4" fill="'+C.crit+'"/>';
+    s+=txt(X(5)+7,Y(38)-6,'top 5 = 38% · RM 56.3M',{s:10,w:800,f:C.ink});
+    s+=txt(x0,y0+16,'advertiser rank (0–20)',{s:9,f:C.fnt});
+    return wrap(s);
+  }
+
+  // Percentages only, deliberately: the spec states 62%/75% for Digital and
+  // 97%/109% for Addressable but no per-line RM split, and inventing one here
+  // would risk contradicting Mode 2's own fill panel. The only RM figure this
+  // board owns for fill is the all-lines total, RM 148.2M of RM 174.0M.
+  function mFill(name,soldPct,attainPct){
+    var x0=14,x1=366,s='';
+    s+=txt(x0,16,name+' · sold against sellable',{s:10,w:800,f:C.ink});
+    s+=rect(x0,24,x1-x0,20,{f:C.rule,o:.55,r:2});
+    s+=rect(x0,24,(x1-x0)*soldPct/100,20,{f:C.der,r:2});
+    s+=txt(x0+6,38,soldPct+'% sold',{s:10,w:800,f:'#fff'});
+    s+=txt(x1,38,'unsold shelf '+(100-soldPct)+'%',{a:'end',s:9,f:C.mut});
+    s+=txt(x0,64,'target attainment',{s:9,w:800,f:C.fnt});
+    var capped=attainPct>100;
+    s+=rect(x0,70,(x1-x0)*Math.min(attainPct,130)/130,14,{f:capped?C.good:C.warn,r:2});
+    s+=ln(x0+(x1-x0)*100/130,66,x0+(x1-x0)*100/130,88,{c:C.ink,w:1.4,d:'3 3'});
+    s+=txt(x0+(x1-x0)*100/130+5,98,'100%',{s:8,f:C.fnt});
+    s+=txt(x1,81,attainPct+'%',{a:'end',s:11,w:900,f:capped?C.good:C.warn});
+    s+=txt(x0,116,capped?'Sold out — this ceiling is supply, not selling.'
+                        :'Shelf was full — the constraint is demand, not supply.',
+           {s:10,w:700,f:C.ink});
+    return wrap(s);
+  }
+
+  function mQuad(){
+    var x0=44,x1=352,y0=100,y1=18;
+    function X(a){ return x0+(a-60)/70*(x1-x0); }        // attainment 60..130 %
+    function Y(c){ return y0-(c/3)*(y0-y1); }            // cover 0..3 x
+    var s='';
+    s+=rect(x0,y1,X(100)-x0,Y(1)-y1,{f:C.warn,o:.08,r:0});
+    s+=rect(X(100),y1,x1-X(100),Y(1)-y1,{f:C.good,o:.09,r:0});
+    s+=rect(x0,Y(1),X(100)-x0,y0-Y(1),{f:C.crit,o:.09,r:0});
+    s+=ln(X(100),y1,X(100),y0,{c:C.rule,w:1.2,d:'3 3'});
+    s+=ln(x0,Y(1),x1,Y(1),{c:C.rule,w:1.2,d:'3 3'});
+    s+=txt(x0-6,Y(1)+3,'1.0×',{a:'end',s:8,f:C.fnt});
+    s+=txt(X(100),y0+14,'100%',{a:'middle',s:8,f:C.fnt});
+    // Labels flip to left-of-point (anchor 'end') once the point sits in the
+    // right half of the plot — a fixed +9 right offset let Aisyah Rahman's
+    // label run off the 380-wide viewBox; the audit in Step 6 caught it.
+    var pts=[['Daniel Tan',85,0.8,C.crit],['Aisyah Rahman',118,2.4,C.good]];
+    pts.forEach(function(p){
+      var cx=X(p[1]), cy=Y(p[2]), toLeft=cx>(x0+x1)/2;
+      s+='<circle cx="'+cx.toFixed(1)+'" cy="'+cy.toFixed(1)+'" r="5" fill="'+p[3]+'"/>';
+      s+=txt(toLeft?cx-9:cx+9,cy+4,p[0]+' · '+p[1]+'% · '+p[2]+'×',
+             {s:10,w:800,f:C.ink,a:toLeft?'end':undefined});
+    });
+    s+=txt(x0,y0+28,'attainment →   ↑ pipeline cover · all 14 reps plotted in Mode 2',{s:9,f:C.fnt});
+    return wrap(s);
+  }
+
+  function mChurn(){
+    var rows=[['Petronas Retail',2.1,'Budget cycle',true],
+              ['AirAsia',1.4,'Competitive',false],
+              ['Tealive',0.5,'Price',false],
+              ['Watsons MY',0.4,'Service',false]];
+    // x1 pulled in from 300 to 280 — the trailing 'recoverable' tag at x1+34
+    // ran past the 380-wide viewBox; the shorter row leaves it room instead.
+    var x0=110,x1=280,s='';
+    rows.forEach(function(r,i){
+      var y=16+i*24;
+      s+=txt(x0-8,y+10,r[0],{a:'end',s:9.5,f:C.mut});
+      s+=rect(x0,y,(x1-x0)*r[1]/2.4,13,{f:r[3]?C.warn:C.crit,o:r[3]?.9:.55,r:2});
+      s+=txt(x1+6,y+10,r[1].toFixed(1),{s:9.5,w:800,f:C.ink});
+      if(r[3]) s+=txt(x1+30,y+10,'recoverable',{s:8.5,w:800,f:C.warn});
+    });
+    s+=txt(x0-8,120,'RM 4.4M total',{a:'end',s:10,w:900,f:C.ink});
+    s+=txt(x0,120,'— RM 2.1M was timing, not a loss',{s:10,f:C.mut});
+    return wrap(s);
+  }
+
+  function mShare(){
+    // Copied verbatim from Mode 2's cShare IIFE (mk/us index arrays). An
+    // earlier draft of this task hand-typed placeholder interior values that
+    // matched the endpoints (us[7]=106.4, mk[7]=108.1) but diverged on every
+    // point in between — the real arrays are used here instead.
+    var us=[100,100.9,101.9,102.8,103.8,104.7,105.6,106.4];
+    var mk=[100,101.2,102.4,103.5,104.8,105.9,107.0,108.1];
+    var x0=34,x1=300,y0=96,y1=18;
+    function X(i){ return x0+i/(us.length-1)*(x1-x0); }
+    function Y(v){ return y0-(v-99)/10*(y0-y1); }
+    function d(a){ var p='M'+X(0).toFixed(1)+' '+Y(a[0]).toFixed(1);
+      for(var i=1;i<a.length;i++) p+=' L'+X(i).toFixed(1)+' '+Y(a[i]).toFixed(1); return p; }
+    function rev(a){ var p=''; for(var k=a.length-1;k>=0;k--) p+=' L'+X(k).toFixed(1)+' '+Y(a[k]).toFixed(1); return p; }
+    var s='';
+    s+=path(d(mk)+rev(us)+' Z',{f:C.crit,o:.11});
+    s+=path(d(mk),{s:C.mut,w:2,d:'4 3'});
+    s+=path(d(us),{s:C.der,w:2.4});
+    s+=txt(X(7)+6,Y(mk[7])+3,'market +8.1%',{s:9.5,w:800,f:C.mut});
+    s+=txt(X(7)+6,Y(us[7])+3,'us +6.4%',{s:9.5,w:800,f:C.der});
+    s+=txt(x0,120,'share 14.2% → 13.8% · about RM 4.3M that went elsewhere',{s:10,w:700,f:C.ink});
+    return wrap(s);
+  }
+
+  window.M3CHARTS={
+    mGap:mGap, mConc:mConc, mQuad:mQuad, mChurn:mChurn, mShare:mShare,
+    mFillDigital:function(){ return mFill('Digital',62,75); },
+    mFillAddressable:function(){ return mFill('Addressable',97,109); }
+  };
+})();
+</script>
+
+<!-- Mode 3 interactions: separate IIFE from the chart module, which is why
+     the mini-charts are handed over on window.M3CHARTS rather than closed
+     over. -->
+<script>
+(function(){
+  var CLAIMS={
+    mGap:'<b>The plan line is only touched by best case.</b> Weighted lands RM 17.1M short and commit RM 29.8M short.',
+    mConc:'<b>No single-account cliff, but a top-five exposure.</b> The largest advertiser is 9.2%; the top five carry 38%.',
+    mFillDigital:'<b>The pale remainder is shelf we never filled.</b> Digital sold 62% and reached 75% of target.',
+    mFillAddressable:'<b>The only line beating plan is supply-capped.</b> Addressable is 97% sold out at 109% of target.',
+    mQuad:'<b>Behind with a thin pipeline.</b> 85% attainment and 0.8× cover is a prospecting problem, not slow closes.',
+    mChurn:'<b>Half of it was never lost — it was timing.</b> RM 2.1M is a budget-cycle gap that needs a calendar.',
+    mShare:'<b>Growth that still loses ground.</b> 6.4% in a market growing 8.1% cost 0.4pt of share.'
+  };
+  var PANEL={mGap:'cFan',mConc:'cConc',mFillDigital:'cFill',mFillAddressable:'cFill',
+             mQuad:'cQuad',mChurn:'cChurn',mShare:'cShare'};
+
+  document.addEventListener('click',function(e){
+    var t=e.target.closest('.dec-ev'); if(!t)return;
+    var dec=t.closest('.dec'), drawer=dec.querySelector('.dec-drawer');
+    var open=t.getAttribute('aria-expanded')==='true';
+    if(!open && !drawer.querySelector('svg')){
+      var key=t.dataset.chart, fn=window.M3CHARTS&&window.M3CHARTS[key];
+      drawer.innerHTML='<p class="dec-dclaim">'+(CLAIMS[key]||'')+'</p>'+
+        (fn?fn():'')+
+        '<button type="button" class="dec-dlink" data-panel="'+PANEL[key]+'">Full analysis in Mode 2 →</button>';
+    }
+    t.setAttribute('aria-expanded',String(!open));
+    t.innerHTML=(open?'&#9656;':'&#9662;')+' Evidence';
+    drawer.hidden=open;
+  });
+
+  // Deep link: switch to Mode 2 and bring the full panel into view. The nine
+  // panels already carry svg ids, so no markup change to Mode 2 is needed.
+  document.addEventListener('click',function(e){
+    var l=e.target.closest('.dec-dlink'); if(!l)return;
+    var btn=document.getElementById('mNext'); if(btn) btn.click();
+    var svg=document.getElementById(l.dataset.panel);
+    if(svg){ var w=svg.closest('.w'); if(w) w.scrollIntoView({block:'center'}); }
+  });
 })();
 </script>
 

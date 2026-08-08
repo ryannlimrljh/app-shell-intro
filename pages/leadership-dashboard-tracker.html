@@ -1279,7 +1279,7 @@ table.d tr.tot td{font-weight:900; border-top:1.5px solid var(--art-ink); border
       <span class="prov-i"><i class="dot dot-c"></i>Confirmed source — live today</span>
       <span class="prov-i"><i class="dot dot-d"></i>Computed from confirmed sources</span>
       <span class="prov-i"><i class="dot dot-p"></i>Needs an outstanding source</span>
-      <span class="prov-c">8 of 11 panels mix data you have with a source still to land.</span>
+      <span class="prov-c">6 of 9 panels mix data you have with a source still to land.</span>
     </div></div>
 
     <!-- ── The answer strip ── -->
@@ -1432,7 +1432,7 @@ table.d tr.tot td{font-weight:900; border-top:1.5px solid var(--art-ink); border
     <div class="w s12" data-mode-only="decide"><div class="m3-health" id="m3Health">
       <div class="m3-hm">
         <span class="m3-hm-k">Forecast to plan</span>
-        <span class="m3-hm-v">RM 222.9M</span>
+        <span class="m3-hm-v">RM 222.9M <span class="m3-hm-wt">weighted</span></span>
         <span class="m3-hm-d">of RM 240.0M · <b class="m3-dn">RM 17.1M short</b><br><span class="prov-s"><i class="dot dot-p"></i>pending</span> +RM 1.2M since Monday</span>
       </div>
       <div class="m3-hm">
@@ -1443,7 +1443,7 @@ table.d tr.tot td{font-weight:900; border-top:1.5px solid var(--art-ink); border
       <div class="m3-hm">
         <span class="m3-hm-k">Net revenue retention</span>
         <span class="m3-hm-v">97.3%</span>
-        <span class="m3-hm-d"><span class="prov-s"><i class="dot dot-d"></i>derived</span> from the growth bridge<br>lapsed RM 4.4M YTD</span>
+        <span class="m3-hm-d"><span class="prov-s"><i class="dot dot-d"></i>derived</span> from the growth bridge<br>lapsed RM 8.6M in the bridge</span>
       </div>
       <div class="m3-hm">
         <span class="m3-hm-k">Share of market</span>
@@ -1463,43 +1463,12 @@ table.d tr.tot td{font-weight:900; border-top:1.5px solid var(--art-ink); border
     </div></div>
 
     <div class="w s12" data-mode-only="decide"><div class="m3-srule">
-      <h3>Watch</h3><p>Material, not yet actionable — each carries the threshold that would promote it</p>
-    </div></div>
-
-    <div class="w s12" data-mode-only="decide"><div class="m3-watch">
-      <div class="m3-wcard">
-        <h4>Negotiation-stage ageing</h4>
-        <span class="m3-wv">41 days</span>
-        <p>37 deals · RM 51.2M at 50% — the oldest cohort in the pipeline.</p>
-        <p class="m3-thr">Escalates if <b>the average passes 45 days</b></p>
-      </div>
-      <div class="m3-wcard">
-        <h4>Contracted, not booked</h4>
-        <span class="m3-wv">RM 28.4M</span>
-        <p>At 95% and averaging 11 days. A billing question, not a selling one.</p>
-        <p class="m3-thr">Escalates if <b>average ageing doubles</b></p>
-      </div>
-      <div class="m3-wcard">
-        <h4>Share of market</h4>
-        <span class="m3-wv m3-dn">13.8%</span>
-        <p>Down 0.4pt YTD. At FY horizon this stops being a threshold and becomes a decision.</p>
-        <p class="m3-thr">Escalates if <b>it falls a further 0.2pt at H1 close</b></p>
-      </div>
-      <div class="m3-wcard">
-        <h4>Gross margin</h4>
-        <span class="m3-wv m3-up">31.4%</span>
-        <p>Up 0.8pt vs LY — the only headline metric moving the right way.</p>
-        <p class="m3-thr">Escalates if <b>it drops below 30.5%</b></p>
-      </div>
-    </div></div>
-
-    <div class="w s12" data-mode-only="decide"><div class="m3-srule">
-      <h3>Now</h3><p>Decisions only leadership can make — nobody below can unlock these</p>
+      <h3>Now</h3><p>Decisions in the selected horizon, at full weight</p>
     </div></div>
 
     <div class="w s12" data-mode-only="decide"><div class="decs" id="m3Decs">
 
-      <section class="dec" data-id="D1" data-h="week" data-tier="urgent" aria-labelledby="d1-title">
+      <section class="dec" data-id="D1" data-h="week" data-tier="urgent" data-owner="Sales lead" aria-labelledby="d1-title">
         <span class="m3-tier m3-t-urgent">Urgent</span>
         <h4 class="dec-h" id="d1-title">Close the RM 17.1M gap — name the eight deals</h4>
         <p class="dec-sum">RM 17.1M · Sales lead · by 15 Aug</p>
@@ -1522,7 +1491,7 @@ table.d tr.tot td{font-weight:900; border-top:1.5px solid var(--art-ink); border
         <div class="dec-drawer" id="d1-drawer" hidden></div>
       </section>
 
-      <section class="dec" data-id="D2" data-h="week" data-tier="urgent" aria-labelledby="d2-title">
+      <section class="dec" data-id="D2" data-h="week" data-tier="urgent" data-owner="Leadership" aria-labelledby="d2-title">
         <span class="m3-tier m3-t-urgent">Urgent</span>
         <h4 class="dec-h" id="d2-title">Name an executive sponsor for each top-five account</h4>
         <p class="dec-sum">RM 56.3M · Leadership · by 12 Aug</p>
@@ -1545,7 +1514,7 @@ table.d tr.tot td{font-weight:900; border-top:1.5px solid var(--art-ink); border
         <div class="dec-drawer" id="d2-drawer" hidden></div>
       </section>
 
-      <section class="dec" data-id="D3" data-h="week" data-tier="risk" aria-labelledby="d3-title">
+      <section class="dec" data-id="D3" data-h="week" data-tier="risk" data-owner="Daniel Tan" aria-labelledby="d3-title">
         <span class="m3-tier m3-t-risk">Risk</span>
         <h4 class="dec-h" id="d3-title">Fund Digital demand, not inventory</h4>
         <p class="dec-sum">RM 5.1M · Daniel Tan · by 15 Aug</p>
@@ -1570,7 +1539,7 @@ table.d tr.tot td{font-weight:900; border-top:1.5px solid var(--art-ink); border
 
       <div class="dec-split"><h3>Also open</h3><p>Live decisions outside the selected horizon</p></div>
 
-      <section class="dec" data-id="D4" data-h="quarter" data-tier="opp" aria-labelledby="d4-title">
+      <section class="dec" data-id="D4" data-h="quarter" data-tier="opp" data-owner="Aisyah Rahman" aria-labelledby="d4-title">
         <span class="m3-tier m3-t-opp">Opportunity</span>
         <h4 class="dec-h" id="d4-title">Buy more addressable inventory</h4>
         <p class="dec-sum">RM 2.6M · Aisyah Rahman · by Q3 inventory commit</p>
@@ -1593,7 +1562,7 @@ table.d tr.tot td{font-weight:900; border-top:1.5px solid var(--art-ink); border
         <div class="dec-drawer" id="d4-drawer" hidden></div>
       </section>
 
-      <section class="dec" data-id="D5" data-h="quarter" data-tier="risk" aria-labelledby="d5-title">
+      <section class="dec" data-id="D5" data-h="quarter" data-tier="risk" data-owner="Sales lead" aria-labelledby="d5-title">
         <span class="m3-tier m3-t-risk">Risk</span>
         <h4 class="dec-h" id="d5-title">Move Daniel to prospecting, not closing</h4>
         <p class="dec-sum">RM 2.4M · Sales lead · by Q4 territory plan</p>
@@ -1616,10 +1585,10 @@ table.d tr.tot td{font-weight:900; border-top:1.5px solid var(--art-ink); border
         <div class="dec-drawer" id="d5-drawer" hidden></div>
       </section>
 
-      <section class="dec" data-id="D6" data-h="quarter" data-tier="risk" data-stalled="true" aria-labelledby="d6-title">
+      <section class="dec" data-id="D6" data-h="quarter" data-tier="risk" data-stalled="true" data-owner="Aisyah Rahman" aria-labelledby="d6-title">
         <span class="m3-tier m3-t-risk">Risk</span>
         <h4 class="dec-h" id="d6-title">Diarise Petronas for the Q3 budget reset</h4>
-        <p class="dec-sum">RM 2.1M · Aisyah Rahman · decided 5 Aug, still undiarised</p>
+        <p class="dec-sum">RM 2.1M · Aisyah Rahman · by the Q3 reset window · decided 5 Aug</p>
         <div class="dec-f">
           <div class="dec-fi"><span class="dec-fk">Because</span><span class="dec-fv"><b>RM 2.1M of the RM 4.4M lapsed was a budget-cycle gap</b>, not a loss. It needs a calendar, not a discount.</span></div>
           <div class="dec-fi"><span class="dec-fk">At stake</span><span class="dec-fv"><b>RM 2.1M revenue</b> · RM 0.7M gross profit at the blended 31.4% margin</span></div>
@@ -1639,7 +1608,7 @@ table.d tr.tot td{font-weight:900; border-top:1.5px solid var(--art-ink); border
         <div class="dec-drawer" id="d6-drawer" hidden></div>
       </section>
 
-      <section class="dec" data-id="D7" data-h="fy" data-tier="strategic" aria-labelledby="d7-title">
+      <section class="dec" data-id="D7" data-h="fy" data-tier="strategic" data-owner="Leadership" aria-labelledby="d7-title">
         <span class="m3-tier m3-t-strategic">Strategic</span>
         <h4 class="dec-h" id="d7-title">Take the share question to the board</h4>
         <p class="dec-sum">RM 4.3M · Leadership · by next board meeting</p>
@@ -1662,6 +1631,38 @@ table.d tr.tot td{font-weight:900; border-top:1.5px solid var(--art-ink); border
         <div class="dec-drawer" id="d7-drawer" hidden></div>
       </section>
 
+    </div></div>
+
+    <div class="w s12" data-mode-only="decide"><div class="m3-srule">
+      <h3>Watch</h3><p>Material, not yet actionable — each carries the threshold that would promote it</p>
+    </div></div>
+
+    <div class="w s12" data-mode-only="decide"><div class="m3-watch">
+      <div class="m3-wcard">
+        <h4>Negotiation-stage ageing</h4>
+        <span class="m3-wv">41 days</span>
+        <p>37 deals · RM 51.2M at 50% — the oldest cohort in the pipeline.</p>
+        <p class="m3-thr">Escalates if <b>the average passes 45 days</b></p>
+      </div>
+      <div class="m3-wcard">
+        <h4>Contracted, not booked</h4>
+        <span class="m3-wv">RM 28.4M</span>
+        <p>At 95% and averaging 11 days. A billing question, not a selling one.</p>
+        <p class="m3-thr">Escalates if <b>average ageing doubles</b></p>
+      </div>
+      <div class="m3-wcard">
+        <h4>Share of market</h4>
+        <span class="m3-wv m3-dn">13.8%</span>
+        <p>Down 0.4pt YTD. At FY horizon this stops being a threshold and becomes a decision.</p>
+        <p class="m3-thr">Escalates if <b>it falls a further 0.2pt at H1 close</b></p>
+        <p class="m3-fy-note">Now a decision above — D7</p>
+      </div>
+      <div class="m3-wcard">
+        <h4>Gross margin</h4>
+        <span class="m3-wv m3-up">31.4%</span>
+        <p>Up 0.8pt vs LY — the only headline metric moving the right way.</p>
+        <p class="m3-thr">Escalates if <b>it drops below 30.5%</b></p>
+      </div>
     </div></div>
 
     <div class="w s12" data-mode-only="decide"><div class="m3-asks">
@@ -1744,12 +1745,24 @@ table.d tr.tot td{font-weight:900; border-top:1.5px solid var(--art-ink); border
   var bText=document.getElementById('bannerText');
   var copy={
     now:'<b>Every number here traces to a confirmed dataset.</b> Computed figures carry a <span class="tag t-derived">Derived</span> tag naming their sources; the KOL and Studio views carry <span class="tag t-illus">Illustrative</span> because no creator or production data exists. Totals reconcile: months sum to RM 148.2M, media actuals sum to RM 148.2M, target RM 157.6M, gap exactly RM 9.4M.',
-    next:'<b>This is the target-state board.</b> Everything you already have, visualised properly, with the six outstanding sources slotted in beside it. Every panel carries a dot for its provenance — <b>8 of the 11 panels mix both</b> — the new sources mostly complete existing panels rather than adding separate ones. The five pending panels are plausible and internally consistent, not real. Role filtering is off here: the ideal board is leadership-level.',
+    next:'<b>This is the target-state board.</b> Everything you already have, visualised properly, with the six outstanding sources slotted in beside it. Every panel carries a dot for its provenance — <b>6 of the 9 panels mix confirmed and pending data</b>, and two are pending outright — the new sources mostly complete existing panels rather than adding separate ones. Those pending panels are plausible and internally consistent, not real. Role filtering is off here: the ideal board is leadership-level.',
     decide:'<b>This mode reorders, it does not add.</b> Every figure comes from Mode 2 — the same forecast, the same concentration, the same fill rates. What changes is the ordering: decisions are the objects and the charts became their evidence. Roughly a third of the fields here — every deadline, every status, the cash metric and all “since last review” deltas — are an operating layer no dataset supplies. Those carry the pending marker.'
   };
   var titles={now:['Across the business','Every media line, rolled up — exceptions first'],
               next:['The ideal board','Everything available today, plus the six sources still to land'],
               decide:['Three decisions this week','Ordered by what is at stake, not by what is easy to chart']};
+  // The heading's decision COUNT depends on the horizon radiogroup, which
+  // setMode knows nothing about — titles.decide[0] alone falsified itself
+  // the moment someone switched horizon (heading still said "this week"
+  // above one FY card, or three quarter cards). One source of truth here,
+  // read by both setMode's decide branch and the horizon click handler
+  // below, so re-entering Mode 3 at a non-week horizon is also correct.
+  var decideTitle={week:'Three decisions this week',
+                    quarter:'Three decisions this quarter',
+                    fy:'One decision for the year'};
+  function updateDecideTitle(){
+    document.getElementById('secTitle').textContent=decideTitle[root.getAttribute('data-horizon')||'week'];
+  }
   // Loop over .modes button keyed on data-m rather than naming each button:
   // the two-button version needed one more line per mode forever, and a
   // fourth mode now costs only its copy[] and titles[] entries — the
@@ -1763,7 +1776,15 @@ table.d tr.tot td{font-weight:900; border-top:1.5px solid var(--art-ink); border
     });
     bText.innerHTML=copy[mode];
     document.getElementById('secTitle').textContent=titles[mode][0];
-    document.getElementById('secSub').textContent=titles[mode][1];
+    // Mode 1's subtitle is role-dependent (the role radiogroup owns it via
+    // `subs` below) but setMode used to overwrite it with the generic
+    // leadership-level default regardless — pick Sales manager, switch
+    // modes and back, and the subtitle silently reverted while the radio
+    // stayed on Sales manager. `subs` is defined further down this same
+    // script but already assigned by the time any click can reach here.
+    document.getElementById('secSub').textContent=
+      (mode==='now'&&root.dataset.view&&subs[root.dataset.view])?subs[root.dataset.view]:titles[mode][1];
+    if(mode==='decide') updateDecideTitle();
   }
   document.querySelectorAll('.modes button').forEach(function(b){
     b.addEventListener('click',function(){setMode(b.dataset.m);});
@@ -1831,6 +1852,7 @@ table.d tr.tot td{font-weight:900; border-top:1.5px solid var(--art-ink); border
     root.setAttribute('data-horizon',b.dataset.hz);
     root.parentElement.setAttribute('data-horizon',b.dataset.hz);
     reflowDecisions(b.dataset.hz);
+    updateDecideTitle();
   });
 })();
 </script>
@@ -1912,7 +1934,11 @@ table.d tr.tot td{font-weight:900; border-top:1.5px solid var(--art-ink); border
 .m3-posture .m3-delta{margin:12px 0 0; padding-top:12px; border-top:1px solid var(--art-rule);
   font-size:12.5px; font-weight:600; color:var(--art-muted);}
 .m3-hz{display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-top:14px;}
-.m3-hz-lbl{font-size:10px; font-weight:800; letter-spacing:.13em; text-transform:uppercase; color:var(--art-faint);}
+/* --art-faint at 10px measured 3.44:1 light / 3.30:1 dark — the same
+   under-12px failure as .o-moot and .m3-ev-row span. Repointed to
+   --art-muted, consistent with every other Mode 3 micro-text decision;
+   the file-wide --art-faint token itself stays untouched, pending sign-off. */
+.m3-hz-lbl{font-size:10px; font-weight:800; letter-spacing:.13em; text-transform:uppercase; color:var(--art-muted);}
 .m3-hz button{border:1px solid var(--art-rule); background:var(--art-surface); border-radius:999px;
   padding:5px 13px; font:inherit; font-size:12px; font-weight:700; color:var(--art-muted); cursor:pointer;}
 .m3-hz button:hover{border-color:var(--art-faint); color:var(--art-ink);}
@@ -1954,6 +1980,10 @@ table.d tr.tot td{font-weight:900; border-top:1.5px solid var(--art-ink); border
 }
 .m3-hm-k{font-size:9.5px; font-weight:800; letter-spacing:.12em; text-transform:uppercase; color:var(--art-muted);}
 .m3-hm-v{font-size:21px; font-weight:900; letter-spacing:-.02em; line-height:1.1; font-variant-numeric:tabular-nums;}
+/* Qualifies the one figure people screenshot without it — Mode 1 carries
+   RM 228.1M and RM 222.3M on other bases two clicks away, close enough to
+   222.9 to be misquoted from memory if the basis isn't printed alongside it. */
+.m3-hm-wt{font-size:11px; font-weight:800; letter-spacing:0; color:var(--art-muted); text-transform:none;}
 .m3-hm-d{font-size:11.5px; color:var(--art-muted); line-height:1.45;}
 .m3-hm-d b{color:var(--art-ink);}
 /* Raised specificity (.m3-hm-d b.m3-up/.m3-dn) so the delta colour actually
@@ -2006,6 +2036,14 @@ table.d tr.tot td{font-weight:900; border-top:1.5px solid var(--art-ink); border
 .m3-wcard p.m3-thr{margin-top:auto; padding-top:8px; border-top:1px dashed var(--art-rule);
   font-size:11px; color:var(--art-muted);}
 .m3-thr b{color:var(--art-warn-ink);}
+
+/* Share-of-market's Watch card claims that at FY horizon it "becomes a
+   decision" — true only once D7 exists and is promoted, which is exactly
+   what the FY horizon does. Dim the card and surface the note only then,
+   so the copy is true instead of permanently aspirational. */
+.m3-fy-note{display:none; margin:0; font-size:10.5px; font-weight:800; color:var(--art-accent);}
+[data-horizon="fy"] .m3-watch .m3-wcard:nth-child(3){opacity:.55;}
+[data-horizon="fy"] .m3-watch .m3-wcard:nth-child(3) .m3-fy-note{display:block;}
 
 /* ── Decision objects. The unit the whole mode is built from: a decision is
    an object with an owner, a deadline, a stake, an escalation and a status,
@@ -2325,7 +2363,7 @@ table.d tr.tot td{font-weight:900; border-top:1.5px solid var(--art-ink); border
   /* ── 4 · Rep risk quadrant ────────────────────────────── */
   (function(){
     var reps=[
-      {n:'Aisyah Rahman',x:118,y:2.5},{n:'Kavitha Raj',x:112,y:2.2},
+      {n:'Aisyah Rahman',x:118,y:2.4},{n:'Kavitha Raj',x:112,y:2.2},
       {n:'Bryan Wong',x:106,y:1.9},{n:'Wei Ling Ho',x:101,y:1.75},
       {n:'Hafiz Osman',x:121,y:1.45},{n:'Nurul Izzah',x:108,y:1.15},
       {n:'Arvind Kumar',x:103,y:0.85},{n:'Siti Marina',x:97,y:1.35},
@@ -2796,6 +2834,12 @@ table.d tr.tot td{font-weight:900; border-top:1.5px solid var(--art-ink); border
   var CLS={'Not started':'o-none','Scheduled':'o-open','Awaiting client':'o-wait',
            'Closed':'o-done','Moot':'o-moot'};
   var LOG_CAP=6; // generated rows only; the four seed rows are never eligible
+  // In-universe "today" — the masthead's own REVIEWED date is 7 Aug 2026,
+  // and the seed rows read 5/1 Aug and 28/21 Jul, so a fixed "8 Aug"
+  // (rather than the real device clock, which would print whatever date
+  // this happens to be opened on) keeps every generated row consistent
+  // with the four hand-written ones around it.
+  var TODAY='8 Aug';
 
   function recount(){
     var decs=Array.prototype.slice.call(document.querySelectorAll('.dec'));
@@ -2810,7 +2854,12 @@ table.d tr.tot td{font-weight:900; border-top:1.5px solid var(--art-ink); border
     return due;
   }
 
-  function logRow(dec,status){
+  // label/cls are separated from STATUSES so a log row can carry text that
+  // is not itself a chip status (Defer with reason writes "Deferred"
+  // without moving the chip) — the five-word status vocabulary stays
+  // exactly five words; this is a sixth, log-only label, never assigned to
+  // chip.dataset.status or added to STATUSES/CLS.
+  function logRow(dec,label,cls){
     var body=document.querySelector('#m3Log tbody');
     // At most one row carries .is-new — it means "newest", not "ever
     // machine-generated" — so the previous one is cleared before this one
@@ -2818,11 +2867,18 @@ table.d tr.tot td{font-weight:900; border-top:1.5px solid var(--art-ink); border
     var prevNew=body.querySelector('tr.is-new');
     if(prevNew) prevNew.classList.remove('is-new');
     var name=dec.querySelector('.dec-h').textContent;
+    // Reads the card's own Owner field via data-owner rather than
+    // hardcoding a single name — three of seven cards are NOT owned by
+    // Bryan Wong, and the four seed rows above already put an owner (not
+    // the accountable leader) in this column, so a hardcoded name made the
+    // "By" header silently mean two different things above and below the
+    // fold.
+    var owner=dec.dataset.owner||'Bryan Wong';
     var tr=document.createElement('tr');
     tr.className='is-new';
     tr.dataset.gen='1';
-    tr.innerHTML='<td><b>'+name+'</b></td><td>today</td><td>Bryan Wong</td>'+
-                 '<td><span class="'+CLS[status]+'">'+status+'</span> — set from the board</td>';
+    tr.innerHTML='<td><b>'+name+'</b></td><td>'+TODAY+'</td><td>'+owner+'</td>'+
+                 '<td><span class="'+cls+'">'+label+'</span> — set from the board</td>';
     body.insertBefore(tr,body.firstChild);
     // Cap generated rows only, evicting the oldest generated row — the
     // four hand-written seed rows (no data-gen) are never eligible, so the
@@ -2856,20 +2912,50 @@ table.d tr.tot td{font-weight:900; border-top:1.5px solid var(--art-ink); border
   // initial content — the first status click replaces it, so the strip and
   // the card can never disagree about whether D6 is still stalled the way
   // the old always-on span could once D6 was cycled to Closed.
-  function cycleStatus(chip){
-    var next=STATUSES[(STATUSES.indexOf(chip.dataset.status)+1)%STATUSES.length];
-    chip.dataset.status=next;
-    chip.textContent=next;
+  // setStatus is the shared primitive: the chip's own click cycle advances
+  // through STATUSES one step at a time, while Approve/Ask for options
+  // (below) jump straight to a named status — both go through the same
+  // function so the log row, the recount and the live span can never drift
+  // apart between the two entry points.
+  function setStatus(chip,status){
+    chip.dataset.status=status;
+    chip.textContent=status;
     labelChip(chip);
     var due=recount();
-    logRow(chip.closest('.dec'),next);
+    logRow(chip.closest('.dec'),status,CLS[status]);
     var h=chip.closest('.dec').querySelector('.m3-chip-h[data-live]');
     if(h) h.textContent='logged · '+due+' due';
+  }
+  function cycleStatus(chip){
+    var next=STATUSES[(STATUSES.indexOf(chip.dataset.status)+1)%STATUSES.length];
+    setStatus(chip,next);
   }
 
   document.addEventListener('click',function(e){
     var chip=e.target.closest('.m3-chip'); if(!chip)return;
     cycleStatus(chip);
+  });
+
+  // ── Approve / Ask for options / Defer with reason: the most decision-
+  // shaped control on every card, unwired until now — clicking Approve
+  // twice left the log, the counts, the chip and the card's own outerHTML
+  // byte-identical. Reuses setStatus/logRow/recount rather than adding a
+  // parallel path, and does not extend the five-word status vocabulary:
+  // Approve and Ask for options resolve to two of the five existing
+  // words; Defer with reason writes a log row reading "Deferred" without
+  // touching chip.dataset.status at all, because "Deferred" describes an
+  // event, not a state the card is now in.
+  document.addEventListener('click',function(e){
+    var btn=e.target.closest('.dec-acts button'); if(!btn)return;
+    var dec=btn.closest('.dec'), chip=dec.querySelector('.m3-chip');
+    var label=btn.textContent.trim();
+    if(label==='Approve') setStatus(chip,'Scheduled');
+    else if(label==='Ask for options') setStatus(chip,'Awaiting client');
+    else if(label==='Defer with reason'){
+      logRow(dec,'Deferred','o-wait');
+      var h=dec.querySelector('.m3-chip-h[data-live]');
+      if(h) h.textContent='logged · deferred';
+    }
   });
 
   recount();

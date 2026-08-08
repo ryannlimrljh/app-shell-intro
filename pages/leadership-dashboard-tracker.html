@@ -776,7 +776,7 @@
   /* -ink variants: readable text counterparts to the saturated status fills.
      Never point chart fills/bars/dots at these — they exist so text can
      clear 4.5:1 without re-valuing the fills that already ship in Modes 1/2. */
-  --art-good-ink:#00875A; --art-warn-ink:#8A5A00; --art-crit-ink:#D01427;
+  --art-good-ink:#00734D; --art-warn-ink:#8A5A00; --art-crit-ink:#D01427;
   /* Tier system gets its own hue, separate from --art-imagined (which means
      "invented / not-yet-real data" elsewhere in this file — dot-p, t-imagined,
      the Mode 2 banner). A filled strategic-tier dot must not be mistaken for
@@ -819,7 +819,7 @@
   --art-derived-bg:#E8F1FD; --art-derived-ink:#0B4FA8;
   --art-imagined-bg:#F3EBFF; --art-imagined-ink:#5B21B6;
   --art-illus-bg:#FFF6E9; --art-illus-ink:#8A5A00; --art-accent-bg:#FFEEE7;
-  --art-good-ink:#00875A; --art-warn-ink:#8A5A00; --art-crit-ink:#D01427;
+  --art-good-ink:#00734D; --art-warn-ink:#8A5A00; --art-crit-ink:#D01427;
   --art-strategic:#7C3AED;
   --art-shadow:0 1px 2px rgba(140,130,110,.28);
   --color-neutral-1:#FFFFFF; --color-neutral-2:#F0F0F0; --color-neutral-3:#D8D8D8;
@@ -1475,9 +1475,9 @@ table.d tr.tot td{font-weight:900; border-top:1.5px solid var(--art-ink); border
 
     <div class="w s12" data-mode-only="decide"><div class="decs" id="m3Decs">
 
-      <div class="dec" data-id="D1" data-h="week" data-tier="urgent">
+      <section class="dec" data-id="D1" data-h="week" data-tier="urgent" aria-labelledby="d1-title">
         <span class="m3-tier m3-t-urgent">Urgent</span>
-        <h4 class="dec-h">Close the RM 17.1M gap — name the eight deals</h4>
+        <h4 class="dec-h" id="d1-title">Close the RM 17.1M gap — name the eight deals</h4>
         <p class="dec-sum">RM 17.1M · Sales lead · by 15 Aug</p>
         <div class="dec-f">
           <div class="dec-fi"><span class="dec-fk">Because</span><span class="dec-fv">Weighted forecast lands RM 222.9M against a RM 240.0M plan. RM 111.2M is open across 73 deals; <b>RM 51.2M of it sits in Negotiation at 50%</b> and averages 41 days — the oldest cohort.</span></div>
@@ -1488,18 +1488,18 @@ table.d tr.tot td{font-weight:900; border-top:1.5px solid var(--art-ink); border
           <div class="dec-fi"><span class="dec-fk">Escalation</span><span class="dec-fv"><span class="prov-s"><i class="dot dot-p"></i>pending</span> Rate approval above 12% discount</span></div>
         </div>
         <div class="dec-acts">
-          <button type="button">Approve</button><button type="button">Ask for options</button><button type="button">Defer with reason</button>
+          <button type="button" aria-label="Approve — close the RM 17.1M gap">Approve</button><button type="button" aria-label="Ask for options — close the RM 17.1M gap">Ask for options</button><button type="button" aria-label="Defer with reason — close the RM 17.1M gap">Defer with reason</button>
         </div>
         <div class="dec-status">
           <button type="button" class="m3-chip" data-status="Not started">Not started</button>
-          <button type="button" class="dec-ev" aria-expanded="false" data-chart="mGap">&#9656; Evidence</button>
+          <button type="button" class="dec-ev" aria-expanded="false" aria-controls="d1-drawer" data-chart="mGap"><span aria-hidden="true">&#9656;</span> Evidence</button>
         </div>
-        <div class="dec-drawer" hidden></div>
-      </div>
+        <div class="dec-drawer" id="d1-drawer" hidden></div>
+      </section>
 
-      <div class="dec" data-id="D2" data-h="week" data-tier="urgent">
+      <section class="dec" data-id="D2" data-h="week" data-tier="urgent" aria-labelledby="d2-title">
         <span class="m3-tier m3-t-urgent">Urgent</span>
-        <h4 class="dec-h">Name an executive sponsor for each top-five account</h4>
+        <h4 class="dec-h" id="d2-title">Name an executive sponsor for each top-five account</h4>
         <p class="dec-sum">RM 56.3M · Leadership · by 12 Aug</p>
         <div class="dec-f">
           <div class="dec-fi"><span class="dec-fk">Because</span><span class="dec-fv">The top five advertisers carry <b>38% of revenue — RM 56.3M</b>. At 9.2% no single account can sink the year, but losing two breaches plan.</span></div>
@@ -1510,18 +1510,18 @@ table.d tr.tot td{font-weight:900; border-top:1.5px solid var(--art-ink); border
           <div class="dec-fi"><span class="dec-fk">Escalation</span><span class="dec-fv">Leadership allocation — <b>nobody below this level can assign an executive</b></span></div>
         </div>
         <div class="dec-acts">
-          <button type="button">Approve</button><button type="button">Ask for options</button><button type="button">Defer with reason</button>
+          <button type="button" aria-label="Approve — top-five sponsors">Approve</button><button type="button" aria-label="Ask for options — top-five sponsors">Ask for options</button><button type="button" aria-label="Defer with reason — top-five sponsors">Defer with reason</button>
         </div>
         <div class="dec-status">
           <button type="button" class="m3-chip" data-status="Not started">Not started</button>
-          <button type="button" class="dec-ev" aria-expanded="false" data-chart="mConc">&#9656; Evidence</button>
+          <button type="button" class="dec-ev" aria-expanded="false" aria-controls="d2-drawer" data-chart="mConc"><span aria-hidden="true">&#9656;</span> Evidence</button>
         </div>
-        <div class="dec-drawer" hidden></div>
-      </div>
+        <div class="dec-drawer" id="d2-drawer" hidden></div>
+      </section>
 
-      <div class="dec" data-id="D3" data-h="week" data-tier="risk">
+      <section class="dec" data-id="D3" data-h="week" data-tier="risk" aria-labelledby="d3-title">
         <span class="m3-tier m3-t-risk">Risk</span>
-        <h4 class="dec-h">Fund Digital demand, not inventory</h4>
+        <h4 class="dec-h" id="d3-title">Fund Digital demand, not inventory</h4>
         <p class="dec-sum">RM 5.1M · Daniel Tan · by 15 Aug</p>
         <div class="dec-f">
           <div class="dec-fi"><span class="dec-fk">Because</span><span class="dec-fv">Digital sold <b>62% of its inventory</b> and reached 75% of target. The shelf was full, so the constraint is demand, not supply.</span></div>
@@ -1532,20 +1532,20 @@ table.d tr.tot td{font-weight:900; border-top:1.5px solid var(--art-ink); border
           <div class="dec-fi"><span class="dec-fk">Escalation</span><span class="dec-fv"><span class="prov-s"><i class="dot dot-p"></i>pending</span> Budget reallocation between inventory and demand</span></div>
         </div>
         <div class="dec-acts">
-          <button type="button">Approve</button><button type="button">Ask for options</button><button type="button">Defer with reason</button>
+          <button type="button" aria-label="Approve — fund Digital demand">Approve</button><button type="button" aria-label="Ask for options — fund Digital demand">Ask for options</button><button type="button" aria-label="Defer with reason — fund Digital demand">Defer with reason</button>
         </div>
         <div class="dec-status">
           <button type="button" class="m3-chip" data-status="Not started">Not started</button>
-          <button type="button" class="dec-ev" aria-expanded="false" data-chart="mFillDigital">&#9656; Evidence</button>
+          <button type="button" class="dec-ev" aria-expanded="false" aria-controls="d3-drawer" data-chart="mFillDigital"><span aria-hidden="true">&#9656;</span> Evidence</button>
         </div>
-        <div class="dec-drawer" hidden></div>
-      </div>
+        <div class="dec-drawer" id="d3-drawer" hidden></div>
+      </section>
 
       <div class="dec-split"><h3>Also open</h3><p>Live decisions outside the selected horizon</p></div>
 
-      <div class="dec" data-id="D4" data-h="quarter" data-tier="opp">
+      <section class="dec" data-id="D4" data-h="quarter" data-tier="opp" aria-labelledby="d4-title">
         <span class="m3-tier m3-t-opp">Opportunity</span>
-        <h4 class="dec-h">Buy more addressable inventory</h4>
+        <h4 class="dec-h" id="d4-title">Buy more addressable inventory</h4>
         <p class="dec-sum">RM 2.6M · Aisyah Rahman · by Q3 inventory commit</p>
         <div class="dec-f">
           <div class="dec-fi"><span class="dec-fk">Because</span><span class="dec-fv">Addressable is <b>97% sold out</b> and the only line beating plan at 109% — its ceiling is supply, not selling.</span></div>
@@ -1556,18 +1556,18 @@ table.d tr.tot td{font-weight:900; border-top:1.5px solid var(--art-ink); border
           <div class="dec-fi"><span class="dec-fk">Escalation</span><span class="dec-fv"><span class="prov-s"><i class="dot dot-p"></i>pending</span> Capital commitment on inventory</span></div>
         </div>
         <div class="dec-acts">
-          <button type="button">Approve</button><button type="button">Ask for options</button><button type="button">Defer with reason</button>
+          <button type="button" aria-label="Approve — buy addressable inventory">Approve</button><button type="button" aria-label="Ask for options — buy addressable inventory">Ask for options</button><button type="button" aria-label="Defer with reason — buy addressable inventory">Defer with reason</button>
         </div>
         <div class="dec-status">
           <button type="button" class="m3-chip" data-status="Not started">Not started</button>
-          <button type="button" class="dec-ev" aria-expanded="false" data-chart="mFillAddressable">&#9656; Evidence</button>
+          <button type="button" class="dec-ev" aria-expanded="false" aria-controls="d4-drawer" data-chart="mFillAddressable"><span aria-hidden="true">&#9656;</span> Evidence</button>
         </div>
-        <div class="dec-drawer" hidden></div>
-      </div>
+        <div class="dec-drawer" id="d4-drawer" hidden></div>
+      </section>
 
-      <div class="dec" data-id="D5" data-h="quarter" data-tier="risk">
+      <section class="dec" data-id="D5" data-h="quarter" data-tier="risk" aria-labelledby="d5-title">
         <span class="m3-tier m3-t-risk">Risk</span>
-        <h4 class="dec-h">Move Daniel to prospecting, not closing</h4>
+        <h4 class="dec-h" id="d5-title">Move Daniel to prospecting, not closing</h4>
         <p class="dec-sum">RM 2.4M · Sales lead · by Q4 territory plan</p>
         <div class="dec-f">
           <div class="dec-fi"><span class="dec-fk">Because</span><span class="dec-fv"><b>85% attainment with only 0.8× pipeline cover</b> is a top-of-funnel gap. Coaching on closing technique would have been the wrong quarter's work.</span></div>
@@ -1578,18 +1578,18 @@ table.d tr.tot td{font-weight:900; border-top:1.5px solid var(--art-ink); border
           <div class="dec-fi"><span class="dec-fk">Escalation</span><span class="dec-fv">None — a management decision. It appears here because <b>the board's own evidence overturned an earlier one</b>; see the log.</span></div>
         </div>
         <div class="dec-acts">
-          <button type="button">Approve</button><button type="button">Ask for options</button><button type="button">Defer with reason</button>
+          <button type="button" aria-label="Approve — move Daniel to prospecting">Approve</button><button type="button" aria-label="Ask for options — move Daniel to prospecting">Ask for options</button><button type="button" aria-label="Defer with reason — move Daniel to prospecting">Defer with reason</button>
         </div>
         <div class="dec-status">
           <button type="button" class="m3-chip" data-status="Not started">Not started</button>
-          <button type="button" class="dec-ev" aria-expanded="false" data-chart="mQuad">&#9656; Evidence</button>
+          <button type="button" class="dec-ev" aria-expanded="false" aria-controls="d5-drawer" data-chart="mQuad"><span aria-hidden="true">&#9656;</span> Evidence</button>
         </div>
-        <div class="dec-drawer" hidden></div>
-      </div>
+        <div class="dec-drawer" id="d5-drawer" hidden></div>
+      </section>
 
-      <div class="dec" data-id="D6" data-h="quarter" data-tier="risk" data-stalled="true">
+      <section class="dec" data-id="D6" data-h="quarter" data-tier="risk" data-stalled="true" aria-labelledby="d6-title">
         <span class="m3-tier m3-t-risk">Risk</span>
-        <h4 class="dec-h">Diarise Petronas for the Q3 budget reset</h4>
+        <h4 class="dec-h" id="d6-title">Diarise Petronas for the Q3 budget reset</h4>
         <p class="dec-sum">RM 2.1M · Aisyah Rahman · decided 5 Aug, still undiarised</p>
         <div class="dec-f">
           <div class="dec-fi"><span class="dec-fk">Because</span><span class="dec-fv"><b>RM 2.1M of the RM 4.4M lapsed was a budget-cycle gap</b>, not a loss. It needs a calendar, not a discount.</span></div>
@@ -1600,19 +1600,19 @@ table.d tr.tot td{font-weight:900; border-top:1.5px solid var(--art-ink); border
           <div class="dec-fi"><span class="dec-fk">Escalation</span><span class="dec-fv">None</span></div>
         </div>
         <div class="dec-acts">
-          <button type="button">Approve</button><button type="button">Ask for options</button><button type="button">Defer with reason</button>
+          <button type="button" aria-label="Approve — diarise Petronas">Approve</button><button type="button" aria-label="Ask for options — diarise Petronas">Ask for options</button><button type="button" aria-label="Defer with reason — diarise Petronas">Defer with reason</button>
         </div>
         <div class="dec-status">
           <button type="button" class="m3-chip" data-status="Scheduled">Scheduled</button>
           <span class="m3-chip-h">stalled 7 days</span>
-          <button type="button" class="dec-ev" aria-expanded="false" data-chart="mChurn">&#9656; Evidence</button>
+          <button type="button" class="dec-ev" aria-expanded="false" aria-controls="d6-drawer" data-chart="mChurn"><span aria-hidden="true">&#9656;</span> Evidence</button>
         </div>
-        <div class="dec-drawer" hidden></div>
-      </div>
+        <div class="dec-drawer" id="d6-drawer" hidden></div>
+      </section>
 
-      <div class="dec" data-id="D7" data-h="fy" data-tier="strategic">
+      <section class="dec" data-id="D7" data-h="fy" data-tier="strategic" aria-labelledby="d7-title">
         <span class="m3-tier m3-t-strategic">Strategic</span>
-        <h4 class="dec-h">Take the share question to the board</h4>
+        <h4 class="dec-h" id="d7-title">Take the share question to the board</h4>
         <p class="dec-sum">RM 4.3M · Leadership · by next board meeting</p>
         <div class="dec-f">
           <div class="dec-fi"><span class="dec-fk">Because</span><span class="dec-fv">Growing 6.4% in a market growing 8.1% moved share from 14.2% to 13.8% — <b>roughly RM 4.3M of revenue that existed and went elsewhere</b>. Every other panel on the board calls this a good year.</span></div>
@@ -1623,14 +1623,14 @@ table.d tr.tot td{font-weight:900; border-top:1.5px solid var(--art-ink); border
           <div class="dec-fi"><span class="dec-fk">Escalation</span><span class="dec-fv"><b>Only the board can set that posture</b></span></div>
         </div>
         <div class="dec-acts">
-          <button type="button">Approve</button><button type="button">Ask for options</button><button type="button">Defer with reason</button>
+          <button type="button" aria-label="Approve — take share question to board">Approve</button><button type="button" aria-label="Ask for options — take share question to board">Ask for options</button><button type="button" aria-label="Defer with reason — take share question to board">Defer with reason</button>
         </div>
         <div class="dec-status">
           <button type="button" class="m3-chip" data-status="Not started">Not started</button>
-          <button type="button" class="dec-ev" aria-expanded="false" data-chart="mShare">&#9656; Evidence</button>
+          <button type="button" class="dec-ev" aria-expanded="false" aria-controls="d7-drawer" data-chart="mShare"><span aria-hidden="true">&#9656;</span> Evidence</button>
         </div>
-        <div class="dec-drawer" hidden></div>
-      </div>
+        <div class="dec-drawer" id="d7-drawer" hidden></div>
+      </section>
 
     </div></div>
 
@@ -1724,11 +1724,25 @@ table.d tr.tot td{font-weight:900; border-top:1.5px solid var(--art-ink); border
   root.parentElement.setAttribute('data-view','leadership');
 
   // Mode 3 horizon default. Same attribute-writing philosophy as data-mode
-  // and data-view, but asymmetric for now: JS only writes data-horizon,
-  // nothing reads it yet. The decision cards added in the next task carry
-  // the per-horizon CSS that consumes this attribute.
+  // and data-view. The CSS `order` re-tiering (kept as the no-JS fallback)
+  // only changes *visual* order, so DOM/reading order stayed D1..D7 at
+  // every horizon while the visually-promoted cards moved above the
+  // "Also open" divider — at "quarter" and "fy" that told a keyboard or
+  // screen-reader user the opposite of what sighted users saw (WCAG 1.3.2 /
+  // 2.4.3). reflowDecisions() additionally moves the DOM nodes themselves
+  // so reading order always matches visual order when scripting runs.
+  var m3Decs=document.getElementById('m3Decs'), m3Split=m3Decs&&m3Decs.querySelector('.dec-split');
+  function reflowDecisions(hz){
+    if(!m3Decs||!m3Split)return;
+    var cards=[].slice.call(m3Decs.querySelectorAll('.dec'));
+    cards.filter(function(c){return c.dataset.h.split(/\s+/).indexOf(hz)>-1;})
+         .forEach(function(c){m3Decs.insertBefore(c,m3Split);});
+    cards.filter(function(c){return c.dataset.h.split(/\s+/).indexOf(hz)<0;})
+         .forEach(function(c){m3Decs.appendChild(c);});
+  }
   root.setAttribute('data-horizon','week');
   root.parentElement.setAttribute('data-horizon','week');
+  reflowDecisions('week');
   var hzGroup=document.querySelector('.m3-hz');
   hzGroup.addEventListener('click',function(e){
     var b=e.target.closest('button[data-hz]'); if(!b)return;
@@ -1737,6 +1751,7 @@ table.d tr.tot td{font-weight:900; border-top:1.5px solid var(--art-ink); border
     });
     root.setAttribute('data-horizon',b.dataset.hz);
     root.parentElement.setAttribute('data-horizon',b.dataset.hz);
+    reflowDecisions(b.dataset.hz);
   });
 })();
 </script>
@@ -1915,26 +1930,38 @@ table.d tr.tot td{font-weight:900; border-top:1.5px solid var(--art-ink); border
 
 /* ── Decision objects. The unit the whole mode is built from: a decision is
    an object with an owner, a deadline, a stake, an escalation and a status,
-   not a verb in a table cell. ── */
+   not a verb in a table cell. Canonical field order (do not templatise the
+   seven cards — the repetition is the point, for content this is the point
+   of; the seven cards are meant to be diffable by eye), each .dec-fk using
+   exactly this label text: Because, At stake, Owner, By, Success looks
+   like, Escalation. A missing field is a visible diff against this list.
+   data-h is matched with ~= so a card could in principle carry more than
+   one horizon token (e.g. data-h="week quarter"); no card uses that today,
+   but the selectors below support it intentionally. data-stalled="true"
+   (D6 only) has no consumer yet — Task 5's closure/log work is the
+   intended reader. ── */
 .decs{display:flex; flex-direction:column; gap:14px;}
 
-/* Horizon re-tiering with flexbox order — pure CSS, no DOM moves. order
-   takes integers only, hence 1/2/3 rather than a fraction for the divider.
-   Cards matching the horizon float to order 1 and get the Now treatment;
-   everything else falls below the divider, compacted. */
+/* Horizon re-tiering with flexbox order — pure CSS, no DOM moves, and kept
+   as the no-JS fallback (order is correct for the initial "week" horizon
+   even with scripting off). With scripting on, reflowDecisions() below
+   additionally moves the DOM nodes themselves, because visual order alone
+   left DOM/reading order wrong at the other two horizons — see the JS
+   comment. order takes integers only, hence 1/2/3 rather than a fraction
+   for the divider. */
 .decs .dec{order:3;}
 .decs .dec-split{order:2;}
-[data-horizon="week"]    .decs .dec[data-h~="week"]{order:1;}
-[data-horizon="quarter"] .decs .dec[data-h~="quarter"]{order:1;}
+[data-horizon="week"]    .decs .dec[data-h~="week"],
+[data-horizon="quarter"] .decs .dec[data-h~="quarter"],
 [data-horizon="fy"]      .decs .dec[data-h~="fy"]{order:1;}
 
-.dec{background:var(--art-surface); border:1px solid var(--art-rule); border-radius:3px;
-  box-shadow:var(--art-shadow); padding:18px 20px;}
+.dec{--dec-c:var(--art-rule); background:var(--art-surface); border:1px solid var(--art-rule);
+  border-radius:3px; box-shadow:var(--art-shadow); padding:18px 20px;}
 .dec-h{margin:8px 0 0; font-size:19px; font-weight:900; letter-spacing:-.02em; line-height:1.25; color:var(--art-ink);}
 .dec-f{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px 26px; margin-top:14px;}
 @media (max-width:760px){ .dec-f{grid-template-columns:1fr;} }
 .dec-fi{display:flex; flex-direction:column; gap:2px;}
-.dec-fk{font-size:9.5px; font-weight:800; letter-spacing:.12em; text-transform:uppercase; color:var(--art-faint);}
+.dec-fk{font-size:9.5px; font-weight:800; letter-spacing:.12em; text-transform:uppercase; color:var(--art-muted);}
 .dec-fv{font-size:12.5px; color:var(--art-muted); line-height:1.5;}
 .dec-fv b{color:var(--art-ink);}
 .dec-acts{display:flex; align-items:center; gap:9px; flex-wrap:wrap; margin-top:16px;
@@ -1947,24 +1974,25 @@ table.d tr.tot td{font-weight:900; border-top:1.5px solid var(--art-ink); border
 .dec-acts button:focus-visible{outline:2px solid var(--art-accent); outline-offset:2px;}
 
 /* Now tier: 2px semantic border, keyed off the tier attribute so colour and
-   weight can never disagree with the label. */
-[data-horizon="week"]    .dec[data-h~="week"],
-[data-horizon="quarter"] .dec[data-h~="quarter"],
-[data-horizon="fy"]      .dec[data-h~="fy"]{border-width:2px;}
+   weight can never disagree with the label. --dec-c falls back to
+   --art-rule on .dec itself (above), so an unrecognised data-tier gets a
+   neutral 2px border instead of an invalid-var() black one; the
+   border-color declaration repeats the fallback for the same reason. */
+[data-horizon="week"]    .decs .dec[data-h~="week"],
+[data-horizon="quarter"] .decs .dec[data-h~="quarter"],
+[data-horizon="fy"]      .decs .dec[data-h~="fy"]{border-width:2px; border-color:var(--dec-c, var(--art-rule));}
 .dec[data-tier="urgent"]{--dec-c:var(--art-crit);}
 .dec[data-tier="risk"]{--dec-c:var(--art-warn);}
 .dec[data-tier="opp"]{--dec-c:var(--art-good);}
 .dec[data-tier="strategic"]{--dec-c:var(--art-strategic);}
-[data-horizon="week"]    .dec[data-h~="week"],
-[data-horizon="quarter"] .dec[data-h~="quarter"],
-[data-horizon="fy"]      .dec[data-h~="fy"]{border-color:var(--dec-c);}
 
 /* "Also open" tier: same card, compacted. The field grid and the commitment
    buttons collapse; the stake/owner/by summary appears; and .dec-status is
    deliberately left alone so a demoted decision keeps its status chip and
    stays inspectable without being promoted first. That is why the chip and
    the evidence trigger live in .dec-status rather than in .dec-acts — the
-   compact rule hides .dec-acts wholesale. */
+   compact rule hides .dec-acts wholesale. :is() collapses what would
+   otherwise be parallel :not() chains per property. */
 .dec-sum{display:none; margin:8px 0 0; font-size:12px; color:var(--art-muted);}
 .dec-status{display:flex; align-items:center; gap:9px; flex-wrap:wrap; margin-top:12px;}
 [data-horizon="week"]    .decs .dec:not([data-h~="week"]) .dec-status,
@@ -1976,34 +2004,61 @@ table.d tr.tot td{font-weight:900; border-top:1.5px solid var(--art-ink); border
 [data-horizon="week"]    .decs .dec:not([data-h~="week"]) .dec-h,
 [data-horizon="quarter"] .decs .dec:not([data-h~="quarter"]) .dec-h,
 [data-horizon="fy"]      .decs .dec:not([data-h~="fy"]) .dec-h{font-size:14px; font-weight:800;}
-[data-horizon="week"]    .decs .dec:not([data-h~="week"]) .dec-f,
-[data-horizon="week"]    .decs .dec:not([data-h~="week"]) .dec-acts,
-[data-horizon="quarter"] .decs .dec:not([data-h~="quarter"]) .dec-f,
-[data-horizon="quarter"] .decs .dec:not([data-h~="quarter"]) .dec-acts,
-[data-horizon="fy"]      .decs .dec:not([data-h~="fy"]) .dec-f,
-[data-horizon="fy"]      .decs .dec:not([data-h~="fy"]) .dec-acts{display:none;}
+[data-horizon="week"]    .decs .dec:not([data-h~="week"]) :is(.dec-f,.dec-acts),
+[data-horizon="quarter"] .decs .dec:not([data-h~="quarter"]) :is(.dec-f,.dec-acts),
+[data-horizon="fy"]      .decs .dec:not([data-h~="fy"]) :is(.dec-f,.dec-acts){display:none;}
 [data-horizon="week"]    .decs .dec:not([data-h~="week"]) .dec-sum,
 [data-horizon="quarter"] .decs .dec:not([data-h~="quarter"]) .dec-sum,
 [data-horizon="fy"]      .decs .dec:not([data-h~="fy"]) .dec-sum{display:block;}
 
-.dec-split{display:flex; align-items:baseline; gap:12px; padding-top:6px;}
-.dec-split h3{margin:0; font-size:11px; font-weight:900; letter-spacing:.14em; text-transform:uppercase; color:var(--art-faint);}
-.dec-split p{margin:0; font-size:11.5px; color:var(--art-faint);}
+/* Divider gated to the three known horizons — an absent/unrecognised
+   data-horizon otherwise demoted every card under a "Now" heading that
+   would then sit above an empty section. */
+.dec-split{display:none; align-items:baseline; gap:12px; padding-top:6px;}
+[data-horizon="week"] .dec-split,[data-horizon="quarter"] .dec-split,[data-horizon="fy"] .dec-split{display:flex;}
+.dec-split h3{margin:0; font-size:11px; font-weight:900; letter-spacing:.14em; text-transform:uppercase; color:var(--art-muted);}
+.dec-split p{margin:0; font-size:11.5px; color:var(--art-muted);}
 
 /* Status chip. NOT st-* — the file already owns .st, .st-lead, .st-v and
-   .st-warn. State lives in data-status so CSS and JS read one source. */
+   .st-warn. State lives in data-status so CSS and JS read one source.
+   Text colour uses -ink variants, never the saturated fills (those stay on
+   border-color, a non-text boundary, to preserve the visual coding). */
 .m3-chip{border:1px solid var(--art-rule); background:var(--art-sunk); border-radius:999px;
   padding:5px 12px; font:inherit; font-size:11px; font-weight:800; cursor:pointer;
   color:var(--art-muted); display:inline-flex; align-items:center; gap:6px;}
 .m3-chip::before{content:''; width:7px; height:7px; border-radius:50%; background:currentColor; opacity:.6;}
 .m3-chip:hover{border-color:var(--art-faint); color:var(--art-ink);}
 .m3-chip:focus-visible{outline:2px solid var(--art-accent); outline-offset:2px;}
-.m3-chip[data-status="Scheduled"]{color:var(--art-warn); border-color:var(--art-warn);}
-.m3-chip[data-status="Awaiting client"]{color:var(--art-derived); border-color:var(--art-derived);}
-.m3-chip[data-status="Closed"]{color:var(--art-good); border-color:var(--art-good);}
-.m3-chip[data-status="Moot"]{color:var(--art-faint); text-decoration:line-through;}
+.m3-chip[data-status="Scheduled"]{color:var(--art-warn-ink); border-color:var(--art-warn);}
+.m3-chip[data-status="Awaiting client"]{color:var(--art-derived-ink); border-color:var(--art-derived);}
+.m3-chip[data-status="Closed"]{color:var(--art-good-ink); border-color:var(--art-good);}
+.m3-chip[data-status="Moot"]{color:var(--art-muted); text-decoration:line-through;}
 .m3-chip-h{margin-left:auto; font-size:10px; font-weight:800; letter-spacing:.1em;
-  text-transform:uppercase; color:var(--art-faint);}
+  text-transform:uppercase; color:var(--art-muted);}
+
+/* Evidence trigger — was unstyled (the only .dec-ev rule anywhere lived in
+   Task 4's block as a bare margin-left:auto), rendering as raw UA button
+   chrome that ignored the theme entirely. Styled to sit beside .m3-chip
+   without competing with it — outline, not filled, since it opens a
+   drawer rather than committing a decision. */
+.dec-ev{border:1px solid var(--art-rule); background:var(--art-surface); border-radius:2px;
+  padding:5px 10px; font:inherit; font-size:11px; font-weight:800; color:var(--art-muted); cursor:pointer;}
+.dec-ev:hover{border-color:var(--art-accent); color:var(--art-accent);}
+.dec-ev:focus-visible{outline:2px solid var(--art-accent); outline-offset:2px;}
+.dec-ev[aria-expanded="true"]{color:var(--art-ink); border-color:var(--art-faint);}
+/* .m3-chip-h's margin-left:auto pushes .dec-ev onto its own line once the
+   status row can no longer fit both on 375px; drop the auto margin there.
+   That alone still overflows by a few px on a stalled card (chip + hint +
+   evidence trigger, three items), so the same rule trims gap and padding
+   just enough to bring the row back under one line without touching any
+   other viewport. */
+@media (max-width:400px){
+  .m3-chip-h{margin-left:0;}
+  .dec-status{gap:6px;}
+  .m3-chip{padding:5px 9px; font-size:10.5px;}
+  .dec-ev{padding:5px 8px; font-size:10.5px;}
+  .m3-chip-h{font-size:9px;}
+}
 </style>
 
 <script>

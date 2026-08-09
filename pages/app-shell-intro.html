@@ -11,7 +11,7 @@
      stat values use --weight-black (900) — any weight missing from
      this list gets faux-bolded from the nearest loaded cut instead of
      using the real face Mulish ships. -->
-<link href="https://fonts.googleapis.com/css2?family=Mulish:wght@400;500;600;700;800;900&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Mulish:wght@400;500;600;700;800;900&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400;1,8..60,600&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css" />
 <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css" />
 <link rel="stylesheet" href="../collabrium-dls/tokens.css" />
@@ -214,7 +214,7 @@
      puts them back inside the scroll container, where they are clipped
      like everything else. Applies to both panels, so any future absolute
      descendant is contained too. */
-  .c-space-panel{position:relative;}
+  .c-space-panel{position:relative; scroll-margin-top:calc(var(--spacing-8) + 45px + var(--spacing-12));}
   .c-space-panel[hidden]{display:none;}
   .c-space-panel:focus{outline:none;} /* the panel is only a programmatic focus target on tab switch — a visible ring on a whole page-height region reads as an error state */
 
@@ -327,9 +327,12 @@
      line, and everything the paragraph quantified becomes a scannable
      badge. The paragraph itself survives behind "Full read" — it is the
      thesis, so deleting it would break the argument. */
-  .c-dec-digest{background:transparent; border:0; box-shadow:none; border-radius:0; padding:0; margin:var(--spacing-24) 0 var(--spacing-32); gap:0;}
+  .c-dec-digest{background:transparent; border:0; box-shadow:none; border-radius:0; padding:0; margin:var(--spacing-48) 0 var(--spacing-32); gap:0;}
   .c-dec-digest-top{display:flex; align-items:flex-start; justify-content:space-between; gap:var(--spacing-24); flex-wrap:wrap;}
-  .c-dec-digest h3{margin:0; font-family:var(--font-secondary); font-size:var(--text-h2-size); font-weight:600; line-height:1.35; letter-spacing:0; max-width:34ch;}
+  .c-dec-digest h3{margin:0; font-family:var(--font-secondary); font-style:italic; font-size:var(--text-h1-size); font-weight:600; line-height:1.3; letter-spacing:0; max-width:30ch;}
+  @media (min-width:1280px){ .c-dec-digest h3{font-size:var(--text-h1-size-lg); line-height:var(--text-h1-lh-lg);} }
+  /* The emphasis is already carried by the italic quote, so the inner em stays
+     upright — nesting italic inside italic reads as a mistake. */
   .c-dec-digest h3 em{font-style:normal; color:var(--dec-crit-ink);}
 
   /* Posture gauge — five segments. A gauge rather than a number because
@@ -347,11 +350,11 @@
   /* Badge row — the numbers the paragraph used to bury. Direction is an
      icon AND a colour, never colour alone. */
   .c-dec-badges{display:flex; gap:var(--spacing-8); flex-wrap:wrap; margin-top:var(--spacing-16); padding-top:var(--spacing-12); border-top:1px solid var(--color-neutral-3);}
-  .c-dec-badge{display:inline-flex; align-items:center; gap:var(--spacing-4); padding:var(--spacing-4) var(--spacing-12); border-radius:var(--radius-pill); background:var(--color-neutral-2); border:1px solid var(--color-neutral-3); font-size:var(--text-caption-size); font-weight:700; color:var(--color-neutral-5); white-space:nowrap;}
+  .c-dec-badge{display:inline-flex; align-items:center; gap:var(--spacing-4); padding:var(--spacing-4) var(--spacing-12); border-radius:var(--radius-pill); background:var(--color-neutral-1); border:1px solid var(--color-neutral-3); font-size:var(--text-caption-size); font-weight:700; color:var(--color-neutral-5); white-space:nowrap;}
   .c-dec-badge b{font-weight:700; font-variant-numeric:tabular-nums; color:var(--color-neutral-9); font-size:var(--text-body2-size);}
   .c-dec-badge i{font-size:var(--icon-micro); flex:none;}
-  .c-dec-badge.dn{border-color:rgba(253,51,67,.30);} .c-dec-badge.dn b,.c-dec-badge.dn i{color:var(--dec-crit-ink);}
-  .c-dec-badge.up{border-color:rgba(0,194,110,.32);} .c-dec-badge.up b,.c-dec-badge.up i{color:var(--dec-good-ink);}
+  .c-dec-badge.dn{background:rgba(253,51,67,.10); border-color:rgba(253,51,67,.30);} .c-dec-badge.dn b,.c-dec-badge.dn i{color:var(--dec-crit-ink);}
+  .c-dec-badge.up{background:rgba(0,194,110,.12); border-color:rgba(0,194,110,.32);} .c-dec-badge.up b,.c-dec-badge.up i{color:var(--dec-good-ink);}
 
   .c-dec-more{margin-top:var(--spacing-16); display:flex; align-items:center; gap:var(--spacing-16); flex-wrap:wrap;}
   .c-dec-more .c-dec-disclose{margin-left:auto;}
@@ -359,7 +362,7 @@
   .c-dec-lnk:hover{color:var(--color-neutral-9);}
   /* Scoped past .c-card p (0,1,1) — a bare class loses to it and inherits
      the card's own paragraph recipe instead. Same trap as .c-dec-rv. */
-  .c-dec-digest p.c-dec-full{margin:0; padding:var(--spacing-12) var(--spacing-16); background:var(--color-neutral-2); border-radius:var(--radius-md); font-size:var(--text-body2-size); color:var(--color-neutral-5); line-height:1.6;}
+  .c-dec-digest p.c-dec-full{margin:0; padding:var(--spacing-12) var(--spacing-16); background:var(--color-neutral-1); border:1px solid var(--color-neutral-3); border-radius:var(--radius-md); font-size:var(--text-body2-size); color:var(--color-neutral-5); line-height:1.6;}
   .c-dec-since{font-size:var(--text-caption-size); color:var(--color-neutral-5);}
   .c-dec-since b{color:var(--color-neutral-9); font-weight:700;}
 
@@ -370,7 +373,7 @@
   .c-dec-strip{display:grid; grid-template-columns:repeat(6,1fr); background:var(--color-neutral-1); border:1px solid var(--color-neutral-3); border-radius:var(--radius-lg); box-shadow:var(--shadow-1); overflow:hidden; margin-bottom:var(--spacing-48);}
   .c-dec-kpi{position:relative; display:flex; flex-direction:column; align-items:flex-start; gap:var(--spacing-8); padding:var(--spacing-16); background:none; border:0; border-right:1px solid var(--color-neutral-3); text-align:left; width:100%; font-family:inherit; cursor:pointer; transition:background var(--duration-fast) var(--ease-standard);}
   .c-dec-kpi:last-child{border-right:0;}
-  .c-dec-kpi:hover{background:var(--color-canvas-warm-card);}
+  .c-dec-kpi:hover{background:var(--color-neutral-2);}
   .c-dec-kpi[aria-expanded="true"]{background:var(--color-neutral-2);}
   /* Border resets are per-breakpoint and complete: a partial reset here
      leaves either a doubled 2px seam at the container edge or one cell
@@ -398,11 +401,11 @@
   .c-dec-kpi:hover .c-dec-kpi-k i{opacity:1; color:var(--color-orange);}
   .c-dec-kpi-v{font-size:var(--text-h3-size-lg); font-weight:800; line-height:1; font-variant-numeric:tabular-nums; color:var(--color-neutral-9);}
   .c-dec-kpi-v.dn{color:var(--dec-crit-ink);}
-  .c-dec-kpi-d{display:inline-flex; align-items:center; gap:var(--spacing-4); padding:var(--spacing-4) var(--spacing-8); border-radius:var(--radius-pill); font-size:var(--text-caption-size); font-weight:700; font-variant-numeric:tabular-nums; background:var(--color-neutral-2); border:1px solid var(--color-neutral-3); color:var(--color-neutral-5);}
+  .c-dec-kpi-d{display:inline-flex; align-items:center; gap:var(--spacing-4); padding:var(--spacing-4) var(--spacing-8); border-radius:var(--radius-pill); font-size:var(--text-caption-size); font-weight:700; font-variant-numeric:tabular-nums; background:var(--color-neutral-1); border:1px solid var(--color-neutral-3); color:var(--color-neutral-5);}
   .c-dec-kpi[aria-expanded="true"] .c-dec-kpi-d{background:var(--color-neutral-1);}
-  .c-dec-kpi-d.up{color:var(--dec-good-ink); border-color:rgba(0,194,110,.32);}
-  .c-dec-kpi-d.dn{color:var(--dec-crit-ink); border-color:rgba(253,51,67,.30);}
-  .c-dec-kpi-d.wn{color:var(--dec-warn-ink); border-color:rgba(255,164,37,.38);}
+  .c-dec-kpi-d.up{color:var(--dec-good-ink); background:rgba(0,194,110,.12); border-color:rgba(0,194,110,.32);}
+  .c-dec-kpi-d.dn{color:var(--dec-crit-ink); background:rgba(253,51,67,.10); border-color:rgba(253,51,67,.30);}
+  .c-dec-kpi-d.wn{color:var(--dec-warn-ink); background:rgba(255,164,37,.14); border-color:rgba(255,164,37,.38);}
   /* Bullet bar — the one permitted fourth element, and only on a tile
      with a real target to be measured against. Its presence is itself
      information, so tiles without a target do not get one. */
@@ -461,9 +464,9 @@
   .c-dec-m b{color:var(--color-neutral-9); font-weight:700;}
   .c-dec-m i{opacity:.6; flex:none; font-size:var(--icon-micro);}
   .c-dec-sep{width:1px; height:13px; background:var(--color-neutral-3); flex:none;}
-  .c-dec-status{display:inline-flex; align-items:center; gap:var(--spacing-4); padding:var(--spacing-4) var(--spacing-8); border-radius:var(--radius-pill); font-size:var(--text-caption-size); font-weight:700; background:var(--color-neutral-2); border:1px solid var(--color-neutral-3); color:var(--color-neutral-5);}
+  .c-dec-status{display:inline-flex; align-items:center; gap:var(--spacing-4); padding:var(--spacing-4) var(--spacing-8); border-radius:var(--radius-pill); font-size:var(--text-caption-size); font-weight:700; background:var(--color-neutral-1); border:1px solid var(--color-neutral-3); color:var(--color-neutral-5);}
   .c-dec-status::before{content:''; width:7px; height:7px; border-radius:50%; background:var(--color-neutral-4); flex:none;}
-  .c-dec-status[data-s="Scheduled"]{color:var(--dec-warn-ink); border-color:rgba(255,164,37,.38);}
+  .c-dec-status[data-s="Scheduled"]{color:var(--dec-warn-ink); background:rgba(255,164,37,.14); border-color:rgba(255,164,37,.38);}
   .c-dec-status[data-s="Scheduled"]::before{background:var(--color-amber);}
   .c-dec-status[data-s="Awaiting client"]{color:var(--color-neutral-9);}
   .c-dec-status[data-s="Awaiting client"]::before{background:var(--color-navy);}
@@ -595,29 +598,48 @@
      content region is about 1060px. Below that the pill lifts above the box
      (which occupies the bottom ~162px — the same figure .c-shell-content's
      padding-bottom already reserves). Above it, the corner is genuinely free. */
-  .c-dec-fab{position:absolute; right:var(--spacing-24); bottom:178px; z-index:25; display:inline-flex; align-items:center; gap:var(--spacing-8); height:44px; padding:0 var(--spacing-20); border-radius:var(--radius-pill); border:1px solid var(--color-obsidian); background:var(--color-obsidian); color:var(--color-neutral-1); font-family:inherit; font-size:var(--text-body2-size); font-weight:700; cursor:pointer; box-shadow:var(--shadow-3); transition:background var(--duration-fast) var(--ease-standard), border-color var(--duration-fast) var(--ease-standard);}
+  .c-dec-fab{position:absolute; right:var(--spacing-24); bottom:178px; z-index:25; display:inline-flex; align-items:center; gap:var(--spacing-8); height:44px; padding:0 var(--spacing-20); border-radius:var(--radius-pill); border:1px solid var(--color-obsidian); background:var(--color-obsidian); color:var(--color-neutral-1); font-family:inherit; font-size:var(--text-body2-size); font-weight:700; cursor:pointer; box-shadow:var(--shadow-3);
+    opacity:0; visibility:hidden; transform:translateY(8px);
+    transition:opacity var(--duration-slow) var(--ease-settle), transform var(--duration-slow) var(--ease-settle), visibility 0s linear var(--duration-slow), background var(--duration-fast) var(--ease-standard), border-color var(--duration-fast) var(--ease-standard);}
+  .c-dec-fab.is-visible{opacity:1; visibility:visible; transform:none;
+    transition:opacity var(--duration-slow) var(--ease-settle), transform var(--duration-slow) var(--ease-settle), visibility 0s, background var(--duration-fast) var(--ease-standard), border-color var(--duration-fast) var(--ease-standard);}
   .c-dec-fab:hover{background:var(--color-neutral-8); border-color:var(--color-neutral-8);}
-  .c-dec-fab[hidden]{display:none;} /* shown only in Decision Space — the log it opens belongs to that space */
   @media (min-width:1180px){ .c-dec-fab{bottom:var(--spacing-24);} }
   .c-dec-fab i{font-size:var(--icon-sm);}
 
-  .c-dec-scrim{position:absolute; inset:0; z-index:70; background:var(--color-canvas-warm); opacity:0; pointer-events:none; transition:opacity var(--duration-base) var(--ease-standard);}
-  .c-dec-scrim.is-open{opacity:.72; pointer-events:auto;}
-  .c-dec-drawer{position:absolute; top:0; right:0; bottom:0; z-index:75; width:min(520px,100%); background:var(--color-neutral-1); border-left:1px solid var(--color-neutral-3); box-shadow:var(--shadow-4); transform:translateX(101%); transition:transform var(--duration-slow) var(--ease-settle); display:flex; flex-direction:column;}
-  .c-dec-drawer.is-open{transform:translateX(0);}
-  .c-dec-drawer-hd{display:flex; align-items:center; gap:var(--spacing-12); padding:var(--spacing-16); border-bottom:1px solid var(--color-neutral-3); flex:none;}
-  .c-dec-drawer-hd h3{margin:0; font-size:var(--text-h5-size); font-weight:800; flex:1 1 auto;}
-  .c-dec-drawer-tabs{padding:0 var(--spacing-16); flex:none;}
-  .c-dec-drawer-b{flex:1 1 auto; overflow-y:auto; padding:var(--spacing-16) var(--spacing-16) var(--spacing-32);}
+  .c-dec-panel{position:absolute; right:var(--spacing-24); bottom:178px; z-index:75;
+    width:min(520px, calc(100% - var(--spacing-48))); max-height:min(60vh, 560px);
+    background:var(--color-neutral-1); border:1px solid var(--color-neutral-3); border-radius:var(--radius-lg);
+    box-shadow:var(--shadow-4); display:flex; flex-direction:column; overflow:hidden;
+    transform-origin:100% 100%; transform:scale(.88) translateY(8px); opacity:0; visibility:hidden;
+    transition:transform var(--duration-slow) var(--ease-settle), opacity var(--duration-base) var(--ease-standard), visibility 0s linear var(--duration-slow);}
+  .c-dec-panel.is-open{transform:none; opacity:1; visibility:visible;
+    transition:transform var(--duration-slow) var(--ease-settle), opacity var(--duration-base) var(--ease-standard), visibility 0s;}
+  /* Contents follow the box rather than scaling with it, so the panel reads as
+     opening and then filling, not as a picture being zoomed. */
+  .c-dec-panel > *{opacity:0; transition:opacity var(--duration-base) var(--ease-standard) 70ms;}
+  .c-dec-panel.is-open > *{opacity:1;}
+  @media (min-width:1180px){ .c-dec-panel{bottom:var(--spacing-24);} }
+  .c-dec-panel-hd{display:flex; align-items:center; gap:var(--spacing-12); padding:var(--spacing-16) var(--spacing-16) var(--spacing-12); flex:none;}
+  .c-dec-panel-hd h3{margin:0; font-size:var(--text-h5-size); font-weight:800; flex:1 1 auto;}
+  /* Small, quiet, top-right — the same treatment as the sidebar's own toggle
+     (background:none, radius-sm, neutral-5), not a bordered icon button. */
+  .c-dec-panel-x{width:28px; height:28px; flex:none; display:inline-flex; align-items:center; justify-content:center;
+    background:none; border:0; border-radius:var(--radius-sm); color:var(--color-neutral-5); cursor:pointer; font-size:var(--icon-sm);
+    transition:background var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard);}
+  .c-dec-panel-x:hover{background:var(--color-neutral-2); color:var(--color-neutral-9);}
+  .c-dec-panel-x:focus-visible{outline:2px solid var(--color-obsidian); outline-offset:2px;}
+  .c-dec-panel-tabs{padding:0 var(--spacing-16); flex:none;}
+  .c-dec-panel-b{flex:1 1 auto; overflow-y:auto; padding:var(--spacing-16);}
   .c-dec-evr{display:flex; align-items:center; gap:var(--spacing-12); width:100%; min-height:52px; padding:0 var(--spacing-12); background:none; border:1px solid var(--color-neutral-3); border-radius:var(--radius-md); margin-bottom:var(--spacing-8); text-align:left; font-family:inherit; font-size:var(--text-body2-size); font-weight:700; color:var(--color-neutral-9); cursor:pointer; transition:border-color var(--duration-fast) var(--ease-standard), background var(--duration-fast) var(--ease-standard);}
   .c-dec-evr:hover{border-color:var(--color-orange); background:var(--color-neutral-2);}
   .c-dec-evr span{margin-left:auto; font-size:var(--text-caption-size); font-weight:700; color:var(--color-neutral-5); flex:none;}
   .c-dec-evr:hover span{color:var(--dec-accent-ink);}
   .c-dec-log td b{display:block; margin-bottom:2px; color:var(--color-neutral-9);}
   .c-dec-log td{color:var(--color-neutral-5); vertical-align:top; line-height:1.5;}
-  .c-dec-o{display:inline-block; padding:2px var(--spacing-8); border-radius:var(--radius-pill); font-weight:700; font-size:var(--text-caption-size); border:1px solid var(--color-neutral-3); color:var(--color-neutral-5);}
-  .c-dec-o.is-open{color:var(--dec-warn-ink); border-color:rgba(255,164,37,.38);}
-  .c-dec-o.is-done{color:var(--dec-good-ink); border-color:rgba(0,194,110,.32);}
+  .c-dec-o{display:inline-block; padding:2px var(--spacing-8); border-radius:var(--radius-pill); font-weight:700; font-size:var(--text-caption-size); background:var(--color-neutral-1); border:1px solid var(--color-neutral-3); color:var(--color-neutral-5);}
+  .c-dec-o.is-open{color:var(--dec-warn-ink); background:rgba(255,164,37,.14); border-color:rgba(255,164,37,.38);}
+  .c-dec-o.is-done{color:var(--dec-good-ink); background:rgba(0,194,110,.12); border-color:rgba(0,194,110,.32);}
   .c-dec-o.is-moot{color:var(--dec-strategic-ink);}
 
   /* Cited panel — when an evidence link crosses over from Decisions, the
@@ -646,7 +668,7 @@
   .c-dash-chart svg.is-fading > *:not(path.is-drawing){animation:c-chart-fade var(--duration-slow) var(--ease-standard) both;}
 
   @media (prefers-reduced-motion:reduce){
-    .c-dec-drawer,.c-dec-scrim,.c-dec-reveal,.c-dec-reveal > *{transition:none;}
+    .c-dec-panel,.c-dec-panel > *,.c-dec-fab,.c-dec-reveal,.c-dec-reveal > *{transition:none;}
     .c-space-panel.is-entering,.c-dec-card.is-settling{animation:none;}
     .c-dash-chart svg.is-fading > *:not(path.is-drawing){animation:none;}
     .c-dash-chart svg path.is-drawing{transition:none;}
@@ -2053,23 +2075,22 @@
            container and absolute inside .c-shell-main, so it spans the
            Content region's full height without scrolling with it and
            leaves the nav rail visible. -->
-      <!-- Floating trigger, bottom-right. It shares this region with the
-           permanently-pinned assistant box, so its offset is not a flat
-           24px — see .c-dec-fab, which lifts it above the box at the
-           widths where the two would otherwise overlap. Shown only in
-           Decision Space, since the log it opens is that space's. -->
+      <!-- Floating trigger, bottom-right, and the panel it expands into.
+           Both share this corner with the permanently-pinned assistant box,
+           so neither uses a flat 24px offset — they lift above the box at the
+           widths where they would otherwise overlap. Shown only in Decision
+           Space, since the log it opens is that space's. -->
       <button class="c-dec-fab" id="decDrawerBtn" type="button" aria-haspopup="dialog"><i class="ph ph-file-text" aria-hidden="true"></i>Evidence &amp; log</button>
-      <div class="c-dec-scrim" id="decScrim"></div>
-      <aside class="c-dec-drawer" id="decDrawer" role="dialog" aria-modal="true" aria-labelledby="decDrawerH" aria-hidden="true">
-        <div class="c-dec-drawer-hd">
+      <aside class="c-dec-panel" id="decDrawer" role="dialog" aria-labelledby="decDrawerH" aria-hidden="true">
+        <div class="c-dec-panel-hd">
           <h3 id="decDrawerH">Evidence &amp; log</h3>
-          <button class="c-btn c-btn-md c-btn-icon c-btn-secondary" id="decDrawerX" type="button" aria-label="Close evidence and log"><i class="ph ph-x" aria-hidden="true"></i></button>
+          <button class="c-dec-panel-x" id="decDrawerX" type="button" aria-label="Close evidence and log"><i class="ph ph-x" aria-hidden="true"></i></button>
         </div>
-        <div class="c-tabs c-dec-drawer-tabs" role="tablist" aria-label="Drawer sections">
+        <div class="c-tabs c-dec-panel-tabs" role="tablist" aria-label="Drawer sections">
           <button class="c-tab active" role="tab" id="decTabE" aria-selected="true" aria-controls="decPanE" type="button" tabindex="0">Evidence</button>
           <button class="c-tab" role="tab" id="decTabL" aria-selected="false" aria-controls="decPanL" type="button" tabindex="-1">Decision log</button>
         </div>
-        <div class="c-dec-drawer-b">
+        <div class="c-dec-panel-b">
 
           <!-- Each row crosses to the panel that proves the claim: it
                activates Insights Space and scrolls that widget into
@@ -3517,7 +3538,6 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
      read off document.activeElement, which is unreliable for an opener
      invoked without a real pointer or keyboard focus first. ── */
   const drawer = document.getElementById('decDrawer');
-  const scrim = document.getElementById('decScrim');
   const drawerBtn = document.getElementById('decDrawerBtn');
   const drawerX = document.getElementById('decDrawerX');
   let lastFocus = null;
@@ -3525,8 +3545,9 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
   function openDrawer(trigger) {
     lastFocus = (trigger && trigger.focus) ? trigger : drawerBtn;
     drawer.classList.add('is-open');
-    scrim.classList.add('is-open');
     drawer.setAttribute('aria-hidden', 'false');
+    drawerBtn.classList.remove('is-visible'); // the pill becomes the panel, so it must not sit behind it
+    void drawer.offsetHeight; // flush the visibility change — a still-hidden element cannot take focus
     drawerX.focus();
   }
   // restoreFocus is false on the cross-tab path: the trigger we would
@@ -3537,8 +3558,8 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
   function closeDrawer({ restoreFocus = true } = {}) {
     if (!drawer.classList.contains('is-open')) return;
     drawer.classList.remove('is-open');
-    scrim.classList.remove('is-open');
     drawer.setAttribute('aria-hidden', 'true');
+    document.dispatchEvent(new CustomEvent('decpanel:closed')); // the motion layer owns pill visibility
     if (restoreFocus) (lastFocus || drawerBtn).focus();
   }
   drawerBtn.addEventListener('click', () => openDrawer(drawerBtn));
@@ -3551,12 +3572,18 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
     if (e.detail.panel !== 'spaceDecisions') closeDrawer({ restoreFocus: false });
   });
   drawerX.addEventListener('click', closeDrawer);
-  scrim.addEventListener('click', closeDrawer);
+  // Not modal any more, so dismissal is click-outside rather than a scrim. The
+  // pill's own click is excluded, or opening would immediately close again.
+  document.addEventListener('click', (e) => {
+    if (!drawer.classList.contains('is-open')) return;
+    if (drawer.contains(e.target) || drawerBtn.contains(e.target)) return;
+    closeDrawer();
+  });
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeDrawer(); });
 
   // Drawer's own tablist (Evidence / Decision log) — separate from the
   // space switcher, and scoped to the drawer so the two never collide.
-  const drawerTabs = Array.from(drawer.querySelectorAll('.c-dec-drawer-tabs .c-tab'));
+  const drawerTabs = Array.from(drawer.querySelectorAll('.c-dec-panel-tabs .c-tab'));
   function selectDrawerTab(tab, focus) {
     drawerTabs.forEach((t) => {
       const on = t === tab;
@@ -3567,11 +3594,11 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
     });
     if (focus) tab.focus();
   }
-  drawer.querySelector('.c-dec-drawer-tabs').addEventListener('click', (e) => {
+  drawer.querySelector('.c-dec-panel-tabs').addEventListener('click', (e) => {
     const tab = e.target.closest('.c-tab');
     if (tab) selectDrawerTab(tab);
   });
-  drawer.querySelector('.c-dec-drawer-tabs').addEventListener('keydown', (e) => {
+  drawer.querySelector('.c-dec-panel-tabs').addEventListener('keydown', (e) => {
     const i = drawerTabs.indexOf(document.activeElement);
     if (i < 0) return;
     let next = null;
@@ -3830,18 +3857,23 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
      exists in Decision Space (see the space controller), so this ANDs with
      that rather than replacing it. ── */
   const fab = document.getElementById('decDrawerBtn');
+  const panel = document.getElementById('decDrawer');
   if (fab) {
-    fab.dataset.scrolled = '0';
+    // Class, not [hidden]: the entrance is a transition, and display:none has
+    // no intermediate state to animate from. visibility still keeps the
+    // control out of the tab order and the accessibility tree while away.
     const sync = () => {
       const past = shellContent.scrollTop > 240;
-      fab.dataset.scrolled = past ? '1' : '0';
-      fab.hidden = !(past && fab.dataset.space !== 'other');
+      const onDecisions = fab.dataset.space !== 'other';
+      const panelOpen = panel && panel.classList.contains('is-open');
+      fab.classList.toggle('is-visible', past && onDecisions && !panelOpen);
     };
     shellContent.addEventListener('scroll', sync, { passive: true });
     document.addEventListener('space:shown', (e) => {
       fab.dataset.space = e.detail.panel === 'spaceDecisions' ? 'decisions' : 'other';
       sync();
     });
+    document.addEventListener('decpanel:closed', sync);
     sync();
   }
 })();

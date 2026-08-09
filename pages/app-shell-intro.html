@@ -18,7 +18,16 @@
 <link rel="stylesheet" href="../collabrium-dls/components.css" />
 <style>
   *{box-sizing:border-box;}
-  html,body{margin:0; height:100%;}
+  /* overflow:hidden is a guarantee, not a workaround. This is a
+     fixed-viewport app shell: .c-shell is 100dvh and .c-shell-content is
+     the ONE scroll surface. Any document-level scrollbar here is by
+     definition a bug, and it is an expensive one — it steals ~15px of
+     width, which narrows .c-shell and shifts every centred thing on the
+     page (greeting, ask box, hand-off link). Because it appeared on only
+     one tab, switching tabs made the whole layout jump sideways. The
+     specific escapee is fixed at .c-space-panel below; this stops the
+     next one from ever reaching the viewport. */
+  html,body{margin:0; height:100%; overflow:hidden;}
   body{font-family:var(--font-primary); color:var(--color-neutral-9);}
 
   /* .c-shell in components.css is pinned to a 480px demo height for
@@ -195,6 +204,20 @@
        the ::before band that covers the strip above the pinned bar. */
     .c-space-tabs{flex-wrap:wrap;}
   }
+  /* position:relative is load-bearing, and not for anything it positions
+     itself. .c-dash-vh (the visually-hidden table captions) is
+     position:absolute, and without a positioned ancestor INSIDE the
+     scroll container its containing block resolved all the way out to
+     .c-shell-main. An absolutely-positioned box whose containing block is
+     an ancestor of a scroll container is not clipped by that container —
+     so three 1px captions sat at y≈3272 and y≈4040, overflowed
+     .c-shell-main, and handed the document its own scrollbar (measured:
+     documentElement.scrollHeight 4041 vs clientHeight 1195; hiding just
+     those three captions took it straight back to 1195). Anchoring here
+     puts them back inside the scroll container, where they are clipped
+     like everything else. Applies to both panels, so any future absolute
+     descendant is contained too. */
+  .c-space-panel{position:relative;}
   .c-space-panel[hidden]{display:none;}
   .c-space-panel:focus{outline:none;} /* the panel is only a programmatic focus target on tab switch — a visible ring on a whole page-height region reads as an error state */
 

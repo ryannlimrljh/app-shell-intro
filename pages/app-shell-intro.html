@@ -431,9 +431,11 @@
      perimeter border: it marks without enclosing, so the eye runs down
      the stripe column and reads severity in one pass instead of seeing
      seven equally-boxed cards. */
-  .c-dec-queue{display:flex; flex-direction:column; gap:var(--spacing-16); margin-bottom:var(--spacing-48);}
-  .c-dec-card{padding:var(--spacing-16) var(--spacing-24); gap:0; transition:box-shadow var(--duration-base) var(--ease-settle);}
-  .c-dec-card:hover{box-shadow:var(--shadow-3);}
+    /* 1400px, not the fan's 900px: these cards are ~3x wider, and the shorter
+     the perspective the more a tilt distorts long lines of text. */
+  .c-dec-queue{display:flex; flex-direction:column; gap:var(--spacing-16); margin-bottom:var(--spacing-48); perspective:1400px;}
+  .c-dec-card{position:relative; z-index:1; padding:var(--spacing-16) var(--spacing-24); gap:0; transition:box-shadow var(--duration-base) var(--ease-settle);}
+  .c-dec-card:hover{box-shadow:var(--shadow-3); z-index:2;}
   .c-dec-card[data-tier="urgent"]{--dec-tier:var(--color-red); --dec-tier-ink:var(--dec-crit-ink);}
   .c-dec-card[data-tier="risk"]{--dec-tier:var(--color-amber); --dec-tier-ink:var(--dec-warn-ink);}
   .c-dec-card[data-tier="opp"]{--dec-tier:var(--color-green); --dec-tier-ink:var(--dec-good-ink);}
@@ -681,11 +683,6 @@
   @keyframes c-space-enter{from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:none;}}
   .c-space-panel.is-entering{animation:c-space-enter var(--duration-slow) var(--ease-settle);}
 
-  /* Horizon re-tier physically moves cards between the two groups. Without
-     this the list teleports; with it each card settles into its new slot, in
-     DOM order, which is what makes promotion and demotion legible. */
-  @keyframes c-dec-settle{from{opacity:0; transform:translateY(8px);} to{opacity:1; transform:none;}}
-  .c-dec-card.is-settling{animation:c-dec-settle var(--duration-base) var(--ease-settle) both; animation-delay:calc(var(--dec-i, 0) * 40ms);}
 
   /* Charts draw in on first reveal. Stroked paths get their real length
      measured in JS and unroll; the rest of the plot fades up behind them. */
@@ -695,7 +692,7 @@
 
   @media (prefers-reduced-motion:reduce){
     .c-dec-panel,.c-dec-panel > *,.c-dec-fab,.c-dec-reveal,.c-dec-reveal > *{transition:none;}
-    .c-space-panel.is-entering,.c-dec-card.is-settling{animation:none;}
+    .c-space-panel.is-entering{animation:none;}
     .c-dec-qc.is-caret::after{animation:none; display:none;}
     .c-dash-chart svg.is-fading > *:not(path.is-drawing){animation:none;}
     .c-dash-chart svg path.is-drawing{transition:none;}
@@ -3705,6 +3702,69 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
     fy:      { sub: 'One decision for the year',                                  total: 'RM 4.3M in play' }
   };
 
+  /* ── Card poses and hover, borrowed from the hero card fan.
+     Motion owns each card's transform end-to-end, exactly as it does for the
+     fan: the base pose is re-stated as Motion values because Motion composes
+     its own transform string, and animating only rotateX/rotateY later would
+     otherwise drop the pose. One owner is also why the settle is animated here
+     rather than by a CSS keyframe — a keyframe on transform would be silently
+     overridden by Motion's inline value the first time a hover fired. ── */
+  const CARD_TILT_DEG = 4;   // the fan uses 12; these are full-width and text-heavy, and long lines visibly swim at that angle
+  const CARD_SPRING = { type: 'spring', stiffness: 300, damping: 22, mass: 0.6 };
+
+  // Alternating sub-degree rotation and a small indent, keyed to VISUAL order,
+  // so seven cards read as a hand-laid stack rather than a table. An order of
+  // magnitude below the fan's 12deg on purpose — this is a reading surface.
+  function pose(i) {
+    // Symmetric, not 0/+8: offsetting only the odd cards pushed three of them
+    // 9px past the queue's right edge, so the column read as drifting right
+    // rather than alternating. +/-4 keeps it centred on the same axis as the
+    // metric strip above, and both extremes stay inside the 32px page gutter.
+    return { rotate: i % 2 === 0 ? -0.3 : 0.3, x: i % 2 === 0 ? -4 : 4 };
+  }
+
+  function layoutCards(withSettle) {
+    Array.from(queue.querySelectorAll('.c-dec-card')).forEach((c, i) => {
+      const p = pose(i);
+      if (REDUCED.matches) {
+        animate(c, { ...p, rotateX: 0, rotateY: 0, scale: 1, opacity: 1, y: 0 }, { duration: 0 });
+      } else if (withSettle) {
+        // Pose lands instantly; only opacity and y travel, so the stagger reads
+        // as each card arriving into a slot it already holds.
+        animate(c, { ...p, rotateX: 0, rotateY: 0, scale: 1 }, { duration: 0 });
+        animate(c, { opacity: [0, 1], y: [10, 0] }, { duration: 0.28, delay: i * 0.04, ease: [0.16, 0.84, 0.24, 1] });
+      } else {
+        animate(c, { ...p, rotateX: 0, rotateY: 0, scale: 1, opacity: 1, y: 0 }, { duration: 0 });
+      }
+      enableCardHover(c);
+    });
+  }
+
+  function enableCardHover(card) {
+    if (card.dataset.hoverBound) return;
+    card.dataset.hoverBound = '1';
+    card.addEventListener('pointerenter', (e) => {
+      if (e.pointerType !== 'mouse' || REDUCED.matches) return;
+      animate(card, { scale: 1.012 }, CARD_SPRING); // the fan's 1.05 is far too much travel on a card this wide
+    });
+    card.addEventListener('pointermove', (e) => {
+      if (e.pointerType !== 'mouse' || REDUCED.matches) return;
+      const r = card.getBoundingClientRect();
+      const px = (e.clientX - r.left) / r.width;
+      const py = (e.clientY - r.top) / r.height;
+      // Only rotateX/rotateY are animated, so the pose's rotate and x survive.
+      animate(card, {
+        rotateY: (px - 0.5) * 2 * CARD_TILT_DEG,
+        rotateX: -(py - 0.5) * 2 * CARD_TILT_DEG
+      }, CARD_SPRING);
+    });
+    card.addEventListener('pointerleave', (e) => {
+      if (e.pointerType !== 'mouse' || REDUCED.matches) return;
+      // Softer spring out, so it settles rather than snapping — same as the fan.
+      animate(card, { rotateX: 0, rotateY: 0, scale: 1 }, { type: 'spring', stiffness: 220, damping: 18 });
+    });
+  }
+
   let first = true;
   function setHorizon(hz) {
     if (!HZ[hz]) return; // guard first: a missing key must not leave the attribute written and the labels stale
@@ -3722,17 +3782,7 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
       if (w) collapse(w);
     });
 
-    if (!first && !REDUCED.matches) {
-      Array.from(queue.querySelectorAll('.c-dec-card')).forEach((c, i) => {
-        c.style.setProperty('--dec-i', i); // visual order, post-reflow — not the canonical array index
-        c.classList.remove('is-settling');
-      });
-      void queue.offsetHeight;
-      cards.forEach((c) => {
-        c.classList.add('is-settling');
-        c.addEventListener('animationend', () => c.classList.remove('is-settling'), { once: true });
-      });
-    }
+    layoutCards(!first); // re-pose by the NEW visual order, and settle only when something actually moved
 
     qSub.textContent = HZ[hz].sub;
     qCount.textContent = HZ[hz].total;

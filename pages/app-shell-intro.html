@@ -145,12 +145,38 @@
      section one gap below it. No JS measurement, no magic number. */
   .c-canvas-hero{min-height:calc(100dvh - var(--section-gap));}
 
-  /* ── Section 2 — the leadership "ideal board" (spec 2026-08-07, as amended).
-     .c-shell-content is the page's scroll container (components.css:282
+  /* ── Section 2 — the two spaces. The same business, read two ways:
+     Decisions Space leads with what is being asked of the reader,
+     Insights Space is the leadership board that evidences it. Tabs use
+     components.css's own .c-tabs/.c-tab (a real tablist here, unlike
+     .c-dash-head's period control — two tabpanels genuinely exist, so
+     tab semantics are honest). The section gap that used to belong to
+     .c-dash now belongs to this wrapper, since this is what begins
+     below the fold; .c-dash's own margin drops to a normal in-panel
+     gap so the board doesn't sit a full screen below its own tab. */
+  .c-space{margin-top:var(--section-gap);}
+  .c-space-tabs{position:sticky; top:0; z-index:6; background:var(--color-canvas-warm); padding-top:var(--spacing-8); gap:var(--spacing-8);}
+  .c-space-tabs .c-tab{height:44px; font-size:var(--text-h5-size); letter-spacing:-.01em;}
+  .c-space-tabs .c-tab i{font-size:18px; opacity:.75;}
+  .c-space-tabs .c-tab.active i{opacity:1; color:var(--color-orange);}
+  .c-space-tabs .c-tab .count{padding:0 7px; border-radius:var(--radius-pill); background:var(--color-neutral-2); color:var(--color-neutral-5);}
+  .c-space-tabs .c-tab.active .count{background:var(--color-obsidian); color:var(--color-neutral-1);}
+  .c-space-panel[hidden]{display:none;}
+  .c-space-panel:focus{outline:none;} /* the panel is only a programmatic focus target on tab switch — a visible ring on a whole page-height region reads as an error state */
+
+  /* .c-shell-content is the page's scroll container (components.css:282
      gives it overflow-y:auto inside a 100dvh shell), so smooth scrolling
      MUST live here — on html it fails silently. */
   .c-shell-content{scroll-behavior:smooth;}
-  .c-dash{margin-top:var(--section-gap); scroll-margin-top:var(--spacing-32);}
+  /* scroll-margin has to clear the sticky tab bar, and the two use
+     DIFFERENT reference edges inside this scroll container: sticky top:0
+     resolves against the content box (so the bar parks at --section-gap,
+     48px), while scrollIntoView/anchor jumps align to the padding box
+     (y=0). So the offset is the bar's parked position PLUS its own height
+     (44px tab + --spacing-8 of padding-top) plus a gap — measured, not
+     guessed: without this the "Across the business" heading landed at
+     y=60 underneath a bar occupying 48–101. */
+  .c-dash{margin-top:var(--spacing-24); scroll-margin-top:calc(var(--section-gap) + 44px + var(--spacing-8) + var(--spacing-12));}
   .c-dash-head{display:flex; align-items:flex-end; justify-content:space-between; gap:var(--spacing-16); flex-wrap:wrap; padding-bottom:var(--spacing-12); border-bottom:1px solid var(--color-neutral-3); margin-bottom:var(--spacing-16);}
   .c-dash-head h2{margin:0; font-size:var(--text-h2-size); line-height:var(--text-h2-lh); font-weight:800; letter-spacing:-.01em;}
   .c-dash-head p{margin:2px 0 0; font-size:var(--text-body1-size); color:var(--color-neutral-5);}
@@ -1032,13 +1058,36 @@
             </div>
           </div>
         </div>
-        <p class="c-canvas-dashlink" id="dashLink">Get more done, straight to your <a href="#dashboard">Dashboard &#8595;</a> | <a href="#">Clean up cards</a></p>
+        <!-- Link label follows the tab it now lands on: it activates
+             Insights Space, so calling it "Dashboard" would name a
+             destination that no longer exists by that name. -->
+        <p class="c-canvas-dashlink" id="dashLink">Get more done, straight to your <a href="#dashboard">Insights Space &#8595;</a> | <a href="#">Clean up cards</a></p>
         </div><!-- /.c-canvas-hero -->
 
-        <!-- ── Section 2 — leadership ideal board. Reached via #dashboard
-             from the dashlink; content arrives on scroll-in (see .c-dash
-             CSS). Chart panels are filled by the dashboard chart module
-             at the end of the page script. -->
+        <!-- ── Section 2 — the two spaces.
+             Decisions Space is what is being asked of the reader this
+             week; Insights Space is the leadership board that evidences
+             it. Decisions leads on load: the board is one click away,
+             not gone. Every figure in Decisions reconciles to a panel in
+             Insights, and the "Open panel" links cross between them. -->
+        <div class="c-space" id="space">
+          <div class="c-tabs c-space-tabs" role="tablist" aria-label="Workspace">
+            <button class="c-tab active" id="tabDecisions" type="button" role="tab" aria-selected="true" aria-controls="spaceDecisions" tabindex="0"><i class="ph-fill ph-gavel" aria-hidden="true"></i>Decisions Space<span class="count">7</span></button>
+            <button class="c-tab" id="tabInsights" type="button" role="tab" aria-selected="false" aria-controls="spaceInsights" tabindex="-1"><i class="ph-fill ph-chart-line-up" aria-hidden="true"></i>Insights Space<span class="count">15</span></button>
+          </div>
+
+          <div class="c-space-panel" id="spaceDecisions" role="tabpanel" aria-labelledby="tabDecisions" tabindex="-1">
+            <!-- filled in by the decision-workspace port -->
+          </div>
+
+          <div class="c-space-panel" id="spaceInsights" role="tabpanel" aria-labelledby="tabInsights" tabindex="-1" hidden>
+
+        <!-- Leadership ideal board. Reached via #dashboard from the
+             dashlink, which also activates this tab (see the space
+             controller). Chart panels are filled by the dashboard chart
+             module at the end of the page script — fixed-viewBox SVG
+             strings, so they render correctly even while this panel is
+             still hidden. -->
         <section id="dashboard" class="c-dash" aria-labelledby="dashTitle">
           <div class="c-dash-head">
             <div>
@@ -1176,6 +1225,9 @@
 
           </div>
         </section>
+
+          </div><!-- /#spaceInsights -->
+        </div><!-- /.c-space -->
       </div><!-- /.c-shell-content -->
 
       <!-- Ask box — assistant entry point, ported from dashboard-home's
@@ -2408,6 +2460,77 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
   })();
 })();
 
+// ── Space switcher — Decisions Space / Insights Space.
+// A real tablist: one tab stop for the group, arrow keys + Home/End move
+// between tabs, and activation follows focus (both panels are already in
+// the DOM, so there is nothing to load and no reason to make the user
+// press Enter as well).
+//
+// Announces `space:shown` rather than reaching into the sections it
+// reveals. The dashboard's reveal/measure work lives in the observer IIFE
+// below and the decision workspace's lives in its own; both listen. That
+// keeps this function's whole job "which panel is visible".
+(function () {
+  const tablist = document.querySelector('.c-space-tabs');
+  if (!tablist) return;
+  const tabs = Array.from(tablist.querySelectorAll('.c-tab'));
+
+  function activate(tab, { focus = false } = {}) {
+    if (!tab) return;
+    tabs.forEach((t) => {
+      const on = t === tab;
+      t.classList.toggle('active', on);
+      t.setAttribute('aria-selected', String(on));
+      t.tabIndex = on ? 0 : -1; // roving tabindex — a tablist is one tab stop, not two
+      const panel = document.getElementById(t.getAttribute('aria-controls'));
+      if (panel) panel.hidden = !on;
+    });
+    if (focus) tab.focus();
+    document.dispatchEvent(new CustomEvent('space:shown', {
+      detail: { panel: tab.getAttribute('aria-controls') }
+    }));
+  }
+
+  tablist.addEventListener('click', (e) => {
+    const tab = e.target.closest('.c-tab');
+    if (tab) activate(tab);
+  });
+
+  tablist.addEventListener('keydown', (e) => {
+    const i = tabs.indexOf(document.activeElement);
+    if (i < 0) return;
+    let next = null;
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') next = tabs[(i + 1) % tabs.length];
+    else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') next = tabs[(i - 1 + tabs.length) % tabs.length];
+    else if (e.key === 'Home') next = tabs[0];
+    else if (e.key === 'End') next = tabs[tabs.length - 1];
+    if (next) { e.preventDefault(); activate(next, { focus: true }); }
+  });
+
+  // Anything anywhere on the page can ask for a space by tab id. Used by
+  // the hero's hand-off link and by every "Open panel" evidence link in
+  // Decisions Space, which cross over to the board that proves the claim.
+  window.showSpace = function (tabId, anchorId) {
+    activate(document.getElementById(tabId));
+    if (!anchorId) return;
+    // Two frames: one for the panel to leave display:none, one for layout
+    // to settle at its real height before we ask for a scroll position.
+    // A single rAF lands short on the tab's first activation.
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      const target = document.getElementById(anchorId);
+      if (target) target.scrollIntoView({ block: 'start' });
+    }));
+  };
+
+  const dashLink = document.querySelector('#dashLink a[href="#dashboard"]');
+  if (dashLink) {
+    dashLink.addEventListener('click', (e) => {
+      e.preventDefault(); // the panel is display:none until its tab is active, so the native anchor jump has nothing to scroll to
+      window.showSpace('tabInsights', 'dashboard');
+    });
+  }
+})();
+
 // ── Section 2: scroll-in reveal (observer) + date-banner fade (scroll listener).
 // The observer does ONE job — reveal, one-way (class add is idempotent — the
 // revealCanvasContent() double-fire bug is the precedent for being paranoid
@@ -2455,6 +2578,17 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
     });
   }, { root: shellContent, threshold: 0 }); // threshold 0 = any-pixel semantics: the section is many viewports tall on narrow screens (375×667 renders it ~8,000px, max ratio ~0.08), so any fractional threshold is unreachable there. Reveal fires at first pixel; it is one-way, so no else branch.
   io.observe(dash);
+
+  // The board now lives in a tabpanel that starts display:none, and a
+  // display:none element never intersects — so the observer alone would
+  // leave it permanently at opacity 0. The tab switch is the other way in.
+  // Both paths are idempotent (class add + offset read), so a section that
+  // is both switched to and scrolled past just does this twice.
+  document.addEventListener('space:shown', (e) => {
+    if (e.detail.panel !== 'spaceInsights') return;
+    dash.classList.add('is-revealed');
+    positionDashThumb(); // offsetLeft/offsetWidth read 0 while hidden, so the thumb must be re-measured now that the panel has a layout box
+  });
 
   // Date banner — fade once the container scrolls. WHY: the fixed date predates
   // the page scrolling at all; once Section 2 made the container scroll, it

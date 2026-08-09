@@ -175,6 +175,26 @@
   .c-space-tabs .c-tab.active i{opacity:1; color:var(--color-orange);}
   .c-space-tabs .c-tab .count{padding:0 7px; border-radius:var(--radius-pill); background:var(--color-neutral-2); color:var(--color-neutral-5);}
   .c-space-tabs .c-tab.active .count{background:var(--color-obsidian); color:var(--color-neutral-1);}
+  /* At 375px the nav rail plus gutters leave the tablist only 223px, and
+     the two tabs wanted 287 — .c-tabs does not wrap and flex items will
+     not shrink below their content, so .c-shell-main's overflow-x:clip cut
+     the Insights tab in half: the page's primary control, half
+     unclickable. The word "Space" and the count badges come off, which
+     buys back the 64px needed (measured, not estimated). The names alone
+     stay unambiguous, including as the accessible name; the counts are
+     the part a phone reader can afford to lose. */
+  @media (max-width:620px){
+    .c-space-tabs-w{display:none;}
+    .c-space-tabs .c-tab{padding:0 var(--spacing-8);}
+    .c-space-tabs .c-tab .count{display:none;}
+    /* That lands at 222px inside 223 — too little headroom to trust, since
+       the fallback face before Mulish loads measures wider. Wrapping is
+       the graceful failure: the second tab drops to its own line and stays
+       usable, instead of being clipped by the ancestor's overflow-x. It
+       cannot be overflow-x:auto on the tablist itself — that would clip
+       the ::before band that covers the strip above the pinned bar. */
+    .c-space-tabs{flex-wrap:wrap;}
+  }
   .c-space-panel[hidden]{display:none;}
   .c-space-panel:focus{outline:none;} /* the panel is only a programmatic focus target on tab switch — a visible ring on a whole page-height region reads as an error state */
 
@@ -266,12 +286,21 @@
      convention in pages/leadership-dashboard-tracker.html. The page's
      older .c-dash-up/.c-dash-dn spans are a pre-existing exception and
      are deliberately left alone — repainting the board is not this
-     port's job. */
-  .c-space-panel{
+     port's job.
+
+     Declared at :root, NOT on the panel: the evidence drawer is a child
+     of .c-shell-main, outside any .c-space-panel, so panel-scoped
+     definitions did not reach it. An undefined var makes the whole `color`
+     declaration invalid at computed-value time, so the four log outcome
+     chips all silently inherited the same grey — no console error, and
+     the contrast audit passed, because grey-on-white is perfectly
+     legible. It was just wrong. */
+  :root{
     --dec-good-ink:#00734D;      /* 5.90 / 5.18 */
     --dec-warn-ink:#8A5A00;      /* 5.93 / 5.20 */
     --dec-crit-ink:#C4111F;      /* 6.09 / 5.35 */
     --dec-strategic-ink:#6D28D9; /* 7.10 / 6.23 */
+    --dec-accent-ink:#C13A0E;    /* 5.41 / 4.75 — --color-orange itself is 3.15, so it is a border/icon colour here, never text */
   }
 
   #spaceDecisions{padding-top:var(--spacing-24);}
@@ -308,7 +337,7 @@
   .c-dec-badge.up{border-color:rgba(0,194,110,.36);} .c-dec-badge.up b,.c-dec-badge.up i{color:var(--dec-good-ink);}
 
   .c-dec-more{margin-top:var(--spacing-12); display:flex; align-items:center; gap:var(--spacing-12); flex-wrap:wrap;}
-  .c-dec-lnk{background:none; border:0; padding:0 2px; min-height:32px; font-family:inherit; font-size:var(--text-caption-size); font-weight:800; color:var(--color-orange); text-decoration:underline; text-underline-offset:3px; cursor:pointer; display:inline-flex; align-items:center; gap:6px; transition:color var(--duration-fast) var(--ease-standard);}
+  .c-dec-lnk{background:none; border:0; padding:0 2px; min-height:32px; font-family:inherit; font-size:var(--text-caption-size); font-weight:800; color:var(--dec-accent-ink); text-decoration:underline; text-underline-offset:3px; cursor:pointer; display:inline-flex; align-items:center; gap:6px; transition:color var(--duration-fast) var(--ease-standard);}
   .c-dec-lnk:hover{color:var(--color-neutral-9);}
   /* Scoped past .c-card p (0,1,1) — a bare class loses to it and inherits
      the card's own paragraph recipe instead. Same trap as .c-dec-rv. */
@@ -336,7 +365,12 @@
   }
   @media (max-width:620px){
     .c-dec-strip{grid-template-columns:repeat(2,1fr);}
-    .c-dec-kpi{border-right:1px solid var(--color-neutral-3); border-bottom:0;}
+    /* The :nth-child(3n) selector has to be reset BY NAME, not just via a
+       bare .c-dec-kpi rule: both media blocks apply below 620px, and
+       (0,2,0) beats (0,1,0) regardless of source order — so cell 3 kept
+       the 3-column rule's border-right:0 and lost its divider mid-row.
+       This is the same collision the tracker's health strip hit. */
+    .c-dec-kpi,.c-dec-kpi:nth-child(3n){border-right:1px solid var(--color-neutral-3); border-bottom:0;}
     .c-dec-kpi:nth-child(2n){border-right:0;}
     .c-dec-kpi:nth-child(-n+4){border-bottom:1px solid var(--color-neutral-3);}
   }
@@ -421,7 +455,7 @@
   .c-dec-acts{display:flex; align-items:center; gap:var(--spacing-8); flex-wrap:wrap; margin-top:var(--spacing-16); padding-top:var(--spacing-12); border-top:1px solid var(--color-neutral-3);}
   .c-dec-acts .c-dec-why{margin-left:auto;}
   .c-dec-why{display:inline-flex; align-items:center; gap:6px; height:40px; padding:0 var(--spacing-12); background:none; border:1px solid var(--color-neutral-3); border-radius:var(--radius-md); font-family:inherit; font-size:var(--text-caption-size); font-weight:800; color:var(--color-neutral-5); cursor:pointer; transition:border-color var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard);}
-  .c-dec-why:hover{border-color:var(--color-orange); color:var(--color-orange);}
+  .c-dec-why:hover{border-color:var(--color-orange); color:var(--dec-accent-ink);} /* border may be raw orange (3.15 clears the 3:1 UI-component floor), the label may not */
   .c-dec-why i{transition:transform var(--duration-base) var(--ease-standard);}
   .c-dec-why[aria-expanded="true"]{color:var(--color-neutral-9);}
   .c-dec-why[aria-expanded="true"] i{transform:rotate(90deg);}
@@ -453,6 +487,16 @@
   .c-dec-hz button::before{content:''; position:absolute; left:0; right:0; top:50%; height:44px; transform:translateY(-50%);}
   .c-dec-hz button:hover{color:var(--color-neutral-9);}
   .c-dec-hz button[aria-checked="true"]{background:var(--color-obsidian); color:var(--color-neutral-1);}
+  /* At 375px the three fixed-padding pills ran 25px past the viewport,
+     and .c-shell-main's overflow-x:clip meant they were silently cut off
+     rather than scrollable — "FY outlook" was simply unreachable on a
+     phone. Below 620px the control takes its own full-width line and the
+     buttons share it equally. */
+  @media (max-width:620px){
+    .c-dec-hz{width:100%;}
+    .c-dec-hz button{flex:1 1 0; min-width:0; padding:0 var(--spacing-4);}
+    .c-dec-count{margin-left:0;}
+  }
 
   /* ── Out-of-horizon demotion. NOT a separate component — the same
      banner, compacted. That is what makes the horizon switch legible as
@@ -521,7 +565,7 @@
   .c-dec-evr{display:flex; align-items:center; gap:var(--spacing-12); width:100%; min-height:52px; padding:0 var(--spacing-12); background:none; border:1px solid var(--color-neutral-3); border-radius:var(--radius-md); margin-bottom:var(--spacing-8); text-align:left; font-family:inherit; font-size:var(--text-body2-size); font-weight:700; color:var(--color-neutral-9); cursor:pointer; transition:border-color var(--duration-fast) var(--ease-standard), background var(--duration-fast) var(--ease-standard);}
   .c-dec-evr:hover{border-color:var(--color-orange); background:var(--color-neutral-2);}
   .c-dec-evr span{margin-left:auto; font-size:var(--text-caption-size); font-weight:800; color:var(--color-neutral-5); flex:none;}
-  .c-dec-evr:hover span{color:var(--color-orange);}
+  .c-dec-evr:hover span{color:var(--dec-accent-ink);}
   .c-dec-log td b{display:block; margin-bottom:2px; color:var(--color-neutral-9);}
   .c-dec-log td{color:var(--color-neutral-5); vertical-align:top; line-height:1.5;}
   .c-dec-o{display:inline-block; padding:2px var(--spacing-8); border-radius:var(--radius-pill); font-weight:800; font-size:var(--text-caption-size); border:1px solid var(--color-neutral-3); color:var(--color-neutral-5);}
@@ -1378,8 +1422,8 @@
              Insights, and the "Open panel" links cross between them. -->
         <div class="c-space" id="space">
           <div class="c-tabs c-space-tabs" role="tablist" aria-label="Workspace">
-            <button class="c-tab active" id="tabDecisions" type="button" role="tab" aria-selected="true" aria-controls="spaceDecisions" tabindex="0"><i class="ph-fill ph-gavel" aria-hidden="true"></i>Decisions Space<span class="count">7</span></button>
-            <button class="c-tab" id="tabInsights" type="button" role="tab" aria-selected="false" aria-controls="spaceInsights" tabindex="-1"><i class="ph-fill ph-chart-line-up" aria-hidden="true"></i>Insights Space<span class="count">15</span></button>
+            <button class="c-tab active" id="tabDecisions" type="button" role="tab" aria-selected="true" aria-controls="spaceDecisions" tabindex="0"><i class="ph-fill ph-gavel" aria-hidden="true"></i>Decisions<span class="c-space-tabs-w"> Space</span><span class="count">7</span></button>
+            <button class="c-tab" id="tabInsights" type="button" role="tab" aria-selected="false" aria-controls="spaceInsights" tabindex="-1"><i class="ph-fill ph-chart-line-up" aria-hidden="true"></i>Insights<span class="c-space-tabs-w"> Space</span><span class="count">15</span></button>
           </div>
 
           <!-- data-horizon lives on the markup, not on script: the

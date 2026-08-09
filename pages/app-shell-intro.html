@@ -818,11 +818,16 @@
 
 
   /* ---- Assistant overlay ---------------------------------------------
-     A full takeover: it covers the Collabrium rail as well as the canvas and
-     brings its own conversation sidebar, so z-index sits above
-     .c-sidebar-shell's 50 and above .c-card-modal's 90 — nothing on the page
-     behind should be able to open over the top of it. Only .wipe-panel (100)
-     stays higher, which is correct: that is the page's own load curtain.
+     A centred modal on a veil, not a full-bleed takeover: it keeps its own
+     conversation rail but stays a box, so the app is still visibly behind it.
+     z-index sits above .c-sidebar-shell's 50 and above .c-card-modal's 90 —
+     nothing on the page behind should be able to open over the top of it.
+     Only .wipe-panel (100) stays higher, which is correct: that is the page's
+     own load curtain.
+     Centred with inset:0 + margin:auto against a fixed width/height rather
+     than a translate(-50%,-50%): the morph below owns this element's
+     transform outright, and a centring transform would be overwritten by the
+     first frame of it.
 
      The shell morphs out of the ask box rather than fading in, using the same
      translate+scale-from-a-rect trick as the card modal: transform-origin is
@@ -840,11 +845,13 @@
   .c-chat-veil{position:absolute; inset:0; background:rgba(20,20,20,.42); opacity:0;
     transition:opacity var(--chat-dur) var(--ease-standard);}
   .c-chat.is-shown .c-chat-veil{opacity:1;}
-  .c-chat-shell{position:absolute; inset:0; display:grid; grid-template-columns:288px minmax(0,1fr);
+  .c-chat-shell{position:absolute; inset:0; margin:auto;
+    width:min(1080px, calc(100vw - var(--spacing-48)));
+    height:min(720px, calc(100vh - var(--spacing-48)));
+    display:grid; grid-template-columns:288px minmax(0,1fr);
     background:var(--color-neutral-1); overflow:hidden; transform-origin:0 0;
     border-radius:var(--radius-lg); box-shadow:var(--shadow-4);
-    transition:transform var(--chat-dur) var(--chat-ease), border-radius var(--chat-dur) var(--chat-ease);}
-  .c-chat.is-shown .c-chat-shell{border-radius:0;}
+    transition:transform var(--chat-dur) var(--chat-ease);}
   .c-chat-shell > *{opacity:0; transition:opacity var(--duration-base) var(--ease-standard);}
   .c-chat.is-shown .c-chat-shell > *{opacity:1; transition-delay:180ms;}
 
@@ -960,9 +967,10 @@
      the shell it just turned into. */
   .c-canvas-askbox.is-launched{opacity:0; pointer-events:none; transition:opacity var(--duration-base) var(--ease-standard);}
 
-  /* One column below 900px: a 288px rail plus a readable thread does not fit,
-     and the thread is the part that matters. */
-  @media (max-width:900px){
+  /* One column below 820px: at that width the modal itself is narrower than a
+     288px rail plus a readable thread, and the thread is the part that
+     matters. */
+  @media (max-width:820px){
     .c-chat-shell{grid-template-columns:minmax(0,1fr);}
     .c-chat-rail{display:none;}
   }
@@ -978,10 +986,11 @@
      Motion-owned inline transform) and the sort would have read as a
      cross-fade rather than as the mess actually resolving into order.
 
-     z-index 45 is deliberately BELOW .c-sidebar-shell's 50: the rail stays
-     visible and usable beside the grid, which is what the reference shows.
-     The panel's left padding is measured from the rail at open time rather
-     than hardcoded, because the rail auto-collapses 240px -> 72px on load.
+     z-index 55 puts this over .c-sidebar-shell's 50, so the rail sits behind
+     the overlay rather than beside it. .c-card-modal's 90 still wins, which
+     is what lets a card in the grid open its own detail on top.
+     Nothing is measured off the rail any more: with the rail covered, the
+     grid centres in the whole viewport.
 
      perspective here mirrors .c-card-slider-track's: without it the cards'
      pointer tilt (rotateX/rotateY, still bound from the fan) would degrade
@@ -989,21 +998,20 @@
      The negative-margin overlap and the fan's z-index ladder both have to
      be neutralised for the same reason — they follow .c-card-slide by
      selector, not by which container it happens to be in. */
-  .c-tidy{position:fixed; inset:0; z-index:45; display:none;}
+  .c-tidy{position:fixed; inset:0; z-index:55; display:none;}
   .c-tidy.is-open{display:block;}
   .c-tidy[hidden]{display:none;}
-  /* Blurred as well as darkened: at 30% alpha alone the greeting and the
-     hand-off links stayed legible through the gaps between cards, which made
-     the grid read as floating over a live page rather than as the thing to
-     look at. The blur sits on the backdrop only — the cards are in the panel
-     above it, so they stay sharp. */
-  .c-tidy-backdrop{position:absolute; inset:0; background:rgba(20,20,20,.34); opacity:0;
-    -webkit-backdrop-filter:blur(6px); backdrop-filter:blur(6px);
-    transition:opacity var(--duration-slow) var(--ease-standard);}
-  .c-tidy.is-shown .c-tidy-backdrop{opacity:1;}
+  /* Same scrim as selecting a hero card (.c-card-modal-backdrop): warm canvas
+     at .88 over half a second, not a black veil. At that coverage the page
+     behind is quiet enough on its own, so the blur that was compensating for
+     a 34% black wash is gone — it was doing no work and cost a compositing
+     layer the size of the viewport. */
+  .c-tidy-backdrop{position:absolute; inset:0; background:var(--color-canvas-warm); opacity:0;
+    transition:opacity .5s ease;}
+  .c-tidy.is-shown .c-tidy-backdrop{opacity:.88;}
   .c-tidy-panel{position:absolute; inset:0; display:flex; flex-direction:column; gap:var(--spacing-24);
     overflow-y:auto; padding:var(--spacing-32);
-    padding-left:calc(var(--tidy-inset-l, 120px) + var(--spacing-32));}
+    padding-left:var(--spacing-32);}
   .c-tidy-head{display:flex; align-items:flex-start; justify-content:space-between; gap:var(--spacing-24);
     opacity:0; transform:translateY(-8px);
     transition:opacity var(--duration-slow) var(--ease-settle), transform var(--duration-slow) var(--ease-settle);}
@@ -1012,16 +1020,10 @@
     letter-spacing:var(--tracking-eyebrow); text-transform:uppercase; color:var(--color-neutral-5);}
   .c-tidy-head h2{margin:0; font-size:var(--text-h4-size); font-weight:800; letter-spacing:0; color:var(--color-neutral-9);}
   .c-tidy-head p.c-tidy-sub{margin:var(--spacing-4) 0 0; font-size:var(--text-body2-size); color:var(--color-neutral-5);}
-  /* 40px, not the 36px of .ask-icon-btn: this one is a lone dismiss control
-     on a scrim rather than one of a cluster, and 44 is the touch floor the
-     ruleset asks for once you count the 4px of visual padding around it. */
-  .c-tidy-x{flex:none; width:40px; height:40px; display:flex; align-items:center; justify-content:center;
-    border:0; border-radius:var(--radius-pill); background:var(--color-neutral-1); color:var(--color-neutral-9);
-    box-shadow:var(--shadow-2); font-size:var(--icon-base); cursor:pointer;
-    transition:background-color var(--duration-fast) var(--ease-standard);}
-  .c-tidy-x:hover{background:var(--color-neutral-2);}
-  .c-tidy-x:active{background:var(--color-neutral-3);}
-  .c-tidy-x:focus-visible{outline:2px solid var(--color-obsidian); outline-offset:2px;}
+  /* The panel takes focus itself now that there is no close button to hand it
+     to — without a focus target, a keyboard reader opening this overlay would
+     be left on a trigger that is now behind a scrim. */
+  .c-tidy-panel:focus{outline:none;}
   .c-tidy-grid{display:grid; grid-template-columns:repeat(3, 340px); gap:var(--spacing-24);
     justify-content:center; align-content:start; margin:auto; perspective:900px;}
   .c-tidy-grid .c-card-slide + .c-card-slide{margin-left:0;}
@@ -2604,14 +2606,13 @@
        so there is exactly one copy of each card in the document. -->
   <div class="c-tidy" id="tidyOverlay" aria-hidden="true">
     <div class="c-tidy-backdrop" id="tidyBackdrop"></div>
-    <div class="c-tidy-panel" role="dialog" aria-modal="true" aria-labelledby="tidyH">
+    <div class="c-tidy-panel" role="dialog" aria-modal="true" aria-labelledby="tidyH" tabindex="-1">
       <div class="c-tidy-head">
         <div>
           <p class="c-tidy-eyebrow">Actionable cards</p>
           <h2 id="tidyH">Six things worth your attention</h2>
-          <p class="c-tidy-sub">The same cards as the row above, laid out to read in order.</p>
+          <p class="c-tidy-sub">The same cards as the row above, laid out to read in order. Press <b>Esc</b> or click the background to go back.</p>
         </div>
-        <button class="c-tidy-x" id="tidyX" type="button" aria-label="Close actionable cards"><i class="ph ph-x" aria-hidden="true"></i></button>
       </div>
       <div class="c-tidy-grid" id="tidyGrid"></div>
     </div>
@@ -4059,7 +4060,7 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
   const overlay = document.getElementById('tidyOverlay');
   const grid = document.getElementById('tidyGrid');
   const backdrop = document.getElementById('tidyBackdrop');
-  const closeBtn = document.getElementById('tidyX');
+  const panel = overlay.querySelector('.c-tidy-panel');
   const slider = document.getElementById('cardSlider');
   const track = slider ? slider.querySelector('.c-card-slider-track') : null;
   if (!overlay || !grid || !track) return;
@@ -4078,19 +4079,6 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
   function homePose(card) {
     const st = getComputedStyle(card);
     return { y: parseFloat(st.getPropertyValue('--arc-y')) || 0, rotate: parseFloat(st.getPropertyValue('--arc-rotate')) || 0 };
-  }
-
-  // The rail auto-collapses 240px -> 72px, so its width is measured at open
-  // time instead of hardcoded; the grid then centres in what is left.
-  function syncInset() {
-    const rail = document.querySelector('.c-sidebar-shell');
-    if (!rail) return;
-    // offsetLeft/offsetWidth, not a client rect: the rail parks at
-    // translateX(-120%) until its entrance runs, so its rect reads off-screen
-    // (right edge <= 0) and the grid would centre as if there were no rail at
-    // all. Layout space is immune to that transform — the same reason the
-    // segmented-toggle thumbs are positioned from offsets on this page.
-    overlay.style.setProperty('--tidy-inset-l', Math.max(0, rail.offsetLeft + rail.offsetWidth) + 'px');
   }
 
   /* One direction of the FLIP. `poseFor` and `invRotate` are both evaluated
@@ -4138,7 +4126,6 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
     if (open || busy) return;
     busy = true;
     returnFocus = trigger || null;
-    syncInset();
     overlay.classList.add('is-open');
     overlay.setAttribute('aria-hidden', 'false');
     // Original position recorded as an INDEX among the track's children, not
@@ -4153,7 +4140,7 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
     void overlay.offsetWidth;
     overlay.classList.add('is-shown');
     open = true;
-    if (closeBtn) closeBtn.focus({ preventScroll: true });
+    if (panel) panel.focus({ preventScroll: true });
     setTimeout(() => { busy = false; }, 120);
   }
 
@@ -4182,7 +4169,6 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
   }
 
   window.showCards = openCards;
-  if (closeBtn) closeBtn.addEventListener('click', closeCards);
   if (backdrop) backdrop.addEventListener('click', closeCards);
   document.addEventListener('keydown', (e) => {
     if (e.key !== 'Escape' || !open) return;
@@ -4193,8 +4179,6 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
     if (modal && modal.classList.contains('is-open')) return;
     closeCards();
   });
-  // Keep the grid centred against the rail if it is toggled while open.
-  window.addEventListener('resize', () => { if (open) syncInset(); });
 })();
 
 // ── Decisions Space behaviour.
@@ -4885,6 +4869,16 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
        left:50% + translateX(-50%), so moving it beside the dock is a shift on
        that same translate — one animatable property rather than swapping
        left/right, which cannot transition. */
+    /* Performance Space has no Evidence pill to sit beside — the FAB hides with
+       visibility, so the dock keeps its full laid-out width and parking to the
+       LEFT of it stranded the pill short of the edge by the width of a button
+       that was not there. In that space the pill takes the dock's right edge
+       instead, which is the same 24px gutter the Evidence pill uses in
+       Decisions Space, so the two spaces line up on the same margin. */
+    const onPerformance = () => {
+      const p = document.getElementById('spaceInsights');
+      return !!p && !p.hasAttribute('hidden');
+    };
     function syncAskGeometry() {
       const host = askBox.offsetParent;
       if (!host) return;
@@ -4892,7 +4886,10 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
       const d = dock.getBoundingClientRect();
       const hostRect = host.getBoundingClientRect();
       const dockLeft = d.left - hostRect.left;
-      const targetCentre = dockLeft - ASK_GAP - ASK_PILL_W / 2;
+      const dockRight = d.right - hostRect.left;
+      const targetCentre = onPerformance()
+        ? dockRight - ASK_PILL_W / 2
+        : dockLeft - ASK_GAP - ASK_PILL_W / 2;
       askBox.style.setProperty('--ask-w', ASK_PILL_W + 'px');
       askBox.style.setProperty('--ask-shift', Math.round(targetCentre - hostW / 2) + 'px');
       askBox.style.setProperty('--ask-bottom', getComputedStyle(dock).bottom);
@@ -4951,6 +4948,10 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
       });
     }, { passive: true });
     window.addEventListener('resize', () => { syncAskGeometry(); syncAsk(); });
+    // Switching space moves the pill's anchor from the Evidence pill to the
+    // gutter, so the geometry has to be re-taken on the swap and not only on
+    // a collapse/expand.
+    document.addEventListener('space:shown', () => { syncAskGeometry(); syncAsk(); });
     syncAskGeometry();
     syncAsk();
     // Webfonts change the Evidence pill's width, and with it the dock's left

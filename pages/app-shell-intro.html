@@ -825,20 +825,19 @@
      Only .wipe-panel (100) stays higher, which is correct: that is the page's
      own load curtain.
      Centred with inset:0 + margin:auto against a fixed width/height rather
-     than a translate(-50%,-50%): the morph below owns this element's
+     than a translate(-50%,-50%): the fold-out below owns this element's
      transform outright, and a centring transform would be overwritten by the
      first frame of it.
-
-     The shell morphs out of the ask box rather than fading in, using the same
-     translate+scale-from-a-rect trick as the card modal: transform-origin is
-     the top-left corner so a translate to the box's corner plus a
-     non-uniform scale to the box's size is the whole transform. The transform
-     is driven entirely from inline style (set at open, cleared to animate
-     out) — keeping the resting state in the stylesheet would have made
-     removing .is-shown snap the shell back to its OPEN size, which is the
-     opposite of a close. Content opacity is delayed behind the shell so the
-     text is not legible while it is still the wrong shape. */
-  .c-chat{position:fixed; inset:0; z-index:95; display:none;
+     Entrance is the hero card's fold, not a straight scale: same shape as
+     c-card-modal-swing (rotateY/rotateZ out of the source rect, .8s open /
+     .55s close), parameterised by --fold-* set inline at both open AND close
+     because the page can scroll while the modal is up and the box's rect
+     moves with it. transform-origin stays top-left because the rect maths
+     depends on it, and there is no transition on transform: an animation and
+     a transition on the same property fight, and the animation has to win.
+     Content opacity is delayed behind the shell so the text is not legible
+     while it is still the wrong shape. */
+  .c-chat{position:fixed; inset:0; z-index:95; display:none; perspective:1600px;
     --chat-dur:480ms; --chat-ease:cubic-bezier(.22,1,.36,1);}
   .c-chat.is-open{display:block;}
   .c-chat[hidden]{display:none;}
@@ -846,12 +845,24 @@
     transition:opacity var(--chat-dur) var(--ease-standard);}
   .c-chat.is-shown .c-chat-veil{opacity:1;}
   .c-chat-shell{position:absolute; inset:0; margin:auto;
-    width:min(1080px, calc(100vw - var(--spacing-48)));
-    height:min(720px, calc(100vh - var(--spacing-48)));
+    width:min(1200px, calc(100vw - var(--spacing-48)));
+    height:min(820px, calc(100vh - var(--spacing-48)));
     display:grid; grid-template-columns:288px minmax(0,1fr);
     background:var(--color-neutral-1); overflow:hidden; transform-origin:0 0;
-    border-radius:var(--radius-lg); box-shadow:var(--shadow-4);
-    transition:transform var(--chat-dur) var(--chat-ease);}
+    border-radius:var(--radius-lg); box-shadow:0 25px 50px -12px rgba(0,0,0,.25);}
+  .c-chat-shell.is-folding-open{animation:c-chat-fold-open .8s cubic-bezier(.25,.9,.35,1) both;}
+  .c-chat-shell.is-folding-closed{animation:c-chat-fold-close .55s cubic-bezier(.3,.6,.35,1) both;}
+  @keyframes c-chat-fold-open{
+    0%{transform:translate(var(--fold-dx, 0px), var(--fold-dy, 0px)) scale(var(--fold-sx, 1), var(--fold-sy, 1)); opacity:.4;}
+    45%{transform:translate(calc(var(--fold-dx, 0px) * .5), calc(var(--fold-dy, 0px) * .5)) scale(.72) rotateY(calc(42deg * var(--fold-dir, 1))) rotateZ(calc(-5deg * var(--fold-dir, 1))); opacity:1;}
+    78%{transform:translate(0px, 0px) scale(1) rotateY(calc(-6deg * var(--fold-dir, 1))) rotateZ(calc(1deg * var(--fold-dir, 1)));}
+    100%{transform:none; opacity:1;}
+  }
+  @keyframes c-chat-fold-close{
+    0%{transform:none; opacity:1;}
+    50%{transform:translate(calc(var(--fold-dx, 0px) * .5), calc(var(--fold-dy, 0px) * .5)) scale(.72) rotateY(calc(40deg * var(--fold-dir, 1))) rotateZ(calc(-5deg * var(--fold-dir, 1))); opacity:1;}
+    100%{transform:translate(var(--fold-dx, 0px), var(--fold-dy, 0px)) scale(var(--fold-sx, 1), var(--fold-sy, 1)); opacity:.35;}
+  }
   .c-chat-shell > *{opacity:0; transition:opacity var(--duration-base) var(--ease-standard);}
   .c-chat.is-shown .c-chat-shell > *{opacity:1; transition-delay:180ms;}
 
@@ -860,10 +871,6 @@
   .c-chat-rail{display:flex; flex-direction:column; min-height:0;
     background:var(--color-canvas-warm); border-right:1px solid var(--color-neutral-3);
     padding:var(--spacing-16); gap:var(--spacing-16);}
-  .c-chat-rail-hd{display:flex; align-items:center; gap:var(--spacing-8); padding:0 var(--spacing-4);}
-  .c-chat-mark{width:28px; height:28px; flex:none; display:flex; align-items:center; justify-content:center;
-    border-radius:var(--radius-sm); background:var(--color-obsidian); color:var(--color-neutral-1); font-size:16px;}
-  .c-chat-wordmark{font-size:var(--text-body1-size); font-weight:800; color:var(--color-neutral-9);}
   .c-chat-new{display:flex; align-items:center; gap:var(--spacing-8); width:100%; height:40px;
     padding:0 var(--spacing-12); border:1px solid var(--color-neutral-3); border-radius:var(--radius-sm);
     background:var(--color-neutral-1); color:var(--color-neutral-9); font-family:inherit;
@@ -871,14 +878,6 @@
     transition:background-color var(--duration-fast) var(--ease-standard);}
   .c-chat-new:hover{background:var(--color-neutral-2);}
   .c-chat-new:active{background:var(--color-neutral-3);}
-  .c-chat-rail-nav{display:flex; flex-direction:column; gap:2px;}
-  .c-chat-rail-item{display:flex; align-items:center; gap:var(--spacing-12); width:100%; height:36px;
-    padding:0 var(--spacing-12); border:0; border-radius:var(--radius-sm); background:transparent;
-    color:var(--color-neutral-5); font-family:inherit; font-size:var(--text-body2-size); font-weight:500;
-    text-align:left; cursor:pointer;
-    transition:background-color var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard);}
-  .c-chat-rail-item:hover{background:var(--color-neutral-2); color:var(--color-neutral-9);}
-  .c-chat-rail-item.is-active{background:var(--color-neutral-2); color:var(--color-neutral-9); font-weight:700;}
   .c-chat-threads{flex:1 1 auto; min-height:0; overflow-y:auto; display:flex; flex-direction:column; gap:2px;
     overscroll-behavior:contain;}
   .c-chat-threads-h{margin:var(--spacing-12) 0 var(--spacing-4); padding:0 var(--spacing-12);
@@ -891,13 +890,6 @@
     transition:background-color var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard);}
   .c-chat-thread:hover{background:var(--color-neutral-2); color:var(--color-neutral-9);}
   .c-chat-thread.is-active{background:var(--color-neutral-2); color:var(--color-neutral-9); font-weight:700;}
-  .c-chat-rail-ft{display:flex; align-items:center; gap:var(--spacing-8); padding-top:var(--spacing-12);
-    border-top:1px solid var(--color-neutral-3);}
-  .c-chat-avatar{width:32px; height:32px; flex:none; display:flex; align-items:center; justify-content:center;
-    border-radius:var(--radius-pill); background:var(--color-neutral-2); color:var(--color-neutral-9);
-    font-size:var(--text-caption-size); font-weight:800;}
-  .c-chat-who{display:flex; flex-direction:column; min-width:0; font-size:var(--text-caption-size); color:var(--color-neutral-5);}
-  .c-chat-who b{font-size:var(--text-body2-size); font-weight:700; color:var(--color-neutral-9);}
 
   /* Thread column */
   .c-chat-main{display:flex; flex-direction:column; min-width:0; min-height:0;}
@@ -934,15 +926,21 @@
     padding:2px var(--spacing-8); border-radius:var(--radius-pill); background:var(--color-neutral-2);
     font-size:var(--text-caption-size); font-weight:700; color:var(--color-neutral-5);}
 
-  /* Composer */
-  .c-chat-composer{flex:none; padding:var(--spacing-16) var(--spacing-24) var(--spacing-20);
-    border-top:1px solid var(--color-neutral-3);}
-  .c-chat-inputwrap{max-width:760px; margin:0 auto;}
-  .c-chat-input{display:flex; flex-direction:column; gap:var(--spacing-12);
-    padding:var(--spacing-12) var(--spacing-16); border:1px solid var(--color-neutral-3);
-    border-radius:var(--radius-md); background:var(--color-neutral-1);
-    transition:border-color var(--duration-fast) var(--ease-standard);}
-  .c-chat-input:focus-within{border-color:var(--color-obsidian);}
+  /* Composer — the ask box, grown. It reuses the small box's own glow layers
+     (.floating-ask-glow-*), radius and suggestion chips rather than restating
+     them: sharing the vocabulary is what makes this read as that box expanded
+     instead of a different screen that happens to open.
+     The tray is canvas-warm rather than white for a measured reason, not a
+     decorative one: the glow layers are mix-blend-mode:plus-lighter, which is a
+     no-op against white, so on a white panel the single strongest cue tying
+     this to the small box rendered invisible. On canvas it blooms exactly as it
+     does out on the page. */
+  .c-chat-composer{flex:none; padding:var(--spacing-16) var(--spacing-24) var(--spacing-24);
+    background:var(--color-canvas-warm); border-top:1px solid var(--color-neutral-3);}
+  .c-chat-inputwrap{position:relative; max-width:760px; margin:0 auto;}
+  .c-chat-input{position:relative; z-index:10; display:flex; flex-direction:column; gap:var(--spacing-12);
+    padding:var(--spacing-16); border:0; border-radius:var(--radius-lg);
+    background:var(--color-neutral-1); box-shadow:var(--shadow-4);}
   .c-chat-input input{width:100%; border:0; outline:none; background:transparent; font-family:inherit;
     font-size:var(--text-body1-size); color:var(--color-neutral-9);}
   .c-chat-input input::placeholder{color:var(--color-neutral-5);}
@@ -975,7 +973,8 @@
     .c-chat-rail{display:none;}
   }
   @media (prefers-reduced-motion:reduce){
-    .c-chat-shell,.c-chat-veil,.c-chat-shell > *{transition:none;}
+    .c-chat-veil,.c-chat-shell > *{transition:none;}
+    .c-chat-shell.is-folding-open,.c-chat-shell.is-folding-closed{animation:none;}
   }
 
   /* ---- Actionable Cards overlay -------------------------------------
@@ -1012,14 +1011,6 @@
   .c-tidy-panel{position:absolute; inset:0; display:flex; flex-direction:column; gap:var(--spacing-24);
     overflow-y:auto; padding:var(--spacing-32);
     padding-left:var(--spacing-32);}
-  .c-tidy-head{display:flex; align-items:flex-start; justify-content:space-between; gap:var(--spacing-24);
-    opacity:0; transform:translateY(-8px);
-    transition:opacity var(--duration-slow) var(--ease-settle), transform var(--duration-slow) var(--ease-settle);}
-  .c-tidy.is-shown .c-tidy-head{opacity:1; transform:none; transition-delay:120ms;}
-  .c-tidy-eyebrow{margin:0 0 var(--spacing-4); font-size:var(--text-caption-size); font-weight:700;
-    letter-spacing:var(--tracking-eyebrow); text-transform:uppercase; color:var(--color-neutral-5);}
-  .c-tidy-head h2{margin:0; font-size:var(--text-h4-size); font-weight:800; letter-spacing:0; color:var(--color-neutral-9);}
-  .c-tidy-head p.c-tidy-sub{margin:var(--spacing-4) 0 0; font-size:var(--text-body2-size); color:var(--color-neutral-5);}
   /* The panel takes focus itself now that there is no close button to hand it
      to — without a focus target, a keyboard reader opening this overlay would
      be left on a trigger that is now behind a scrim. */
@@ -2512,16 +2503,7 @@
     <div class="c-chat-veil" id="chatVeil"></div>
     <div class="c-chat-shell" id="chatShell" role="dialog" aria-modal="true" aria-labelledby="chatTitle">
       <aside class="c-chat-rail">
-        <div class="c-chat-rail-hd">
-          <span class="c-chat-mark" aria-hidden="true"><i class="ph-fill ph-sparkle"></i></span>
-          <span class="c-chat-wordmark">Collabrium AI</span>
-        </div>
         <button class="c-chat-new" type="button"><i class="ph ph-plus" aria-hidden="true"></i>New chat</button>
-        <nav class="c-chat-rail-nav" aria-label="Assistant sections">
-          <button class="c-chat-rail-item is-active" type="button"><i class="ph ph-chat-circle" aria-hidden="true"></i>Chats</button>
-          <button class="c-chat-rail-item" type="button"><i class="ph ph-bookmark-simple" aria-hidden="true"></i>Saved</button>
-          <button class="c-chat-rail-item" type="button"><i class="ph ph-squares-four" aria-hidden="true"></i>Workspaces</button>
-        </nav>
         <div class="c-chat-threads">
           <p class="c-chat-threads-h">Today</p>
           <button class="c-chat-thread is-active" type="button">Where the RM 17.1M gap sits</button>
@@ -2531,10 +2513,6 @@
           <button class="c-chat-thread" type="button">Why RM 4.4M lapsed</button>
           <button class="c-chat-thread" type="button">Which reps are actually at risk</button>
           <button class="c-chat-thread" type="button">Petronas budget reset — who owns it</button>
-        </div>
-        <div class="c-chat-rail-ft">
-          <span class="c-chat-avatar" aria-hidden="true">BW</span>
-          <span class="c-chat-who"><b>Bryan Wong</b>Astro Digital</span>
         </div>
       </aside>
 
@@ -2581,6 +2559,10 @@
 
         <div class="c-chat-composer">
           <div class="c-chat-inputwrap">
+            <!-- Same two glow layers the small ask box wears, so the composer is
+                 recognisably the thing that was clicked. -->
+            <div class="floating-ask-glow-outer" aria-hidden="true"></div>
+            <div class="floating-ask-glow-inner" aria-hidden="true"></div>
             <div class="c-chat-input">
               <input type="text" id="chatInput" aria-label="Message the assistant" placeholder="Reply to Collabrium&hellip;" />
               <div class="c-chat-tools">
@@ -2592,6 +2574,11 @@
                   <span class="c-chat-model">Reading: this workspace</span>
                   <button class="c-chat-send" type="button" aria-label="Send"><i class="ph ph-arrow-up" aria-hidden="true"></i></button>
                 </div>
+              </div>
+              <div class="prompt-row-mini">
+                <button class="mini-pill" type="button">Show the eight deals</button>
+                <button class="mini-pill" type="button">Compare to last quarter</button>
+                <button class="mini-pill" type="button">Who owns Petronas?</button>
               </div>
             </div>
           </div>
@@ -2606,14 +2593,7 @@
        so there is exactly one copy of each card in the document. -->
   <div class="c-tidy" id="tidyOverlay" aria-hidden="true">
     <div class="c-tidy-backdrop" id="tidyBackdrop"></div>
-    <div class="c-tidy-panel" role="dialog" aria-modal="true" aria-labelledby="tidyH" tabindex="-1">
-      <div class="c-tidy-head">
-        <div>
-          <p class="c-tidy-eyebrow">Actionable cards</p>
-          <h2 id="tidyH">Six things worth your attention</h2>
-          <p class="c-tidy-sub">The same cards as the row above, laid out to read in order. Press <b>Esc</b> or click the background to go back.</p>
-        </div>
-      </div>
+    <div class="c-tidy-panel" role="dialog" aria-modal="true" aria-label="Actionable cards" tabindex="-1">
       <div class="c-tidy-grid" id="tidyGrid"></div>
     </div>
   </div>
@@ -3967,15 +3947,23 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
   const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)');
   let open = false, returnFocus = null, hideTimer = 0;
 
-  function morphFrom(el) {
-    shell.style.transition = 'none';
-    shell.style.transform = 'none';
+  /* Parameterises the fold keyframes off the box's current rect. Same contract
+     as the card modal's setSwingVars: clear any running fold and force a
+     reflow FIRST, so the shell is measured untransformed — a mid-flight pose
+     would otherwise be baked into the next fold and compound. --fold-dir flips
+     the rotation so the panel always turns toward the viewer. */
+  function setFoldVars() {
+    shell.classList.remove('is-folding-open', 'is-folding-closed');
     void shell.offsetWidth;
-    const from = el.getBoundingClientRect();
+    const src = askBox || shell;
+    const from = src.getBoundingClientRect();
     const to = shell.getBoundingClientRect();
-    if (!to.width || !to.height) return 'none';
-    return `translate(${(from.left - to.left).toFixed(1)}px, ${(from.top - to.top).toFixed(1)}px)` +
-           ` scale(${(from.width / to.width).toFixed(4)}, ${(from.height / to.height).toFixed(4)})`;
+    if (!to.width || !to.height) return;
+    shell.style.setProperty('--fold-dx', (from.left - to.left).toFixed(1) + 'px');
+    shell.style.setProperty('--fold-dy', (from.top - to.top).toFixed(1) + 'px');
+    shell.style.setProperty('--fold-sx', (from.width / to.width).toFixed(4));
+    shell.style.setProperty('--fold-sy', (from.height / to.height).toFixed(4));
+    shell.style.setProperty('--fold-dir', (from.left + from.width / 2) <= window.innerWidth / 2 ? '1' : '-1');
   }
 
   function openChat(trigger) {
@@ -3986,16 +3974,10 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
     overlay.classList.add('is-open');
     overlay.setAttribute('aria-hidden', 'false');
     if (askBox) askBox.classList.add('is-launched');
-    if (REDUCED.matches) {
-      shell.style.transition = 'none';
-      shell.style.transform = 'none';
-      overlay.classList.add('is-shown');
-    } else {
-      shell.style.transform = morphFrom(askBox || shell);
-      void shell.offsetWidth;          // commit the start pose before the stylesheet's timing comes back
-      shell.style.transition = '';
-      shell.style.transform = 'none';  // animates out to the full shell
-      overlay.classList.add('is-shown');
+    overlay.classList.add('is-shown');
+    if (!REDUCED.matches) {
+      setFoldVars();
+      shell.classList.add('is-folding-open');
     }
     // The composer is the point of the overlay, so that is where focus goes.
     (input || closeBtn || shell).focus({ preventScroll: true });
@@ -4004,29 +3986,34 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
   function closeChat() {
     if (!open) return;
     open = false;
-    const back = morphFrom(askBox || shell);   // measured fresh: the page may have scrolled
-    shell.style.transition = '';
     overlay.classList.remove('is-shown');
     if (REDUCED.matches) {
       finish();
     } else {
-      void shell.offsetWidth;
-      shell.style.transform = back;
-      // Timer rather than transitionend, this page's convention: a
-      // backgrounded tab can miss the event and would strand the overlay.
-      hideTimer = setTimeout(finish, 520);
+      setFoldVars();   // re-measured: the page may have scrolled while the modal was up
+      shell.classList.add('is-folding-closed');
+      // Timer as well as animationend, this page's convention: a backgrounded
+      // tab can miss the event outright and would strand the modal on screen.
+      hideTimer = setTimeout(finish, 600);   // .55s animation + margin
     }
     if (returnFocus && document.contains(returnFocus)) returnFocus.focus({ preventScroll: true });
     returnFocus = null;
   }
 
+  // Idempotent: both animationend and the fallback timer call it. The fold
+  // class is dropped in the same style recalc as the display flip, so a
+  // visible element never sees the transform revert on its own — no ghost.
   function finish() {
+    clearTimeout(hideTimer);
     overlay.classList.remove('is-open');
     overlay.setAttribute('aria-hidden', 'true');
-    shell.style.transition = '';
-    shell.style.transform = '';
+    shell.classList.remove('is-folding-open', 'is-folding-closed');
     if (askBox) askBox.classList.remove('is-launched');
   }
+  shell.addEventListener('animationend', (e) => {
+    if (e.target !== shell) return;   // children may animate someday
+    if (e.animationName === 'c-chat-fold-close' && !open) finish();
+  });
 
   window.showChat = openChat;
   if (closeBtn) closeBtn.addEventListener('click', closeChat);
@@ -4170,6 +4157,15 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
 
   window.showCards = openCards;
   if (backdrop) backdrop.addEventListener('click', closeCards);
+  /* Click anywhere that is not a card to go back. The panel is inset:0 and sits
+     over the backdrop, so the backdrop's own handler above almost never gets
+     the event — this is what actually closes it. Guarded on .c-card-slide so a
+     click on a card still opens that card's detail instead of dismissing
+     everything underneath it. */
+  if (panel) panel.addEventListener('click', (e) => {
+    if (e.target.closest('.c-card-slide')) return;
+    closeCards();
+  });
   document.addEventListener('keydown', (e) => {
     if (e.key !== 'Escape' || !open) return;
     // The card detail modal can sit above this overlay; it owns Escape while

@@ -607,18 +607,24 @@
   @media (min-width:1180px){ .c-dec-fab{bottom:var(--spacing-24);} }
   .c-dec-fab i{font-size:var(--icon-sm);}
 
-  .c-dec-panel{position:absolute; right:var(--spacing-24); bottom:178px; z-index:75;
-    width:min(520px, calc(100% - var(--spacing-48))); max-height:min(60vh, 560px);
-    background:var(--color-neutral-1); border:1px solid var(--color-neutral-3); border-radius:var(--radius-lg);
+  .c-dec-panel{position:absolute; top:var(--spacing-16); right:var(--spacing-24); bottom:178px; z-index:75;
+    width:min(400px, calc(100% - var(--spacing-48)));
+    background:var(--color-neutral-1); border:1px solid var(--color-neutral-3);
     box-shadow:var(--shadow-4); display:flex; flex-direction:column; overflow:hidden;
-    transform-origin:100% 100%; transform:scale(.88) translateY(8px); opacity:0; visibility:hidden;
-    transition:transform var(--duration-slow) var(--ease-settle), opacity var(--duration-base) var(--ease-standard), visibility 0s linear var(--duration-slow);}
-  .c-dec-panel.is-open{transform:none; opacity:1; visibility:visible;
-    transition:transform var(--duration-slow) var(--ease-settle), opacity var(--duration-base) var(--ease-standard), visibility 0s;}
-  /* Contents follow the box rather than scaling with it, so the panel reads as
-     opening and then filling, not as a picture being zoomed. */
-  .c-dec-panel > *{opacity:0; transition:opacity var(--duration-base) var(--ease-standard) 70ms;}
-  .c-dec-panel.is-open > *{opacity:1;}
+    /* The closed state IS the pill: same bottom-right corner, the pill's
+       measured width and height, the pill's radius. --morph-* are written by
+       the script from the live pill rect; the fallbacks only matter if it has
+       not run yet. */
+    transform-origin:100% 100%; transform:scale(var(--morph-sx, .4), var(--morph-sy, .06));
+    border-radius:var(--radius-pill); opacity:0; visibility:hidden;
+    transition:transform var(--duration-slow) var(--ease-settle), border-radius var(--duration-slow) var(--ease-settle), opacity var(--duration-base) var(--ease-standard), visibility 0s linear var(--duration-slow);}
+  .c-dec-panel.is-open{transform:none; border-radius:var(--radius-lg); opacity:1; visibility:visible;
+    transition:transform var(--duration-slow) var(--ease-settle), border-radius var(--duration-slow) var(--ease-settle), opacity var(--duration-base) var(--ease-standard), visibility 0s;}
+  /* Contents fade rather than scale with the box, and wait until it has most of
+     its size — otherwise the morph reads as a squashed screenshot being
+     stretched. They leave first on the way out. */
+  .c-dec-panel > *{opacity:0; transition:opacity var(--duration-fast) var(--ease-standard);}
+  .c-dec-panel.is-open > *{opacity:1; transition:opacity var(--duration-base) var(--ease-standard) 160ms;}
   @media (min-width:1180px){ .c-dec-panel{bottom:var(--spacing-24);} }
   .c-dec-panel-hd{display:flex; align-items:center; gap:var(--spacing-12); padding:var(--spacing-16) var(--spacing-16) var(--spacing-12); flex:none;}
   .c-dec-panel-hd h3{margin:0; font-size:var(--text-h5-size); font-weight:800; flex:1 1 auto;}
@@ -3542,8 +3548,27 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
   const drawerX = document.getElementById('decDrawerX');
   let lastFocus = null;
 
+  // Measured, not guessed: the closed state has to be the pill's exact box or
+  // the morph visibly starts at the wrong size. Both boxes are width-dependent,
+  // so this also re-runs on resize.
+  function syncMorph() {
+    // offsetWidth/offsetHeight, NOT client rects: the panel is already scaled by
+    // the closed transform we are about to compute, so a client rect returns the
+    // scaled box and the ratio comes out near 1 — and compounds on every call.
+    // Offset geometry is layout space, immune to the transform.
+    const pw = drawer.offsetWidth, ph = drawer.offsetHeight;
+    const fw = drawerBtn.offsetWidth, fh = drawerBtn.offsetHeight;
+    if (!pw || !ph || !fw) return;
+    drawer.style.setProperty('--morph-sx', (fw / pw).toFixed(4));
+    drawer.style.setProperty('--morph-sy', (fh / ph).toFixed(4));
+  }
+  window.addEventListener('resize', syncMorph);
+  syncMorph();
+
   function openDrawer(trigger) {
     lastFocus = (trigger && trigger.focus) ? trigger : drawerBtn;
+    syncMorph();
+    void drawer.offsetHeight; // commit the start geometry before the class flips, or there is nothing to transition from
     drawer.classList.add('is-open');
     drawer.setAttribute('aria-hidden', 'false');
     drawerBtn.classList.remove('is-visible'); // the pill becomes the panel, so it must not sit behind it

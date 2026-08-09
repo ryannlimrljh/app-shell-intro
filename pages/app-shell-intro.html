@@ -433,9 +433,15 @@
      seven equally-boxed cards. */
     /* 1400px, not the fan's 900px: these cards are ~3x wider, and the shorter
      the perspective the more a tilt distorts long lines of text. */
-  .c-dec-queue{display:flex; flex-direction:column; gap:var(--spacing-16); margin-bottom:var(--spacing-48); perspective:1400px;}
-  .c-dec-card{position:relative; z-index:1; padding:var(--spacing-16) var(--spacing-24); gap:0; transition:box-shadow var(--duration-base) var(--ease-settle);}
-  .c-dec-card:hover{box-shadow:var(--shadow-3); z-index:2;}
+  .c-dec-queue{display:flex; flex-direction:column; gap:0; margin-bottom:var(--spacing-48); perspective:1400px;}
+  .c-dec-card{position:relative; padding:var(--spacing-24); gap:0; box-shadow:none;}
+  /* Stacked like the hero fan: each card tucks under the one above it, and
+     z-index descends so the highest-stake card sits on top. 12px of the 24px
+     bottom padding is covered, so no content or control is ever under the
+     next card. The card straight after the "Also open" marker resets, or it
+     would ride up over that heading. */
+  .c-dec-card + .c-dec-card{margin-top:calc(-1 * var(--spacing-12));}
+  .c-dec-split + .c-dec-card{margin-top:0;}
   .c-dec-card[data-tier="urgent"]{--dec-tier:var(--color-red); --dec-tier-ink:var(--dec-crit-ink);}
   .c-dec-card[data-tier="risk"]{--dec-tier:var(--color-amber); --dec-tier-ink:var(--dec-warn-ink);}
   .c-dec-card[data-tier="opp"]{--dec-tier:var(--color-green); --dec-tier-ink:var(--dec-good-ink);}
@@ -554,7 +560,7 @@
   .c-dec-split p{margin:0; font-size:var(--text-caption-size); color:var(--color-neutral-5);}
   [data-horizon="week"]    .c-dec-card:not([data-h~="week"]),
   [data-horizon="quarter"] .c-dec-card:not([data-h~="quarter"]),
-  [data-horizon="fy"]      .c-dec-card:not([data-h~="fy"]){padding:var(--spacing-12) var(--spacing-16);}
+  [data-horizon="fy"]      .c-dec-card:not([data-h~="fy"]){padding:var(--spacing-20) var(--spacing-16);}
   [data-horizon="week"]    .c-dec-card:not([data-h~="week"]) h4,
   [data-horizon="quarter"] .c-dec-card:not([data-h~="quarter"]) h4,
   [data-horizon="fy"]      .c-dec-card:not([data-h~="fy"]) h4{font-size:var(--text-h5-size); margin-top:var(--spacing-4);}
@@ -3736,6 +3742,10 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
       } else {
         animate(c, { ...p, rotateX: 0, rotateY: 0, scale: 1, opacity: 1, y: 0 }, { duration: 0 });
       }
+      // Descending, so the first (highest-stake) card sits on top of the pile.
+      // Inline because layoutCards re-derives it on every horizon change, and
+      // because the hover raise below has to be able to beat it.
+      c.style.zIndex = c.dataset.restZ = String(100 - i);
       enableCardHover(c);
     });
   }
@@ -3745,6 +3755,7 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
     card.dataset.hoverBound = '1';
     card.addEventListener('pointerenter', (e) => {
       if (e.pointerType !== 'mouse' || REDUCED.matches) return;
+      card.style.zIndex = '200'; // above every resting card, so a tilted card is never clipped by the one below it in the stack
       animate(card, { scale: 1.012 }, CARD_SPRING); // the fan's 1.05 is far too much travel on a card this wide
     });
     card.addEventListener('pointermove', (e) => {
@@ -3762,6 +3773,11 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
       if (e.pointerType !== 'mouse' || REDUCED.matches) return;
       // Softer spring out, so it settles rather than snapping — same as the fan.
       animate(card, { rotateX: 0, rotateY: 0, scale: 1 }, { type: 'spring', stiffness: 220, damping: 18 });
+      // Restore the resting stack order once the card has landed, not on the
+      // instant of leaving — dropping it mid-spring makes it duck behind its
+      // neighbour while still visibly tilted.
+      clearTimeout(card._zTimer);
+      card._zTimer = setTimeout(() => { card.style.zIndex = card.dataset.restZ || '1'; }, 320);
     });
   }
 

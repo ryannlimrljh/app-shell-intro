@@ -555,7 +555,13 @@
      Driven off [data-horizon] so the markup's own default is already
      correct with no JS; the script only moves nodes and flips the
      attribute. */
-  .c-dec-split{display:flex; align-items:baseline; gap:var(--spacing-12); flex-wrap:wrap; margin:var(--spacing-24) 0 var(--spacing-4);}
+    /* Bottom margin matches .c-dec-rule's, so both section headers sit the same
+     distance above their first card — this one was 4px against the other's
+     16px, which rendered as a 2px gap once the card below it took
+     margin-top:0 to clear the overlap. Top margin is larger than the
+     bottom on purpose: it separates two groups of cards, not a heading
+     from its own content. */
+  .c-dec-split{display:flex; align-items:baseline; gap:var(--spacing-12); flex-wrap:wrap; margin:var(--spacing-32) 0 var(--spacing-16);}
   .c-dec-split h3{margin:0; font-size:var(--text-body2-size); font-weight:700; letter-spacing:var(--tracking-eyebrow); text-transform:uppercase;}
   .c-dec-split p{margin:0; font-size:var(--text-caption-size); color:var(--color-neutral-5);}
   [data-horizon="week"]    .c-dec-card:not([data-h~="week"]),

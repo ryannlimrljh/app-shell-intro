@@ -119,7 +119,11 @@
      lifts this line above the slider box it now overlaps, so the
      link's hit target can't be shadowed by the slider's drag-to-
      scroll surface. */
-  .c-canvas-dashlink{position:relative; margin:-48px 0 0; text-align:center; font-family:var(--font-primary); font-size:var(--text-body1-size); font-weight:var(--text-body1-weight); color:var(--color-neutral-5); opacity:0; transform:translateY(16px); transition:opacity 550ms cubic-bezier(.16,1,.3,1), transform 550ms cubic-bezier(.16,1,.3,1);}
+  /* The card track carries 96px of bottom padding for the fan's tilt, so
+     this used to be pulled back up into it by -48px. Now only -12px, which
+     leaves a clear gap under the cards instead of tucking the line against
+     them. The hero is min-height, so the extra height just extends it. */
+  .c-canvas-dashlink{position:relative; margin:-12px 0 0; text-align:center; font-family:var(--font-primary); font-size:var(--text-body1-size); font-weight:var(--text-body1-weight); color:var(--color-neutral-5); opacity:0; transform:translateY(16px); transition:opacity 550ms cubic-bezier(.16,1,.3,1), transform 550ms cubic-bezier(.16,1,.3,1);}
   .c-canvas-dashlink.is-revealed{opacity:1; transform:translateY(0); transition-delay:900ms;}
   .c-canvas-dashlink a{color:var(--color-neutral-9); font-weight:700; text-decoration:underline; text-underline-offset:3px; transition:color var(--duration-fast) var(--ease-standard);}
   .c-canvas-dashlink a:hover{color:var(--color-orange);}
@@ -171,7 +175,7 @@
      below the fold; .c-dash's own margin drops to a normal in-panel
      gap so the board doesn't sit a full screen below its own tab. */
   .c-space{margin-top:var(--section-gap);}
-  .c-space-tabs{position:sticky; top:0; z-index:6; background:var(--color-canvas-warm); padding-top:var(--spacing-8); gap:var(--spacing-8);}
+  .c-space-tabs{position:sticky; top:0; z-index:6; background:var(--color-canvas-warm); padding-top:var(--spacing-8); gap:var(--spacing-8); justify-content:center;}
   /* The bar pins at --section-gap (sticky top:0 resolves against this
      scroll container's content box, not its padding box), which leaves
      the 48px band above it unpainted — scrolled content kept showing
@@ -179,29 +183,22 @@
      canvas. Below the pinned state it sits in .c-space's own top margin,
      where there is nothing to cover, so it is invisible until needed. */
   .c-space-tabs::before{content:''; position:absolute; left:0; right:0; bottom:100%; height:var(--section-gap); background:var(--color-canvas-warm);}
-  .c-space-tabs .c-tab{height:44px; font-size:var(--text-h5-size); letter-spacing:-.01em;}
-  .c-space-tabs .c-tab i{font-size:var(--icon-sm); opacity:.75;}
-  .c-space-tabs .c-tab.active i{opacity:1; color:var(--color-orange);}
-  .c-space-tabs .c-tab .count{padding:0 7px; border-radius:var(--radius-pill); background:var(--color-neutral-2); color:var(--color-neutral-5);}
-  .c-space-tabs .c-tab.active .count{background:var(--color-obsidian); color:var(--color-neutral-1);}
-  /* At 375px the nav rail plus gutters leave the tablist only 223px, and
-     the two tabs wanted 287 — .c-tabs does not wrap and flex items will
-     not shrink below their content, so .c-shell-main's overflow-x:clip cut
-     the Insights tab in half: the page's primary control, half
-     unclickable. The word "Space" and the count badges come off, which
-     buys back the 64px needed (measured, not estimated). The names alone
-     stay unambiguous, including as the accessible name; the counts are
-     the part a phone reader can afford to lose. */
+  /* Icons and count badges removed: with only two tabs the label carries it,
+     and dropping both is what let the pair fit a 375px viewport on one line
+     without also dropping the word "Space" (they cost ~64px between them). */
+  /* gap:0 because " Space" is a separate flex item carrying its own leading
+     space — .c-tabs' 8px gap was landing on top of it and rendering a double
+     word space. It has to be &nbsp; and not a plain space: the span is its
+     own flex item, so a leading ordinary space sits at the start of its line
+     box and gets collapsed away, which ran the two words together. */
+  .c-space-tabs .c-tab{height:44px; font-size:var(--text-h5-size); letter-spacing:-.01em; padding:0 var(--spacing-16); gap:0;}
   @media (max-width:620px){
-    .c-space-tabs-w{display:none;}
     .c-space-tabs .c-tab{padding:0 var(--spacing-8);}
-    .c-space-tabs .c-tab .count{display:none;}
-    /* That lands at 222px inside 223 — too little headroom to trust, since
-       the fallback face before Mulish loads measures wider. Wrapping is
-       the graceful failure: the second tab drops to its own line and stays
-       usable, instead of being clipped by the ancestor's overflow-x. It
-       cannot be overflow-x:auto on the tablist itself — that would clip
-       the ::before band that covers the strip above the pinned bar. */
+    /* Wrapping is the graceful failure if the pair ever still does not fit
+       (the fallback face before Mulish loads measures wider): the second tab
+       drops to its own line and stays usable, rather than being clipped by
+       the ancestor's overflow-x. It cannot be overflow-x:auto on the tablist
+       itself — that would clip the ::before band above the pinned bar. */
     .c-space-tabs{flex-wrap:wrap;}
   }
   /* position:relative is load-bearing, and not for anything it positions
@@ -233,7 +230,7 @@
      (44px tab + --spacing-8 of padding-top) plus a gap — measured, not
      guessed: without this the "Across the business" heading landed at
      y=60 underneath a bar occupying 48–101. */
-  .c-dash{margin-top:var(--spacing-24); scroll-margin-top:calc(var(--section-gap) + 44px + var(--spacing-8) + var(--spacing-12));}
+  .c-dash{margin-top:var(--spacing-40); scroll-margin-top:calc(var(--section-gap) + 44px + var(--spacing-8) + var(--spacing-12));}
   .c-dash-head{display:flex; align-items:flex-end; justify-content:space-between; gap:var(--spacing-16); flex-wrap:wrap; padding-bottom:var(--spacing-12); border-bottom:1px solid var(--color-neutral-3); margin-bottom:var(--spacing-16);}
   .c-dash-head h2{margin:0; font-size:var(--text-h2-size); line-height:var(--text-h2-lh); font-weight:800;}
   .c-dash-head p{margin:2px 0 0; font-size:var(--text-body1-size); color:var(--color-neutral-5);}
@@ -257,7 +254,7 @@
      is carried by border-color and text colour only. Purple is the DS's
      "AI / premium, projected-not-actual" accent, which is what the
      forecast tile and the forecast lines in the charts are. */
-  .c-dash-grid{display:grid; grid-template-columns:repeat(12,1fr); gap:var(--spacing-16); align-items:stretch;}
+  .c-dash-grid{display:grid; grid-template-columns:repeat(12,1fr); gap:var(--spacing-20); align-items:stretch;}
   .c-dash-w{min-width:0;}
   .c-dash .sp2{grid-column:span 2;} .c-dash .sp4{grid-column:span 4;} .c-dash .sp5{grid-column:span 5;}
   .c-dash .sp6{grid-column:span 6;} .c-dash .sp7{grid-column:span 7;} .c-dash .sp8{grid-column:span 8;} .c-dash .sp12{grid-column:span 12;}
@@ -335,7 +332,7 @@
      line, and everything the paragraph quantified becomes a scannable
      badge. The paragraph itself survives behind "Full read" — it is the
      thesis, so deleting it would break the argument. */
-  .c-dec-digest{border-left:4px solid var(--color-red); margin-bottom:var(--spacing-12); gap:0;}
+  .c-dec-digest{border-left:4px solid var(--color-red); margin-bottom:var(--spacing-24); gap:0;}
   .c-dec-digest-top{display:flex; align-items:flex-start; justify-content:space-between; gap:var(--spacing-24); flex-wrap:wrap;}
   .c-dec-digest h3{margin:0; font-size:var(--text-h3-size); font-weight:800; line-height:1.25; max-width:30ch;}
   .c-dec-digest h3 em{font-style:normal; color:var(--dec-crit-ink);}
@@ -372,7 +369,7 @@
      supporting clause moves into a click-opened popover. Click, not
      hover: hover-only affordances are unreachable on the tablets this
      board is actually read on. */
-  .c-dec-strip{display:grid; grid-template-columns:repeat(6,1fr); background:var(--color-neutral-1); border:1px solid var(--color-neutral-3); border-radius:var(--radius-lg); box-shadow:var(--shadow-1); overflow:hidden; margin-bottom:var(--spacing-24);}
+  .c-dec-strip{display:grid; grid-template-columns:repeat(6,1fr); background:var(--color-neutral-1); border:1px solid var(--color-neutral-3); border-radius:var(--radius-lg); box-shadow:var(--shadow-1); overflow:hidden; margin-bottom:var(--spacing-48);}
   .c-dec-kpi{position:relative; display:flex; flex-direction:column; align-items:flex-start; gap:var(--spacing-8); padding:var(--spacing-16); background:none; border:0; border-right:1px solid var(--color-neutral-3); text-align:left; width:100%; font-family:inherit; cursor:pointer; transition:background var(--duration-fast) var(--ease-standard);}
   .c-dec-kpi:last-child{border-right:0;}
   .c-dec-kpi:hover,.c-dec-kpi[aria-expanded="true"]{background:var(--color-neutral-2);}
@@ -419,17 +416,17 @@
   .c-dec-prov i{width:7px; height:7px; border-radius:50%; background:var(--color-purple); flex:none;}
 
   /* ── Section rules ── */
-  .c-dec-rule{display:flex; align-items:baseline; gap:var(--spacing-12); flex-wrap:wrap; margin:0 0 var(--spacing-12);}
+  .c-dec-rule{display:flex; align-items:baseline; gap:var(--spacing-12); flex-wrap:wrap; margin:0 0 var(--spacing-16);}
   .c-dec-rule h3{margin:0; font-size:var(--text-body2-size); font-weight:700; letter-spacing:var(--tracking-eyebrow); text-transform:uppercase;}
   .c-dec-rule p{margin:0; font-size:var(--text-caption-size); color:var(--color-neutral-5);}
-  .c-dec-count{margin-left:auto; font-size:var(--text-caption-size); font-weight:700; color:var(--color-neutral-5); font-variant-numeric:tabular-nums;}
+  .c-dec-count{font-size:var(--text-caption-size); font-weight:700; color:var(--color-neutral-5); font-variant-numeric:tabular-nums;}
 
   /* ── Decision banners. The tier is a 4px LEFT stripe, not a full
      perimeter border: it marks without enclosing, so the eye runs down
      the stripe column and reads severity in one pass instead of seeing
      seven equally-boxed cards. */
-  .c-dec-queue{display:flex; flex-direction:column; gap:var(--spacing-12); margin-bottom:var(--spacing-32);}
-  .c-dec-card{border-left:4px solid var(--dec-tier, var(--color-neutral-3)); padding:var(--spacing-16) var(--spacing-24); gap:0; transition:box-shadow var(--duration-base) var(--ease-settle);}
+  .c-dec-queue{display:flex; flex-direction:column; gap:var(--spacing-16); margin-bottom:var(--spacing-48);}
+  .c-dec-card{padding:var(--spacing-16) var(--spacing-24); gap:0; transition:box-shadow var(--duration-base) var(--ease-settle);}
   .c-dec-card:hover{box-shadow:var(--shadow-3);}
   .c-dec-card[data-tier="urgent"]{--dec-tier:var(--color-red); --dec-tier-ink:var(--dec-crit-ink);}
   .c-dec-card[data-tier="risk"]{--dec-tier:var(--color-amber); --dec-tier-ink:var(--dec-warn-ink);}
@@ -479,16 +476,27 @@
   .c-dec-acts .c-dec-why{margin-left:auto;}
   .c-dec-why{display:inline-flex; align-items:center; gap:var(--spacing-4); height:40px; padding:0 var(--spacing-12); background:none; border:1px solid var(--color-neutral-3); border-radius:var(--radius-md); font-family:inherit; font-size:var(--text-caption-size); font-weight:700; color:var(--color-neutral-5); cursor:pointer; transition:border-color var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard);}
   .c-dec-why:hover{border-color:var(--color-orange); color:var(--dec-accent-ink);} /* border may be raw orange (3.15 clears the 3:1 UI-component floor), the label may not */
-  .c-dec-why i{transition:transform var(--duration-base) var(--ease-standard);}
-  .c-dec-why[aria-expanded="true"]{color:var(--color-neutral-9);}
-  .c-dec-why[aria-expanded="true"] i{transform:rotate(90deg);}
+    .c-dec-why[aria-expanded="true"]{color:var(--color-neutral-9);}
+  .c-dec-why::after{content:"+"; font-size:var(--text-body2-size); font-weight:700; line-height:1;}
+  .c-dec-why[aria-expanded="true"]::after{content:"\2212";}
 
-  .c-dec-rat{margin-top:var(--spacing-12); padding:var(--spacing-16); background:var(--color-neutral-2); border-radius:var(--radius-md); display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:var(--spacing-12) var(--spacing-24);}
+  .c-dec-rat{padding:0 var(--spacing-16); background:var(--color-neutral-2); border-radius:var(--radius-md); display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:var(--spacing-12) var(--spacing-24);}
   /* Required, not defensive: the [hidden] attribute's display:none comes
      from the UA sheet at zero specificity, so the display:grid above wins
      and every rationale renders permanently open. Any element whose state
      is carried by [hidden] and which also declares display needs this. */
-  .c-dec-rat[hidden]{display:none;}
+  .c-dec-rat-wrap{display:grid; grid-template-rows:0fr; opacity:0; margin-top:0;
+    transition:grid-template-rows var(--duration-base) var(--ease-settle), opacity var(--duration-fast) var(--ease-standard), margin-top var(--duration-base) var(--ease-settle);}
+  .c-dec-rat-wrap.is-open{grid-template-rows:1fr; opacity:1; margin-top:var(--spacing-12);}
+  /* min-height:0 is required — a grid item's automatic minimum size would
+     otherwise refuse to shrink below its content. overflow:hidden clips the
+     content mid-transition. Vertical padding has to come off too and animate
+     back: min-height:0 caps the CONTENT box, so 16px of padding still floored
+     the collapsed row at 44px (measured). Left/right padding stays put. */
+  .c-dec-rat-wrap > .c-dec-rat{overflow:hidden; min-height:0; padding-top:0; padding-bottom:0;
+    transition:padding-top var(--duration-base) var(--ease-settle), padding-bottom var(--duration-base) var(--ease-settle);}
+  .c-dec-rat-wrap.is-open > .c-dec-rat{padding-top:var(--spacing-16); padding-bottom:var(--spacing-16);}
+  .c-dec-rat-wrap[hidden]{display:none;}
   @media (max-width:760px){ .c-dec-rat{grid-template-columns:1fr;} }
   .c-dec-ri{display:flex; flex-direction:column; gap:var(--spacing-4); min-width:0;}
   .c-dec-rk{font-size:var(--text-label3-size); font-weight:700; letter-spacing:var(--tracking-eyebrow); text-transform:uppercase; color:var(--color-neutral-5);}
@@ -502,7 +510,7 @@
      digest: a filter separated from the thing it filters is the classic
      "why did the page just change?" bug. A real radiogroup — roving
      tabindex, arrow keys, Home/End. */
-  .c-dec-hz{display:inline-flex; align-items:center; gap:var(--spacing-4); padding:var(--spacing-4); border-radius:var(--radius-pill); background:var(--color-neutral-2); border:1px solid var(--color-neutral-3);}
+  .c-dec-hz{margin-left:auto; display:inline-flex; align-items:center; gap:var(--spacing-4); padding:var(--spacing-4); border-radius:var(--radius-pill); background:var(--color-neutral-2); border:1px solid var(--color-neutral-3);}
   .c-dec-hz button{position:relative; min-height:34px; padding:0 var(--spacing-12); border:0; border-radius:var(--radius-pill); background:none; font-family:inherit; font-size:var(--text-caption-size); font-weight:700; color:var(--color-neutral-5); white-space:nowrap; cursor:pointer; transition:background var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard);}
   /* The 34px pill sits inside a 44px hit area rather than being drawn
      44px tall — a segmented control that tall stops reading as one
@@ -552,7 +560,7 @@
 
   /* ── Watch. Deliberately buttonless — Now means act, Watch means not
      yet. Each card carries the threshold that would promote it. */
-  .c-dec-watch{display:grid; grid-template-columns:repeat(4,1fr); gap:var(--spacing-12); margin-bottom:var(--spacing-32);}
+  .c-dec-watch{display:grid; grid-template-columns:repeat(4,1fr); gap:var(--spacing-16); margin-bottom:var(--spacing-48);}
   @media (max-width:960px){ .c-dec-watch{grid-template-columns:repeat(2,1fr);} }
   @media (max-width:540px){ .c-dec-watch{grid-template-columns:1fr;} }
   .c-dec-wc{gap:var(--spacing-4);}
@@ -577,6 +585,21 @@
      the sidebar (50) and the popover menus (60) but stays under the
      card modal (90) and the wipe panel (100), neither of which can be
      open at the same time. */
+  /* Floating trigger. Absolute inside .c-shell-main, matching the drawer, so
+     it never covers the nav rail. It shares this corner with the pinned
+     assistant box, and the UX ruleset is explicit that multiple fixed/pinned
+     elements must not be stacked carelessly — so the offset is measured, not
+     assumed: the box is centred at min(620px, 100% - 32px), and this pill is
+     ~170px wide with 24px margins, so the two only clear each other once the
+     content region is about 1060px. Below that the pill lifts above the box
+     (which occupies the bottom ~162px — the same figure .c-shell-content's
+     padding-bottom already reserves). Above it, the corner is genuinely free. */
+  .c-dec-fab{position:absolute; right:var(--spacing-24); bottom:178px; z-index:25; display:inline-flex; align-items:center; gap:var(--spacing-8); height:44px; padding:0 var(--spacing-20); border-radius:var(--radius-pill); border:1px solid var(--color-obsidian); background:var(--color-obsidian); color:var(--color-neutral-1); font-family:inherit; font-size:var(--text-body2-size); font-weight:700; cursor:pointer; box-shadow:var(--shadow-3); transition:background var(--duration-fast) var(--ease-standard), border-color var(--duration-fast) var(--ease-standard);}
+  .c-dec-fab:hover{background:var(--color-neutral-8); border-color:var(--color-neutral-8);}
+  .c-dec-fab[hidden]{display:none;} /* shown only in Decision Space — the log it opens belongs to that space */
+  @media (min-width:1180px){ .c-dec-fab{bottom:var(--spacing-24);} }
+  .c-dec-fab i{font-size:var(--icon-sm);}
+
   .c-dec-scrim{position:absolute; inset:0; z-index:70; background:var(--color-canvas-warm); opacity:0; pointer-events:none; transition:opacity var(--duration-base) var(--ease-standard);}
   .c-dec-scrim.is-open{opacity:.72; pointer-events:auto;}
   .c-dec-drawer{position:absolute; top:0; right:0; bottom:0; z-index:75; width:min(520px,100%); background:var(--color-neutral-1); border-left:1px solid var(--color-neutral-3); box-shadow:var(--shadow-4); transform:translateX(101%); transition:transform var(--duration-slow) var(--ease-settle); display:flex; flex-direction:column;}
@@ -605,7 +628,7 @@
   .c-dash-w.is-cited.is-fading > .c-card,.c-dash-w.is-cited.is-fading > .c-stat{outline-color:transparent;}
 
   @media (prefers-reduced-motion:reduce){
-    .c-dec-drawer,.c-dec-scrim{transition:none;}
+    .c-dec-drawer,.c-dec-scrim,.c-dec-rat-wrap,.c-dec-rat-wrap > .c-dec-rat{transition:none;}
   }
   /* Ambient backlight — deliberately off-token (the DS has no gradient
      token; these are the source file's literal pastels). Two layers,
@@ -1431,10 +1454,11 @@
             </div>
           </div>
         </div>
-        <!-- Link label follows the tab it now lands on: it activates
-             Insights Space, so calling it "Dashboard" would name a
-             destination that no longer exists by that name. -->
-        <p class="c-canvas-dashlink" id="dashLink">Get more done, straight to your <a href="#dashboard">Insights Space &#8595;</a> | <a href="#">Clean up cards</a></p>
+        <!-- Every label names the destination it actually lands on, and all
+             three are wired (the old "Clean up cards" was href="#" and did
+             nothing). "Actionable Cards" returns to the fan above, so it
+             gets no down-arrow — the other two go down into the spaces. -->
+        <p class="c-canvas-dashlink" id="dashLink">Get more done, straight to your <a href="#spaceDecisions">Decision Space &#8595;</a> | <a href="#dashboard">Performance Space &#8595;</a> | <a href="#cardSlider">Actionable Cards</a></p>
         </div><!-- /.c-canvas-hero -->
 
         <!-- ── Section 2 — the two spaces.
@@ -1445,8 +1469,11 @@
              Insights, and the "Open panel" links cross between them. -->
         <div class="c-space" id="space">
           <div class="c-tabs c-space-tabs" role="tablist" aria-label="Workspace">
-            <button class="c-tab active" id="tabDecisions" type="button" role="tab" aria-selected="true" aria-controls="spaceDecisions" tabindex="0"><i class="ph-fill ph-gavel" aria-hidden="true"></i>Decisions<span class="c-space-tabs-w"> Space</span><span class="count">7</span></button>
-            <button class="c-tab" id="tabInsights" type="button" role="tab" aria-selected="false" aria-controls="spaceInsights" tabindex="-1"><i class="ph-fill ph-chart-line-up" aria-hidden="true"></i>Insights<span class="c-space-tabs-w"> Space</span><span class="count">15</span></button>
+            <!-- ids stay tabInsights/spaceInsights: they are internal wiring
+                 referenced from CSS and four places in the script, and the
+                 rename is a labelling change, not a structural one. -->
+            <button class="c-tab active" id="tabDecisions" type="button" role="tab" aria-selected="true" aria-controls="spaceDecisions" tabindex="0">Decision<span class="c-space-tabs-w">&nbsp;Space</span></button>
+            <button class="c-tab" id="tabInsights" type="button" role="tab" aria-selected="false" aria-controls="spaceInsights" tabindex="-1">Performance<span class="c-space-tabs-w">&nbsp;Space</span></button>
           </div>
 
           <!-- data-horizon lives on the markup, not on script: the
@@ -1461,10 +1488,6 @@
                 <h2 id="decTitle">What needs deciding</h2>
                 <p>Ordered by what is at stake — not by what is easy to chart</p>
               </div>
-              <!-- Inline, not a bottom-right FAB: the assistant box is
-                   pinned to the bottom of this region permanently, and a
-                   floating button would sit on top of it. -->
-              <button class="c-btn c-btn-md c-btn-secondary" id="decDrawerBtn" type="button" aria-haspopup="dialog"><i class="ph ph-file-text" aria-hidden="true"></i>Evidence &amp; log</button>
             </div>
 
             <!-- ── Digest — the verdict, then the numbers it rests on ── -->
@@ -1600,14 +1623,14 @@
                   <button class="c-btn c-btn-md c-btn-primary" type="button" data-act="approve" aria-label="Approve — name an executive sponsor for each top-five account">Approve</button>
                   <button class="c-btn c-btn-md c-btn-secondary" type="button" data-act="options" aria-label="Ask for options — name an executive sponsor for each top-five account">Ask for options</button>
                   <button class="c-btn c-btn-md c-btn-ghost" type="button" data-act="defer" aria-label="Defer with reason — name an executive sponsor for each top-five account"><i class="ph ph-calendar-blank" aria-hidden="true"></i>Defer</button>
-                  <button class="c-dec-why" type="button" aria-expanded="false" aria-controls="dec-r2" aria-label="Why — name an executive sponsor for each top-five account"><i class="ph ph-caret-right" aria-hidden="true"></i>Why</button>
+                  <button class="c-dec-why" type="button" aria-expanded="false" aria-controls="dec-r2" aria-label="Why — name an executive sponsor for each top-five account">Why</button>
                 </div>
-                <div class="c-dec-rat" id="dec-r2" hidden>
+                <div class="c-dec-rat-wrap" id="dec-r2" hidden><div class="c-dec-rat">
                   <div class="c-dec-ri"><span class="c-dec-rk">Because</span><p class="c-dec-rv">The top five advertisers carry <b>38% of revenue — RM 56.3M</b>. At 9.2% no single account can sink the year, but losing two breaches plan.</p></div>
                   <div class="c-dec-ri"><span class="c-dec-rk">Success looks like</span><p class="c-dec-rv">Five named executive sponsors, each with a standing quarterly contact rhythm in the diary.</p></div>
                   <div class="c-dec-ri"><span class="c-dec-rk">Owner</span><p class="c-dec-rv"><b>Leadership</b> · accountable: Bryan Wong</p></div>
                   <div class="c-dec-ri"><span class="c-dec-rk">Escalation</span><p class="c-dec-rv">Board note if any top-five account goes 30 days without executive contact.</p></div>
-                  <div class="c-dec-ri c-dec-rev"><span class="c-dec-rk">Evidence</span><p class="c-dec-rv">Concentration curve — <b>How much rests on how few</b>. <button class="c-dec-lnk" type="button" data-panel="dConc">Open panel</button></p></div>
+                  <div class="c-dec-ri c-dec-rev"><span class="c-dec-rk">Evidence</span><p class="c-dec-rv">Concentration curve — <b>How much rests on how few</b>. <button class="c-dec-lnk" type="button" data-panel="dConc">Open panel</button></p></div></div>
                 </div>
               </section>
 
@@ -1635,14 +1658,14 @@
                   <button class="c-btn c-btn-md c-btn-primary" type="button" data-act="approve" aria-label="Approve — close the RM 17.1M gap">Approve</button>
                   <button class="c-btn c-btn-md c-btn-secondary" type="button" data-act="options" aria-label="Ask for options — close the RM 17.1M gap">Ask for options</button>
                   <button class="c-btn c-btn-md c-btn-ghost" type="button" data-act="defer" aria-label="Defer with reason — close the RM 17.1M gap"><i class="ph ph-calendar-blank" aria-hidden="true"></i>Defer</button>
-                  <button class="c-dec-why" type="button" aria-expanded="false" aria-controls="dec-r1" aria-label="Why — close the RM 17.1M gap"><i class="ph ph-caret-right" aria-hidden="true"></i>Why</button>
+                  <button class="c-dec-why" type="button" aria-expanded="false" aria-controls="dec-r1" aria-label="Why — close the RM 17.1M gap">Why</button>
                 </div>
-                <div class="c-dec-rat" id="dec-r1" hidden>
+                <div class="c-dec-rat-wrap" id="dec-r1" hidden><div class="c-dec-rat">
                   <div class="c-dec-ri"><span class="c-dec-rk">Because</span><p class="c-dec-rv">Weighted forecast lands RM 222.9M against a RM 240.0M plan. RM 111.2M is open across 73 deals; <b>RM 51.2M sits in Negotiation at 50%</b> and averages 41 days — the oldest cohort.</p></div>
                   <div class="c-dec-ri"><span class="c-dec-rk">Success looks like</span><p class="c-dec-rv">Eight named deals with an executive sponsor each, together covering RM 17.1M weighted.</p></div>
                   <div class="c-dec-ri"><span class="c-dec-rk">Owner</span><p class="c-dec-rv"><b>Sales lead</b> · accountable: Bryan Wong</p></div>
                   <div class="c-dec-ri"><span class="c-dec-rk">Escalation</span><p class="c-dec-rv">Rate approval required above 12% discount.</p></div>
-                  <div class="c-dec-ri c-dec-rev"><span class="c-dec-rk">Evidence</span><p class="c-dec-rv">Pipeline by stage, and the cumulative plan fan. <button class="c-dec-lnk" type="button" data-panel="dFunnel">Open panel</button></p></div>
+                  <div class="c-dec-ri c-dec-rev"><span class="c-dec-rk">Evidence</span><p class="c-dec-rv">Pipeline by stage, and the cumulative plan fan. <button class="c-dec-lnk" type="button" data-panel="dFunnel">Open panel</button></p></div></div>
                 </div>
               </section>
 
@@ -1670,14 +1693,14 @@
                   <button class="c-btn c-btn-md c-btn-primary" type="button" data-act="approve" aria-label="Approve — fund Digital demand">Approve</button>
                   <button class="c-btn c-btn-md c-btn-secondary" type="button" data-act="options" aria-label="Ask for options — fund Digital demand">Ask for options</button>
                   <button class="c-btn c-btn-md c-btn-ghost" type="button" data-act="defer" aria-label="Defer with reason — fund Digital demand"><i class="ph ph-calendar-blank" aria-hidden="true"></i>Defer</button>
-                  <button class="c-dec-why" type="button" aria-expanded="false" aria-controls="dec-r3" aria-label="Why — fund Digital demand"><i class="ph ph-caret-right" aria-hidden="true"></i>Why</button>
+                  <button class="c-dec-why" type="button" aria-expanded="false" aria-controls="dec-r3" aria-label="Why — fund Digital demand">Why</button>
                 </div>
-                <div class="c-dec-rat" id="dec-r3" hidden>
+                <div class="c-dec-rat-wrap" id="dec-r3" hidden><div class="c-dec-rat">
                   <div class="c-dec-ri"><span class="c-dec-rk">Because</span><p class="c-dec-rv">Digital sold <b>62% of its inventory</b> and reached only 75% of target. The inventory was there and went unsold — so the constraint is demand, not supply.</p></div>
                   <div class="c-dec-ri"><span class="c-dec-rk">Success looks like</span><p class="c-dec-rv">Budget moved from inventory acquisition into demand generation, with fill rate above 75% by Q4.</p></div>
                   <div class="c-dec-ri"><span class="c-dec-rk">Owner</span><p class="c-dec-rv"><b>Daniel Tan</b></p></div>
                   <div class="c-dec-ri"><span class="c-dec-rk">Escalation</span><p class="c-dec-rv">Reopen at the Q3 inventory commit if fill rate has not moved.</p></div>
-                  <div class="c-dec-ri c-dec-rev"><span class="c-dec-rk">Evidence</span><p class="c-dec-rv">Sold against sellable, by media line. <button class="c-dec-lnk" type="button" data-panel="dFill">Open panel</button></p></div>
+                  <div class="c-dec-ri c-dec-rev"><span class="c-dec-rk">Evidence</span><p class="c-dec-rv">Sold against sellable, by media line. <button class="c-dec-lnk" type="button" data-panel="dFill">Open panel</button></p></div></div>
                 </div>
               </section>
 
@@ -1716,14 +1739,14 @@
                   <button class="c-btn c-btn-md c-btn-primary" type="button" data-act="approve" aria-label="Approve — buy more addressable inventory">Approve</button>
                   <button class="c-btn c-btn-md c-btn-secondary" type="button" data-act="options" aria-label="Ask for options — buy more addressable inventory">Ask for options</button>
                   <button class="c-btn c-btn-md c-btn-ghost" type="button" data-act="defer" aria-label="Defer with reason — buy more addressable inventory"><i class="ph ph-calendar-blank" aria-hidden="true"></i>Defer</button>
-                  <button class="c-dec-why" type="button" aria-expanded="false" aria-controls="dec-r4" aria-label="Why — buy more addressable inventory"><i class="ph ph-caret-right" aria-hidden="true"></i>Why</button>
+                  <button class="c-dec-why" type="button" aria-expanded="false" aria-controls="dec-r4" aria-label="Why — buy more addressable inventory">Why</button>
                 </div>
-                <div class="c-dec-rat" id="dec-r4" hidden>
+                <div class="c-dec-rat-wrap" id="dec-r4" hidden><div class="c-dec-rat">
                   <div class="c-dec-ri"><span class="c-dec-rk">Because</span><p class="c-dec-rv">Addressable is <b>97% sold out</b> and the only line beating plan at 109% — its ceiling is supply, not selling.</p></div>
                   <div class="c-dec-ri"><span class="c-dec-rk">Success looks like</span><p class="c-dec-rv">Additional addressable inventory contracted before the Q3 commit closes.</p></div>
                   <div class="c-dec-ri"><span class="c-dec-rk">Owner</span><p class="c-dec-rv"><b>Aisyah Rahman</b></p></div>
                   <div class="c-dec-ri"><span class="c-dec-rk">Escalation</span><p class="c-dec-rv">Capital approval if the buy exceeds the quarter's inventory budget.</p></div>
-                  <div class="c-dec-ri c-dec-rev"><span class="c-dec-rk">Evidence</span><p class="c-dec-rv">Sold against sellable, by media line. <button class="c-dec-lnk" type="button" data-panel="dFill">Open panel</button></p></div>
+                  <div class="c-dec-ri c-dec-rev"><span class="c-dec-rk">Evidence</span><p class="c-dec-rv">Sold against sellable, by media line. <button class="c-dec-lnk" type="button" data-panel="dFill">Open panel</button></p></div></div>
                 </div>
               </section>
 
@@ -1751,14 +1774,14 @@
                   <button class="c-btn c-btn-md c-btn-primary" type="button" data-act="approve" aria-label="Approve — move Daniel to prospecting">Approve</button>
                   <button class="c-btn c-btn-md c-btn-secondary" type="button" data-act="options" aria-label="Ask for options — move Daniel to prospecting">Ask for options</button>
                   <button class="c-btn c-btn-md c-btn-ghost" type="button" data-act="defer" aria-label="Defer with reason — move Daniel to prospecting"><i class="ph ph-calendar-blank" aria-hidden="true"></i>Defer</button>
-                  <button class="c-dec-why" type="button" aria-expanded="false" aria-controls="dec-r5" aria-label="Why — move Daniel to prospecting"><i class="ph ph-caret-right" aria-hidden="true"></i>Why</button>
+                  <button class="c-dec-why" type="button" aria-expanded="false" aria-controls="dec-r5" aria-label="Why — move Daniel to prospecting">Why</button>
                 </div>
-                <div class="c-dec-rat" id="dec-r5" hidden>
+                <div class="c-dec-rat-wrap" id="dec-r5" hidden><div class="c-dec-rat">
                   <div class="c-dec-ri"><span class="c-dec-rk">Because</span><p class="c-dec-rv">85% attainment with only <b>0.8&times; pipeline cover</b> is a top-of-funnel gap. Coaching on closing technique would have been the wrong quarter's work.</p></div>
                   <div class="c-dec-ri"><span class="c-dec-rk">Success looks like</span><p class="c-dec-rv">His cover ratio above 1.5&times; within one quarter.</p></div>
                   <div class="c-dec-ri"><span class="c-dec-rk">Owner</span><p class="c-dec-rv"><b>Sales lead</b> · accountable: Bryan Wong</p></div>
                   <div class="c-dec-ri"><span class="c-dec-rk">Escalation</span><p class="c-dec-rv">None — a management decision. It appears here because the board's own evidence overturned an earlier one; see the log.</p></div>
-                  <div class="c-dec-ri c-dec-rev"><span class="c-dec-rk">Evidence</span><p class="c-dec-rv">Rep attainment against pipeline cover. <button class="c-dec-lnk" type="button" data-panel="dQuad">Open panel</button></p></div>
+                  <div class="c-dec-ri c-dec-rev"><span class="c-dec-rk">Evidence</span><p class="c-dec-rv">Rep attainment against pipeline cover. <button class="c-dec-lnk" type="button" data-panel="dQuad">Open panel</button></p></div></div>
                 </div>
               </section>
 
@@ -1787,13 +1810,13 @@
                   <button class="c-btn c-btn-md c-btn-primary" type="button" data-act="approve" aria-label="Approve — diarise Petronas for the Q3 budget reset">Approve</button>
                   <button class="c-btn c-btn-md c-btn-secondary" type="button" data-act="options" aria-label="Ask for options — diarise Petronas for the Q3 budget reset">Ask for options</button>
                   <button class="c-btn c-btn-md c-btn-ghost" type="button" data-act="defer" aria-label="Defer with reason — diarise Petronas for the Q3 budget reset"><i class="ph ph-calendar-blank" aria-hidden="true"></i>Defer</button>
-                  <button class="c-dec-why" type="button" aria-expanded="false" aria-controls="dec-r6" aria-label="Why — diarise Petronas for the Q3 budget reset"><i class="ph ph-caret-right" aria-hidden="true"></i>Why</button>
+                  <button class="c-dec-why" type="button" aria-expanded="false" aria-controls="dec-r6" aria-label="Why — diarise Petronas for the Q3 budget reset">Why</button>
                 </div>
-                <div class="c-dec-rat" id="dec-r6" hidden>
+                <div class="c-dec-rat-wrap" id="dec-r6" hidden><div class="c-dec-rat">
                   <div class="c-dec-ri"><span class="c-dec-rk">Because</span><p class="c-dec-rv"><b>RM 2.1M of the RM 4.4M of lapses we could attribute</b> was a budget-cycle gap, not a loss. It needs a calendar, not a discount.</p></div>
                   <div class="c-dec-ri"><span class="c-dec-rk">Success looks like</span><p class="c-dec-rv">A meeting in the diary inside the reset window.</p></div>
                   <div class="c-dec-ri"><span class="c-dec-rk">Owner</span><p class="c-dec-rv"><b>Aisyah Rahman</b> · accountable: Sales lead</p></div>
-                  <div class="c-dec-ri c-dec-rev"><span class="c-dec-rk">Evidence</span><p class="c-dec-rv">Lapsed revenue split by cause. <button class="c-dec-lnk" type="button" data-panel="dChurn">Open panel</button></p></div>
+                  <div class="c-dec-ri c-dec-rev"><span class="c-dec-rk">Evidence</span><p class="c-dec-rv">Lapsed revenue split by cause. <button class="c-dec-lnk" type="button" data-panel="dChurn">Open panel</button></p></div></div>
                 </div>
               </section>
 
@@ -1821,14 +1844,14 @@
                   <button class="c-btn c-btn-md c-btn-primary" type="button" data-act="approve" aria-label="Approve — take the share question to the board">Approve</button>
                   <button class="c-btn c-btn-md c-btn-secondary" type="button" data-act="options" aria-label="Ask for options — take the share question to the board">Ask for options</button>
                   <button class="c-btn c-btn-md c-btn-ghost" type="button" data-act="defer" aria-label="Defer with reason — take the share question to the board"><i class="ph ph-calendar-blank" aria-hidden="true"></i>Defer</button>
-                  <button class="c-dec-why" type="button" aria-expanded="false" aria-controls="dec-r7" aria-label="Why — take the share question to the board"><i class="ph ph-caret-right" aria-hidden="true"></i>Why</button>
+                  <button class="c-dec-why" type="button" aria-expanded="false" aria-controls="dec-r7" aria-label="Why — take the share question to the board">Why</button>
                 </div>
-                <div class="c-dec-rat" id="dec-r7" hidden>
-                  <div class="c-dec-ri"><span class="c-dec-rk">Because</span><p class="c-dec-rv">Growing 6.4% in a market growing 8.1% moved share from 14.2% to <b>13.8%</b> — roughly RM 4.3M of revenue that existed and went elsewhere. Every other panel in Insights calls this a good year.</p></div>
+                <div class="c-dec-rat-wrap" id="dec-r7" hidden><div class="c-dec-rat">
+                  <div class="c-dec-ri"><span class="c-dec-rk">Because</span><p class="c-dec-rv">Growing 6.4% in a market growing 8.1% moved share from 14.2% to <b>13.8%</b> — roughly RM 4.3M of revenue that existed and went elsewhere. Every other panel in Performance Space calls this a good year.</p></div>
                   <div class="c-dec-ri"><span class="c-dec-rk">Success looks like</span><p class="c-dec-rv">A board-agreed position on whether to defend share or bank margin.</p></div>
                   <div class="c-dec-ri"><span class="c-dec-rk">Owner</span><p class="c-dec-rv"><b>Leadership</b> · accountable: Bryan Wong</p></div>
                   <div class="c-dec-ri"><span class="c-dec-rk">Escalation</span><p class="c-dec-rv">Only the board can set that posture.</p></div>
-                  <div class="c-dec-ri c-dec-rev"><span class="c-dec-rk">Evidence</span><p class="c-dec-rv">Our indexed growth against the market. <button class="c-dec-lnk" type="button" data-panel="dShare">Open panel</button></p></div>
+                  <div class="c-dec-ri c-dec-rev"><span class="c-dec-rk">Evidence</span><p class="c-dec-rv">Our indexed growth against the market. <button class="c-dec-lnk" type="button" data-panel="dShare">Open panel</button></p></div></div>
                 </div>
               </section>
 
@@ -2015,6 +2038,12 @@
            container and absolute inside .c-shell-main, so it spans the
            Content region's full height without scrolling with it and
            leaves the nav rail visible. -->
+      <!-- Floating trigger, bottom-right. It shares this region with the
+           permanently-pinned assistant box, so its offset is not a flat
+           24px — see .c-dec-fab, which lifts it above the box at the
+           widths where the two would otherwise overlap. Shown only in
+           Decision Space, since the log it opens is that space's. -->
+      <button class="c-dec-fab" id="decDrawerBtn" type="button" aria-haspopup="dialog"><i class="ph ph-file-text" aria-hidden="true"></i>Evidence &amp; log</button>
       <div class="c-dec-scrim" id="decScrim"></div>
       <aside class="c-dec-drawer" id="decDrawer" role="dialog" aria-modal="true" aria-labelledby="decDrawerH" aria-hidden="true">
         <div class="c-dec-drawer-hd">
@@ -2031,15 +2060,15 @@
                activates Insights Space and scrolls that widget into
                view, rather than restating the chart here. -->
           <div id="decPanE" role="tabpanel" aria-labelledby="decTabE">
-            <button class="c-dec-evr" type="button" data-panel="dFan">Cumulative revenue against plan <span>Insights &rarr;</span></button>
-            <button class="c-dec-evr" type="button" data-panel="dBridge">Where the RM 8.9M of growth came from <span>Insights &rarr;</span></button>
-            <button class="c-dec-evr" type="button" data-panel="dFunnel">Pipeline by stage <span>Insights &rarr;</span></button>
-            <button class="c-dec-evr" type="button" data-panel="dQuad">Which reps are actually at risk <span>Insights &rarr;</span></button>
-            <button class="c-dec-evr" type="button" data-panel="dFill">Sold against what we had to sell <span>Insights &rarr;</span></button>
-            <button class="c-dec-evr" type="button" data-panel="dBubble">Revenue against contribution <span>Insights &rarr;</span></button>
-            <button class="c-dec-evr" type="button" data-panel="dChurn">Why RM 4.4M walked <span>Insights &rarr;</span></button>
-            <button class="c-dec-evr" type="button" data-panel="dConc">How much rests on how few <span>Insights &rarr;</span></button>
-            <button class="c-dec-evr" type="button" data-panel="dShare">Us against the market <span>Insights &rarr;</span></button>
+            <button class="c-dec-evr" type="button" data-panel="dFan">Cumulative revenue against plan <span>Performance &rarr;</span></button>
+            <button class="c-dec-evr" type="button" data-panel="dBridge">Where the RM 8.9M of growth came from <span>Performance &rarr;</span></button>
+            <button class="c-dec-evr" type="button" data-panel="dFunnel">Pipeline by stage <span>Performance &rarr;</span></button>
+            <button class="c-dec-evr" type="button" data-panel="dQuad">Which reps are actually at risk <span>Performance &rarr;</span></button>
+            <button class="c-dec-evr" type="button" data-panel="dFill">Sold against what we had to sell <span>Performance &rarr;</span></button>
+            <button class="c-dec-evr" type="button" data-panel="dBubble">Revenue against contribution <span>Performance &rarr;</span></button>
+            <button class="c-dec-evr" type="button" data-panel="dChurn">Why RM 4.4M walked <span>Performance &rarr;</span></button>
+            <button class="c-dec-evr" type="button" data-panel="dConc">How much rests on how few <span>Performance &rarr;</span></button>
+            <button class="c-dec-evr" type="button" data-panel="dShare">Us against the market <span>Performance &rarr;</span></button>
           </div>
 
           <div id="decPanL" role="tabpanel" aria-labelledby="decTabL" hidden>
@@ -3353,11 +3382,29 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
     target.scrollIntoView({ block: 'start' });
   };
 
-  const dashLink = document.querySelector('#dashLink a[href="#dashboard"]');
-  if (dashLink) {
-    dashLink.addEventListener('click', (e) => {
-      e.preventDefault(); // the panel is display:none until its tab is active, so the native anchor jump has nothing to scroll to
-      window.showSpace('tabInsights', 'dashboard');
+  // All three hand-off links are wired. Each preventDefaults because a panel
+  // is display:none until its tab is active, so a native anchor jump has
+  // nothing to scroll to.
+  const handoff = [
+    ['#dashLink a[href="#spaceDecisions"]', 'tabDecisions', 'spaceDecisions'],
+    ['#dashLink a[href="#dashboard"]', 'tabInsights', 'dashboard']
+  ];
+  handoff.forEach(([sel, tabId, anchorId]) => {
+    const a = document.querySelector(sel);
+    if (a) a.addEventListener('click', (e) => { e.preventDefault(); window.showSpace(tabId, anchorId); });
+  });
+
+  // "Actionable Cards" goes back UP to the fan, which is in the hero and
+  // belongs to neither space, so no tab switch — just scroll and focus it,
+  // since the slider is itself a keyboard-operable region.
+  const cardLink = document.querySelector('#dashLink a[href="#cardSlider"]');
+  if (cardLink) {
+    cardLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      const slider = document.getElementById('cardSlider');
+      if (!slider) return;
+      slider.scrollIntoView({ block: 'center' });
+      slider.focus({ preventScroll: true });
     });
   }
 })();
@@ -3374,10 +3421,28 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
      panels and the digest's Full read, rather than three near-identical
      ones: they are the same interaction (a button owning a [hidden]
      target), and the only difference is that popovers are transient. ── */
+  const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  function show(t) {
+    if (!t.classList.contains('c-dec-rat-wrap')) { t.hidden = false; return; }
+    clearTimeout(t._hideTimer);
+    t.hidden = false;
+    if (REDUCED.matches) { t.classList.add('is-open'); return; }
+    void t.offsetHeight; // without this the class lands in the same frame as the un-hide and there is nothing to transition from
+    t.classList.add('is-open');
+  }
+  function hide(t) {
+    if (!t.classList.contains('c-dec-rat-wrap')) { t.hidden = true; return; }
+    clearTimeout(t._hideTimer);
+    t.classList.remove('is-open');
+    if (REDUCED.matches) { t.hidden = true; return; }
+    // 400ms > the 220ms transition: a fallback, not the mechanism.
+    t._hideTimer = setTimeout(() => { t.hidden = true; }, 400);
+  }
   function collapse(btn) {
     btn.setAttribute('aria-expanded', 'false');
     const t = document.getElementById(btn.getAttribute('aria-controls'));
-    if (t) t.hidden = true;
+    if (t) hide(t);
   }
   function closePops() {
     space.querySelectorAll('.c-dec-kpi[aria-expanded="true"]').forEach(collapse);
@@ -3390,7 +3455,7 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
       const open = btn.getAttribute('aria-expanded') === 'true';
       if (btn.classList.contains('c-dec-kpi')) closePops(); // two open popovers overlap each other
       btn.setAttribute('aria-expanded', String(!open));
-      target.hidden = open;
+      if (open) hide(target); else show(target);
     });
   });
   // Popovers are transient; the Why panels persist until toggled back.
@@ -3455,6 +3520,13 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
     if (restoreFocus) (lastFocus || drawerBtn).focus();
   }
   drawerBtn.addEventListener('click', () => openDrawer(drawerBtn));
+  // The pill lives outside both panels, so CSS cannot tell which space is
+  // active — it follows the same event the panels do.
+  document.addEventListener('space:shown', (e) => {
+    const onDecisions = e.detail.panel === 'spaceDecisions';
+    drawerBtn.hidden = !onDecisions;
+    if (!onDecisions) closeDrawer({ restoreFocus: false });
+  });
   drawerX.addEventListener('click', closeDrawer);
   scrim.addEventListener('click', closeDrawer);
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeDrawer(); });

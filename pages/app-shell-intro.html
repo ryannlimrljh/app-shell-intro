@@ -180,7 +180,7 @@
      where there is nothing to cover, so it is invisible until needed. */
   .c-space-tabs::before{content:''; position:absolute; left:0; right:0; bottom:100%; height:var(--section-gap); background:var(--color-canvas-warm);}
   .c-space-tabs .c-tab{height:44px; font-size:var(--text-h5-size); letter-spacing:-.01em;}
-  .c-space-tabs .c-tab i{font-size:18px; opacity:.75;}
+  .c-space-tabs .c-tab i{font-size:var(--icon-sm); opacity:.75;}
   .c-space-tabs .c-tab.active i{opacity:1; color:var(--color-orange);}
   .c-space-tabs .c-tab .count{padding:0 7px; border-radius:var(--radius-pill); background:var(--color-neutral-2); color:var(--color-neutral-5);}
   .c-space-tabs .c-tab.active .count{background:var(--color-obsidian); color:var(--color-neutral-1);}
@@ -235,7 +235,7 @@
      y=60 underneath a bar occupying 48–101. */
   .c-dash{margin-top:var(--spacing-24); scroll-margin-top:calc(var(--section-gap) + 44px + var(--spacing-8) + var(--spacing-12));}
   .c-dash-head{display:flex; align-items:flex-end; justify-content:space-between; gap:var(--spacing-16); flex-wrap:wrap; padding-bottom:var(--spacing-12); border-bottom:1px solid var(--color-neutral-3); margin-bottom:var(--spacing-16);}
-  .c-dash-head h2{margin:0; font-size:var(--text-h2-size); line-height:var(--text-h2-lh); font-weight:800; letter-spacing:-.01em;}
+  .c-dash-head h2{margin:0; font-size:var(--text-h2-size); line-height:var(--text-h2-lh); font-weight:800;}
   .c-dash-head p{margin:2px 0 0; font-size:var(--text-body1-size); color:var(--color-neutral-5);}
   /* Scroll-in reveal — same arrive-don't-exist convention as the cards.
      Widgets stagger off a per-widget --dw-i index (set inline in markup).
@@ -274,18 +274,18 @@
   .c-dash-scroll{overflow-x:auto;} /* tables scroll inside themselves; the page body never scrolls sideways */
   /* Answer-strip stat tiles: stock .c-stat, value size stepped down to fit
      five-across; emphasis via border-color only (never a tinted fill). */
-  .c-dash .c-stat-value{font-size:24px; letter-spacing:-.02em; font-variant-numeric:tabular-nums;}
+  .c-dash .c-stat-value{font-size:var(--text-h3-size-lg); font-variant-numeric:tabular-nums;}
   .c-dash .c-stat{height:100%;}
   .c-dash .c-stat.is-lead{border-color:var(--color-purple);}
-  .c-dash .c-stat.is-lead .c-stat-value{color:var(--color-purple); font-size:28px;}
+  .c-dash .c-stat.is-lead .c-stat-value{color:var(--color-purple); font-size:var(--text-h2-size);}
   .c-dash-up{color:var(--color-green);} .c-dash-dn{color:var(--color-red);}
   /* Chart tables reuse DS .c-table / .c-datatable as-is; td.num alignment
      already comes from components.css:148/365 — only th.num needs it here. */
   .c-dash .c-table th.num,.c-dash .c-datatable th.num{text-align:right; font-variant-numeric:tabular-nums;}
   .c-dash .c-table tr.tot td{font-weight:900; border-top:1.5px solid var(--color-neutral-9); border-bottom:0;}
-  .c-dash-key{display:flex; gap:15px; flex-wrap:wrap; margin-top:var(--spacing-8); font-size:var(--text-caption-size); font-weight:700; color:var(--color-neutral-5);}
+  .c-dash-key{display:flex; gap:var(--spacing-16); flex-wrap:wrap; margin-top:var(--spacing-8); font-size:var(--text-caption-size); font-weight:700; color:var(--color-neutral-5);}
   .c-dash-key span{display:inline-flex; align-items:center; gap:6px;}
-  .c-dash-sw{width:13px; height:4px; border-radius:2px; flex:none; display:inline-block;}
+  .c-dash-sw{width:13px; height:4px; border-radius:var(--radius-pill); flex:none; display:inline-block;}
   .c-dash-sw.k-band{height:11px; background:var(--color-purple); opacity:.22;}
   .c-dash-sw.k-plan{height:0; border-top:1.8px dashed var(--color-neutral-9); opacity:.6; border-radius:0;}
   /* Visually-hidden table captions (spec's accessibility section): tables
@@ -328,8 +328,8 @@
 
   #spaceDecisions{padding-top:var(--spacing-24);}
   .c-dec-head{display:flex; align-items:flex-end; justify-content:space-between; gap:var(--spacing-16); flex-wrap:wrap; padding-bottom:var(--spacing-12); border-bottom:1px solid var(--color-neutral-3); margin-bottom:var(--spacing-16);}
-  .c-dec-head h2{margin:0; font-size:var(--text-h2-size); line-height:var(--text-h2-lh); font-weight:800; letter-spacing:-.01em;}
-  .c-dec-head p{margin:2px 0 0; font-size:var(--text-body1-size); color:var(--color-neutral-5);}
+  .c-dec-head h2{margin:0; font-size:var(--text-h2-size); line-height:var(--text-h2-lh); font-weight:800;}
+  .c-dec-head p{margin:var(--spacing-4) 0 0; font-size:var(--text-body1-size); color:var(--color-neutral-5);}
 
   /* ── Digest. Replaces a 56-word posture paragraph: a verdict is one
      line, and everything the paragraph quantified becomes a scannable
@@ -337,15 +337,15 @@
      thesis, so deleting it would break the argument. */
   .c-dec-digest{border-left:4px solid var(--color-red); margin-bottom:var(--spacing-12); gap:0;}
   .c-dec-digest-top{display:flex; align-items:flex-start; justify-content:space-between; gap:var(--spacing-24); flex-wrap:wrap;}
-  .c-dec-digest h3{margin:0; font-size:var(--text-h3-size); font-weight:800; letter-spacing:-.02em; line-height:1.25; max-width:30ch;}
+  .c-dec-digest h3{margin:0; font-size:var(--text-h3-size); font-weight:800; line-height:1.25; max-width:30ch;}
   .c-dec-digest h3 em{font-style:normal; color:var(--dec-crit-ink);}
 
   /* Posture gauge — five segments. A gauge rather than a number because
      "how bad" is the one thing here with no natural unit. */
   .c-dec-gauge{display:flex; flex-direction:column; align-items:flex-end; gap:var(--spacing-4); flex:none;}
-  .c-dec-gauge-t{font-size:var(--text-label3-size); font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--color-neutral-5);}
-  .c-dec-gauge-b{display:flex; gap:3px;}
-  .c-dec-gauge-b i{width:22px; height:8px; border-radius:2px; background:var(--color-neutral-3); display:block;}
+  .c-dec-gauge-t{font-size:var(--text-label3-size); font-weight:700; letter-spacing:var(--tracking-eyebrow); text-transform:uppercase; color:var(--color-neutral-5);}
+  .c-dec-gauge-b{display:flex; gap:var(--spacing-4);}
+  .c-dec-gauge-b i{width:22px; height:8px; border-radius:var(--radius-pill); background:var(--color-neutral-3); display:block;}
   .c-dec-gauge-b i.on{background:var(--color-amber);}
   .c-dec-gauge-b i.hot{background:var(--color-red);}
   .c-dec-gauge-l{font-size:var(--text-caption-size); font-weight:700; color:var(--dec-crit-ink);}
@@ -353,11 +353,11 @@
   /* Badge row — the numbers the paragraph used to bury. Direction is an
      icon AND a colour, never colour alone. */
   .c-dec-badges{display:flex; gap:var(--spacing-8); flex-wrap:wrap; margin-top:var(--spacing-16); padding-top:var(--spacing-12); border-top:1px solid var(--color-neutral-3);}
-  .c-dec-badge{display:inline-flex; align-items:center; gap:6px; padding:6px var(--spacing-12); border-radius:var(--radius-pill); background:var(--color-neutral-2); border:1px solid var(--color-neutral-3); font-size:var(--text-caption-size); font-weight:700; color:var(--color-neutral-5); white-space:nowrap;}
-  .c-dec-badge b{font-weight:800; font-variant-numeric:tabular-nums; color:var(--color-neutral-9); font-size:var(--text-body2-size);}
-  .c-dec-badge i{font-size:13px; flex:none;}
-  .c-dec-badge.dn{border-color:rgba(253,51,67,.34);} .c-dec-badge.dn b,.c-dec-badge.dn i{color:var(--dec-crit-ink);}
-  .c-dec-badge.up{border-color:rgba(0,194,110,.36);} .c-dec-badge.up b,.c-dec-badge.up i{color:var(--dec-good-ink);}
+  .c-dec-badge{display:inline-flex; align-items:center; gap:var(--spacing-4); padding:var(--spacing-4) var(--spacing-12); border-radius:var(--radius-pill); background:var(--color-neutral-2); border:1px solid var(--color-neutral-3); font-size:var(--text-caption-size); font-weight:700; color:var(--color-neutral-5); white-space:nowrap;}
+  .c-dec-badge b{font-weight:700; font-variant-numeric:tabular-nums; color:var(--color-neutral-9); font-size:var(--text-body2-size);}
+  .c-dec-badge i{font-size:var(--icon-micro); flex:none;}
+  .c-dec-badge.dn{border-color:rgba(253,51,67,.30);} .c-dec-badge.dn b,.c-dec-badge.dn i{color:var(--dec-crit-ink);}
+  .c-dec-badge.up{border-color:rgba(0,194,110,.32);} .c-dec-badge.up b,.c-dec-badge.up i{color:var(--dec-good-ink);}
 
   .c-dec-more{margin-top:var(--spacing-12); display:flex; align-items:center; gap:var(--spacing-12); flex-wrap:wrap;}
   .c-dec-lnk{background:none; border:0; padding:0 2px; min-height:32px; font-family:inherit; font-size:var(--text-caption-size); font-weight:800; color:var(--dec-accent-ink); text-decoration:underline; text-underline-offset:3px; cursor:pointer; display:inline-flex; align-items:center; gap:6px; transition:color var(--duration-fast) var(--ease-standard);}
@@ -366,14 +366,14 @@
      the card's own paragraph recipe instead. Same trap as .c-dec-rv. */
   .c-dec-digest p.c-dec-full{margin:0; padding:var(--spacing-12) var(--spacing-16); background:var(--color-neutral-2); border-radius:var(--radius-md); font-size:var(--text-body2-size); color:var(--color-neutral-5); line-height:1.6;}
   .c-dec-since{font-size:var(--text-caption-size); color:var(--color-neutral-5);}
-  .c-dec-since b{color:var(--color-neutral-9); font-weight:800;}
+  .c-dec-since b{color:var(--color-neutral-9); font-weight:700;}
 
   /* ── KPI strip. Three elements per tile — label, value, delta. Every
      supporting clause moves into a click-opened popover. Click, not
      hover: hover-only affordances are unreachable on the tablets this
      board is actually read on. */
   .c-dec-strip{display:grid; grid-template-columns:repeat(6,1fr); background:var(--color-neutral-1); border:1px solid var(--color-neutral-3); border-radius:var(--radius-lg); box-shadow:var(--shadow-1); overflow:hidden; margin-bottom:var(--spacing-24);}
-  .c-dec-kpi{position:relative; display:flex; flex-direction:column; align-items:flex-start; gap:7px; padding:var(--spacing-16); background:none; border:0; border-right:1px solid var(--color-neutral-3); text-align:left; width:100%; font-family:inherit; cursor:pointer; transition:background var(--duration-fast) var(--ease-standard);}
+  .c-dec-kpi{position:relative; display:flex; flex-direction:column; align-items:flex-start; gap:var(--spacing-8); padding:var(--spacing-16); background:none; border:0; border-right:1px solid var(--color-neutral-3); text-align:left; width:100%; font-family:inherit; cursor:pointer; transition:background var(--duration-fast) var(--ease-standard);}
   .c-dec-kpi:last-child{border-right:0;}
   .c-dec-kpi:hover,.c-dec-kpi[aria-expanded="true"]{background:var(--color-neutral-2);}
   /* Border resets are per-breakpoint and complete: a partial reset here
@@ -397,32 +397,32 @@
     .c-dec-kpi:nth-child(2n){border-right:0;}
     .c-dec-kpi:nth-child(-n+4){border-bottom:1px solid var(--color-neutral-3);}
   }
-  .c-dec-kpi-k{font-size:var(--text-label3-size); font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--color-neutral-5); display:flex; align-items:center; gap:5px;}
-  .c-dec-kpi-k i{font-size:13px; opacity:.5; flex:none;}
+  .c-dec-kpi-k{font-size:var(--text-label3-size); font-weight:700; letter-spacing:var(--tracking-eyebrow); text-transform:uppercase; color:var(--color-neutral-5); display:flex; align-items:center; gap:var(--spacing-4);}
+  .c-dec-kpi-k i{font-size:var(--icon-micro); opacity:.5; flex:none;}
   .c-dec-kpi:hover .c-dec-kpi-k i{opacity:1; color:var(--color-orange);}
-  .c-dec-kpi-v{font-size:24px; font-weight:800; letter-spacing:-.02em; line-height:1; font-variant-numeric:tabular-nums; color:var(--color-neutral-9);}
+  .c-dec-kpi-v{font-size:var(--text-h3-size-lg); font-weight:800; line-height:1; font-variant-numeric:tabular-nums; color:var(--color-neutral-9);}
   .c-dec-kpi-v.dn{color:var(--dec-crit-ink);}
-  .c-dec-kpi-d{display:inline-flex; align-items:center; gap:5px; padding:3px var(--spacing-8); border-radius:var(--radius-pill); font-size:var(--text-caption-size); font-weight:700; font-variant-numeric:tabular-nums; background:var(--color-neutral-2); border:1px solid var(--color-neutral-3); color:var(--color-neutral-5);}
+  .c-dec-kpi-d{display:inline-flex; align-items:center; gap:var(--spacing-4); padding:var(--spacing-4) var(--spacing-8); border-radius:var(--radius-pill); font-size:var(--text-caption-size); font-weight:700; font-variant-numeric:tabular-nums; background:var(--color-neutral-2); border:1px solid var(--color-neutral-3); color:var(--color-neutral-5);}
   .c-dec-kpi:hover .c-dec-kpi-d,.c-dec-kpi[aria-expanded="true"] .c-dec-kpi-d{background:var(--color-neutral-1);}
-  .c-dec-kpi-d.up{color:var(--dec-good-ink); border-color:rgba(0,194,110,.36);}
-  .c-dec-kpi-d.dn{color:var(--dec-crit-ink); border-color:rgba(253,51,67,.34);}
-  .c-dec-kpi-d.wn{color:var(--dec-warn-ink); border-color:rgba(255,164,37,.42);}
+  .c-dec-kpi-d.up{color:var(--dec-good-ink); border-color:rgba(0,194,110,.32);}
+  .c-dec-kpi-d.dn{color:var(--dec-crit-ink); border-color:rgba(253,51,67,.30);}
+  .c-dec-kpi-d.wn{color:var(--dec-warn-ink); border-color:rgba(255,164,37,.38);}
   /* Bullet bar — the one permitted fourth element, and only on a tile
      with a real target to be measured against. Its presence is itself
      information, so tiles without a target do not get one. */
-  .c-dec-bul{width:100%; height:5px; border-radius:3px; background:var(--color-neutral-3); overflow:hidden; position:relative;}
-  .c-dec-bul i{position:absolute; inset:0 auto 0 0; border-radius:3px; background:var(--color-amber); display:block;}
-  .c-dec-bul u{position:absolute; top:-2px; bottom:-2px; width:2px; background:var(--color-neutral-9); border-radius:1px;}
-  .c-dec-pop{position:absolute; top:calc(100% - 4px); left:12px; right:12px; z-index:40; background:var(--color-neutral-1); border:1px solid var(--color-neutral-3); border-radius:var(--radius-md); box-shadow:var(--shadow-3); padding:var(--spacing-12); font-size:var(--text-caption-size); color:var(--color-neutral-5); line-height:1.55; text-align:left; min-width:210px;}
+  .c-dec-bul{width:100%; height:5px; border-radius:var(--radius-pill); background:var(--color-neutral-3); overflow:hidden; position:relative;}
+  .c-dec-bul i{position:absolute; inset:0 auto 0 0; border-radius:var(--radius-pill); background:var(--color-amber); display:block;}
+  .c-dec-bul u{position:absolute; top:-2px; bottom:-2px; width:2px; background:var(--color-neutral-9); border-radius:var(--radius-pill);}
+  .c-dec-pop{position:absolute; top:calc(100% - 4px); left:12px; right:12px; z-index:40; background:var(--color-neutral-1); border:1px solid var(--color-neutral-3); border-radius:var(--radius-lg); box-shadow:var(--shadow-3); padding:var(--spacing-12); font-size:var(--text-caption-size); color:var(--color-neutral-5); line-height:1.55; text-align:left; min-width:210px;}
   .c-dec-pop b{color:var(--color-neutral-9);}
-  .c-dec-prov{display:flex; align-items:center; gap:5px; font-weight:800; text-transform:uppercase; letter-spacing:.1em; font-size:var(--text-label3-size); color:var(--color-neutral-5); margin-bottom:6px;}
+  .c-dec-prov{display:flex; align-items:center; gap:var(--spacing-4); font-weight:700; text-transform:uppercase; letter-spacing:var(--tracking-eyebrow); font-size:var(--text-label3-size); color:var(--color-neutral-5); margin-bottom:var(--spacing-4);}
   .c-dec-prov i{width:7px; height:7px; border-radius:50%; background:var(--color-purple); flex:none;}
 
   /* ── Section rules ── */
   .c-dec-rule{display:flex; align-items:baseline; gap:var(--spacing-12); flex-wrap:wrap; margin:0 0 var(--spacing-12);}
-  .c-dec-rule h3{margin:0; font-size:var(--text-body2-size); font-weight:800; letter-spacing:.12em; text-transform:uppercase;}
+  .c-dec-rule h3{margin:0; font-size:var(--text-body2-size); font-weight:700; letter-spacing:var(--tracking-eyebrow); text-transform:uppercase;}
   .c-dec-rule p{margin:0; font-size:var(--text-caption-size); color:var(--color-neutral-5);}
-  .c-dec-count{margin-left:auto; font-size:var(--text-caption-size); font-weight:800; color:var(--color-neutral-5); font-variant-numeric:tabular-nums;}
+  .c-dec-count{margin-left:auto; font-size:var(--text-caption-size); font-weight:700; color:var(--color-neutral-5); font-variant-numeric:tabular-nums;}
 
   /* ── Decision banners. The tier is a 4px LEFT stripe, not a full
      perimeter border: it marks without enclosing, so the eye runs down
@@ -439,36 +439,36 @@
   .c-dec-card-l{flex:1 1 380px; min-width:0;}
   /* Tier badge: shape AND colour AND text, so the tier survives
      greyscale printing and colour-blind readers. */
-  .c-dec-tier{display:inline-flex; align-items:center; gap:7px; font-size:var(--text-label3-size); font-weight:800; letter-spacing:.13em; text-transform:uppercase; color:var(--dec-tier-ink);}
+  .c-dec-tier{display:inline-flex; align-items:center; gap:var(--spacing-8); font-size:var(--text-label3-size); font-weight:700; letter-spacing:var(--tracking-eyebrow); text-transform:uppercase; color:var(--dec-tier-ink);}
   .c-dec-tier::before{content:''; width:9px; height:9px; border-radius:50%; background:currentColor; flex:none;}
   .c-dec-card[data-tier="risk"] .c-dec-tier::before{border-radius:1px; transform:rotate(45deg);}
   .c-dec-card[data-tier="opp"] .c-dec-tier::before{background:transparent; border:1.5px solid currentColor; width:7.5px; height:7.5px;}
   .c-dec-card[data-tier="strategic"] .c-dec-tier::before{border-radius:2px;}
-  .c-dec-card h4{margin:9px 0 0; font-size:var(--text-h4-size); font-weight:800; letter-spacing:-.02em; line-height:1.28;}
+  .c-dec-card h4{margin:var(--spacing-8) 0 0; font-size:var(--text-h4-size); font-weight:800; line-height:1.28;}
   /* Money at stake is the sort key of this whole panel, so it gets
      display weight and a fixed right-hand column — the seven tags line
      up into something you can compare down. */
   .c-dec-impact{flex:none; text-align:right; min-width:132px;}
-  .c-dec-impact-k{font-size:var(--text-label3-size); font-weight:700; letter-spacing:.11em; text-transform:uppercase; color:var(--color-neutral-5);}
-  .c-dec-impact-v{font-size:26px; font-weight:800; letter-spacing:-.03em; line-height:1.05; font-variant-numeric:tabular-nums; color:var(--dec-tier-ink); margin-top:2px;}
-  .c-dec-impact-s{font-size:var(--text-caption-size); color:var(--color-neutral-5); margin-top:2px;}
+  .c-dec-impact-k{font-size:var(--text-label3-size); font-weight:700; letter-spacing:var(--tracking-eyebrow); text-transform:uppercase; color:var(--color-neutral-5);}
+  .c-dec-impact-v{font-size:var(--text-h2-size); font-weight:800; line-height:1.05; font-variant-numeric:tabular-nums; color:var(--dec-tier-ink); margin-top:var(--spacing-4);}
+  .c-dec-impact-s{font-size:var(--text-caption-size); color:var(--color-neutral-5); margin-top:var(--spacing-4);}
   /* The one place a raw number lies: RM 5.1M next to RM 56.3M reads as
      "similar size" in text, and as 9% of the width here. */
-  .c-dec-impact-bar{margin-top:7px; height:4px; border-radius:2px; background:var(--color-neutral-3); overflow:hidden;}
-  .c-dec-impact-bar i{display:block; height:100%; border-radius:2px; background:var(--dec-tier);}
+  .c-dec-impact-bar{margin-top:var(--spacing-8); height:4px; border-radius:var(--radius-pill); background:var(--color-neutral-3); overflow:hidden;}
+  .c-dec-impact-bar i{display:block; height:100%; border-radius:var(--radius-pill); background:var(--dec-tier);}
 
-  .c-dec-meta{display:flex; align-items:center; gap:9px; flex-wrap:wrap; margin-top:var(--spacing-12);}
-  .c-dec-m{display:inline-flex; align-items:center; gap:6px; font-size:var(--text-caption-size); font-weight:700; color:var(--color-neutral-5);}
-  .c-dec-m b{color:var(--color-neutral-9); font-weight:800;}
-  .c-dec-m i{opacity:.6; flex:none; font-size:14px;}
+  .c-dec-meta{display:flex; align-items:center; gap:var(--spacing-8); flex-wrap:wrap; margin-top:var(--spacing-12);}
+  .c-dec-m{display:inline-flex; align-items:center; gap:var(--spacing-4); font-size:var(--text-caption-size); font-weight:700; color:var(--color-neutral-5);}
+  .c-dec-m b{color:var(--color-neutral-9); font-weight:700;}
+  .c-dec-m i{opacity:.6; flex:none; font-size:var(--icon-micro);}
   .c-dec-sep{width:1px; height:13px; background:var(--color-neutral-3); flex:none;}
-  .c-dec-status{display:inline-flex; align-items:center; gap:6px; padding:4px 10px; border-radius:var(--radius-pill); font-size:var(--text-caption-size); font-weight:800; background:var(--color-neutral-2); border:1px solid var(--color-neutral-3); color:var(--color-neutral-5);}
+  .c-dec-status{display:inline-flex; align-items:center; gap:var(--spacing-4); padding:var(--spacing-4) var(--spacing-8); border-radius:var(--radius-pill); font-size:var(--text-caption-size); font-weight:700; background:var(--color-neutral-2); border:1px solid var(--color-neutral-3); color:var(--color-neutral-5);}
   .c-dec-status::before{content:''; width:7px; height:7px; border-radius:50%; background:var(--color-neutral-4); flex:none;}
-  .c-dec-status[data-s="Scheduled"]{color:var(--dec-warn-ink); border-color:rgba(255,164,37,.42);}
+  .c-dec-status[data-s="Scheduled"]{color:var(--dec-warn-ink); border-color:rgba(255,164,37,.38);}
   .c-dec-status[data-s="Scheduled"]::before{background:var(--color-amber);}
   .c-dec-status[data-s="Awaiting client"]{color:var(--color-neutral-9);}
   .c-dec-status[data-s="Awaiting client"]::before{background:var(--color-navy);}
-  .c-dec-stall{font-size:var(--text-caption-size); font-weight:800; color:var(--dec-crit-ink);}
+  .c-dec-stall{font-size:var(--text-caption-size); font-weight:700; color:var(--dec-crit-ink);}
 
   /* Action group — three genuinely different weights. The source this
      came from rendered "Ask for options" and "Defer" as byte-identical
@@ -477,7 +477,7 @@
      ghost. */
   .c-dec-acts{display:flex; align-items:center; gap:var(--spacing-8); flex-wrap:wrap; margin-top:var(--spacing-16); padding-top:var(--spacing-12); border-top:1px solid var(--color-neutral-3);}
   .c-dec-acts .c-dec-why{margin-left:auto;}
-  .c-dec-why{display:inline-flex; align-items:center; gap:6px; height:40px; padding:0 var(--spacing-12); background:none; border:1px solid var(--color-neutral-3); border-radius:var(--radius-md); font-family:inherit; font-size:var(--text-caption-size); font-weight:800; color:var(--color-neutral-5); cursor:pointer; transition:border-color var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard);}
+  .c-dec-why{display:inline-flex; align-items:center; gap:var(--spacing-4); height:40px; padding:0 var(--spacing-12); background:none; border:1px solid var(--color-neutral-3); border-radius:var(--radius-md); font-family:inherit; font-size:var(--text-caption-size); font-weight:700; color:var(--color-neutral-5); cursor:pointer; transition:border-color var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard);}
   .c-dec-why:hover{border-color:var(--color-orange); color:var(--dec-accent-ink);} /* border may be raw orange (3.15 clears the 3:1 UI-component floor), the label may not */
   .c-dec-why i{transition:transform var(--duration-base) var(--ease-standard);}
   .c-dec-why[aria-expanded="true"]{color:var(--color-neutral-9);}
@@ -490,20 +490,20 @@
      is carried by [hidden] and which also declares display needs this. */
   .c-dec-rat[hidden]{display:none;}
   @media (max-width:760px){ .c-dec-rat{grid-template-columns:1fr;} }
-  .c-dec-ri{display:flex; flex-direction:column; gap:3px; min-width:0;}
-  .c-dec-rk{font-size:var(--text-label3-size); font-weight:800; letter-spacing:.11em; text-transform:uppercase; color:var(--color-neutral-5);}
+  .c-dec-ri{display:flex; flex-direction:column; gap:var(--spacing-4); min-width:0;}
+  .c-dec-rk{font-size:var(--text-label3-size); font-weight:700; letter-spacing:var(--tracking-eyebrow); text-transform:uppercase; color:var(--color-neutral-5);}
   /* Scoped past .c-card p (0,1,1) — a bare .c-dec-rv (0,1,0) loses to it
      and silently renders at the card's own paragraph size instead. */
   .c-dec-rat .c-dec-rv{font-size:var(--text-body2-size); color:var(--color-neutral-5); line-height:1.55; margin:0;}
-  .c-dec-rat .c-dec-rv b{color:var(--color-neutral-9); font-weight:800;}
+  .c-dec-rat .c-dec-rv b{color:var(--color-neutral-9); font-weight:700;}
   .c-dec-rev{grid-column:1/-1; padding-top:var(--spacing-12); border-top:1px solid var(--color-neutral-3);}
 
   /* ── Horizon control. Sits ON the queue header rather than up in the
      digest: a filter separated from the thing it filters is the classic
      "why did the page just change?" bug. A real radiogroup — roving
      tabindex, arrow keys, Home/End. */
-  .c-dec-hz{display:inline-flex; align-items:center; gap:var(--spacing-4); padding:3px; border-radius:var(--radius-pill); background:var(--color-neutral-2); border:1px solid var(--color-neutral-3);}
-  .c-dec-hz button{position:relative; min-height:34px; padding:0 var(--spacing-12); border:0; border-radius:var(--radius-pill); background:none; font-family:inherit; font-size:var(--text-caption-size); font-weight:800; color:var(--color-neutral-5); white-space:nowrap; cursor:pointer; transition:background var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard);}
+  .c-dec-hz{display:inline-flex; align-items:center; gap:var(--spacing-4); padding:var(--spacing-4); border-radius:var(--radius-pill); background:var(--color-neutral-2); border:1px solid var(--color-neutral-3);}
+  .c-dec-hz button{position:relative; min-height:34px; padding:0 var(--spacing-12); border:0; border-radius:var(--radius-pill); background:none; font-family:inherit; font-size:var(--text-caption-size); font-weight:700; color:var(--color-neutral-5); white-space:nowrap; cursor:pointer; transition:background var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard);}
   /* The 34px pill sits inside a 44px hit area rather than being drawn
      44px tall — a segmented control that tall stops reading as one
      control and starts reading as three buttons. */
@@ -527,15 +527,15 @@
      Driven off [data-horizon] so the markup's own default is already
      correct with no JS; the script only moves nodes and flips the
      attribute. */
-  .c-dec-split{display:flex; align-items:baseline; gap:var(--spacing-12); flex-wrap:wrap; margin:var(--spacing-24) 0 2px;}
-  .c-dec-split h3{margin:0; font-size:var(--text-body2-size); font-weight:800; letter-spacing:.12em; text-transform:uppercase;}
+  .c-dec-split{display:flex; align-items:baseline; gap:var(--spacing-12); flex-wrap:wrap; margin:var(--spacing-24) 0 var(--spacing-4);}
+  .c-dec-split h3{margin:0; font-size:var(--text-body2-size); font-weight:700; letter-spacing:var(--tracking-eyebrow); text-transform:uppercase;}
   .c-dec-split p{margin:0; font-size:var(--text-caption-size); color:var(--color-neutral-5);}
   [data-horizon="week"]    .c-dec-card:not([data-h~="week"]),
   [data-horizon="quarter"] .c-dec-card:not([data-h~="quarter"]),
   [data-horizon="fy"]      .c-dec-card:not([data-h~="fy"]){padding:var(--spacing-12) var(--spacing-16);}
   [data-horizon="week"]    .c-dec-card:not([data-h~="week"]) h4,
   [data-horizon="quarter"] .c-dec-card:not([data-h~="quarter"]) h4,
-  [data-horizon="fy"]      .c-dec-card:not([data-h~="fy"]) h4{font-size:var(--text-h5-size); margin-top:5px;}
+  [data-horizon="fy"]      .c-dec-card:not([data-h~="fy"]) h4{font-size:var(--text-h5-size); margin-top:var(--spacing-4);}
   /* The commitment buttons, the rationale and the impact scale all go: a
      decision you are not being asked to take this horizon should not be
      offering an Approve button. Stake, owner, due and status stay —
@@ -545,7 +545,7 @@
   [data-horizon="fy"]      .c-dec-card:not([data-h~="fy"]) :is(.c-dec-acts,.c-dec-rat,.c-dec-impact-bar,.c-dec-impact-k,.c-dec-impact-s){display:none;}
   [data-horizon="week"]    .c-dec-card:not([data-h~="week"]) .c-dec-impact-v,
   [data-horizon="quarter"] .c-dec-card:not([data-h~="quarter"]) .c-dec-impact-v,
-  [data-horizon="fy"]      .c-dec-card:not([data-h~="fy"]) .c-dec-impact-v{font-size:18px; color:var(--color-neutral-9);}
+  [data-horizon="fy"]      .c-dec-card:not([data-h~="fy"]) .c-dec-impact-v{font-size:var(--text-h4-size); color:var(--color-neutral-9);}
   [data-horizon="week"]    .c-dec-card:not([data-h~="week"]) .c-dec-meta,
   [data-horizon="quarter"] .c-dec-card:not([data-h~="quarter"]) .c-dec-meta,
   [data-horizon="fy"]      .c-dec-card:not([data-h~="fy"]) .c-dec-meta{margin-top:7px;}
@@ -555,13 +555,13 @@
   .c-dec-watch{display:grid; grid-template-columns:repeat(4,1fr); gap:var(--spacing-12); margin-bottom:var(--spacing-32);}
   @media (max-width:960px){ .c-dec-watch{grid-template-columns:repeat(2,1fr);} }
   @media (max-width:540px){ .c-dec-watch{grid-template-columns:1fr;} }
-  .c-dec-wc{gap:6px;}
-  .c-dec-wk{font-size:var(--text-caption-size); font-weight:800; color:var(--color-neutral-5);}
-  .c-dec-wv{font-size:19px; font-weight:800; letter-spacing:-.02em; font-variant-numeric:tabular-nums;}
+  .c-dec-wc{gap:var(--spacing-4);}
+  .c-dec-wk{font-size:var(--text-caption-size); font-weight:700; color:var(--color-neutral-5);}
+  .c-dec-wv{font-size:var(--text-h4-size); font-weight:800; font-variant-numeric:tabular-nums;}
   .c-dec-wv.up{color:var(--dec-good-ink);} .c-dec-wv.dn{color:var(--dec-crit-ink);}
   /* Scoped past .c-card p, same specificity trap as .c-dec-rv above. */
-  .c-dec-wc p.c-dec-wt{margin:auto 0 0; padding-top:9px; border-top:1px dashed var(--color-neutral-3); font-size:var(--text-caption-size); color:var(--color-neutral-5);}
-  .c-dec-wc p.c-dec-wt b{color:var(--dec-warn-ink); font-weight:800;}
+  .c-dec-wc p.c-dec-wt{margin:auto 0 0; padding-top:var(--spacing-8); border-top:1px dashed var(--color-neutral-3); font-size:var(--text-caption-size); color:var(--color-neutral-5);}
+  .c-dec-wc p.c-dec-wt b{color:var(--dec-warn-ink); font-weight:700;}
   /* The share-of-market card claims it "becomes a decision" at FY. True
      only at that horizon, so the note only exists there — otherwise the
      copy is permanently aspirational. No opacity dimming anywhere in
@@ -579,7 +579,7 @@
      open at the same time. */
   .c-dec-scrim{position:absolute; inset:0; z-index:70; background:var(--color-canvas-warm); opacity:0; pointer-events:none; transition:opacity var(--duration-base) var(--ease-standard);}
   .c-dec-scrim.is-open{opacity:.72; pointer-events:auto;}
-  .c-dec-drawer{position:absolute; top:0; right:0; bottom:0; z-index:75; width:min(520px,100%); background:var(--color-neutral-1); border-left:1px solid var(--color-neutral-3); box-shadow:var(--shadow-4); transform:translateX(101%); transition:transform 340ms var(--ease-settle); display:flex; flex-direction:column;}
+  .c-dec-drawer{position:absolute; top:0; right:0; bottom:0; z-index:75; width:min(520px,100%); background:var(--color-neutral-1); border-left:1px solid var(--color-neutral-3); box-shadow:var(--shadow-4); transform:translateX(101%); transition:transform var(--duration-slow) var(--ease-settle); display:flex; flex-direction:column;}
   .c-dec-drawer.is-open{transform:translateX(0);}
   .c-dec-drawer-hd{display:flex; align-items:center; gap:var(--spacing-12); padding:var(--spacing-16); border-bottom:1px solid var(--color-neutral-3); flex:none;}
   .c-dec-drawer-hd h3{margin:0; font-size:var(--text-h5-size); font-weight:800; flex:1 1 auto;}
@@ -587,13 +587,13 @@
   .c-dec-drawer-b{flex:1 1 auto; overflow-y:auto; padding:var(--spacing-16) var(--spacing-16) var(--spacing-32);}
   .c-dec-evr{display:flex; align-items:center; gap:var(--spacing-12); width:100%; min-height:52px; padding:0 var(--spacing-12); background:none; border:1px solid var(--color-neutral-3); border-radius:var(--radius-md); margin-bottom:var(--spacing-8); text-align:left; font-family:inherit; font-size:var(--text-body2-size); font-weight:700; color:var(--color-neutral-9); cursor:pointer; transition:border-color var(--duration-fast) var(--ease-standard), background var(--duration-fast) var(--ease-standard);}
   .c-dec-evr:hover{border-color:var(--color-orange); background:var(--color-neutral-2);}
-  .c-dec-evr span{margin-left:auto; font-size:var(--text-caption-size); font-weight:800; color:var(--color-neutral-5); flex:none;}
+  .c-dec-evr span{margin-left:auto; font-size:var(--text-caption-size); font-weight:700; color:var(--color-neutral-5); flex:none;}
   .c-dec-evr:hover span{color:var(--dec-accent-ink);}
   .c-dec-log td b{display:block; margin-bottom:2px; color:var(--color-neutral-9);}
   .c-dec-log td{color:var(--color-neutral-5); vertical-align:top; line-height:1.5;}
-  .c-dec-o{display:inline-block; padding:2px var(--spacing-8); border-radius:var(--radius-pill); font-weight:800; font-size:var(--text-caption-size); border:1px solid var(--color-neutral-3); color:var(--color-neutral-5);}
-  .c-dec-o.is-open{color:var(--dec-warn-ink); border-color:rgba(255,164,37,.42);}
-  .c-dec-o.is-done{color:var(--dec-good-ink); border-color:rgba(0,194,110,.36);}
+  .c-dec-o{display:inline-block; padding:2px var(--spacing-8); border-radius:var(--radius-pill); font-weight:700; font-size:var(--text-caption-size); border:1px solid var(--color-neutral-3); color:var(--color-neutral-5);}
+  .c-dec-o.is-open{color:var(--dec-warn-ink); border-color:rgba(255,164,37,.38);}
+  .c-dec-o.is-done{color:var(--dec-good-ink); border-color:rgba(0,194,110,.32);}
   .c-dec-o.is-moot{color:var(--dec-strategic-ink);}
 
   /* Cited panel — when an evidence link crosses over from Decisions, the
@@ -601,7 +601,7 @@
      changes and the reader has to work out which of fifteen panels
      answered them. Outline rather than a border so nothing reflows. */
   .c-dash-w{scroll-margin-top:calc(var(--section-gap) + 44px + var(--spacing-8) + var(--spacing-12));}
-  .c-dash-w.is-cited > .c-card,.c-dash-w.is-cited > .c-stat{outline:2px solid var(--color-orange); outline-offset:3px; transition:outline-color 1.2s var(--ease-standard);}
+  .c-dash-w.is-cited > .c-card,.c-dash-w.is-cited > .c-stat{outline:2px solid var(--color-orange); outline-offset:3px; transition:outline-color var(--duration-ambient) var(--ease-standard);}
   .c-dash-w.is-cited.is-fading > .c-card,.c-dash-w.is-cited.is-fading > .c-stat{outline-color:transparent;}
 
   @media (prefers-reduced-motion:reduce){
@@ -1600,7 +1600,7 @@
                   <button class="c-btn c-btn-md c-btn-primary" type="button" data-act="approve" aria-label="Approve — name an executive sponsor for each top-five account">Approve</button>
                   <button class="c-btn c-btn-md c-btn-secondary" type="button" data-act="options" aria-label="Ask for options — name an executive sponsor for each top-five account">Ask for options</button>
                   <button class="c-btn c-btn-md c-btn-ghost" type="button" data-act="defer" aria-label="Defer with reason — name an executive sponsor for each top-five account"><i class="ph ph-calendar-blank" aria-hidden="true"></i>Defer</button>
-                  <button class="c-dec-why" type="button" aria-expanded="false" aria-controls="dec-r2" aria-label="Why — name an executive sponsor for each top-five account"><i class="ph-fill ph-caret-right" aria-hidden="true"></i>Why</button>
+                  <button class="c-dec-why" type="button" aria-expanded="false" aria-controls="dec-r2" aria-label="Why — name an executive sponsor for each top-five account"><i class="ph ph-caret-right" aria-hidden="true"></i>Why</button>
                 </div>
                 <div class="c-dec-rat" id="dec-r2" hidden>
                   <div class="c-dec-ri"><span class="c-dec-rk">Because</span><p class="c-dec-rv">The top five advertisers carry <b>38% of revenue — RM 56.3M</b>. At 9.2% no single account can sink the year, but losing two breaches plan.</p></div>
@@ -1635,7 +1635,7 @@
                   <button class="c-btn c-btn-md c-btn-primary" type="button" data-act="approve" aria-label="Approve — close the RM 17.1M gap">Approve</button>
                   <button class="c-btn c-btn-md c-btn-secondary" type="button" data-act="options" aria-label="Ask for options — close the RM 17.1M gap">Ask for options</button>
                   <button class="c-btn c-btn-md c-btn-ghost" type="button" data-act="defer" aria-label="Defer with reason — close the RM 17.1M gap"><i class="ph ph-calendar-blank" aria-hidden="true"></i>Defer</button>
-                  <button class="c-dec-why" type="button" aria-expanded="false" aria-controls="dec-r1" aria-label="Why — close the RM 17.1M gap"><i class="ph-fill ph-caret-right" aria-hidden="true"></i>Why</button>
+                  <button class="c-dec-why" type="button" aria-expanded="false" aria-controls="dec-r1" aria-label="Why — close the RM 17.1M gap"><i class="ph ph-caret-right" aria-hidden="true"></i>Why</button>
                 </div>
                 <div class="c-dec-rat" id="dec-r1" hidden>
                   <div class="c-dec-ri"><span class="c-dec-rk">Because</span><p class="c-dec-rv">Weighted forecast lands RM 222.9M against a RM 240.0M plan. RM 111.2M is open across 73 deals; <b>RM 51.2M sits in Negotiation at 50%</b> and averages 41 days — the oldest cohort.</p></div>
@@ -1670,7 +1670,7 @@
                   <button class="c-btn c-btn-md c-btn-primary" type="button" data-act="approve" aria-label="Approve — fund Digital demand">Approve</button>
                   <button class="c-btn c-btn-md c-btn-secondary" type="button" data-act="options" aria-label="Ask for options — fund Digital demand">Ask for options</button>
                   <button class="c-btn c-btn-md c-btn-ghost" type="button" data-act="defer" aria-label="Defer with reason — fund Digital demand"><i class="ph ph-calendar-blank" aria-hidden="true"></i>Defer</button>
-                  <button class="c-dec-why" type="button" aria-expanded="false" aria-controls="dec-r3" aria-label="Why — fund Digital demand"><i class="ph-fill ph-caret-right" aria-hidden="true"></i>Why</button>
+                  <button class="c-dec-why" type="button" aria-expanded="false" aria-controls="dec-r3" aria-label="Why — fund Digital demand"><i class="ph ph-caret-right" aria-hidden="true"></i>Why</button>
                 </div>
                 <div class="c-dec-rat" id="dec-r3" hidden>
                   <div class="c-dec-ri"><span class="c-dec-rk">Because</span><p class="c-dec-rv">Digital sold <b>62% of its inventory</b> and reached only 75% of target. The inventory was there and went unsold — so the constraint is demand, not supply.</p></div>
@@ -1716,7 +1716,7 @@
                   <button class="c-btn c-btn-md c-btn-primary" type="button" data-act="approve" aria-label="Approve — buy more addressable inventory">Approve</button>
                   <button class="c-btn c-btn-md c-btn-secondary" type="button" data-act="options" aria-label="Ask for options — buy more addressable inventory">Ask for options</button>
                   <button class="c-btn c-btn-md c-btn-ghost" type="button" data-act="defer" aria-label="Defer with reason — buy more addressable inventory"><i class="ph ph-calendar-blank" aria-hidden="true"></i>Defer</button>
-                  <button class="c-dec-why" type="button" aria-expanded="false" aria-controls="dec-r4" aria-label="Why — buy more addressable inventory"><i class="ph-fill ph-caret-right" aria-hidden="true"></i>Why</button>
+                  <button class="c-dec-why" type="button" aria-expanded="false" aria-controls="dec-r4" aria-label="Why — buy more addressable inventory"><i class="ph ph-caret-right" aria-hidden="true"></i>Why</button>
                 </div>
                 <div class="c-dec-rat" id="dec-r4" hidden>
                   <div class="c-dec-ri"><span class="c-dec-rk">Because</span><p class="c-dec-rv">Addressable is <b>97% sold out</b> and the only line beating plan at 109% — its ceiling is supply, not selling.</p></div>
@@ -1751,7 +1751,7 @@
                   <button class="c-btn c-btn-md c-btn-primary" type="button" data-act="approve" aria-label="Approve — move Daniel to prospecting">Approve</button>
                   <button class="c-btn c-btn-md c-btn-secondary" type="button" data-act="options" aria-label="Ask for options — move Daniel to prospecting">Ask for options</button>
                   <button class="c-btn c-btn-md c-btn-ghost" type="button" data-act="defer" aria-label="Defer with reason — move Daniel to prospecting"><i class="ph ph-calendar-blank" aria-hidden="true"></i>Defer</button>
-                  <button class="c-dec-why" type="button" aria-expanded="false" aria-controls="dec-r5" aria-label="Why — move Daniel to prospecting"><i class="ph-fill ph-caret-right" aria-hidden="true"></i>Why</button>
+                  <button class="c-dec-why" type="button" aria-expanded="false" aria-controls="dec-r5" aria-label="Why — move Daniel to prospecting"><i class="ph ph-caret-right" aria-hidden="true"></i>Why</button>
                 </div>
                 <div class="c-dec-rat" id="dec-r5" hidden>
                   <div class="c-dec-ri"><span class="c-dec-rk">Because</span><p class="c-dec-rv">85% attainment with only <b>0.8&times; pipeline cover</b> is a top-of-funnel gap. Coaching on closing technique would have been the wrong quarter's work.</p></div>
@@ -1787,7 +1787,7 @@
                   <button class="c-btn c-btn-md c-btn-primary" type="button" data-act="approve" aria-label="Approve — diarise Petronas for the Q3 budget reset">Approve</button>
                   <button class="c-btn c-btn-md c-btn-secondary" type="button" data-act="options" aria-label="Ask for options — diarise Petronas for the Q3 budget reset">Ask for options</button>
                   <button class="c-btn c-btn-md c-btn-ghost" type="button" data-act="defer" aria-label="Defer with reason — diarise Petronas for the Q3 budget reset"><i class="ph ph-calendar-blank" aria-hidden="true"></i>Defer</button>
-                  <button class="c-dec-why" type="button" aria-expanded="false" aria-controls="dec-r6" aria-label="Why — diarise Petronas for the Q3 budget reset"><i class="ph-fill ph-caret-right" aria-hidden="true"></i>Why</button>
+                  <button class="c-dec-why" type="button" aria-expanded="false" aria-controls="dec-r6" aria-label="Why — diarise Petronas for the Q3 budget reset"><i class="ph ph-caret-right" aria-hidden="true"></i>Why</button>
                 </div>
                 <div class="c-dec-rat" id="dec-r6" hidden>
                   <div class="c-dec-ri"><span class="c-dec-rk">Because</span><p class="c-dec-rv"><b>RM 2.1M of the RM 4.4M of lapses we could attribute</b> was a budget-cycle gap, not a loss. It needs a calendar, not a discount.</p></div>
@@ -1821,7 +1821,7 @@
                   <button class="c-btn c-btn-md c-btn-primary" type="button" data-act="approve" aria-label="Approve — take the share question to the board">Approve</button>
                   <button class="c-btn c-btn-md c-btn-secondary" type="button" data-act="options" aria-label="Ask for options — take the share question to the board">Ask for options</button>
                   <button class="c-btn c-btn-md c-btn-ghost" type="button" data-act="defer" aria-label="Defer with reason — take the share question to the board"><i class="ph ph-calendar-blank" aria-hidden="true"></i>Defer</button>
-                  <button class="c-dec-why" type="button" aria-expanded="false" aria-controls="dec-r7" aria-label="Why — take the share question to the board"><i class="ph-fill ph-caret-right" aria-hidden="true"></i>Why</button>
+                  <button class="c-dec-why" type="button" aria-expanded="false" aria-controls="dec-r7" aria-label="Why — take the share question to the board"><i class="ph ph-caret-right" aria-hidden="true"></i>Why</button>
                 </div>
                 <div class="c-dec-rat" id="dec-r7" hidden>
                   <div class="c-dec-ri"><span class="c-dec-rk">Because</span><p class="c-dec-rv">Growing 6.4% in a market growing 8.1% moved share from 14.2% to <b>13.8%</b> — roughly RM 4.3M of revenue that existed and went elsewhere. Every other panel in Insights calls this a good year.</p></div>

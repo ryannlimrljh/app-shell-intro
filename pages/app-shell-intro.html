@@ -125,8 +125,9 @@
      them. The hero is min-height, so the extra height just extends it. */
   .c-canvas-dashlink{position:relative; margin:-12px 0 0; text-align:center; font-family:var(--font-primary); font-size:var(--text-body1-size); font-weight:var(--text-body1-weight); color:var(--color-neutral-5); opacity:0; transform:translateY(16px); transition:opacity 550ms cubic-bezier(.16,1,.3,1), transform 550ms cubic-bezier(.16,1,.3,1);}
   .c-canvas-dashlink.is-revealed{opacity:1; transform:translateY(0); transition-delay:900ms;}
-  .c-canvas-dashlink a{color:var(--color-neutral-9); font-weight:700; text-decoration:underline; text-underline-offset:3px; transition:color var(--duration-fast) var(--ease-standard);}
-  .c-canvas-dashlink a:hover{color:var(--color-orange);}
+  .c-canvas-dashlink a{color:var(--color-obsidian); font-weight:700; text-decoration:underline; text-underline-offset:3px; transition:color var(--duration-fast) var(--ease-standard);}
+  .c-canvas-dashlink a:hover{color:var(--color-neutral-8);}
+  .c-canvas-dashlink a:active{color:var(--color-neutral-7);}
 
   /* ---- Ask box — the assistant entry point, ported from
      dashboard-home.html's floating-ask (Desktop/collabrium-screens).
@@ -318,7 +319,6 @@
     --dec-warn-ink:#8A5A00;      /* 5.93 / 5.20 */
     --dec-crit-ink:#C4111F;      /* 6.09 / 5.35 */
     --dec-strategic-ink:#6D28D9; /* 7.10 / 6.23 */
-    --dec-accent-ink:#C13A0E;    /* 5.41 / 4.75 — --color-orange itself is 3.15, so it is a border/icon colour here, never text */
   }
 
   #spaceDecisions{padding-top:0;}
@@ -327,7 +327,7 @@
      line, and everything the paragraph quantified becomes a scannable
      badge. The paragraph itself survives behind "Full read" — it is the
      thesis, so deleting it would break the argument. */
-  .c-dec-digest{background:transparent; border:0; box-shadow:none; border-radius:0; padding:0; margin:var(--spacing-48) 0 var(--spacing-32); gap:0;}
+  .c-dec-digest{background:transparent; border:0; box-shadow:none; border-radius:0; padding:0; margin:var(--spacing-48) 0 var(--spacing-16); gap:0;}
   .c-dec-digest-top{display:flex; align-items:flex-start; justify-content:space-between; gap:var(--spacing-24); flex-wrap:wrap;}
   .c-dec-digest h3{margin:0; font-family:var(--font-secondary); font-style:italic; font-size:var(--text-h1-size); font-weight:600; line-height:1.3; letter-spacing:0; max-width:30ch;}
   @media (min-width:1280px){ .c-dec-digest h3{font-size:var(--text-h1-size-lg); line-height:var(--text-h1-lh-lg);} }
@@ -358,8 +358,9 @@
 
   .c-dec-more{margin-top:var(--spacing-16); display:flex; align-items:center; gap:var(--spacing-16); flex-wrap:wrap;}
   .c-dec-more .c-dec-disclose{margin-left:auto;}
-  .c-dec-lnk{background:none; border:0; padding:0 2px; min-height:32px; font-family:inherit; font-size:var(--text-caption-size); font-weight:800; color:var(--dec-accent-ink); text-decoration:underline; text-underline-offset:3px; cursor:pointer; display:inline-flex; align-items:center; gap:6px; transition:color var(--duration-fast) var(--ease-standard);}
-  .c-dec-lnk:hover{color:var(--color-neutral-9);}
+  .c-dec-lnk{background:none; border:0; padding:0 2px; min-height:32px; font-family:inherit; font-size:var(--text-caption-size); font-weight:800; color:var(--color-obsidian); text-decoration:underline; text-underline-offset:3px; cursor:pointer; display:inline-flex; align-items:center; gap:6px; transition:color var(--duration-fast) var(--ease-standard);}
+  .c-dec-lnk:hover{color:var(--color-neutral-8);}
+  .c-dec-lnk:active{color:var(--color-neutral-7);}
   /* Scoped past .c-card p (0,1,1) — a bare class loses to it and inherits
      the card's own paragraph recipe instead. Same trap as .c-dec-rv. */
   .c-dec-digest p.c-dec-full{margin:0; padding:var(--spacing-12) var(--spacing-16); background:var(--color-neutral-1); border:1px solid var(--color-neutral-3); border-radius:var(--radius-md); font-size:var(--text-body2-size); color:var(--color-neutral-5); line-height:1.6;}
@@ -398,7 +399,7 @@
   }
   .c-dec-kpi-k{font-size:var(--text-label3-size); font-weight:700; letter-spacing:var(--tracking-eyebrow); text-transform:uppercase; color:var(--color-neutral-5); display:flex; align-items:center; gap:var(--spacing-4);}
   .c-dec-kpi-k i{font-size:var(--icon-micro); opacity:.5; flex:none;}
-  .c-dec-kpi:hover .c-dec-kpi-k i{opacity:1; color:var(--color-orange);}
+  .c-dec-kpi:hover .c-dec-kpi-k i{opacity:1; color:var(--color-neutral-9);}
   .c-dec-kpi-v{font-size:var(--text-h3-size-lg); font-weight:800; line-height:1; font-variant-numeric:tabular-nums; color:var(--color-neutral-9);}
   .c-dec-kpi-v.dn{color:var(--dec-crit-ink);}
   .c-dec-kpi-d{display:inline-flex; align-items:center; gap:var(--spacing-4); padding:var(--spacing-4) var(--spacing-8); border-radius:var(--radius-pill); font-size:var(--text-caption-size); font-weight:700; font-variant-numeric:tabular-nums; background:var(--color-neutral-1); border:1px solid var(--color-neutral-3); color:var(--color-neutral-5);}
@@ -480,7 +481,14 @@
   .c-dec-acts{display:flex; align-items:center; gap:var(--spacing-8); flex-wrap:wrap; margin-top:var(--spacing-16); padding-top:var(--spacing-12); border-top:1px solid var(--color-neutral-3);}
   .c-dec-acts .c-dec-disclose{margin-left:auto;}
   .c-dec-disclose{display:inline-flex; align-items:center; gap:var(--spacing-4); height:40px; padding:0 var(--spacing-12); background:none; border:1px solid var(--color-neutral-3); border-radius:var(--radius-md); font-family:inherit; font-size:var(--text-caption-size); font-weight:700; color:var(--color-neutral-5); cursor:pointer; transition:border-color var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard);}
-  .c-dec-disclose:hover{border-color:var(--color-orange); color:var(--dec-accent-ink);} /* border may be raw orange (3.15 clears the 3:1 UI-component floor), the label may not */
+  /* Secondary-button states, per components.css: hover fills neutral-2. The
+     border darkens to the action colour and the label to full ink, since an
+     outline button has no fill of its own to carry the state. Active is one
+     step further down the same neutral ramp — the DS documents an active step
+     for primary only, so this extends its logic rather than inventing a hue. */
+  .c-dec-lnk:focus-visible,.c-dec-disclose:focus-visible,.c-dec-evr:focus-visible,.c-dec-fab:focus-visible,.c-dec-kpi:focus-visible{outline:2px solid var(--color-obsidian); outline-offset:2px;}
+  .c-dec-disclose:hover{background:var(--color-neutral-2); border-color:var(--color-obsidian); color:var(--color-neutral-9);}
+  .c-dec-disclose:active{background:var(--color-neutral-3);}
     .c-dec-disclose[aria-expanded="true"]{color:var(--color-neutral-9);}
   .c-dec-disclose::after{content:"+"; font-size:var(--text-body2-size); font-weight:700; line-height:1;}
   .c-dec-disclose[aria-expanded="true"]::after{content:"\2212";}
@@ -638,9 +646,10 @@
   .c-dec-panel-tabs{padding:0 var(--spacing-16); flex:none;}
   .c-dec-panel-b{flex:1 1 auto; overflow-y:auto; padding:var(--spacing-16);}
   .c-dec-evr{display:flex; align-items:center; gap:var(--spacing-12); width:100%; min-height:52px; padding:0 var(--spacing-12); background:none; border:1px solid var(--color-neutral-3); border-radius:var(--radius-md); margin-bottom:var(--spacing-8); text-align:left; font-family:inherit; font-size:var(--text-body2-size); font-weight:700; color:var(--color-neutral-9); cursor:pointer; transition:border-color var(--duration-fast) var(--ease-standard), background var(--duration-fast) var(--ease-standard);}
-  .c-dec-evr:hover{border-color:var(--color-orange); background:var(--color-neutral-2);}
+  .c-dec-evr:hover{border-color:var(--color-obsidian); background:var(--color-neutral-2);}
+  .c-dec-evr:active{background:var(--color-neutral-3);}
   .c-dec-evr span{margin-left:auto; font-size:var(--text-caption-size); font-weight:700; color:var(--color-neutral-5); flex:none;}
-  .c-dec-evr:hover span{color:var(--dec-accent-ink);}
+  .c-dec-evr:hover span{color:var(--color-neutral-9);}
   .c-dec-log td b{display:block; margin-bottom:2px; color:var(--color-neutral-9);}
   .c-dec-log td{color:var(--color-neutral-5); vertical-align:top; line-height:1.5;}
   .c-dec-o{display:inline-block; padding:2px var(--spacing-8); border-radius:var(--radius-pill); font-weight:700; font-size:var(--text-caption-size); background:var(--color-neutral-1); border:1px solid var(--color-neutral-3); color:var(--color-neutral-5);}
@@ -3547,6 +3556,7 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
   const drawerBtn = document.getElementById('decDrawerBtn');
   const drawerX = document.getElementById('decDrawerX');
   let lastFocus = null;
+  let closeTimer = null;
 
   // Measured, not guessed: the closed state has to be the pill's exact box or
   // the morph visibly starts at the wrong size. Both boxes are width-dependent,
@@ -3567,6 +3577,7 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
 
   function openDrawer(trigger) {
     lastFocus = (trigger && trigger.focus) ? trigger : drawerBtn;
+    clearTimeout(closeTimer); // a re-open mid-shrink must not let the queued pill return fire
     syncMorph();
     void drawer.offsetHeight; // commit the start geometry before the class flips, or there is nothing to transition from
     drawer.classList.add('is-open');
@@ -3584,7 +3595,23 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
     if (!drawer.classList.contains('is-open')) return;
     drawer.classList.remove('is-open');
     drawer.setAttribute('aria-hidden', 'true');
-    document.dispatchEvent(new CustomEvent('decpanel:closed')); // the motion layer owns pill visibility
+    // The panel is now shrinking back onto the pill's footprint. The pill must
+    // not reappear until it lands, or both are on screen at once and the morph
+    // reads as two separate elements swapping. transitionend on transform is
+    // the real signal; the timeout is the fallback for a dropped event or a
+    // context that never runs the transition at all.
+    clearTimeout(closeTimer);
+    const announce = () => {
+      clearTimeout(closeTimer);
+      drawer.removeEventListener('transitionend', onEnd);
+      document.dispatchEvent(new CustomEvent('decpanel:closed')); // the motion layer owns pill visibility
+    };
+    const onEnd = (ev) => { if (ev.target === drawer && ev.propertyName === 'transform') announce(); };
+    if (REDUCED.matches) { announce(); }
+    else {
+      drawer.addEventListener('transitionend', onEnd);
+      closeTimer = setTimeout(announce, 420); // > the 360ms transform
+    }
     if (restoreFocus) (lastFocus || drawerBtn).focus();
   }
   drawerBtn.addEventListener('click', () => openDrawer(drawerBtn));

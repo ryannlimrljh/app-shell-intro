@@ -17,7 +17,7 @@ import { Group } from '@visx/group';
 import { curveMonotoneX, curveLinear } from '@visx/curve';
 import {
   C, T, BAR, GRID, BASE, REF_DASH, axisLeftProps, axisBottomProps, axisLabelProps,
-  eyebrowProps, labelProps, valueProps, verdictProps, Dot, Board, Pill, makePlacer,
+  eyebrowProps, labelProps, valueProps, verdictProps, Dot, Board, Bar, makePlacer,
 } from './theme.jsx';
 
 const M = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -88,7 +88,7 @@ function Bridge({ id }) {
         const yy = top + rh * i, bw = Math.abs(r.v) * sc, bx = r.v >= 0 ? zero : zero - bw;
         return (
           <Group key={r.l}>
-            <Pill x={bx} y={yy} w={bw} fill={r.fill} />
+            <Bar x={bx} y={yy} w={bw} fill={r.fill} />
             <text x={L - 8} y={yy + BAR.H / 2 + 4} {...labelProps({ anchor: 'end' })}>{r.l}</text>
             <text x={bx + bw - 12} y={yy + BAR.H / 2 + 4.5} {...valueProps({ fill: r.vf, anchor: 'end' })}>
               {(r.v > 0 ? '+' : '') + r.v.toFixed(1)}
@@ -97,7 +97,7 @@ function Bridge({ id }) {
         );
       })}
       <line x1={L - 4} y1={ny - 10} x2={L + W + 32} y2={ny - 10} stroke={C.rule} strokeWidth={1.2} />
-      <Pill x={zero} y={ny} w={8.9 * sc} fill={g(id, 'ink')} />
+      <Bar x={zero} y={ny} w={8.9 * sc} fill={g(id, 'ink')} />
       <text x={L - 8} y={ny + BAR.H / 2 + 4} {...labelProps({ anchor: 'end', weight: 900 })}>Net growth</text>
       <text x={zero + 8.9 * sc - 12} y={ny + BAR.H / 2 + 4.5} {...valueProps({ fill: '#fff', anchor: 'end' })}>+8.9</text>
       <text x={L - 8} y={ny + BAR.H + 26} {...eyebrowProps('end')}>LAST YEAR TO THIS</text>
@@ -123,8 +123,8 @@ function Funnel({ id }) {
         const yy = top + rh * i, bw = (r.v / max) * W, ww = (r.wt / max) * W;
         return (
           <Group key={r.l}>
-            <Pill x={L} y={yy} w={bw} fill={C.TRACK} opacity={BAR.TRACK_O || 0.12} />
-            <Pill x={L} y={yy} w={ww} fill={g(id, 'sweep')} />
+            <Bar x={L} y={yy} w={bw} fill={C.TRACK} opacity={C.TRACK_O} />
+            <Bar x={L} y={yy} w={ww} fill={g(id, 'sweep')} />
             <text x={L + 14} y={yy + BAR.H / 2 + 4} {...labelProps({ fill: '#fff', weight: 800 })}>{r.l}</text>
             <text x={L + bw - 12} y={yy + BAR.H / 2 + 4.5} {...valueProps({ anchor: 'end' })}>{r.v.toFixed(1)}</text>
             <text x={L} y={yy + BAR.H + 15} fontSize={T.TICK} fontWeight={600} fill={C.faint}>
@@ -231,8 +231,8 @@ function Fill({ id }) {
         const yy = top + rh * i, cw = (r.cap / max) * W, sw = (r.sold / max) * W;
         return (
           <Group key={r.l}>
-            <Pill x={L} y={yy} w={cw} fill={C.TRACK} opacity={0.12} />
-            <Pill x={L} y={yy} w={sw} fill={g(id, 'sweep')} />
+            <Bar x={L} y={yy} w={cw} fill={C.TRACK} opacity={0.12} />
+            <Bar x={L} y={yy} w={sw} fill={g(id, 'sweep')} />
             <text x={L + 14} y={yy + BAR.H / 2 + 4} {...labelProps({ fill: '#fff', weight: 800 })}>{r.l}</text>
             {sw > 110
               ? <text x={L + sw - 12} y={yy + BAR.H / 2 + 4.5} {...valueProps({ fill: '#fff', anchor: 'end' })}>{r.sold.toFixed(1)}</text>
@@ -249,9 +249,9 @@ function Fill({ id }) {
       <line x1={L} y1={y2} x2={L + W} y2={y2} stroke={C.rule} strokeWidth={1.2} />
       <text x={L} y={y2 + 22} {...labelProps({ weight: 800 })}>Sold</text>
       <text x={L + W} y={y2 + 24} {...verdictProps({ anchor: 'end' })}>RM 148.2M · 85% fill</text>
-      <rect x={L} y={y2 + 34} width={12} height={12} rx={6} fill={g(id, 'sweep')} />
+      <rect x={L} y={y2 + 34} width={12} height={12} rx={3} fill={g(id, 'sweep')} />
       <text x={L + 18} y={y2 + 44} fontSize={T.TICK} fontWeight={600} fill={C.mut}>Sold</text>
-      <rect x={L + 64} y={y2 + 34} width={12} height={12} rx={6} fill={C.TRACK} opacity={0.12} />
+      <rect x={L + 64} y={y2 + 34} width={12} height={12} rx={3} fill={C.TRACK} opacity={0.12} />
       <text x={L + 82} y={y2 + 44} fontSize={T.TICK} fontWeight={600} fill={C.mut}>Unsold capacity</text>
     </Board>
   );
@@ -341,7 +341,7 @@ function Churn({ id }) {
         cursor += bw;
         return (
           <Group key={s.l}>
-            <Pill x={bx} y={y} w={bw - 6} fill={s.fill} />
+            <Bar x={bx} y={y} w={bw - 6} fill={s.fill} />
             {bw > 62 ? (
               <>
                 <text x={bx + (bw - 6) / 2} y={y + 15} fontSize={T.TICK} fontWeight={800} fill={s.tf} textAnchor="middle">{s.l}</text>

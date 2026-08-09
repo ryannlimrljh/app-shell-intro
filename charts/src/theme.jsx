@@ -50,7 +50,10 @@ export const T = {
   SCATTER: 8.6,
 };
 
-export const BAR = { H: 34, R: 17 };
+// R is a corner radius, not half the height: at 17 these read as pills, and
+// the bars are chart marks rather than DS surfaces, so the 12px interactive
+// floor does not apply to them.
+export const BAR = { H: 34, R: 6 };
 
 // ── Shared text props, so no chart hand-rolls its own label styling. ───────
 export const eyebrowProps = (anchor = 'start') => ({
@@ -161,8 +164,8 @@ export function Board({ id, w, h, label, children }) {
   );
 }
 
-/* A pill bar. One height, one radius, everywhere. */
-export function Pill({ x, y, w, fill, opacity }) {
+/* One bar: one height, one corner radius, everywhere. */
+export function Bar({ x, y, w, fill, opacity }) {
   return <rect x={x} y={y} width={Math.max(0, w)} height={BAR.H} rx={BAR.R} fill={fill} opacity={opacity} />;
 }
 

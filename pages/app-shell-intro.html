@@ -331,9 +331,9 @@
   .c-dec-digest-top{display:flex; align-items:flex-start; justify-content:space-between; gap:var(--spacing-24); flex-wrap:wrap;}
   .c-dec-digest h3{margin:0; font-family:var(--font-secondary); font-style:italic; font-size:var(--text-h1-size); font-weight:600; line-height:1.3; letter-spacing:0; max-width:30ch;}
   @media (min-width:1280px){ .c-dec-digest h3{font-size:var(--text-h1-size-lg); line-height:var(--text-h1-lh-lg);} }
-  /* The emphasis is already carried by the italic quote, so the inner em stays
-     upright — nesting italic inside italic reads as a mistake. */
-  .c-dec-digest h3 em{font-style:normal; color:var(--dec-crit-ink);}
+  /* The em keeps its emphasis semantics but takes no styling of its own — the
+     whole line is one italic black statement. */
+  .c-dec-digest h3 em{font-style:inherit; color:inherit;}
 
   /* Posture gauge — five segments. A gauge rather than a number because
      "how bad" is the one thing here with no natural unit. */
@@ -665,6 +665,17 @@
   .c-dash-w.is-cited > .c-card,.c-dash-w.is-cited > .c-stat{outline:2px solid var(--color-orange); outline-offset:3px; transition:outline-color var(--duration-ambient) var(--ease-standard);}
   .c-dash-w.is-cited.is-fading > .c-card,.c-dash-w.is-cited.is-fading > .c-stat{outline-color:transparent;}
 
+  /* Type-out. The glyph spans exist from the start and only opacity moves, so
+     the line never reflows and the strip below it never shifts. The caret
+     blinks only while typing — an animation that never stops is reserved for
+     loading indicators. */
+  .c-dec-qc{opacity:0;}
+  .c-dec-qc.is-in{opacity:1;}
+  .c-dec-qc.is-caret{position:relative;}
+  .c-dec-qc.is-caret::after{content:''; position:absolute; right:-0.08em; top:.1em; bottom:.12em; width:2px;
+    background:var(--color-obsidian); animation:c-dec-caret 640ms steps(1,end) infinite;}
+  @keyframes c-dec-caret{0%,49%{opacity:1;} 50%,100%{opacity:0;}}
+
   /* Space swap: the panel that arrives rises and fades in, so the change of
      content reads as a transition rather than a jump cut. */
   @keyframes c-space-enter{from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:none;}}
@@ -685,6 +696,7 @@
   @media (prefers-reduced-motion:reduce){
     .c-dec-panel,.c-dec-panel > *,.c-dec-fab,.c-dec-reveal,.c-dec-reveal > *{transition:none;}
     .c-space-panel.is-entering,.c-dec-card.is-settling{animation:none;}
+    .c-dec-qc.is-caret::after{animation:none; display:none;}
     .c-dash-chart svg.is-fading > *:not(path.is-drawing){animation:none;}
     .c-dash-chart svg path.is-drawing{transition:none;}
   }
@@ -3890,7 +3902,65 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
     });
   }
 
+  /* Splits on characters but leaves whitespace as real text nodes, so line
+     breaking still works — a span per space would either collapse the space or,
+     with white-space:pre, refuse to wrap. The original innerHTML is restored on
+     completion: that returns the accessible text to one clean run and, just as
+     importantly, restores kerning and ligatures, which per-character spans
+     otherwise suppress across every pair in a 32px serif. */
+  function typeOut(el) {
+    if (el.dataset.typed) return;
+    el.dataset.typed = '1';
+    const original = el.innerHTML;
+    const full = el.textContent;
+    if (REDUCED.matches) return;
+
+    const chars = [];
+    (function walk(node) {
+      Array.from(node.childNodes).forEach((n) => {
+        if (n.nodeType === 3) {
+          const frag = document.createDocumentFragment();
+          n.textContent.split(/(\s+)/).forEach((tok) => {
+            if (!tok) return;
+            if (/^\s+$/.test(tok)) { frag.appendChild(document.createTextNode(tok)); return; }
+            for (const ch of tok) {
+              const sp = document.createElement('span');
+              sp.className = 'c-dec-qc';
+              sp.setAttribute('aria-hidden', 'true'); // the sentence is on the element's aria-label; the glyphs must not be read one by one
+              sp.textContent = ch;
+              frag.appendChild(sp);
+              chars.push(sp);
+            }
+          });
+          node.replaceChild(frag, n);
+        } else if (n.nodeType === 1) walk(n);
+      });
+    })(el);
+    if (!chars.length) return;
+    el.setAttribute('aria-label', full);
+
+    const TOTAL = 900;                       // paced off the length, so any copy lands at the same moment
+    const step = Math.max(12, TOTAL / chars.length);
+    let i = 0;
+    const finish = () => {
+      clearInterval(timer);
+      clearTimeout(guard);
+      el.innerHTML = original;               // authored markup wins, always
+      el.removeAttribute('aria-label');
+    };
+    const timer = setInterval(() => {
+      if (i > 0) chars[i - 1].classList.remove('is-caret');
+      if (i >= chars.length) { finish(); return; }
+      chars[i].classList.add('is-in', 'is-caret');
+      i++;
+    }, step);
+    // Same guarantee as the count-up: a stalled interval must not leave the
+    // headline half-typed, so the settled state lands regardless.
+    const guard = setTimeout(finish, TOTAL + 400);
+  }
+
   function animateWithin(root) {
+    root.querySelectorAll('.c-dec-digest h3').forEach(typeOut);
     root.querySelectorAll('.c-dec-kpi-v, .c-dec-impact-v, .c-stat-value, .c-dec-wv').forEach(countUp);
     root.querySelectorAll('.c-dash-chart svg').forEach(drawChart);
   }

@@ -156,10 +156,14 @@
      Declared after .is-revealed so it wins the tie on source order. --ask-* are
      written by the script from the dock's live rect, so the pill lands beside
      Evidence at any width without hardcoding either box. */
-  .c-canvas-askbox{transition:opacity 550ms cubic-bezier(.16,1,.3,1), transform 550ms cubic-bezier(.16,1,.3,1), width var(--duration-slow) var(--ease-settle), bottom var(--duration-slow) var(--ease-settle);}
   .c-canvas-askbox.is-collapsed{width:var(--ask-w, 240px); bottom:var(--ask-bottom, var(--spacing-24));
-    transform:translate(calc(-50% + var(--ask-shift, 0px)), 0);
-    transition:transform var(--duration-slow) var(--ease-settle), width var(--duration-slow) var(--ease-settle), bottom var(--duration-slow) var(--ease-settle);}
+    transform:translate(calc(-50% + var(--ask-shift, 0px)), 0);}
+  /* Set by the script once the entrance has played, and declared after
+     .is-collapsed so it governs BOTH directions with one timing. Without it the
+     collapse ran at 360ms and the expansion fell through to the entrance rule's
+     550ms transform — measurably slower coming back than going, which is what
+     read as lag. --duration-base is 220ms, inside the documented band. */
+  .c-canvas-askbox.is-morphable{transition:transform var(--duration-base) var(--ease-settle), width var(--duration-base) var(--ease-settle), bottom var(--duration-base) var(--ease-settle);}
   /* Pill radius on the card AND both glow layers, or the glow keeps square
      corners around a rounded pill. */
   .c-canvas-askbox.is-collapsed .floating-ask{border-radius:var(--radius-pill); padding:var(--spacing-12) var(--spacing-20);}
@@ -737,19 +741,19 @@
      thin sharp inner line, both sliding via background-position (not a
      rotating oversized layer, which bleeds into surrounding UI), with
      plus-lighter blending (screen declared first as the fallback). */
-  .floating-ask-glow-outer{position:absolute; inset:-4px; z-index:0; border-radius:calc(var(--radius-lg) + 4px); transition:border-radius var(--duration-slow) var(--ease-settle); background:linear-gradient(90deg, #93c5fd, #fca5a5, #fde047, #86efac, #93c5fd); background-size:200% 100%; filter:blur(16px); opacity:.7; mix-blend-mode:screen; mix-blend-mode:plus-lighter; animation:ask-glow-slide 4s linear infinite; pointer-events:none;}
-  .floating-ask-glow-inner{position:absolute; inset:-1px; z-index:0; border-radius:calc(var(--radius-lg) + 1px); transition:border-radius var(--duration-slow) var(--ease-settle); background:linear-gradient(90deg, #93c5fd, #fca5a5, #fde047, #86efac, #93c5fd); background-size:200% 100%; filter:blur(1px); opacity:1; mix-blend-mode:screen; mix-blend-mode:plus-lighter; animation:ask-glow-slide 4s linear infinite; pointer-events:none;}
+  .floating-ask-glow-outer{position:absolute; inset:-4px; z-index:0; border-radius:calc(var(--radius-lg) + 4px); transition:border-radius var(--duration-base) var(--ease-settle); background:linear-gradient(90deg, #93c5fd, #fca5a5, #fde047, #86efac, #93c5fd); background-size:200% 100%; filter:blur(16px); opacity:.7; mix-blend-mode:screen; mix-blend-mode:plus-lighter; animation:ask-glow-slide 4s linear infinite; pointer-events:none;}
+  .floating-ask-glow-inner{position:absolute; inset:-1px; z-index:0; border-radius:calc(var(--radius-lg) + 1px); transition:border-radius var(--duration-base) var(--ease-settle); background:linear-gradient(90deg, #93c5fd, #fca5a5, #fde047, #86efac, #93c5fd); background-size:200% 100%; filter:blur(1px); opacity:1; mix-blend-mode:screen; mix-blend-mode:plus-lighter; animation:ask-glow-slide 4s linear infinite; pointer-events:none;}
   @keyframes ask-glow-slide{ from{ background-position:0% 0%; } to{ background-position:200% 0%; } }
   /* Card-shaped (radius-lg two-row surface, not a pill) at shadow-4 —
      the floating-overlay elevation from the source; kept even in flow
      so the box still reads as "sitting above" the canvas. Opaque and
      z-index above the glow so the bloom only peeks out around it. */
   .floating-ask{position:relative; z-index:10; display:grid; grid-template-rows:auto 1fr; gap:0; padding:var(--spacing-16); background:var(--color-neutral-1); border-radius:var(--radius-lg); box-shadow:var(--shadow-4);
-    transition:grid-template-rows var(--duration-slow) var(--ease-settle), border-radius var(--duration-slow) var(--ease-settle), padding var(--duration-slow) var(--ease-settle);}
+    transition:grid-template-rows var(--duration-base) var(--ease-settle), border-radius var(--duration-base) var(--ease-settle), padding var(--duration-base) var(--ease-settle);}
   /* min-height:0 so the 0fr row can actually collapse; the vertical padding
      animates with it or it would floor the collapsed height. */
   .floating-ask-more{overflow:hidden; min-height:0; display:flex; flex-direction:column; gap:var(--spacing-12); padding-top:var(--spacing-12);
-    transition:padding-top var(--duration-slow) var(--ease-settle), opacity var(--duration-base) var(--ease-standard);}
+    transition:padding-top var(--duration-base) var(--ease-settle), opacity var(--duration-fast) var(--ease-standard);}
   .floating-ask input{width:100%; border:0; outline:none; background:transparent; font-family:inherit; font-size:var(--text-body1-size); color:var(--color-neutral-9);}
   .floating-ask input::placeholder{color:var(--color-neutral-5);}
   .floating-ask-toolbar{display:flex; align-items:center; justify-content:space-between;}
@@ -4155,9 +4159,18 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
       askBox.style.setProperty('--ask-bottom', getComputedStyle(dock).bottom);
     }
 
+    /* Asymmetric thresholds on purpose. Collapse once past 240, then HOLD the
+       pill all the way back up and only return to the box at the very top.
+       A single threshold flipped the box back mid-scroll and flip-flopped
+       either side of the boundary. */
+    const COLLAPSE_AT = 240, EXPAND_AT = 8;
+    let collapsed = false;
     const syncAsk = () => {
-      syncAskGeometry();
-      askBox.classList.toggle('is-collapsed', shellContent.scrollTop > 240 && !expanded);
+      const y = shellContent.scrollTop;
+      if (expanded) collapsed = false;
+      else if (!collapsed && y > COLLAPSE_AT) collapsed = true;
+      else if (collapsed && y <= EXPAND_AT) collapsed = false;
+      askBox.classList.toggle('is-collapsed', collapsed);
     };
 
     // Clicking or focusing the collapsed pill expands it back to the full box.
@@ -4176,12 +4189,22 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
       expanded = false;
       syncAsk();
     });
+    let queued = false;
     shellContent.addEventListener('scroll', () => {
-      if (shellContent.scrollTop <= 240) expanded = false; // back at the top, reset so the next scroll down collapses again
-      syncAsk();
+      if (queued) return;
+      queued = true;
+      requestAnimationFrame(() => {
+        queued = false;
+        if (shellContent.scrollTop <= EXPAND_AT) expanded = false; // back at the top, reset so the next scroll down collapses again
+        syncAsk();
+      });
     }, { passive: true });
-    window.addEventListener('resize', syncAskGeometry);
+    window.addEventListener('resize', () => { syncAskGeometry(); syncAsk(); });
+    syncAskGeometry();
     syncAsk();
+    // After the entrance has finished, hand the transition over to the morph
+    // timing — before that, .is-revealed's slower glide is the one we want.
+    setTimeout(() => askBox.classList.add('is-morphable'), 1800);
   }
 })();
 

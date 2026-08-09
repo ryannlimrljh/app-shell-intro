@@ -433,30 +433,14 @@
      seven equally-boxed cards. */
     /* 1400px, not the fan's 900px: these cards are ~3x wider, and the shorter
      the perspective the more a tilt distorts long lines of text. */
-    /* --dec-overlap is the single source for the stack: the negative margin and
-     the padding that compensates for it both derive from it, so they cannot
-     drift apart. */
-  .c-dec-queue{--dec-overlap:var(--spacing-12); display:flex; flex-direction:column; gap:0; margin-bottom:var(--spacing-48); perspective:1400px;}
+  .c-dec-queue{display:flex; flex-direction:column; gap:0; margin-bottom:var(--spacing-48); perspective:1400px;}
   .c-dec-card{position:relative; padding:var(--spacing-24); gap:0; box-shadow:none;}
   /* Stacked like the hero fan: each card tucks under the one above it, and
-     z-index descends so the highest-stake card sits on top. No content or
-     control is ever under the next card. The card straight after the "Also
-     open" marker resets, or it would ride up over that heading.
-
-     An overlapped card gets its top padding back, plus 4px. Without this the
-     tier label sat 10-17px below the edge the reader actually sees, against
-     33px on the un-overlapped cards — measurably tight, and inconsistent
-     between neighbours. The extra 4px is the rotated neighbour's bottom
-     corner: at 0.3deg a wide card's corner drops a few px below its own border
-     box, so real occlusion measured 16px against a 12px margin. */
-  .c-dec-card + .c-dec-card{margin-top:calc(-1 * var(--dec-overlap));
-    padding-top:calc(var(--spacing-24) + var(--dec-overlap) + 4px);}
-  /* And the same compensation at the bottom, for any card that HAS one below
-     it — the occlusion cuts both ways. Without it the compact cards' meta row
-     finished 1px above where the next card starts painting. :has() so the last
-     card, and the card before the "Also open" marker, keep their normal
-     padding: neither has anything overlapping them. */
-  .c-dec-card:has(+ .c-dec-card){padding-bottom:calc(var(--spacing-24) + var(--dec-overlap) + 4px);}
+     z-index descends so the highest-stake card sits on top. 12px of the 24px
+     bottom padding is covered, so no content or control is ever under the
+     next card. The card straight after the "Also open" marker resets, or it
+     would ride up over that heading. */
+  .c-dec-card + .c-dec-card{margin-top:calc(-1 * var(--spacing-12));}
   .c-dec-split + .c-dec-card{margin-top:0;}
   .c-dec-card[data-tier="urgent"]{--dec-tier:var(--color-red); --dec-tier-ink:var(--dec-crit-ink);}
   .c-dec-card[data-tier="risk"]{--dec-tier:var(--color-amber); --dec-tier-ink:var(--dec-warn-ink);}
@@ -574,14 +558,9 @@
   .c-dec-split{display:flex; align-items:baseline; gap:var(--spacing-12); flex-wrap:wrap; margin:var(--spacing-24) 0 var(--spacing-4);}
   .c-dec-split h3{margin:0; font-size:var(--text-body2-size); font-weight:700; letter-spacing:var(--tracking-eyebrow); text-transform:uppercase;}
   .c-dec-split p{margin:0; font-size:var(--text-caption-size); color:var(--color-neutral-5);}
-  /* Sides only. This selector's (1,2,0) beats the overlap rules' (0,2,0), so
-     touching padding-top or padding-bottom here silently re-tightens every
-     overlapped compact card — which is exactly what happened. The vertical
-     padding has one owner; compactness comes from the hidden actions and
-     rationale and the smaller type, not from squeezing the box. */
   [data-horizon="week"]    .c-dec-card:not([data-h~="week"]),
   [data-horizon="quarter"] .c-dec-card:not([data-h~="quarter"]),
-  [data-horizon="fy"]      .c-dec-card:not([data-h~="fy"]){padding-left:var(--spacing-16); padding-right:var(--spacing-16);}
+  [data-horizon="fy"]      .c-dec-card:not([data-h~="fy"]){padding:var(--spacing-20) var(--spacing-16);}
   [data-horizon="week"]    .c-dec-card:not([data-h~="week"]) h4,
   [data-horizon="quarter"] .c-dec-card:not([data-h~="quarter"]) h4,
   [data-horizon="fy"]      .c-dec-card:not([data-h~="fy"]) h4{font-size:var(--text-h5-size); margin-top:var(--spacing-4);}

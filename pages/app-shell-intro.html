@@ -152,6 +152,7 @@
      c-canvas-* convention. */
   .c-canvas-askbox{position:absolute; left:50%; bottom:var(--spacing-24); z-index:20; width:min(620px, calc(100% - var(--spacing-32))); opacity:0; transform:translate(-50%, 16px); transition:opacity 550ms cubic-bezier(.16,1,.3,1), transform 550ms cubic-bezier(.16,1,.3,1);}
   .c-canvas-askbox.is-revealed{opacity:1; transform:translate(-50%, 0); transition-delay:1150ms;}
+  .c-canvas-askbox.is-docked{opacity:0; visibility:hidden; transform:translate(-50%, 10px) scale(.97); transition:opacity var(--duration-base) var(--ease-standard), transform var(--duration-base) var(--ease-settle), visibility 0s linear var(--duration-base); transition-delay:0s;}
   .c-shell-content{padding-bottom:184px;} /* box height (~138) + its 24px bottom offset + breathing room — the box never moves, so this is what keeps the last widget scrollable clear of it */
 
   /* Canvas hero — greeting + card row + dashboard hand-off line, held to
@@ -243,7 +244,7 @@
   @media (prefers-reduced-motion: reduce){
     .c-shell-content{scroll-behavior:auto;}
     .c-dash .c-dash-w{opacity:1; transform:none; transition:none;}
-    .c-canvas-askbox{transition:none;}
+    .c-canvas-askbox,.c-ask-pill{transition:none;}
     .c-canvas-date{transition:none;}
   }
   /* ── Ideal-board grid + panels. 12-col grid, spans set per panel.
@@ -620,13 +621,29 @@
      content region is about 1060px. Below that the pill lifts above the box
      (which occupies the bottom ~162px — the same figure .c-shell-content's
      padding-bottom already reserves). Above it, the corner is genuinely free. */
-  .c-dec-fab{position:absolute; right:var(--spacing-24); bottom:178px; z-index:25; display:inline-flex; align-items:center; gap:var(--spacing-8); height:44px; padding:0 var(--spacing-20); border-radius:var(--radius-pill); border:1px solid var(--color-obsidian); background:var(--color-obsidian); color:var(--color-neutral-1); font-family:inherit; font-size:var(--text-body2-size); font-weight:700; cursor:pointer; box-shadow:var(--shadow-3);
+  /* Shared bottom-right dock. Both pills sit in it, so "next to Evidence" needs
+     no width measurement, and the offsets that keep them clear of the
+     assistant box live in one place. Evidence is last, so its right edge is
+     still the corner .c-dec-panel morphs out of. */
+  .c-dock{position:absolute; right:var(--spacing-24); bottom:178px; z-index:25; display:flex; align-items:center; gap:var(--spacing-12);}
+  @media (min-width:1180px){ .c-dock{bottom:var(--spacing-24);} }
+
+  /* Secondary weight, so the dark Evidence pill stays the louder of the two. */
+  .c-ask-pill{display:inline-flex; align-items:center; gap:var(--spacing-8); height:44px; padding:0 var(--spacing-20); border-radius:var(--radius-pill); border:1px solid var(--color-neutral-3); background:var(--color-neutral-1); color:var(--color-neutral-9); font-family:inherit; font-size:var(--text-body2-size); font-weight:700; cursor:pointer; box-shadow:var(--shadow-3);
+    opacity:0; visibility:hidden; transform:translateY(8px);
+    transition:opacity var(--duration-slow) var(--ease-settle), transform var(--duration-slow) var(--ease-settle), visibility 0s linear var(--duration-slow), background var(--duration-fast) var(--ease-standard);}
+  .c-ask-pill.is-visible{opacity:1; visibility:visible; transform:none;
+    transition:opacity var(--duration-slow) var(--ease-settle), transform var(--duration-slow) var(--ease-settle), visibility 0s, background var(--duration-fast) var(--ease-standard);}
+  .c-ask-pill:hover{background:var(--color-neutral-2);}
+  .c-ask-pill:focus-visible{outline:2px solid var(--color-obsidian); outline-offset:2px;}
+  .c-ask-pill i{font-size:var(--icon-sm);}
+
+  .c-dec-fab{display:inline-flex; align-items:center; gap:var(--spacing-8); height:44px; padding:0 var(--spacing-20); border-radius:var(--radius-pill); border:1px solid var(--color-obsidian); background:var(--color-obsidian); color:var(--color-neutral-1); font-family:inherit; font-size:var(--text-body2-size); font-weight:700; cursor:pointer; box-shadow:var(--shadow-3);
     opacity:0; visibility:hidden; transform:translateY(8px);
     transition:opacity var(--duration-slow) var(--ease-settle), transform var(--duration-slow) var(--ease-settle), visibility 0s linear var(--duration-slow), background var(--duration-fast) var(--ease-standard), border-color var(--duration-fast) var(--ease-standard);}
   .c-dec-fab.is-visible{opacity:1; visibility:visible; transform:none;
     transition:opacity var(--duration-slow) var(--ease-settle), transform var(--duration-slow) var(--ease-settle), visibility 0s, background var(--duration-fast) var(--ease-standard), border-color var(--duration-fast) var(--ease-standard);}
   .c-dec-fab:hover{background:var(--color-neutral-8); border-color:var(--color-neutral-8);}
-  @media (min-width:1180px){ .c-dec-fab{bottom:var(--spacing-24);} }
   .c-dec-fab i{font-size:var(--icon-sm);}
 
   .c-dec-panel{position:absolute; top:var(--spacing-16); right:var(--spacing-24); bottom:178px; z-index:75;
@@ -2116,7 +2133,10 @@
            so neither uses a flat 24px offset — they lift above the box at the
            widths where they would otherwise overlap. Shown only in Decision
            Space, since the log it opens is that space's. -->
-      <button class="c-dec-fab" id="decDrawerBtn" type="button" aria-haspopup="dialog"><i class="ph ph-file-text" aria-hidden="true"></i>Evidence &amp; log</button>
+      <div class="c-dock" id="dock">
+        <button class="c-ask-pill" id="askPill" type="button" aria-expanded="false" aria-controls="askBox"><i class="ph ph-sparkle" aria-hidden="true"></i>Ask Collabrium</button>
+        <button class="c-dec-fab" id="decDrawerBtn" type="button" aria-haspopup="dialog"><i class="ph ph-file-text" aria-hidden="true"></i>Evidence &amp; log</button>
+      </div>
       <aside class="c-dec-panel" id="decDrawer" role="dialog" aria-labelledby="decDrawerH" aria-hidden="true">
         <div class="c-dec-panel-hd">
           <h3 id="decDrawerH">Evidence &amp; log</h3>
@@ -4031,14 +4051,38 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
     const guard = setTimeout(finish, TOTAL + 400);
   }
 
-  function animateWithin(root) {
-    root.querySelectorAll('.c-dec-digest h3').forEach(typeOut);
-    root.querySelectorAll('.c-dec-kpi-v, .c-dec-impact-v, .c-stat-value, .c-dec-wv').forEach(countUp);
-    root.querySelectorAll('.c-dash-chart svg').forEach(drawChart);
+  /* Everything below fires on scroll-into-view rather than at load. A short
+     delay after entering, so the animation does not start while the viewport is
+     still moving fast over it. threshold 0.35 rather than 0: for the headline
+     specifically, "just poked into view" is too early — it should start once
+     the reader is actually looking at it. */
+  const MOTION_DELAY = 260;
+  const io = ('IntersectionObserver' in window) ? new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (!entry.isIntersecting) return;
+      const el = entry.target;
+      io.unobserve(el);
+      const run = el._motionRun;
+      if (run) setTimeout(() => run(el), MOTION_DELAY);
+    });
+  }, { root: shellContent, threshold: 0.35 }) : null;
+
+  function register(el, run) {
+    if (el._motionRun) return;
+    el._motionRun = run;
+    if (!io) { run(el); return; } // no observer: better to have played it than never
+    io.observe(el);
   }
 
-  // Decision Space is visible at load; Performance Space runs when switched to
-  // or scrolled into. Both are guarded by the one-shot data flags above.
+  function animateWithin(root) {
+    root.querySelectorAll('.c-dec-digest h3').forEach((el) => register(el, typeOut));
+    root.querySelectorAll('.c-dec-kpi-v, .c-dec-impact-v, .c-stat-value, .c-dec-wv').forEach((el) => register(el, countUp));
+    root.querySelectorAll('.c-dash-chart svg').forEach((el) => register(el, drawChart));
+  }
+
+  // Registering is cheap and does not animate anything — the observer decides
+  // when. Both panels register up front; a hidden panel simply never intersects
+  // until its tab is active.
   const decisions = document.getElementById('spaceDecisions');
   if (decisions) animateWithin(decisions);
   document.addEventListener('space:shown', (e) => {
@@ -4069,6 +4113,37 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
     });
     document.addEventListener('decpanel:closed', sync);
     sync();
+  }
+
+  /* Assistant box shrinks into a pill in the dock on scroll, and expands again
+     from the pill or once the reader returns to the top. It collapses rather
+     than resizing: animating a 620x138 box down to a pill would squash its
+     input and chips, and width/height are the two properties the ruleset says
+     not to animate. */
+  const askBox = document.getElementById('askBox');
+  const askPill = document.getElementById('askPill');
+  if (askBox && askPill) {
+    let reopened = false; // set when the reader expands it deliberately, so scrolling does not re-collapse it under them
+    const syncAsk = () => {
+      const docked = shellContent.scrollTop > 240 && !reopened;
+      askBox.classList.toggle('is-docked', docked);
+      askPill.classList.toggle('is-visible', docked);
+      askPill.setAttribute('aria-expanded', String(!docked));
+    };
+    askPill.addEventListener('click', () => {
+      reopened = true;
+      syncAsk();
+      // Focus the input, not the box: expanding it is only useful if you can type.
+      const input = askBox.querySelector('input');
+      if (input) input.focus();
+    });
+    shellContent.addEventListener('scroll', () => {
+      // Returning to the top resets the deliberate-expand, so the pill behaves
+      // the same way on the next scroll down.
+      if (shellContent.scrollTop <= 240) reopened = false;
+      syncAsk();
+    }, { passive: true });
+    syncAsk();
   }
 })();
 

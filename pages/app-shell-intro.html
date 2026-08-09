@@ -306,8 +306,19 @@
      five-across; emphasis via border-color only (never a tinted fill). */
   .c-dash .c-stat-value{font-size:var(--text-h3-size-lg); font-variant-numeric:tabular-nums;}
   .c-dash .c-stat{height:100%;}
-  .c-dash .c-stat.is-lead{border-color:var(--color-purple);}
-  .c-dash .c-stat.is-lead .c-stat-value{color:var(--color-purple); font-size:var(--text-h2-size);}
+  /* The forecast question is the board's verdict, so it carries the same dark
+     treatment as the Next best action hero card (.c-hcard-ai) rather than a
+     coloured border: obsidian ground, amber label, white figure. Contrast on
+     #2B2B2C, measured over the real fill: amber 7.1:1, white 14.1:1,
+     neutral-3 9.9:1, --dash-dn-on-dark 5.6:1 — all above the 4.5 floor.
+     Purple is gone from this card on purpose: it measures 3.54:1 here, which
+     is why the value goes white instead of keeping the .is-lead accent. */
+  .c-dash .c-stat.is-lead{background:var(--color-obsidian); border-color:var(--color-obsidian);}
+  .c-dash .c-stat.is-lead .c-stat-label{color:var(--color-amber);}
+  .c-dash .c-stat.is-lead .c-stat-value{color:var(--color-neutral-1); font-size:var(--text-h2-size);}
+  .c-dash .c-stat.is-lead .c-stat-trend,
+  .c-dash .c-stat.is-lead .c-stat-trend .period{color:var(--color-neutral-3);}
+  .c-dash .c-stat.is-lead .c-dash-dn{color:var(--dash-dn-on-dark);}
   .c-dash-up{color:var(--color-green);} .c-dash-dn{color:var(--color-red);}
   /* Chart tables reuse DS .c-table / .c-datatable as-is; td.num alignment
      already comes from components.css:148/365 — only th.num needs it here. */
@@ -352,7 +363,10 @@
     --dec-good-ink:#00734D;      /* 5.90 / 5.18 */
     --dec-warn-ink:#8A5A00;      /* 5.93 / 5.20 */
     --dec-crit-ink:#C4111F;      /* 6.09 / 5.35 */
-    --dec-strategic-ink:#6D28D9; /* 7.10 / 6.23 */
+    --dec-strategic-ink:#6D28D9;
+  /* Dark-surface variant. --color-red is 3.86:1 on obsidian, so it cannot be
+     used as text on the forecast card; this measures 5.64:1 there. */
+  --dash-dn-on-dark:#FF7A85; /* 7.10 / 6.23 */
   }
 
   #spaceDecisions{padding-top:0;}
@@ -2302,7 +2316,7 @@
               <span class="c-stat-trend"><span class="c-dash-dn">▼ 0.4pt</span><span class="period">market grew 8.1%</span></span>
             </div></div>
 
-            <div class="c-dash-w c-rise sp8"><div class="c-card c-dash-panel">
+            <div class="c-dash-w c-rise sp6"><div class="c-card c-dash-panel">
               <div class="c-dash-panel-head"><div><h4>Cumulative revenue against plan, with the three closes</h4>
                 <p class="c-dash-panel-sub">Actual to August, then commit / weighted / best case to December</p></div></div>
               <div class="c-dash-chart"><svg id="dFan" viewBox="0 0 700 300" height="300" role="img" aria-label="Cumulative revenue against target with commit, weighted and best-case projections to December"></svg></div>
@@ -2310,21 +2324,21 @@
               <p class="c-dash-note"><b>The plan line is only touched by best case.</b> Weighted lands RM 17.1M short and commit RM 29.8M short — so the question stops being "are we behind" and becomes "which of these 73 open deals must close".</p>
             </div></div>
 
-            <div class="c-dash-w c-rise sp4"><div class="c-card c-dash-panel">
+            <div class="c-dash-w c-rise sp6"><div class="c-card c-dash-panel">
               <div class="c-dash-panel-head"><div><h4>Where the RM 8.9M of growth came from</h4>
                 <p class="c-dash-panel-sub">Last year to this year, decomposed</p></div></div>
               <div class="c-dash-chart"><svg id="dBridge" viewBox="0 0 340 300" height="300" role="img" aria-label="Waterfall from last year revenue through existing account growth, new business and lapsed accounts to this year"></svg></div>
               <p class="c-dash-note"><b>New business is doing the work; existing accounts are nearly flat.</b> Of RM 8.9M growth, RM 12.7M came from new advertisers and RM 8.6M walked out — leaving only RM 4.8M from the accounts we already had. Retention, not acquisition, is the exposure.</p>
             </div></div>
 
-            <div class="c-dash-w c-rise sp5"><div class="c-card c-dash-panel">
+            <div class="c-dash-w c-rise sp6"><div class="c-card c-dash-panel">
               <div class="c-dash-panel-head"><div><h4>Pipeline by stage</h4>
                 <p class="c-dash-panel-sub">Value, and what it is worth after probability</p></div></div>
               <div class="c-dash-chart"><svg id="dFunnel" viewBox="0 0 420 268" height="268" role="img" aria-label="Pipeline funnel by stage with weighted value overlay"></svg></div>
               <p class="c-dash-note"><b>Half the open value sits in the least certain stage.</b> Negotiation holds RM 51.2M at 50% and averages 41 days — the oldest cohort. Contracted-not-booked is RM 28.4M at 95% and is really a billing question, not a selling one.</p>
             </div></div>
 
-            <div class="c-dash-w c-rise sp7"><div class="c-card c-dash-panel">
+            <div class="c-dash-w c-rise sp6"><div class="c-card c-dash-panel">
               <div class="c-dash-panel-head"><div><h4>Which reps are actually at risk</h4>
                 <p class="c-dash-panel-sub">All 14 reps — attainment today against pipeline cover for the rest of the year</p></div></div>
               <div class="c-dash-chart"><svg id="dQuad" viewBox="0 0 640 312" height="312" role="img" aria-label="Quadrant chart of sales rep attainment versus pipeline coverage"></svg></div>
@@ -2369,14 +2383,14 @@
               <p class="c-dash-note"><b>No single-account cliff, but a top-five exposure.</b> The largest advertiser is 9.2%, so no one client can sink the year — yet the top five carry 38%, which means losing two of them breaches plan.</p>
             </div></div>
 
-            <div class="c-dash-w c-rise sp12"><div class="c-card c-dash-panel">
+            <div class="c-dash-w c-rise sp6"><div class="c-card c-dash-panel">
               <div class="c-dash-panel-head"><div><h4>Us against the market</h4>
                 <p class="c-dash-panel-sub">Indexed growth, and the share that follows from it</p></div></div>
               <div class="c-dash-chart"><svg id="dShare" viewBox="0 0 700 268" height="268" role="img" aria-label="Our indexed growth against market growth, with share of market trending down"></svg></div>
               <p class="c-dash-note"><b>The most uncomfortable panel here.</b> Growing 6.4% in a market growing 8.1% means share fell from 14.2% to 13.8% — about RM 4.3M of revenue that existed and went elsewhere. Every other widget on this board calls this a good year. Only this one calls it a loss.</p>
             </div></div>
 
-            <div class="c-dash-w c-rise sp12"><div class="c-card c-dash-panel">
+            <div class="c-dash-w c-rise sp6"><div class="c-card c-dash-panel">
               <div class="c-dash-panel-head"><div><h4>What this board says to do next</h4>
                 <p class="c-dash-panel-sub">Each line traces to a panel above — the point of the exercise</p></div></div>
               <div class="c-dash-scroll"><div class="c-datatable"><table>

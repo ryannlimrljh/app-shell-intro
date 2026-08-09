@@ -816,6 +816,160 @@
   @media (prefers-reduced-motion:reduce){ .floating-ask-glow-outer, .floating-ask-glow-inner{ animation:none; } }
 
 
+
+  /* ---- Assistant overlay ---------------------------------------------
+     A full takeover: it covers the Collabrium rail as well as the canvas and
+     brings its own conversation sidebar, so z-index sits above
+     .c-sidebar-shell's 50 and above .c-card-modal's 90 — nothing on the page
+     behind should be able to open over the top of it. Only .wipe-panel (100)
+     stays higher, which is correct: that is the page's own load curtain.
+
+     The shell morphs out of the ask box rather than fading in, using the same
+     translate+scale-from-a-rect trick as the card modal: transform-origin is
+     the top-left corner so a translate to the box's corner plus a
+     non-uniform scale to the box's size is the whole transform. The transform
+     is driven entirely from inline style (set at open, cleared to animate
+     out) — keeping the resting state in the stylesheet would have made
+     removing .is-shown snap the shell back to its OPEN size, which is the
+     opposite of a close. Content opacity is delayed behind the shell so the
+     text is not legible while it is still the wrong shape. */
+  .c-chat{position:fixed; inset:0; z-index:95; display:none;
+    --chat-dur:480ms; --chat-ease:cubic-bezier(.22,1,.36,1);}
+  .c-chat.is-open{display:block;}
+  .c-chat[hidden]{display:none;}
+  .c-chat-veil{position:absolute; inset:0; background:rgba(20,20,20,.42); opacity:0;
+    transition:opacity var(--chat-dur) var(--ease-standard);}
+  .c-chat.is-shown .c-chat-veil{opacity:1;}
+  .c-chat-shell{position:absolute; inset:0; display:grid; grid-template-columns:288px minmax(0,1fr);
+    background:var(--color-neutral-1); overflow:hidden; transform-origin:0 0;
+    border-radius:var(--radius-lg); box-shadow:var(--shadow-4);
+    transition:transform var(--chat-dur) var(--chat-ease), border-radius var(--chat-dur) var(--chat-ease);}
+  .c-chat.is-shown .c-chat-shell{border-radius:0;}
+  .c-chat-shell > *{opacity:0; transition:opacity var(--duration-base) var(--ease-standard);}
+  .c-chat.is-shown .c-chat-shell > *{opacity:1; transition-delay:180ms;}
+
+  /* Conversation rail. Warm canvas against the white thread, which is what
+     separates the two columns — no divider rule needed beyond the 1px edge. */
+  .c-chat-rail{display:flex; flex-direction:column; min-height:0;
+    background:var(--color-canvas-warm); border-right:1px solid var(--color-neutral-3);
+    padding:var(--spacing-16); gap:var(--spacing-16);}
+  .c-chat-rail-hd{display:flex; align-items:center; gap:var(--spacing-8); padding:0 var(--spacing-4);}
+  .c-chat-mark{width:28px; height:28px; flex:none; display:flex; align-items:center; justify-content:center;
+    border-radius:var(--radius-sm); background:var(--color-obsidian); color:var(--color-neutral-1); font-size:16px;}
+  .c-chat-wordmark{font-size:var(--text-body1-size); font-weight:800; color:var(--color-neutral-9);}
+  .c-chat-new{display:flex; align-items:center; gap:var(--spacing-8); width:100%; height:40px;
+    padding:0 var(--spacing-12); border:1px solid var(--color-neutral-3); border-radius:var(--radius-sm);
+    background:var(--color-neutral-1); color:var(--color-neutral-9); font-family:inherit;
+    font-size:var(--text-body2-size); font-weight:700; cursor:pointer;
+    transition:background-color var(--duration-fast) var(--ease-standard);}
+  .c-chat-new:hover{background:var(--color-neutral-2);}
+  .c-chat-new:active{background:var(--color-neutral-3);}
+  .c-chat-rail-nav{display:flex; flex-direction:column; gap:2px;}
+  .c-chat-rail-item{display:flex; align-items:center; gap:var(--spacing-12); width:100%; height:36px;
+    padding:0 var(--spacing-12); border:0; border-radius:var(--radius-sm); background:transparent;
+    color:var(--color-neutral-5); font-family:inherit; font-size:var(--text-body2-size); font-weight:500;
+    text-align:left; cursor:pointer;
+    transition:background-color var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard);}
+  .c-chat-rail-item:hover{background:var(--color-neutral-2); color:var(--color-neutral-9);}
+  .c-chat-rail-item.is-active{background:var(--color-neutral-2); color:var(--color-neutral-9); font-weight:700;}
+  .c-chat-threads{flex:1 1 auto; min-height:0; overflow-y:auto; display:flex; flex-direction:column; gap:2px;
+    overscroll-behavior:contain;}
+  .c-chat-threads-h{margin:var(--spacing-12) 0 var(--spacing-4); padding:0 var(--spacing-12);
+    font-size:var(--text-caption-size); font-weight:700; letter-spacing:var(--tracking-eyebrow);
+    text-transform:uppercase; color:var(--color-neutral-5);}
+  .c-chat-thread{display:block; width:100%; padding:var(--spacing-8) var(--spacing-12); border:0;
+    border-radius:var(--radius-sm); background:transparent; color:var(--color-neutral-5);
+    font-family:inherit; font-size:var(--text-body2-size); text-align:left; cursor:pointer;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    transition:background-color var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard);}
+  .c-chat-thread:hover{background:var(--color-neutral-2); color:var(--color-neutral-9);}
+  .c-chat-thread.is-active{background:var(--color-neutral-2); color:var(--color-neutral-9); font-weight:700;}
+  .c-chat-rail-ft{display:flex; align-items:center; gap:var(--spacing-8); padding-top:var(--spacing-12);
+    border-top:1px solid var(--color-neutral-3);}
+  .c-chat-avatar{width:32px; height:32px; flex:none; display:flex; align-items:center; justify-content:center;
+    border-radius:var(--radius-pill); background:var(--color-neutral-2); color:var(--color-neutral-9);
+    font-size:var(--text-caption-size); font-weight:800;}
+  .c-chat-who{display:flex; flex-direction:column; min-width:0; font-size:var(--text-caption-size); color:var(--color-neutral-5);}
+  .c-chat-who b{font-size:var(--text-body2-size); font-weight:700; color:var(--color-neutral-9);}
+
+  /* Thread column */
+  .c-chat-main{display:flex; flex-direction:column; min-width:0; min-height:0;}
+  .c-chat-hd{display:flex; align-items:flex-start; justify-content:space-between; gap:var(--spacing-16);
+    padding:var(--spacing-20) var(--spacing-24); border-bottom:1px solid var(--color-neutral-3);}
+  .c-chat-hd h2{margin:0; font-size:var(--text-h5-size); font-weight:800; letter-spacing:0; color:var(--color-neutral-9);}
+  .c-chat-hd p{margin:var(--spacing-4) 0 0; font-size:var(--text-caption-size); color:var(--color-neutral-5);}
+  .c-chat-x{flex:none; width:40px; height:40px; display:flex; align-items:center; justify-content:center;
+    border:0; border-radius:var(--radius-pill); background:transparent; color:var(--color-neutral-9);
+    font-size:var(--icon-base); cursor:pointer;
+    transition:background-color var(--duration-fast) var(--ease-standard);}
+  .c-chat-x:hover{background:var(--color-neutral-2);}
+  .c-chat-x:active{background:var(--color-neutral-3);}
+  .c-chat-x:focus-visible{outline:2px solid var(--color-obsidian); outline-offset:2px;}
+  .c-chat-body{flex:1 1 auto; min-height:0; overflow-y:auto; overscroll-behavior:contain;
+    padding:var(--spacing-24); display:flex; flex-direction:column; gap:var(--spacing-24);}
+  .c-chat-scroll{width:100%; max-width:760px; margin:0 auto; display:flex; flex-direction:column; gap:var(--spacing-24);}
+  .c-chat-msg{display:flex; gap:var(--spacing-12);}
+  .c-chat-msg.is-me{justify-content:flex-end;}
+  /* The reader's own turn is the tinted one, the assistant's is plain text on
+     the page — the same asymmetry Claude uses, and it keeps long answers from
+     being boxed in. */
+  .c-chat-msg.is-me .c-chat-bubble{max-width:78%; padding:var(--spacing-12) var(--spacing-16);
+    background:var(--color-neutral-2); border-radius:var(--radius-md); color:var(--color-neutral-9);}
+  .c-chat-ai-mark{width:28px; height:28px; flex:none; display:flex; align-items:center; justify-content:center;
+    border-radius:var(--radius-pill); background:var(--color-obsidian); color:var(--color-neutral-1); font-size:15px;}
+  .c-chat-bubble{font-size:var(--text-body1-size); line-height:1.65; color:var(--color-neutral-9);}
+  .c-chat-bubble p{margin:0 0 var(--spacing-12);}
+  .c-chat-bubble p:last-child{margin-bottom:0;}
+  .c-chat-bubble ul{margin:0 0 var(--spacing-12); padding-left:var(--spacing-20);}
+  .c-chat-bubble li{margin-bottom:var(--spacing-4);}
+  .c-chat-bubble b{font-weight:700;}
+  .c-chat-cite{display:inline-flex; align-items:center; gap:var(--spacing-4); margin-top:var(--spacing-4);
+    padding:2px var(--spacing-8); border-radius:var(--radius-pill); background:var(--color-neutral-2);
+    font-size:var(--text-caption-size); font-weight:700; color:var(--color-neutral-5);}
+
+  /* Composer */
+  .c-chat-composer{flex:none; padding:var(--spacing-16) var(--spacing-24) var(--spacing-20);
+    border-top:1px solid var(--color-neutral-3);}
+  .c-chat-inputwrap{max-width:760px; margin:0 auto;}
+  .c-chat-input{display:flex; flex-direction:column; gap:var(--spacing-12);
+    padding:var(--spacing-12) var(--spacing-16); border:1px solid var(--color-neutral-3);
+    border-radius:var(--radius-md); background:var(--color-neutral-1);
+    transition:border-color var(--duration-fast) var(--ease-standard);}
+  .c-chat-input:focus-within{border-color:var(--color-obsidian);}
+  .c-chat-input input{width:100%; border:0; outline:none; background:transparent; font-family:inherit;
+    font-size:var(--text-body1-size); color:var(--color-neutral-9);}
+  .c-chat-input input::placeholder{color:var(--color-neutral-5);}
+  .c-chat-tools{display:flex; align-items:center; justify-content:space-between; gap:var(--spacing-12);}
+  .c-chat-tools-l,.c-chat-tools-r{display:flex; align-items:center; gap:var(--spacing-8);}
+  .c-chat-tool{width:32px; height:32px; flex:none; display:flex; align-items:center; justify-content:center;
+    border:0; border-radius:var(--radius-sm); background:transparent; color:var(--color-neutral-5);
+    font-size:var(--icon-base); cursor:pointer;
+    transition:background-color var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard);}
+  .c-chat-tool:hover{background:var(--color-neutral-2); color:var(--color-neutral-9);}
+  .c-chat-model{font-size:var(--text-caption-size); font-weight:700; color:var(--color-neutral-5);}
+  .c-chat-send{width:32px; height:32px; flex:none; display:flex; align-items:center; justify-content:center;
+    border:0; border-radius:var(--radius-pill); background:var(--color-obsidian); color:var(--color-neutral-1);
+    font-size:var(--icon-base); cursor:pointer;
+    transition:background-color var(--duration-fast) var(--ease-standard);}
+  .c-chat-send:hover{background:var(--color-neutral-8);}
+  .c-chat-send:active{background:var(--color-neutral-7);}
+  .c-chat-foot{max-width:760px; margin:var(--spacing-8) auto 0; font-size:var(--text-caption-size);
+    color:var(--color-neutral-5); text-align:center;}
+
+  /* The launcher fades out while the chat is up, so it is not sitting under
+     the shell it just turned into. */
+  .c-canvas-askbox.is-launched{opacity:0; pointer-events:none; transition:opacity var(--duration-base) var(--ease-standard);}
+
+  /* One column below 900px: a 288px rail plus a readable thread does not fit,
+     and the thread is the part that matters. */
+  @media (max-width:900px){
+    .c-chat-shell{grid-template-columns:minmax(0,1fr);}
+    .c-chat-rail{display:none;}
+  }
+  @media (prefers-reduced-motion:reduce){
+    .c-chat-shell,.c-chat-veil,.c-chat-shell > *{transition:none;}
+  }
+
   /* ---- Actionable Cards overlay -------------------------------------
      The six hero cards are NOT copied in here: the same six nodes are
      reparented out of the fan into this grid, and a FLIP carries each one
@@ -2349,6 +2503,102 @@
     </div><!-- /.c-shell-main -->
   </div>
 
+  <!-- Assistant overlay. Layout is real; the conversation in it is a fixed
+       placeholder thread (see the answers recorded for this build) so the
+       shape and rhythm can be judged before anything is wired up. -->
+  <div class="c-chat" id="chatOverlay" aria-hidden="true">
+    <div class="c-chat-veil" id="chatVeil"></div>
+    <div class="c-chat-shell" id="chatShell" role="dialog" aria-modal="true" aria-labelledby="chatTitle">
+      <aside class="c-chat-rail">
+        <div class="c-chat-rail-hd">
+          <span class="c-chat-mark" aria-hidden="true"><i class="ph-fill ph-sparkle"></i></span>
+          <span class="c-chat-wordmark">Collabrium AI</span>
+        </div>
+        <button class="c-chat-new" type="button"><i class="ph ph-plus" aria-hidden="true"></i>New chat</button>
+        <nav class="c-chat-rail-nav" aria-label="Assistant sections">
+          <button class="c-chat-rail-item is-active" type="button"><i class="ph ph-chat-circle" aria-hidden="true"></i>Chats</button>
+          <button class="c-chat-rail-item" type="button"><i class="ph ph-bookmark-simple" aria-hidden="true"></i>Saved</button>
+          <button class="c-chat-rail-item" type="button"><i class="ph ph-squares-four" aria-hidden="true"></i>Workspaces</button>
+        </nav>
+        <div class="c-chat-threads">
+          <p class="c-chat-threads-h">Today</p>
+          <button class="c-chat-thread is-active" type="button">Where the RM 17.1M gap sits</button>
+          <button class="c-chat-thread" type="button">Which eight deals would close it</button>
+          <p class="c-chat-threads-h">Earlier this week</p>
+          <button class="c-chat-thread" type="button">Digital inventory against demand</button>
+          <button class="c-chat-thread" type="button">Why RM 4.4M lapsed</button>
+          <button class="c-chat-thread" type="button">Which reps are actually at risk</button>
+          <button class="c-chat-thread" type="button">Petronas budget reset — who owns it</button>
+        </div>
+        <div class="c-chat-rail-ft">
+          <span class="c-chat-avatar" aria-hidden="true">BW</span>
+          <span class="c-chat-who"><b>Bryan Wong</b>Astro Digital</span>
+        </div>
+      </aside>
+
+      <div class="c-chat-main">
+        <header class="c-chat-hd">
+          <div>
+            <h2 id="chatTitle">Where the RM 17.1M gap sits</h2>
+            <p>Collabrium assistant &middot; reading this workspace</p>
+          </div>
+          <button class="c-chat-x" id="chatX" type="button" aria-label="Close assistant"><i class="ph ph-x" aria-hidden="true"></i></button>
+        </header>
+
+        <div class="c-chat-body" id="chatBody">
+          <div class="c-chat-scroll">
+            <div class="c-chat-msg is-me">
+              <div class="c-chat-bubble"><p>We&rsquo;re RM 17.1M short on plan. Is that a pipeline problem or a conversion problem?</p></div>
+            </div>
+            <div class="c-chat-msg is-ai">
+              <span class="c-chat-ai-mark" aria-hidden="true"><i class="ph-fill ph-sparkle"></i></span>
+              <div class="c-chat-bubble">
+                <p>Conversion. There is <b>RM 111.2M</b> of open pipeline against a RM 17.1M gap &mdash; 6.5&times; cover, so there is no shortage of deals to work.</p>
+                <p>What is missing is close rate in the back half of the funnel. Negotiation-stage deals have been ageing 41 days on average, and the plan line is only touched by best case.</p>
+                <span class="c-chat-cite"><i class="ph ph-chart-line" aria-hidden="true"></i>Pipeline by stage</span>
+              </div>
+            </div>
+            <div class="c-chat-msg is-me">
+              <div class="c-chat-bubble"><p>So which deals do I actually chase this week?</p></div>
+            </div>
+            <div class="c-chat-msg is-ai">
+              <span class="c-chat-ai-mark" aria-hidden="true"><i class="ph-fill ph-sparkle"></i></span>
+              <div class="c-chat-bubble">
+                <p>Eight of them cover the gap on their own. In order of what is at stake:</p>
+                <ul>
+                  <li><b>Petronas</b> &mdash; budget reset opens next week, reset undiarised for 7 days</li>
+                  <li><b>MediaCorp</b> &mdash; quiet longest at 12 days stalled</li>
+                  <li><b>Genting F&amp;B</b> and <b>AirAsia Retail</b> &mdash; both inside the renewal window</li>
+                </ul>
+                <p>The remaining four are smaller and all sit with one rep, which is its own risk.</p>
+                <span class="c-chat-cite"><i class="ph ph-list-checks" aria-hidden="true"></i>Decide now &middot; 3 this week</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="c-chat-composer">
+          <div class="c-chat-inputwrap">
+            <div class="c-chat-input">
+              <input type="text" id="chatInput" aria-label="Message the assistant" placeholder="Reply to Collabrium&hellip;" />
+              <div class="c-chat-tools">
+                <div class="c-chat-tools-l">
+                  <button class="c-chat-tool" type="button" aria-label="Add image"><i class="ph ph-image" aria-hidden="true"></i></button>
+                  <button class="c-chat-tool" type="button" aria-label="Attach file"><i class="ph ph-paperclip" aria-hidden="true"></i></button>
+                </div>
+                <div class="c-chat-tools-r">
+                  <span class="c-chat-model">Reading: this workspace</span>
+                  <button class="c-chat-send" type="button" aria-label="Send"><i class="ph ph-arrow-up" aria-hidden="true"></i></button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <p class="c-chat-foot">Placeholder conversation &mdash; the composer is not wired up yet.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Actionable Cards overlay. Empty on purpose: the six .c-card-slide
        nodes are moved in here at open time and back into the fan on close,
        so there is exactly one copy of each card in the document. -->
@@ -3696,6 +3946,103 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
   }
 })();
 
+// ── Assistant overlay: the ask box expands into a full chat surface.
+// The shell morphs out of the box's on-screen rect rather than fading in, so
+// the box reads as becoming the chat. Same measurement contract as the card
+// modal: suppress the transition, clear any in-flight transform, force a
+// reflow, and only then read rects — a mid-flight transform would otherwise
+// be baked into the next morph and compound.
+// Recomputed at open AND close, because the page can be scrolled while the
+// overlay is up and the box's rect moves with it.
+(function () {
+  const overlay = document.getElementById('chatOverlay');
+  const shell = document.getElementById('chatShell');
+  const veil = document.getElementById('chatVeil');
+  const closeBtn = document.getElementById('chatX');
+  const input = document.getElementById('chatInput');
+  const askBox = document.getElementById('askBox');
+  if (!overlay || !shell) return;
+
+  const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)');
+  let open = false, returnFocus = null, hideTimer = 0;
+
+  function morphFrom(el) {
+    shell.style.transition = 'none';
+    shell.style.transform = 'none';
+    void shell.offsetWidth;
+    const from = el.getBoundingClientRect();
+    const to = shell.getBoundingClientRect();
+    if (!to.width || !to.height) return 'none';
+    return `translate(${(from.left - to.left).toFixed(1)}px, ${(from.top - to.top).toFixed(1)}px)` +
+           ` scale(${(from.width / to.width).toFixed(4)}, ${(from.height / to.height).toFixed(4)})`;
+  }
+
+  function openChat(trigger) {
+    if (open) return;
+    clearTimeout(hideTimer);
+    open = true;
+    returnFocus = trigger || askBox || null;
+    overlay.classList.add('is-open');
+    overlay.setAttribute('aria-hidden', 'false');
+    if (askBox) askBox.classList.add('is-launched');
+    if (REDUCED.matches) {
+      shell.style.transition = 'none';
+      shell.style.transform = 'none';
+      overlay.classList.add('is-shown');
+    } else {
+      shell.style.transform = morphFrom(askBox || shell);
+      void shell.offsetWidth;          // commit the start pose before the stylesheet's timing comes back
+      shell.style.transition = '';
+      shell.style.transform = 'none';  // animates out to the full shell
+      overlay.classList.add('is-shown');
+    }
+    // The composer is the point of the overlay, so that is where focus goes.
+    (input || closeBtn || shell).focus({ preventScroll: true });
+  }
+
+  function closeChat() {
+    if (!open) return;
+    open = false;
+    const back = morphFrom(askBox || shell);   // measured fresh: the page may have scrolled
+    shell.style.transition = '';
+    overlay.classList.remove('is-shown');
+    if (REDUCED.matches) {
+      finish();
+    } else {
+      void shell.offsetWidth;
+      shell.style.transform = back;
+      // Timer rather than transitionend, this page's convention: a
+      // backgrounded tab can miss the event and would strand the overlay.
+      hideTimer = setTimeout(finish, 520);
+    }
+    if (returnFocus && document.contains(returnFocus)) returnFocus.focus({ preventScroll: true });
+    returnFocus = null;
+  }
+
+  function finish() {
+    overlay.classList.remove('is-open');
+    overlay.setAttribute('aria-hidden', 'true');
+    shell.style.transition = '';
+    shell.style.transform = '';
+    if (askBox) askBox.classList.remove('is-launched');
+  }
+
+  window.showChat = openChat;
+  if (closeBtn) closeBtn.addEventListener('click', closeChat);
+  if (veil) veil.addEventListener('click', closeChat);
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && open) closeChat(); });
+  // Focus trap: a full takeover that let Tab reach the page behind would put
+  // focus on controls the reader cannot see.
+  shell.addEventListener('keydown', (e) => {
+    if (e.key !== 'Tab') return;
+    const f = shell.querySelectorAll('button, input, [tabindex]:not([tabindex="-1"])');
+    if (!f.length) return;
+    const first = f[0], last = f[f.length - 1];
+    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+  });
+})();
+
 // ── Actionable Cards overlay: the fan sorts itself into a grid.
 // A real FLIP on the six hero cards, not a second set of copies. Sequence
 // per card: measure where it is now -> reparent -> neutralise its transform
@@ -4533,7 +4880,6 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
       ghost.classList.toggle('is-running', dx < -1 && ghost.dataset.ready === '1');
     }
     document.addEventListener('ask:textready', syncMarquee);
-    let expanded = false;  // a deliberate expand, so scrolling does not shut it under the reader
 
     /* The collapsed geometry is measured, not hardcoded. The box is centred by
        left:50% + translateX(-50%), so moving it beside the dock is a shift on
@@ -4561,8 +4907,7 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
     const syncAsk = () => {
       const y = shellContent.scrollTop;
       const was = collapsed;
-      if (expanded) collapsed = false;
-      else if (!collapsed && y > COLLAPSE_AT) collapsed = true;
+      if (!collapsed && y > COLLAPSE_AT) collapsed = true;
       else if (collapsed && y <= EXPAND_AT) collapsed = false;
       // Re-measure on a STATE CHANGE, not on every scroll event. Caching it at
       // init alone was wrong: the Evidence pill is 84px wider before the
@@ -4581,21 +4926,20 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
       }
     };
 
-    // Clicking or focusing the collapsed pill expands it back to the full box.
-    askBox.addEventListener('focusin', () => { expanded = true; syncAsk(); });
-    askBox.addEventListener('click', () => {
-      if (!askBox.classList.contains('is-collapsed')) return;
-      expanded = true;
-      syncAsk();
-      if (askInputEl) askInputEl.focus();
-    });
-    // Clicking away re-collapses, but only if the reader has scrolled past the
-    // threshold and left the field empty — collapsing a half-typed question
-    // would be worse than leaving it open.
-    askBox.addEventListener('focusout', () => {
-      if (askInputEl && askInputEl.value.trim()) return;
-      expanded = false;
-      syncAsk();
+    /* The box is a launcher now: a click anywhere on it (box or collapsed
+       pill) opens the assistant overlay instead of expanding in place. The
+       old deliberate-expand state went with it, and so did the focusout that
+       undid it — there is no inline expanded state left to protect from a
+       scroll, which is why syncAsk no longer consults one.
+       Deliberately NOT wired to focusin: the overlay hands focus back to this
+       box when it closes, and a focus-to-open rule would immediately reopen
+       it. Enter covers the keyboard path instead. */
+    const launchChat = () => { if (typeof window.showChat === 'function') window.showChat(askBox); };
+    askBox.addEventListener('click', launchChat);
+    if (askInputEl) askInputEl.addEventListener('keydown', (e) => {
+      if (e.key !== 'Enter') return;
+      e.preventDefault();
+      launchChat();
     });
     let queued = false;
     shellContent.addEventListener('scroll', () => {
@@ -4603,7 +4947,6 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
       queued = true;
       requestAnimationFrame(() => {
         queued = false;
-        if (shellContent.scrollTop <= EXPAND_AT) expanded = false; // back at the top, reset so the next scroll down collapses again
         syncAsk();
       });
     }, { passive: true });

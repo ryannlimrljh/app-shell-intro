@@ -995,6 +995,48 @@
     .c-chat-shell.is-folding-open,.c-chat-shell.is-folding-closed{animation:none;}
   }
 
+  /* ---- visx boards ---------------------------------------------------
+     The chart host is an empty div; visx renders the <svg> into it at mount,
+     so the sizing rule below has to target that generated child rather than
+     an authored element. overflow:visible because several boards place end
+     labels and verdict numerals just outside the plot's own viewBox edge. */
+  .c-vx{min-width:0;}
+  /* NO height:auto here. The svg carries an explicit pixel height and a 100%
+     width, so preserveAspectRatio letterboxes the viewBox inside that box —
+     which is what keeps every board's type at its authored size. Letting the
+     height derive from the aspect ratio instead upscaled the narrower boards
+     to the card width and blew their labels up with them (dBridge, a 340-wide
+     viewBox in a ~620px card, rendered at 1.8x). */
+  .c-vx > svg{display:block; width:100%; overflow:visible;}
+
+  /* The Detail control is the Decision Space disclosure, unchanged — same
+     class, same +/- ::after, same 40px secondary height — because this is the
+     same interaction and it should not merely resemble it. Only the alignment
+     is local: the panel head is baseline-aligned for its heading pair, which
+     would hang a 40px button off the text baseline. */
+  .c-dash-panel-head{align-items:flex-start;}
+  .c-dash-detail{flex:none; margin-left:var(--spacing-16);}
+
+  /* The revealed writeup gets the rationale's surface (neutral-2, radius-md)
+     so it reads as a box that opened rather than text that appeared. Vertical
+     padding animates with the row: min-height:0 caps the CONTENT box, so
+     padding alone would floor the collapsed track open. */
+  .c-dash-panel .c-dec-reveal > p.c-dash-note{margin:0; padding:0 var(--spacing-16);
+    background:var(--color-neutral-2); border-radius:var(--radius-md);
+    overflow:hidden; min-height:0;
+    transition:padding-top var(--duration-base) var(--ease-settle), padding-bottom var(--duration-base) var(--ease-settle);}
+  .c-dash-panel .c-dec-reveal.is-open > p.c-dash-note{padding-top:var(--spacing-12); padding-bottom:var(--spacing-12);}
+
+  /* Pointer tilt on the dashboard cards, same physics as the hero fan. The
+     perspective lives on the widget while the TILT is applied to the card
+     inside it — .c-dash-w's own transform is owned by the .c-rise scroll
+     reveal, and writing to it from Motion would fight that transition. */
+  .c-dash-w{perspective:900px;}
+  .c-dash-w > .c-card,.c-dash-w > .c-stat{will-change:transform;}
+  @media (prefers-reduced-motion: reduce){
+    .c-dash-panel .c-dec-reveal > p.c-dash-note{transition:none;}
+  }
+
   /* ---- Actionable Cards overlay -------------------------------------
      The six hero cards are NOT copied in here: the same six nodes are
      reparented out of the fan into this grid, and a FLIP carries each one
@@ -2298,21 +2340,6 @@
           </div>
           <div class="c-dash-grid">
 
-            <!-- Shared chart gradients. One copy for all nine boards: url(#id)
-                 is resolved document-wide. The blue end carries white labels,
-                 the dark-purple end carries white numerals; raw purple never
-                 has text on it (see the chart module's contrast notes). -->
-            <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
-              <linearGradient id="dgBP" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#1473E6"/><stop offset="1" stop-color="#6D28D9"/></linearGradient>
-              <linearGradient id="dgGrn" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#009B58"/><stop offset="1" stop-color="#00C26E"/></linearGradient>
-              <linearGradient id="dgRedD" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#FD3343"/><stop offset="1" stop-color="#C4111F"/></linearGradient>
-              <linearGradient id="dgInk" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#2B2B2C"/><stop offset="1" stop-color="#4A4A4C"/></linearGradient>
-              <linearGradient id="dgPurFade" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9F56FF" stop-opacity=".38"/><stop offset="1" stop-color="#9F56FF" stop-opacity=".04"/></linearGradient>
-              <linearGradient id="dgBlueFade" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1473E6" stop-opacity=".26"/><stop offset="1" stop-color="#1473E6" stop-opacity="0"/></linearGradient>
-              <linearGradient id="dgRedFade" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FD3343" stop-opacity=".28"/><stop offset="1" stop-color="#FD3343" stop-opacity=".05"/></linearGradient>
-              <radialGradient id="rPur" cx=".35" cy=".3" r=".95"><stop offset="0" stop-color="#D9BFFF"/><stop offset="1" stop-color="#9F56FF"/></radialGradient>
-              <radialGradient id="rGrn" cx=".35" cy=".3" r=".95"><stop offset="0" stop-color="#9FF0C6"/><stop offset="1" stop-color="#00C26E"/></radialGradient>
-            </defs></svg>
 
             <div class="c-dash-w c-rise sp4"><div class="c-stat is-lead">
               <span class="c-stat-label">Will we hit RM 240.0M?</span>
@@ -2338,51 +2365,51 @@
 
             <div class="c-dash-w c-rise sp6"><div class="c-card c-dash-panel">
               <div class="c-dash-panel-head"><div><h4>Cumulative revenue against plan, with the three closes</h4>
-                <p class="c-dash-panel-sub">Actual to August, then commit / weighted / best case to December</p></div></div>
-              <div class="c-dash-chart"><svg id="dFan" viewBox="0 0 700 300" height="300" role="img" aria-label="Cumulative revenue against target with commit, weighted and best-case projections to December"></svg></div>
+                <p class="c-dash-panel-sub">Actual to August, then commit / weighted / best case to December</p></div><button class="c-dec-disclose c-dash-detail" type="button" aria-expanded="false" aria-controls="dashNote1">Detail</button></div>
+              <div class="c-dash-chart"><div id="dFan" class="c-vx"></div></div>
               <div class="c-dash-key"><span><i class="c-dash-sw" style="background:var(--color-navy)"></i>Actual to date</span><span><i class="c-dash-sw" style="background:var(--dec-strategic-ink)"></i>Weighted forecast</span><span><i class="c-dash-sw k-band"></i>Commit 210.2 &rarr; best case 239.4</span><span><i class="c-dash-sw k-plan"></i>Plan</span></div>
-              <p class="c-dash-note"><b>The plan line is only touched by best case.</b> Weighted lands RM 17.1M short and commit RM 29.8M short — so the question stops being "are we behind" and becomes "which of these 73 open deals must close".</p>
+              <div class="c-dec-reveal" id="dashNote1" hidden><p class="c-dash-note"><b>The plan line is only touched by best case.</b> Weighted lands RM 17.1M short and commit RM 29.8M short — so the question stops being "are we behind" and becomes "which of these 73 open deals must close".</p></div>
             </div></div>
 
             <div class="c-dash-w c-rise sp6"><div class="c-card c-dash-panel">
               <div class="c-dash-panel-head"><div><h4>Where the RM 8.9M of growth came from</h4>
-                <p class="c-dash-panel-sub">Last year to this year, decomposed</p></div></div>
-              <div class="c-dash-chart"><svg id="dBridge" viewBox="0 0 340 300" height="300" role="img" aria-label="Waterfall from last year revenue through existing account growth, new business and lapsed accounts to this year"></svg></div>
-              <p class="c-dash-note"><b>New business is doing the work; existing accounts are nearly flat.</b> Of RM 8.9M growth, RM 12.7M came from new advertisers and RM 8.6M walked out — leaving only RM 4.8M from the accounts we already had. Retention, not acquisition, is the exposure.</p>
+                <p class="c-dash-panel-sub">Last year to this year, decomposed</p></div><button class="c-dec-disclose c-dash-detail" type="button" aria-expanded="false" aria-controls="dashNote2">Detail</button></div>
+              <div class="c-dash-chart"><div id="dBridge" class="c-vx"></div></div>
+              <div class="c-dec-reveal" id="dashNote2" hidden><p class="c-dash-note"><b>New business is doing the work; existing accounts are nearly flat.</b> Of RM 8.9M growth, RM 12.7M came from new advertisers and RM 8.6M walked out — leaving only RM 4.8M from the accounts we already had. Retention, not acquisition, is the exposure.</p></div>
             </div></div>
 
             <div class="c-dash-w c-rise sp6"><div class="c-card c-dash-panel">
               <div class="c-dash-panel-head"><div><h4>Pipeline by stage</h4>
-                <p class="c-dash-panel-sub">Value, and what it is worth after probability</p></div></div>
-              <div class="c-dash-chart"><svg id="dFunnel" viewBox="0 0 420 268" height="268" role="img" aria-label="Pipeline funnel by stage with weighted value overlay"></svg></div>
-              <p class="c-dash-note"><b>Half the open value sits in the least certain stage.</b> Negotiation holds RM 51.2M at 50% and averages 41 days — the oldest cohort. Contracted-not-booked is RM 28.4M at 95% and is really a billing question, not a selling one.</p>
+                <p class="c-dash-panel-sub">Value, and what it is worth after probability</p></div><button class="c-dec-disclose c-dash-detail" type="button" aria-expanded="false" aria-controls="dashNote3">Detail</button></div>
+              <div class="c-dash-chart"><div id="dFunnel" class="c-vx"></div></div>
+              <div class="c-dec-reveal" id="dashNote3" hidden><p class="c-dash-note"><b>Half the open value sits in the least certain stage.</b> Negotiation holds RM 51.2M at 50% and averages 41 days — the oldest cohort. Contracted-not-booked is RM 28.4M at 95% and is really a billing question, not a selling one.</p></div>
             </div></div>
 
             <div class="c-dash-w c-rise sp6"><div class="c-card c-dash-panel">
               <div class="c-dash-panel-head"><div><h4>Which reps are actually at risk</h4>
-                <p class="c-dash-panel-sub">All 14 reps — attainment today against pipeline cover for the rest of the year</p></div></div>
-              <div class="c-dash-chart"><svg id="dQuad" viewBox="0 0 640 312" height="312" role="img" aria-label="Quadrant chart of sales rep attainment versus pipeline coverage"></svg></div>
-              <p class="c-dash-note"><b>This settles the Daniel question, and the answer is the worse of the two.</b> He is at 85% <em>and</em> carries only 0.8× cover — behind with a thin pipeline, so it is a prospecting problem, not slow closes. Aisyah is the mirror image: ahead, with 2.4× cover behind her.</p>
+                <p class="c-dash-panel-sub">All 14 reps — attainment today against pipeline cover for the rest of the year</p></div><button class="c-dec-disclose c-dash-detail" type="button" aria-expanded="false" aria-controls="dashNote4">Detail</button></div>
+              <div class="c-dash-chart"><div id="dQuad" class="c-vx"></div></div>
+              <div class="c-dec-reveal" id="dashNote4" hidden><p class="c-dash-note"><b>This settles the Daniel question, and the answer is the worse of the two.</b> He is at 85% <em>and</em> carries only 0.8× cover — behind with a thin pipeline, so it is a prospecting problem, not slow closes. Aisyah is the mirror image: ahead, with 2.4× cover behind her.</p></div>
             </div></div>
 
             <div class="c-dash-w c-rise sp6"><div class="c-card c-dash-panel">
               <div class="c-dash-panel-head"><div><h4>Sold against what we had to sell</h4>
-                <p class="c-dash-panel-sub">Sold against sellable, with target attainment beneath</p></div></div>
-              <div class="c-dash-chart"><svg id="dFill" viewBox="0 0 480 324" height="324" role="img" aria-label="Fill rate versus target attainment by media type"></svg></div>
-              <p class="c-dash-note"><b>The solid bar is what we sold; the pale remainder went unsold.</b> Digital sold 62% of its inventory and reached 75% of target — the stock was there, so it is a demand problem. Addressable is the opposite at 97% sold out, so its 109% is <b>capped by supply</b>. Sell Digital harder; buy more addressable.</p>
+                <p class="c-dash-panel-sub">Sold against sellable, with target attainment beneath</p></div><button class="c-dec-disclose c-dash-detail" type="button" aria-expanded="false" aria-controls="dashNote5">Detail</button></div>
+              <div class="c-dash-chart"><div id="dFill" class="c-vx"></div></div>
+              <div class="c-dec-reveal" id="dashNote5" hidden><p class="c-dash-note"><b>The solid bar is what we sold; the pale remainder went unsold.</b> Digital sold 62% of its inventory and reached 75% of target — the stock was there, so it is a demand problem. Addressable is the opposite at 97% sold out, so its 109% is <b>capped by supply</b>. Sell Digital harder; buy more addressable.</p></div>
             </div></div>
 
             <div class="c-dash-w c-rise sp6"><div class="c-card c-dash-panel">
               <div class="c-dash-panel-head"><div><h4>Revenue against contribution</h4>
-                <p class="c-dash-panel-sub">14 accounts — bubble size is gross profit, the ranking that matters</p></div></div>
-              <div class="c-dash-chart"><svg id="dBubble" viewBox="0 0 500 274" height="274" role="img" aria-label="Scatter of advertiser revenue against margin percentage, sized by contribution"></svg></div>
-              <p class="c-dash-note"><b>Two of the four biggest profit contributors are sub-RM 1M accounts.</b> 99 Speedmart bills RM 0.85M at 44% margin and out-earns Lazada's RM 1.80M on contribution. Revenue rank and profit rank are different league tables.</p>
+                <p class="c-dash-panel-sub">14 accounts — bubble size is gross profit, the ranking that matters</p></div><button class="c-dec-disclose c-dash-detail" type="button" aria-expanded="false" aria-controls="dashNote6">Detail</button></div>
+              <div class="c-dash-chart"><div id="dBubble" class="c-vx"></div></div>
+              <div class="c-dec-reveal" id="dashNote6" hidden><p class="c-dash-note"><b>Two of the four biggest profit contributors are sub-RM 1M accounts.</b> 99 Speedmart bills RM 0.85M at 44% margin and out-earns Lazada's RM 1.80M on contribution. Revenue rank and profit rank are different league tables.</p></div>
             </div></div>
 
             <div class="c-dash-w c-rise sp6"><div class="c-card c-dash-panel">
               <div class="c-dash-panel-head"><div><h4>Why RM 4.4M walked</h4>
-                <p class="c-dash-panel-sub">Split by cause, and what is actually recoverable</p></div></div>
-              <div class="c-dash-chart"><svg id="dChurn" viewBox="0 0 480 216" height="216" role="img" aria-label="Lapsed revenue split by reason, showing recoverable versus structural loss"></svg></div>
+                <p class="c-dash-panel-sub">Split by cause, and what is actually recoverable</p></div><button class="c-dec-disclose c-dash-detail" type="button" aria-expanded="false" aria-controls="dashNote7">Detail</button></div>
+              <div class="c-dash-chart"><div id="dChurn" class="c-vx"></div></div>
               <div class="c-dash-scroll"><table class="c-table">
                 <caption class="c-dash-vh">Lapsed advertisers with churn reason and recommended play</caption>
                 <thead class="c-dash-vh"><tr><th>Advertiser</th><th>Lost, RM million</th><th>Reason</th><th>Play</th></tr></thead>
@@ -2393,26 +2420,26 @@
                   <tr><td>Watsons MY</td><td class="num">0.40</td><td><span class="c-badge c-badge-neutral">Service</span></td><td style="color:var(--color-neutral-5)">Owner change</td></tr>
                 </tbody>
               </table></div>
-              <p class="c-dash-note"><b>Half of it was never lost — it was timing.</b> RM 2.1M is a budget-cycle gap that needs a calendar, not a discount. The other RM 1.9M is price and competitive, which needs a rate conversation.</p>
+              <div class="c-dec-reveal" id="dashNote7" hidden><p class="c-dash-note"><b>Half of it was never lost — it was timing.</b> RM 2.1M is a budget-cycle gap that needs a calendar, not a discount. The other RM 1.9M is price and competitive, which needs a rate conversation.</p></div>
             </div></div>
 
             <div class="c-dash-w c-rise sp6"><div class="c-card c-dash-panel">
               <div class="c-dash-panel-head"><div><h4>How much rests on how few</h4>
-                <p class="c-dash-panel-sub">Cumulative share of revenue by advertiser rank</p></div></div>
-              <div class="c-dash-chart"><svg id="dConc" viewBox="0 0 480 250" height="250" role="img" aria-label="Cumulative revenue concentration curve by advertiser rank"></svg></div>
-              <p class="c-dash-note"><b>No single-account cliff, but a top-five exposure.</b> The largest advertiser is 9.2%, so no one client can sink the year — yet the top five carry 38%, which means losing two of them breaches plan.</p>
+                <p class="c-dash-panel-sub">Cumulative share of revenue by advertiser rank</p></div><button class="c-dec-disclose c-dash-detail" type="button" aria-expanded="false" aria-controls="dashNote8">Detail</button></div>
+              <div class="c-dash-chart"><div id="dConc" class="c-vx"></div></div>
+              <div class="c-dec-reveal" id="dashNote8" hidden><p class="c-dash-note"><b>No single-account cliff, but a top-five exposure.</b> The largest advertiser is 9.2%, so no one client can sink the year — yet the top five carry 38%, which means losing two of them breaches plan.</p></div>
             </div></div>
 
             <div class="c-dash-w c-rise sp6"><div class="c-card c-dash-panel">
               <div class="c-dash-panel-head"><div><h4>Us against the market</h4>
-                <p class="c-dash-panel-sub">Indexed growth, and the share that follows from it</p></div></div>
-              <div class="c-dash-chart"><svg id="dShare" viewBox="0 0 700 268" height="268" role="img" aria-label="Our indexed growth against market growth, with share of market trending down"></svg></div>
-              <p class="c-dash-note"><b>The most uncomfortable panel here.</b> Growing 6.4% in a market growing 8.1% means share fell from 14.2% to 13.8% — about RM 4.3M of revenue that existed and went elsewhere. Every other widget on this board calls this a good year. Only this one calls it a loss.</p>
+                <p class="c-dash-panel-sub">Indexed growth, and the share that follows from it</p></div><button class="c-dec-disclose c-dash-detail" type="button" aria-expanded="false" aria-controls="dashNote9">Detail</button></div>
+              <div class="c-dash-chart"><div id="dShare" class="c-vx"></div></div>
+              <div class="c-dec-reveal" id="dashNote9" hidden><p class="c-dash-note"><b>The most uncomfortable panel here.</b> Growing 6.4% in a market growing 8.1% means share fell from 14.2% to 13.8% — about RM 4.3M of revenue that existed and went elsewhere. Every other widget on this board calls this a good year. Only this one calls it a loss.</p></div>
             </div></div>
 
             <div class="c-dash-w c-rise sp6"><div class="c-card c-dash-panel">
               <div class="c-dash-panel-head"><div><h4>What this board says to do next</h4>
-                <p class="c-dash-panel-sub">Each line traces to a panel above — the point of the exercise</p></div></div>
+                <p class="c-dash-panel-sub">Each line traces to a panel above — the point of the exercise</p></div><button class="c-dec-disclose c-dash-detail" type="button" aria-expanded="false" aria-controls="dashNote10">Detail</button></div>
               <div class="c-dash-scroll"><div class="c-datatable"><table>
                 <caption class="c-dash-vh">Recommended actions with amount at stake, owner and source panel</caption>
                 <thead><tr><th>Move</th><th>Because</th><th class="num">At stake</th><th>Owner</th><th>From</th></tr></thead>
@@ -2425,7 +2452,7 @@
                   <tr><td><b>Take the share question to the board</b></td><td>Growth is real but sub-market — share fell 0.4pt</td><td class="num">RM 4.3M</td><td>Leadership</td><td>Us against the market</td></tr>
                 </tbody>
               </table></div></div>
-              <p class="c-dash-note">Six moves, each with a number and an owner — the board's own conclusions, stated as decisions rather than as charts.</p>
+              <div class="c-dec-reveal" id="dashNote10" hidden><p class="c-dash-note">Six moves, each with a number and an owner — the board's own conclusions, stated as decisions rather than as charts.</p></div>
             </div></div>
 
           </div>
@@ -4211,6 +4238,87 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
   });
 })();
 
+// ── Performance Space: [Detail +] disclosures and card tilt.
+// The disclosures reuse .c-dec-reveal / .c-dec-disclose wholesale, so the
+// open/close semantics match Decision Space exactly — including the deferred
+// [hidden] flip, which is what keeps the closing transition visible (setting
+// hidden immediately would remove the element mid-animation).
+(function () {
+  const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const dash = document.getElementById('dashboard');
+  if (!dash) return;
+
+  function show(t) {
+    clearTimeout(t._hideTimer);
+    t.hidden = false;
+    if (REDUCED.matches) { t.classList.add('is-open'); return; }
+    void t.offsetHeight;   // forced reflow, not a rAF pair: this page renders in
+                           // contexts that do not always produce frames, and a
+                           // deferred class add there never animates at all
+    t.classList.add('is-open');
+  }
+  function hide(t) {
+    clearTimeout(t._hideTimer);
+    t.classList.remove('is-open');
+    if (REDUCED.matches) { t.hidden = true; return; }
+    t._hideTimer = setTimeout(() => { t.hidden = true; }, 400); // > the 220ms transition; a fallback, not the mechanism
+  }
+  dash.querySelectorAll('.c-dash-detail[aria-controls]').forEach((btn) => {
+    const target = document.getElementById(btn.getAttribute('aria-controls'));
+    if (!target) return;
+    btn.addEventListener('click', () => {
+      const open = btn.getAttribute('aria-expanded') === 'true';
+      btn.setAttribute('aria-expanded', String(!open));
+      if (open) hide(target); else show(target);
+    });
+  });
+
+  /* Card tilt, borrowed from the hero fan. Applied to the card INSIDE the
+     widget: the widget's own transform belongs to the .c-rise scroll reveal.
+     Deferred until that reveal has settled (.is-risen) for the same reason the
+     fan defers to .is-settled — a pointer already resting over a card must not
+     fight the entrance. Mouse-only: on touch this would fire on every card a
+     finger crossed while scrolling. */
+  const TILT_DEG = 5;   // the fan uses 12; these are wide, text-heavy panels and long lines swim at that angle
+  const SPRING = { type: 'spring', stiffness: 300, damping: 22, mass: 0.6 };
+  function enableTilt(card) {
+    if (card.dataset.tiltBound) return;
+    card.dataset.tiltBound = '1';
+    card.addEventListener('pointerenter', (e) => {
+      if (e.pointerType !== 'mouse' || REDUCED.matches) return;
+      animate(card, { scale: 1.008 }, SPRING);   // 1.05 is far too much travel on a card this wide
+    });
+    card.addEventListener('pointermove', (e) => {
+      if (e.pointerType !== 'mouse' || REDUCED.matches) return;
+      const r = card.getBoundingClientRect();
+      const px = (e.clientX - r.left) / r.width, py = (e.clientY - r.top) / r.height;
+      animate(card, {
+        rotateY: (px - 0.5) * 2 * TILT_DEG,
+        rotateX: -(py - 0.5) * 2 * TILT_DEG,
+      }, SPRING);
+    });
+    card.addEventListener('pointerleave', (e) => {
+      if (e.pointerType !== 'mouse') return;
+      animate(card, { rotateX: 0, rotateY: 0, scale: 1 }, { type: 'spring', stiffness: 220, damping: 18 });
+    });
+  }
+  // A widget only becomes tiltable once its reveal has finished. Watching the
+  // class is cheaper and more reliable than guessing at the reveal's duration,
+  // which is jittered per element.
+  const arm = (w) => { const c = w.querySelector(':scope > .c-card, :scope > .c-stat'); if (c) enableTilt(c); };
+  const widgets = Array.from(dash.querySelectorAll('.c-dash-w'));
+  widgets.forEach((w) => { if (w.classList.contains('is-risen')) arm(w); });
+  if ('MutationObserver' in window) {
+    const mo = new MutationObserver((recs) => {
+      recs.forEach((r) => {
+        const w = r.target;
+        if (w.classList && w.classList.contains('is-risen')) { arm(w); }
+      });
+    });
+    widgets.forEach((w) => mo.observe(w, { attributes: true, attributeFilter: ['class'] }));
+  }
+})();
+
 // ── Decisions Space behaviour.
 // Ported from pages/decision-workspace-v2.html. Five things live here:
 // disclosures, the horizon filter, the evidence/log drawer, the cross-tab
@@ -5105,401 +5213,12 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
   rise.forEach((el) => io.observe(el));
 })();
 
-// ── Ideal-board charts. Fixed-viewBox SVG built as strings — zero layout
-// measurement, so rendering is immune to the hidden-tab/zero-rAF sandbox
-// and can run at load while the section is still unrevealed. Figures are
-// the reconciled set: months sum to 148.2, media actuals sum to 148.2
-// against 157.6 target (94%, gap exactly 9.4). Label placement in the two
-// scatters is first-fit against a running collision map — audited at 1px
-// (a 3px threshold let visually-jammed pairs through; see the tracker's
-// history). Data must stay entity-free — txt() does no escaping, so a name
-// containing & or < would truncate the SVG.
-// Diverged copy of the chart module in pages/leadership-dashboard-tracker.html
-// (ids d- vs c-prefixed, colours DS tokens vs --art-*): port fixes both ways.
-//
-// ── ONE CHART SYSTEM ──────────────────────────────────────────────────────
-// These nine boards previously carried fourteen different font sizes and five
-// different grid treatments, which is why they read as nine one-off drawings
-// rather than one family. Everything visual now comes from the S block below:
-// six type rungs, one dotted grid, one baseline, one dot, one pill, one
-// verdict numeral. A renderer that needs a new size or a new rule style is a
-// bug in the system, not a special case — extend S instead.
-//
-// PALETTE, deliberately narrow (was six hues): a blue->purple sweep for every
-// primary series, pale purple for every "remainder" track, and exactly two
-// accents kept for real meaning — POS for genuinely good, ALARM for genuinely
-// bad. Amber is gone from the charts entirely; it was the fifth hue and it
-// carried no meaning the other four did not already cover.
-//
-// CONTRAST CONTRACT: white text only on #1473E6 (4.54:1) or #6D28D9 (7.1:1) —
-// never on raw #9F56FF (4.00, under the AA floor) and never on a red gradient
-// under centred text (it lightens to ~4.2 mid-sweep, which is why ALARM is a
-// solid #C4111F). Coloured text on white uses the page's measured -ink
-// variants, not the raw hues (raw amber on white is 1.98, raw green 2.35).
-(function () {
-  var C = { ink:'var(--color-neutral-9)', mut:'var(--color-neutral-5)', fnt:'var(--color-neutral-4)',
-            rule:'var(--color-neutral-3)', good:'var(--color-green)', warn:'var(--color-amber)',
-            crit:'var(--color-red)', der:'var(--color-navy)', pur:'var(--color-purple)' };
-  var M = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  function el(id){ return document.getElementById(id); }
-  function set(id, s){ var n = el(id); if (n) n.innerHTML = s; }
-  function txt(x,y,t,o){ o=o||{}; return '<text x="'+x+'" y="'+y+'" font-size="'+(o.s||10)+'" font-weight="'+(o.w||700)+
-    '" fill="'+(o.f||C.mut)+'"'+(o.a?' text-anchor="'+o.a+'"':'')+(o.st?' style="'+o.st+'"':'')+'>'+t+'</text>'; }
-  function ln(x1,y1,x2,y2,o){ o=o||{}; return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+
-    '" stroke="'+(o.c||C.rule)+'" stroke-width="'+(o.w||1)+'"'+(o.d?' stroke-dasharray="'+o.d+'"':'')+
-    (o.cap?' stroke-linecap="'+o.cap+'"':'')+'/>'; }
-  function rect(x,y,w,h,o){ o=o||{}; return '<rect x="'+x.toFixed(1)+'" y="'+y.toFixed(1)+'" width="'+Math.max(0,w).toFixed(1)+
-    '" height="'+Math.max(0,h).toFixed(1)+'" rx="'+(o.r!=null?o.r:2)+'" fill="'+(o.f||C.der)+'"'+
-    (o.o!=null?' opacity="'+o.o+'"':'')+(o.s?' stroke="'+o.s+'" stroke-width="'+(o.sw||1.5)+'"':'')+'/>'; }
-  function path(d,o){ o=o||{}; return '<path d="'+d+'" fill="'+(o.f||'none')+'" stroke="'+(o.s||'none')+
-    '" stroke-width="'+(o.w||2)+'"'+(o.d?' stroke-dasharray="'+o.d+'"':'')+
-    (o.o!=null?' opacity="'+o.o+'"':'')+' stroke-linejoin="round" stroke-linecap="round"/>'; }
-
-  /* ── The system. Every renderer draws through this and nothing else. ── */
-  var S = {
-    // Six type rungs. EYE for corner eyebrows, TICK for axis numbers, AXIS for
-    // axis names, LABEL for series names, VALUE for a figure inside a shape,
-    // VERDICT for the one big number each board is allowed.
-    EYE:8.5, TICK:9, AXIS:9.5, LABEL:11, VALUE:12.5, VERDICT:20,
-    // The narrow palette.
-    PRI:'url(#dgBP)',        // every primary bar
-    PRI_LINE:'#1473E6',      // every primary line
-    PRI_INK:'var(--dec-strategic-ink)', // primary as text on white
-    // The sweep's dark end, for a SECOND primary series that must be told
-    // apart from the first. Both ends of one gradient, so the pair still
-    // reads as one family rather than two competing hues.
-    PRI_ALT:'#6D28D9',
-    TRACK:C.pur, TRACK_O:.12,
-    POS:'var(--dec-good-ink)', POS_FILL:'url(#dgGrn)',
-    ALARM:'var(--dec-crit-ink)', ALARM_FILL:'#C4111F',
-    BAR_H:34, BAR_R:17,
-    DASH:'1 5',              // the one grid dash, everywhere
-    REF:'6 4',               // the one reference-line dash, everywhere
-
-    eyebrow:function(x,y,t,a){ return txt(x,y,t,{s:S.EYE,w:800,f:C.fnt,a:a,st:'letter-spacing:.1em'}); },
-    tick:function(x,y,t,a){ return txt(x,y,t,{s:S.TICK,w:600,f:C.fnt,a:a||'middle'}); },
-    axis:function(x,y,t){ return txt(x,y,t,{s:S.AXIS,w:800,f:C.mut,a:'middle'}); },
-    axisRot:function(x,cy,t){ return '<text transform="translate('+x+','+cy+') rotate(-90)" font-size="'+S.AXIS+
-      '" font-weight="800" fill="'+C.mut+'" text-anchor="middle">'+t+'</text>'; },
-    label:function(x,y,t,o){ o=o||{}; return txt(x,y,t,{s:S.LABEL,w:o.w||700,f:o.f||C.ink,a:o.a}); },
-    value:function(x,y,t,o){ o=o||{}; return txt(x,y,t,{s:S.VALUE,w:900,f:o.f||C.ink,a:o.a}); },
-    verdict:function(x,y,t,o){ o=o||{}; return txt(x,y,t,{s:S.VERDICT,w:900,f:o.f||C.ink,a:o.a}); },
-    gridH:function(x1,x2,y){ return ln(x1,y,x2,y,{c:C.rule,d:S.DASH,cap:'round'}); },
-    gridV:function(x,y1,y2){ return ln(x,y1,x,y2,{c:C.rule,d:S.DASH,cap:'round'}); },
-    base:function(x1,x2,y){ return ln(x1,y,x2,y,{c:C.rule,w:1.5}); },
-    // One dot: filled, ringed in the card colour so it reads clean over a line
-    // or a grid rule. Emphasis adds a halo rather than a second size language.
-    dot:function(x,y,col,o){ o=o||{}; var r=o.big?6.5:4.5;
-      return (o.halo?'<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="'+(r+6)+'" fill="'+col+'" opacity="0.16"/>':'')+
-        '<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="'+r+'" fill="'+col+'" stroke="#fff" stroke-width="2"/>'; },
-    pill:function(x,y,w,fill,o){ o=o||{}; return rect(x,y,w,S.BAR_H,{f:fill,r:S.BAR_R,o:o.o}); },
-    // Every bar row is label-left, pill, value-in-or-after, note beneath.
-    barRow:function(x,y,w,label,val,note,o){ o=o||{}; var s='';
-      s+=S.pill(x,y,w,o.fill||S.PRI,{});
-      s+=S.label(x+14,y+S.BAR_H/2+4,label,{f:'#fff',w:800});
-      if(val!=null) s+=S.value(x+w-12,y+S.BAR_H/2+4.5,val,{f:o.vf||'#fff',a:'end'});
-      if(note) s+=txt(x,y+S.BAR_H+15,note,{s:S.TICK,w:600,f:C.fnt});
-      return s; }
-  };
-
-  /* 1 · Cumulative fan */
-  (function(){
-    var act=[16.2,33.3,51.7,68.7,88.3,108.5,127.6,148.2];
-    var tgt=[18.6,37.6,57.0,76.2,96.2,116.6,136.8,157.6,178.2,199.0,219.4,240.0];
-    var com=[148.2,163.2,178.6,194.2,210.2], wtd=[148.2,166.2,184.6,203.4,222.9], bst=[148.2,170.2,192.8,215.9,239.4];
-    var L=52,R=630,T=30,B=254,max=260;
-    var X=function(i){return L+(R-L)*(i/11);}, Y=function(v){return B-(v/max)*(B-T);};
-    var s='';
-    for(var g=0; g<=260; g+=65){ s+=S.gridH(L,R,Y(g)); s+=S.tick(L-8,Y(g)+3.5,g?g+'M':'0','end'); }
-    var up='',dn='';
-    for(var i=0;i<bst.length;i++){ up+=(i?' L':'M')+X(7+i).toFixed(1)+' '+Y(bst[i]).toFixed(1); }
-    for(var j=com.length-1;j>=0;j--){ dn+=' L'+X(7+j).toFixed(1)+' '+Y(com[j]).toFixed(1); }
-    s+=path(up+dn+' Z',{f:'url(#dgPurFade)'});
-    var tp=''; for(var t=0;t<tgt.length;t++){ tp+=(t?' L':'M')+X(t).toFixed(1)+' '+Y(tgt[t]).toFixed(1); }
-    s+=path(tp,{s:C.ink,w:1.6,d:S.REF,o:.45});
-    function line(a,col,dash,w){ var p=''; for(var k=0;k<a.length;k++){ p+=(k?' L':'M')+X(7+k).toFixed(1)+' '+Y(a[k]).toFixed(1); } return path(p,{s:col,w:w||2,d:dash}); }
-    s+=line(com,S.ALARM_FILL,S.REF,2); s+=line(bst,'#009B58',S.REF,2); s+=line(wtd,S.PRI_ALT,null,3.5);   // NOT PRI_LINE: that is the actual, and the two would merge into one line
-    var ap=''; for(var m=0;m<act.length;m++){ ap+=(m?' L':'M')+X(m).toFixed(1)+' '+Y(act[m]).toFixed(1); }
-    s+=path(ap+' L'+X(7).toFixed(1)+' '+B+' L'+X(0).toFixed(1)+' '+B+' Z',{f:'url(#dgBlueFade)'});
-    s+=path(ap,{s:S.PRI_LINE,w:3.5});
-    s+=S.dot(X(7),Y(148.2),S.PRI_LINE,{});
-    s+=S.gridV(X(7),T,B);
-    s+=S.eyebrow(X(7)+6,T+9,'PROJECTED');
-    s+=txt(R+6,Y(240)-4,'plan 240.0',{s:S.TICK,w:800,f:C.ink});
-    s+=S.eyebrow(R+6,Y(222.9)-6,'WEIGHTED');
-    s+=S.verdict(R+6,Y(222.9)+13,'222.9',{f:S.PRI_INK});
-    for(var x=0;x<12;x+=1){ s+=S.tick(X(x),B+16,M[x]); }
-    s+=S.base(L,R,B);
-    set('dFan',s);
-  })();
-
-  /* 2 · Growth composition */
-  (function(){
-    var rows=[{l:'New advertisers',v:12.7,f:S.POS_FILL,vf:C.ink},
-              {l:'Existing accounts',v:4.8,f:S.PRI,vf:'#fff'},
-              {l:'Lapsed advertisers',v:-8.6,f:S.ALARM_FILL,vf:'#fff'}];
-    var L=112,W=196,zero=L+(8.6/21.3)*W,top=30,rh=50,sc=W/21.3,s='';
-    s+=S.eyebrow(L-8,18,'RM MILLION','end');
-    s+=ln(zero,top-8,zero,top+rh*3+22,{c:C.fnt,w:1.2});
-    rows.forEach(function(r,i){
-      var y=top+rh*i, w=Math.abs(r.v)*sc, x=r.v>=0?zero:zero-w;
-      s+=S.pill(x,y,w,r.f,{});
-      s+=S.label(L-8,y+S.BAR_H/2+4,r.l,{a:'end'});
-      s+=S.value(x+w-12,y+S.BAR_H/2+4.5,(r.v>0?'+':'')+r.v.toFixed(1),{f:r.vf,a:'end'});
-    });
-    var ny=top+rh*3+4;
-    s+=ln(L-4,ny-10,L+W+32,ny-10,{c:C.rule,w:1.2});
-    s+=S.pill(zero,ny,8.9*sc,'url(#dgInk)',{});
-    s+=S.label(L-8,ny+S.BAR_H/2+4,'Net growth',{w:900,a:'end'});
-    s+=S.value(zero+8.9*sc-12,ny+S.BAR_H/2+4.5,'+8.9',{f:'#fff',a:'end'});
-    s+=S.eyebrow(L-8,ny+S.BAR_H+26,'LAST YEAR TO THIS','end');
-    s+=S.verdict(L+4,ny+S.BAR_H+28,'139.3 → 148.2',{});
-    set('dBridge',s);
-  })();
-
-  /* 3 · Pipeline funnel */
-  (function(){
-    var st=[{l:'Negotiation',v:51.2,w:25.6,n:37,a:'41d',p:'50%'},
-            {l:'Verbal agreement',v:31.6,w:22.1,n:22,a:'24d',p:'70%'},
-            {l:'Contracted, not booked',v:28.4,w:27.0,n:14,a:'11d',p:'95%'}];
-    var L=14,W=392,max=51.2,top=28,rh=72,s='';
-    s+=S.eyebrow(L,16,'OPEN VALUE');
-    s+=S.eyebrow(L+W,16,'RM 111.2M · 73 DEALS','end');
-    st.forEach(function(r,i){
-      var y=top+rh*i, w=(r.v/max)*W, ww=(r.w/max)*W;
-      s+=S.pill(L,y,w,S.TRACK,{o:S.TRACK_O});
-      s+=S.barRow(L,y,ww,r.l,null,r.n+' deals · '+r.p+' · avg '+r.a,{});
-      s+=S.value(L+w-12,y+S.BAR_H/2+4.5,r.v.toFixed(1),{a:'end'});
-      s+=txt(L+ww,y+S.BAR_H+15,'weighted '+r.w.toFixed(1),{s:S.TICK,w:800,f:S.PRI_INK,a:'middle'});
-    });
-    var y2=top+rh*3-8;
-    s+=ln(L,y2,L+W,y2,{c:C.rule,w:1.2});
-    s+=S.label(L,y2+22,'Weighted total',{w:800});
-    s+=S.verdict(L+W,y2+24,'RM 74.7M',{f:S.PRI_INK,a:'end'});
-    set('dFunnel',s);
-  })();
-
-  /* 4 · Rep risk quadrant — 14 reps, first-fit labels vs a collision map.
-     Plot geometry (L/R/T/B and both scales) is UNCHANGED from the audited
-     version: the 1px label solver below is calibrated against these exact
-     coordinates, so restyling may touch colour and dot chrome but must not
-     move a point. The four tinted zones are gone — three coloured grounds were
-     the loudest thing on the board and the least like the other eight. Only
-     the quadrant that matters keeps a wash. */
-  (function(){
-    var reps=[
-      {n:'Aisyah Rahman',x:118,y:2.5},{n:'Kavitha Raj',x:112,y:2.2},
-      {n:'Bryan Wong',x:106,y:1.9},{n:'Wei Ling Ho',x:101,y:1.75},
-      {n:'Hafiz Osman',x:121,y:1.45},{n:'Nurul Izzah',x:108,y:1.15},
-      {n:'Arvind Kumar',x:103,y:0.85},{n:'Siti Marina',x:97,y:1.35},
-      {n:'Mei Chen',x:88,y:2.4},{n:'Faizal Hamid',x:92,y:2.05},
-      {n:'Zarina Yusof',x:74,y:1.85},{n:'Jason Lim',x:78,y:1.1},
-      {n:'Priya Menon',x:95,y:0.65},{n:'Daniel Tan',x:85,y:0.8,r:true}];
-    var L=54,R=486,T=26,B=266;
-    var X=function(v){return L+((v-70)/(126-70))*(R-L);}, Y=function(v){return B-((v-0.3)/(2.8-0.3))*(B-T);};
-    var s='';
-    s+=rect(X(70),Y(1.5),X(100)-X(70),B-Y(1.5),{f:C.crit,o:.07,r:0});
-    s+=S.gridV(X(100),T,B);
-    s+=S.gridH(L,R,Y(1.5));
-    s+=S.base(L,R,B); s+=ln(L,T,L,B,{c:C.rule,w:1.5});
-    [80,90,100,110,120].forEach(function(v){ s+=S.tick(X(v),B+16,v+'%'); });
-    [0.5,1.0,1.5,2.0,2.5].forEach(function(v){ s+=S.tick(L-8,Y(v)+3.5,v.toFixed(1)+'×','end'); });
-    s+=S.axis(L+(R-L)/2,B+32,'Attainment today');
-    s+=S.axisRot(16,(T+B)/2,'Pipeline cover');
-    s+=S.eyebrow(X(101),T+13,'AHEAD · WELL COVERED');
-    s+=S.eyebrow(X(70.6),B-8,'AT RISK · BEHIND AND THIN');
-    s+=S.eyebrow(X(70.6),T+13,'BEHIND · COVERED');
-    var placed=[{x:X(101)-2,y:T+4,w:120,h:13},{x:X(70.6)-2,y:B-19,w:140,h:13},{x:X(70.6)-2,y:T+4,w:96,h:13}];
-    function free(bx,by,bw,bh){
-      return !placed.some(function(q){ return !(bx+bw<q.x-1||bx>q.x+q.w+1||by+bh<q.y-1||by>q.y+q.h+1); })
-             && bx>2 && bx+bw<636 && by>2 && by+bh<B+34;
-    }
-    reps.forEach(function(p){
-      var cx=X(p.x), cy=Y(p.y), col=p.r?S.ALARM_FILL:S.PRI_LINE;
-      s+=S.dot(cx,cy,col,{big:p.r,halo:p.r});
-      var rad=p.r?6.5:4.5;
-      var fs=p.r?9.5:8.6, h=p.r?22:11;
-      var w=Math.max(p.n.length*fs*0.55, p.r?78:0)+2;
-      var cands=[[cx+rad+4,cy-h/2],[cx-rad-4-w,cy-h/2],[cx-w/2,cy-rad-h-2],[cx-w/2,cy+rad+2],
-                 [cx+rad+4,cy-h-3],[cx+rad+4,cy+3],[cx-rad-4-w,cy-h-3],[cx-rad-4-w,cy+3]];
-      // no free slot ⇒ label silently dropped — re-run the 1px audit after ANY data edit
-      for(var i=0;i<cands.length;i++){
-        if(free(cands[i][0],cands[i][1],w,h)){
-          placed.push({x:cands[i][0],y:cands[i][1],w:w,h:h});
-          s+=txt(cands[i][0],cands[i][1]+8.5,p.n,{s:fs,w:p.r?900:700,f:p.r?S.ALARM:C.ink});
-          if(p.r) s+=txt(cands[i][0],cands[i][1]+19.5,'85% · 0.8× cover',{s:S.EYE,w:700,f:S.ALARM});
-          break;
-        }
-      }
-    });
-    s+=S.eyebrow(R+8,T+4,'14 REPS');
-    set('dQuad',s);
-  })();
-
-  /* 5 · Sold vs sellable */
-  (function(){
-    var d=[{l:'TV',cap:88.0,sold:79.4,fill:90,att:97},
-           {l:'Addressable',cap:27.0,sold:26.1,fill:97,att:109},
-           {l:'Radio',cap:34.0,sold:27.2,fill:80,att:88},
-           {l:'Digital',cap:25.0,sold:15.5,fill:62,att:75}];
-    var L=14,W=440,max=88,top=30,rh=64,s='';
-    s+=S.eyebrow(L,16,'SELLABLE INVENTORY');
-    s+=S.eyebrow(L+W,16,'RM 174.0M CAPACITY','end');
-    d.forEach(function(r,i){
-      var y=top+rh*i, cw=(r.cap/max)*W, sw=(r.sold/max)*W;
-      s+=S.pill(L,y,cw,S.TRACK,{o:S.TRACK_O});
-      s+=S.barRow(L,y,sw,r.l,null,r.fill+'% of '+r.cap.toFixed(1)+' sellable',{});
-      if(sw>110) s+=S.value(L+sw-12,y+S.BAR_H/2+4.5,r.sold.toFixed(1),{f:'#fff',a:'end'});
-      else       s+=S.value(L+sw+10,y+S.BAR_H/2+4.5,r.sold.toFixed(1),{});
-      s+=txt(L+164,y+S.BAR_H+15,r.att+'% of target',{s:S.TICK,w:800,f:r.att>=100?S.POS:S.ALARM});
-    });
-    var y2=top+rh*4-10;   // -10, not -4: the legend row below overran the 324 viewBox
-    s+=ln(L,y2,L+W,y2,{c:C.rule,w:1.2});
-    s+=S.label(L,y2+22,'Sold',{w:800});
-    s+=S.verdict(L+W,y2+24,'RM 148.2M · 85% fill',{a:'end'});
-    s+=rect(L,y2+34,12,12,{f:S.PRI,r:6}); s+=txt(L+18,y2+44,'Sold',{s:S.TICK,w:600,f:C.mut});
-    s+=rect(L+64,y2+34,12,12,{f:S.TRACK,o:S.TRACK_O,r:6}); s+=txt(L+82,y2+44,'Unsold capacity',{s:S.TICK,w:600,f:C.mut});
-    set('dFill',s);
-  })();
-
-  /* 6 · Revenue vs contribution — 14 accounts. Plot geometry UNCHANGED for the
-     same reason as the quadrant: the label solver is calibrated to it. The 40%
-     margin band became a threshold rule so it matches the quadrant's cross
-     rather than inventing a third way to mark a boundary. */
-  (function(){
-    var d=[{n:'Maggi Malaysia',x:2.10,y:26},{n:'Shopee',x:1.95,y:16},
-           {n:'Lazada MY',x:1.80,y:18},{n:'Petronas Retail',x:1.55,y:21},
-           {n:'Maxis',x:1.40,y:29},{n:'Grab MY',x:1.10,y:24},
-           {n:'MyKasih',x:0.90,y:22},{n:'99 Speedmart',x:0.85,y:44},
-           {n:'Watsons MY',x:0.75,y:31},{n:'Mamee',x:0.65,y:36},
-           {n:'ZUS Coffee',x:0.60,y:41},{n:'Farm Fresh',x:0.50,y:34},
-           {n:'Tealive',x:0.45,y:38},{n:'Secret Recipe',x:0.35,y:46}];
-    d.forEach(function(p){ p.c = +(p.x*p.y/100).toFixed(3); });
-    var L=56,R=440,T=30,B=228;
-    var X=function(v){return L+((v-0.20)/(2.30-0.20))*(R-L);}, Y=function(v){return B-((v-12)/(50-12))*(B-T);};
-    var s='';
-    [20,30,40,50].forEach(function(v){ s+=S.gridH(L,R,Y(v)); s+=S.tick(L-8,Y(v)+3.5,v+'%','end'); });
-    [0.5,1.0,1.5,2.0].forEach(function(v){ s+=S.tick(X(v),B+16,v.toFixed(1)); s+=S.gridV(X(v),T,B); });
-    s+=S.base(L,R,B); s+=ln(L,T,L,B,{c:C.rule,w:1.5});
-    s+=S.axis((L+R)/2,B+32,'Revenue, RM million');
-    s+=S.axisRot(17,(T+B)/2,'Gross margin');
-    s+=ln(L,Y(40),R,Y(40),{c:'#009B58',d:S.REF,w:1.6});
-    s+=S.eyebrow(R-6,Y(40)-7,'40%+ MARGIN','end');
-    var placed=[];
-    function free(bx,by,bw,bh){
-      return !placed.some(function(q){ return !(bx+bw<q.x-1||bx>q.x+q.w+1||by+bh<q.y-1||by>q.y+q.h+1); })
-             && bx>2 && bx+bw<496 && by>2 && by+bh<B+30;
-    }
-    d.sort(function(a,b){ return b.c-a.c; });
-    d.forEach(function(p){
-      var hi=p.y>=40, cx=X(p.x), cy=Y(p.y), r=7+p.c*34;
-      s+='<circle cx="'+cx.toFixed(1)+'" cy="'+cy.toFixed(1)+'" r="'+r.toFixed(1)+'" fill="'+(hi?'url(#rGrn)':'url(#rPur)')+'" opacity="'+(hi?.55:.45)+'"/>';
-      s+='<circle cx="'+cx.toFixed(1)+'" cy="'+cy.toFixed(1)+'" r="'+r.toFixed(1)+'" fill="none" stroke="'+(hi?'#009B58':C.pur)+'" stroke-width="1.6"/>';
-      if(r>=15){ s+=txt(cx,cy+3.4,p.c.toFixed(2),{s:S.TICK,w:900,f:hi?S.POS:S.PRI_INK,a:'middle'});
-                 placed.push({x:cx-15,y:cy-6,w:30,h:13}); }
-      var w=p.n.length*4.9+2, h=10.5;
-      var cands=[[cx-w/2,cy-r-h-2],[cx+r+4,cy-h/2],[cx-r-4-w,cy-h/2],[cx-w/2,cy+r+2],
-                 [cx+r+4,cy-h-3],[cx+r+4,cy+3],[cx-r-4-w,cy-h-3],[cx-r-4-w,cy+3]];
-      // no free slot ⇒ label silently dropped — re-run the 1px audit after ANY data edit
-      for(var i=0;i<cands.length;i++){
-        if(free(cands[i][0],cands[i][1],w,h)){
-          placed.push({x:cands[i][0],y:cands[i][1],w:w,h:h});
-          s+=txt(cands[i][0],cands[i][1]+8,p.n,{s:8.6,w:hi?800:700,f:hi?S.POS:C.ink});
-          break;
-        }
-      }
-    });
-    s+=S.eyebrow(R+6,T-12,'BUBBLE = GROSS PROFIT','end');
-    set('dBubble',s);
-  })();
-
-  /* 7 · Churn by reason. Recoverable reads POS because that is what it means —
-     timing, not loss — which also retires the last amber on the board. */
-  (function(){
-    var seg=[{l:'Budget cycle',v:2.1,f:S.POS_FILL,tf:C.ink,of:S.POS},
-             {l:'Competitive',v:1.4,f:S.ALARM_FILL,tf:'#fff',of:S.ALARM},
-             {l:'Price',v:0.5,f:S.ALARM_FILL,tf:'#fff',of:S.ALARM},
-             {l:'Service',v:0.4,f:C.mut,tf:'#fff',of:C.mut}];
-    var L=16,W=448,tot=4.4,y=52,s='',x=L;
-    s+=S.eyebrow(L,20,'RM 4.4M LAPSED');
-    seg.forEach(function(g){
-      var w=(g.v/tot)*W;
-      s+=S.pill(x,y,w-6,g.f,{});
-      if(w>62){ s+=txt(x+(w-6)/2,y+15,g.l,{s:S.TICK,w:800,f:g.tf,a:'middle'});
-                s+=S.value(x+(w-6)/2,y+29,g.v.toFixed(1),{f:g.tf,a:'middle'}); }
-      else { s+=S.value(x+(w-6)/2,y-8,g.v.toFixed(1),{f:g.of,a:'middle'}); }
-      x+=w;
-    });
-    var rw=(2.1/tot)*W, sw2=W-rw, yr=y+S.BAR_H+12;
-    s+=ln(L,yr,L+rw-6,yr,{c:'#009B58',w:2.4,cap:'round'});
-    s+=S.eyebrow(L+rw/2,yr+16,'RECOVERABLE · RM 2.1M','middle');
-    s+=txt(L+rw/2,yr+30,'timing, not loss',{s:S.TICK,w:600,f:C.mut,a:'middle'});
-    s+=ln(L+rw+2,yr,L+W,yr,{c:S.ALARM_FILL,w:2.4,cap:'round'});
-    s+=S.eyebrow(L+rw+sw2/2,yr+16,'STRUCTURAL · RM 2.3M','middle');
-    s+=txt(L+rw+sw2/2,yr+30,'needs a rate conversation',{s:S.TICK,w:600,f:C.mut,a:'middle'});
-    set('dChurn',s);
-  })();
-
-  /* 8 · Concentration curve */
-  (function(){
-    var pts=[[0,0],[1,9.2],[2,16.1],[3,22.4],[5,38],[10,54],[20,71]];
-    var L=52,R=440,T=30,B=196;
-    var X=function(v){return L+(v/20)*(R-L);}, Y=function(v){return B-(v/80)*(B-T);};
-    var s='';
-    [20,40,60,80].forEach(function(v){ s+=S.gridH(L,R,Y(v)); s+=S.tick(L-8,Y(v)+3.5,v+'%','end'); });
-    [1,5,10,20].forEach(function(v){ s+=S.tick(X(v),B+16,'Top '+v); });
-    s+=S.base(L,R,B); s+=ln(L,T,L,B,{c:C.rule,w:1.5});
-    var p=''; pts.forEach(function(q,i){ p+=(i?' L':'M')+X(q[0]).toFixed(1)+' '+Y(q[1]).toFixed(1); });
-    s+=path(p+' L'+X(20).toFixed(1)+' '+B+' L'+X(0).toFixed(1)+' '+B+' Z',{f:'url(#dgPurFade)'});
-    s+=path(p,{s:S.PRI_LINE,w:3.5});
-    s+=S.gridV(X(5),Y(38),B);
-    s+=S.dot(X(1),Y(9.2),S.PRI_LINE,{});
-    s+=txt(X(1)+8,Y(9.2)-8,'largest 9.2%',{s:S.TICK,w:700,f:C.fnt});
-    s+=S.dot(X(5),Y(38),S.PRI_LINE,{big:true,halo:true});
-    s+=S.eyebrow(X(5)+13,Y(38)-12,'TOP 5');
-    s+=S.verdict(X(5)+13,Y(38)+7,'38%',{});
-    s+=txt(X(5)+13,Y(38)+21,'losing two breaches plan',{s:S.TICK,w:600,f:C.mut});
-    s+=S.axis((L+R)/2,B+32,'Advertisers by rank');
-    set('dConc',s);
-  })();
-
-  /* 9 · Us vs market. The share strip below is a small multiple of the same
-     grammar — same dotted rules, same ticks, same baseline — not a second
-     chart style stacked underneath. */
-  (function(){
-    var mk=[100,101.2,102.4,103.5,104.8,105.9,107.0,108.1];
-    var us=[100,100.9,101.9,102.8,103.8,104.7,105.6,106.4];
-    var sh=[14.20,14.14,14.12,14.08,14.02,13.95,13.88,13.80];
-    var L=52,R=628,T=30,B=170;
-    var X=function(i){return L+(R-L)*(i/7);}, Y=function(v){return B-((v-98)/(110-98))*(B-T);};
-    var s='';
-    [100,104,108].forEach(function(v){ s+=S.gridH(L,R,Y(v)); s+=S.tick(L-8,Y(v)+3.5,v,'end'); });
-    s+=S.base(L,R,B);
-    for(var i=0;i<8;i++){ s+=S.tick(X(i),B+16,M[i]); }
-    function mkp(a){ var p=''; for(var k=0;k<a.length;k++){ p+=(k?' L':'M')+X(k).toFixed(1)+' '+Y(a[k]).toFixed(1); } return p; }
-    function revp(a){ var p=''; for(var k=a.length-1;k>=0;k--){ p+=' L'+X(k).toFixed(1)+' '+Y(a[k]).toFixed(1); } return p; }
-    s+=path(mkp(mk)+revp(us)+' Z',{f:'url(#dgRedFade)'});
-    s+=path(mkp(mk),{s:C.fnt,w:2.2,d:S.REF});
-    s+=path(mkp(us),{s:S.PRI_LINE,w:3.5});
-    s+=S.dot(X(7),Y(106.4),S.PRI_LINE,{});
-    s+=txt(R+6,Y(108.1)+3.5,'market +8.1%',{s:S.TICK,w:800,f:C.mut});
-    s+=txt(R+6,Y(106.4)+14,'us +6.4%',{s:S.TICK,w:800,f:S.PRI_INK});
-    var sT=212,sB=248;
-    var SY=function(v){return sB-((v-13.6)/(14.4-13.6))*(sB-sT);};
-    s+=S.eyebrow(L,sT-12,'SHARE OF MARKET');
-    s+=S.gridH(L,R,sT); s+=S.tick(L-8,sT+3.5,'14.4%','end');
-    s+=S.tick(L-8,sB+3.5,'13.6%','end');
-    var sp=''; for(var j=0;j<sh.length;j++){ sp+=(j?' L':'M')+X(j).toFixed(1)+' '+SY(sh[j]).toFixed(1); }
-    s+=path(sp+' L'+X(7).toFixed(1)+' '+sB+' L'+X(0).toFixed(1)+' '+sB+' Z',{f:'url(#dgRedFade)'});
-    s+=path(sp,{s:S.ALARM_FILL,w:3});
-    s+=S.base(L,R,sB);
-    s+=S.dot(X(7),SY(13.8),S.ALARM_FILL,{});
-    s+=txt(X(0)+6,SY(14.2)-8,'14.2%',{s:S.TICK,w:800,f:S.ALARM});
-    s+=S.verdict(R+6,SY(13.8)+7,'13.8%',{f:S.ALARM,a:'end'});
-    set('dShare',s);
-  })();
-})();
 </script>
+
+<!-- Performance Space boards, built on visx (charts/src/*.jsx) and bundled
+     by esbuild into a committed file — the page stays build-free at deploy
+     time and pulls no chart code from a CDN at runtime. -->
+<script src="assets/charts.bundle.js"></script>
 
 </body>
 </html>

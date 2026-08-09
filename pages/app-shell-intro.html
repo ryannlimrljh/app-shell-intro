@@ -2306,7 +2306,6 @@
               <linearGradient id="dgBP" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#1473E6"/><stop offset="1" stop-color="#6D28D9"/></linearGradient>
               <linearGradient id="dgGrn" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#009B58"/><stop offset="1" stop-color="#00C26E"/></linearGradient>
               <linearGradient id="dgRedD" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#FD3343"/><stop offset="1" stop-color="#C4111F"/></linearGradient>
-              <linearGradient id="dgAmb" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#FFC163"/><stop offset="1" stop-color="#FFA425"/></linearGradient>
               <linearGradient id="dgInk" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#2B2B2C"/><stop offset="1" stop-color="#4A4A4C"/></linearGradient>
               <linearGradient id="dgPurFade" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9F56FF" stop-opacity=".38"/><stop offset="1" stop-color="#9F56FF" stop-opacity=".04"/></linearGradient>
               <linearGradient id="dgBlueFade" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1473E6" stop-opacity=".26"/><stop offset="1" stop-color="#1473E6" stop-opacity="0"/></linearGradient>
@@ -2341,7 +2340,7 @@
               <div class="c-dash-panel-head"><div><h4>Cumulative revenue against plan, with the three closes</h4>
                 <p class="c-dash-panel-sub">Actual to August, then commit / weighted / best case to December</p></div></div>
               <div class="c-dash-chart"><svg id="dFan" viewBox="0 0 700 300" height="300" role="img" aria-label="Cumulative revenue against target with commit, weighted and best-case projections to December"></svg></div>
-              <div class="c-dash-key"><span><i class="c-dash-sw" style="background:var(--color-navy)"></i>Actual to date</span><span><i class="c-dash-sw" style="background:var(--color-purple)"></i>Weighted forecast</span><span><i class="c-dash-sw k-band"></i>Commit 210.2 &rarr; best case 239.4</span><span><i class="c-dash-sw k-plan"></i>Plan</span></div>
+              <div class="c-dash-key"><span><i class="c-dash-sw" style="background:var(--color-navy)"></i>Actual to date</span><span><i class="c-dash-sw" style="background:var(--dec-strategic-ink)"></i>Weighted forecast</span><span><i class="c-dash-sw k-band"></i>Commit 210.2 &rarr; best case 239.4</span><span><i class="c-dash-sw k-plan"></i>Plan</span></div>
               <p class="c-dash-note"><b>The plan line is only touched by best case.</b> Weighted lands RM 17.1M short and commit RM 29.8M short — so the question stops being "are we behind" and becomes "which of these 73 open deals must close".</p>
             </div></div>
 
@@ -5117,11 +5116,26 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
 // containing & or < would truncate the SVG.
 // Diverged copy of the chart module in pages/leadership-dashboard-tracker.html
 // (ids d- vs c-prefixed, colours DS tokens vs --art-*): port fixes both ways.
-// CONTRAST CONTRACT for the gradient pills (defs live in the dashboard
-// markup): white text only on #1473E6 (4.56:1) or #6D28D9 (7.4:1) ends —
-// never on raw #9F56FF (4.00, under the AA floor). Coloured text on white
-// uses the page's measured -ink variants, not the raw hues (amber on white
-// is 1.98, green 2.35 — both illegible, both former violations here).
+//
+// ── ONE CHART SYSTEM ──────────────────────────────────────────────────────
+// These nine boards previously carried fourteen different font sizes and five
+// different grid treatments, which is why they read as nine one-off drawings
+// rather than one family. Everything visual now comes from the S block below:
+// six type rungs, one dotted grid, one baseline, one dot, one pill, one
+// verdict numeral. A renderer that needs a new size or a new rule style is a
+// bug in the system, not a special case — extend S instead.
+//
+// PALETTE, deliberately narrow (was six hues): a blue->purple sweep for every
+// primary series, pale purple for every "remainder" track, and exactly two
+// accents kept for real meaning — POS for genuinely good, ALARM for genuinely
+// bad. Amber is gone from the charts entirely; it was the fifth hue and it
+// carried no meaning the other four did not already cover.
+//
+// CONTRAST CONTRACT: white text only on #1473E6 (4.54:1) or #6D28D9 (7.1:1) —
+// never on raw #9F56FF (4.00, under the AA floor) and never on a red gradient
+// under centred text (it lightens to ~4.2 mid-sweep, which is why ALARM is a
+// solid #C4111F). Coloured text on white uses the page's measured -ink
+// variants, not the raw hues (raw amber on white is 1.98, raw green 2.35).
 (function () {
   var C = { ink:'var(--color-neutral-9)', mut:'var(--color-neutral-5)', fnt:'var(--color-neutral-4)',
             rule:'var(--color-neutral-3)', good:'var(--color-green)', warn:'var(--color-amber)',
@@ -5141,61 +5155,105 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
     '" stroke-width="'+(o.w||2)+'"'+(o.d?' stroke-dasharray="'+o.d+'"':'')+
     (o.o!=null?' opacity="'+o.o+'"':'')+' stroke-linejoin="round" stroke-linecap="round"/>'; }
 
+  /* ── The system. Every renderer draws through this and nothing else. ── */
+  var S = {
+    // Six type rungs. EYE for corner eyebrows, TICK for axis numbers, AXIS for
+    // axis names, LABEL for series names, VALUE for a figure inside a shape,
+    // VERDICT for the one big number each board is allowed.
+    EYE:8.5, TICK:9, AXIS:9.5, LABEL:11, VALUE:12.5, VERDICT:20,
+    // The narrow palette.
+    PRI:'url(#dgBP)',        // every primary bar
+    PRI_LINE:'#1473E6',      // every primary line
+    PRI_INK:'var(--dec-strategic-ink)', // primary as text on white
+    // The sweep's dark end, for a SECOND primary series that must be told
+    // apart from the first. Both ends of one gradient, so the pair still
+    // reads as one family rather than two competing hues.
+    PRI_ALT:'#6D28D9',
+    TRACK:C.pur, TRACK_O:.12,
+    POS:'var(--dec-good-ink)', POS_FILL:'url(#dgGrn)',
+    ALARM:'var(--dec-crit-ink)', ALARM_FILL:'#C4111F',
+    BAR_H:34, BAR_R:17,
+    DASH:'1 5',              // the one grid dash, everywhere
+    REF:'6 4',               // the one reference-line dash, everywhere
+
+    eyebrow:function(x,y,t,a){ return txt(x,y,t,{s:S.EYE,w:800,f:C.fnt,a:a,st:'letter-spacing:.1em'}); },
+    tick:function(x,y,t,a){ return txt(x,y,t,{s:S.TICK,w:600,f:C.fnt,a:a||'middle'}); },
+    axis:function(x,y,t){ return txt(x,y,t,{s:S.AXIS,w:800,f:C.mut,a:'middle'}); },
+    axisRot:function(x,cy,t){ return '<text transform="translate('+x+','+cy+') rotate(-90)" font-size="'+S.AXIS+
+      '" font-weight="800" fill="'+C.mut+'" text-anchor="middle">'+t+'</text>'; },
+    label:function(x,y,t,o){ o=o||{}; return txt(x,y,t,{s:S.LABEL,w:o.w||700,f:o.f||C.ink,a:o.a}); },
+    value:function(x,y,t,o){ o=o||{}; return txt(x,y,t,{s:S.VALUE,w:900,f:o.f||C.ink,a:o.a}); },
+    verdict:function(x,y,t,o){ o=o||{}; return txt(x,y,t,{s:S.VERDICT,w:900,f:o.f||C.ink,a:o.a}); },
+    gridH:function(x1,x2,y){ return ln(x1,y,x2,y,{c:C.rule,d:S.DASH,cap:'round'}); },
+    gridV:function(x,y1,y2){ return ln(x,y1,x,y2,{c:C.rule,d:S.DASH,cap:'round'}); },
+    base:function(x1,x2,y){ return ln(x1,y,x2,y,{c:C.rule,w:1.5}); },
+    // One dot: filled, ringed in the card colour so it reads clean over a line
+    // or a grid rule. Emphasis adds a halo rather than a second size language.
+    dot:function(x,y,col,o){ o=o||{}; var r=o.big?6.5:4.5;
+      return (o.halo?'<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="'+(r+6)+'" fill="'+col+'" opacity="0.16"/>':'')+
+        '<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="'+r+'" fill="'+col+'" stroke="#fff" stroke-width="2"/>'; },
+    pill:function(x,y,w,fill,o){ o=o||{}; return rect(x,y,w,S.BAR_H,{f:fill,r:S.BAR_R,o:o.o}); },
+    // Every bar row is label-left, pill, value-in-or-after, note beneath.
+    barRow:function(x,y,w,label,val,note,o){ o=o||{}; var s='';
+      s+=S.pill(x,y,w,o.fill||S.PRI,{});
+      s+=S.label(x+14,y+S.BAR_H/2+4,label,{f:'#fff',w:800});
+      if(val!=null) s+=S.value(x+w-12,y+S.BAR_H/2+4.5,val,{f:o.vf||'#fff',a:'end'});
+      if(note) s+=txt(x,y+S.BAR_H+15,note,{s:S.TICK,w:600,f:C.fnt});
+      return s; }
+  };
+
   /* 1 · Cumulative fan */
   (function(){
     var act=[16.2,33.3,51.7,68.7,88.3,108.5,127.6,148.2];
     var tgt=[18.6,37.6,57.0,76.2,96.2,116.6,136.8,157.6,178.2,199.0,219.4,240.0];
     var com=[148.2,163.2,178.6,194.2,210.2], wtd=[148.2,166.2,184.6,203.4,222.9], bst=[148.2,170.2,192.8,215.9,239.4];
-    var L=48,R=634,T=22,B=252,max=260;
+    var L=52,R=630,T=30,B=254,max=260;
     var X=function(i){return L+(R-L)*(i/11);}, Y=function(v){return B-(v/max)*(B-T);};
     var s='';
-    for(var g=0; g<=260; g+=65){ s+=ln(L,Y(g),R,Y(g),{d:'3 5'}); s+=txt(L-7,Y(g)+3.5,g?g+'M':'0',{s:9,f:C.fnt,a:'end'}); }
+    for(var g=0; g<=260; g+=65){ s+=S.gridH(L,R,Y(g)); s+=S.tick(L-8,Y(g)+3.5,g?g+'M':'0','end'); }
     var up='',dn='';
     for(var i=0;i<bst.length;i++){ up+=(i?' L':'M')+X(7+i).toFixed(1)+' '+Y(bst[i]).toFixed(1); }
     for(var j=com.length-1;j>=0;j--){ dn+=' L'+X(7+j).toFixed(1)+' '+Y(com[j]).toFixed(1); }
     s+=path(up+dn+' Z',{f:'url(#dgPurFade)'});
     var tp=''; for(var t=0;t<tgt.length;t++){ tp+=(t?' L':'M')+X(t).toFixed(1)+' '+Y(tgt[t]).toFixed(1); }
-    s+=path(tp,{s:C.ink,w:1.6,d:'6 4',o:.55});
+    s+=path(tp,{s:C.ink,w:1.6,d:S.REF,o:.45});
     function line(a,col,dash,w){ var p=''; for(var k=0;k<a.length;k++){ p+=(k?' L':'M')+X(7+k).toFixed(1)+' '+Y(a[k]).toFixed(1); } return path(p,{s:col,w:w||2,d:dash}); }
-    s+=line(com,C.crit,'5 4'); s+=line(bst,C.good,'5 4'); s+=line(wtd,C.pur,null,3.5);
+    s+=line(com,S.ALARM_FILL,S.REF,2); s+=line(bst,'#009B58',S.REF,2); s+=line(wtd,S.PRI_ALT,null,3.5);   // NOT PRI_LINE: that is the actual, and the two would merge into one line
     var ap=''; for(var m=0;m<act.length;m++){ ap+=(m?' L':'M')+X(m).toFixed(1)+' '+Y(act[m]).toFixed(1); }
-    // Ground the actual under a fading wash — the year-to-date is the one
-    // certain thing on this board, so it reads as solid ground, not a wire.
     s+=path(ap+' L'+X(7).toFixed(1)+' '+B+' L'+X(0).toFixed(1)+' '+B+' Z',{f:'url(#dgBlueFade)'});
-    s+=path(ap,{s:C.der,w:4});
-    s+='<circle cx="'+X(7).toFixed(1)+'" cy="'+Y(148.2).toFixed(1)+'" r="5.5" fill="'+C.der+'" stroke="#fff" stroke-width="1.6"/>';
-    s+=ln(X(7),T,X(7),B,{c:C.fnt,d:'2 4',w:1});
-    s+=txt(X(7)+5,T+9,'PROJECTED',{s:8.5,w:800,f:C.fnt,st:'letter-spacing:.1em'});
-    s+=txt(R+5,Y(240)-5,'plan 240.0',{s:9.5,w:800,f:C.ink});
-    s+=txt(R+5,Y(222.9)-4,'weighted',{s:9,w:800,f:'var(--dec-strategic-ink)'});
-    s+=txt(R+5,Y(222.9)+14,'222.9',{s:15,w:900,f:'var(--dec-strategic-ink)'});
-    for(var x=0;x<12;x+=1){ s+=txt(X(x),B+15,M[x],{s:9,f:C.fnt,a:'middle'}); }
-    s+=ln(L,B,R,B,{c:C.rule,w:1.5});
+    s+=path(ap,{s:S.PRI_LINE,w:3.5});
+    s+=S.dot(X(7),Y(148.2),S.PRI_LINE,{});
+    s+=S.gridV(X(7),T,B);
+    s+=S.eyebrow(X(7)+6,T+9,'PROJECTED');
+    s+=txt(R+6,Y(240)-4,'plan 240.0',{s:S.TICK,w:800,f:C.ink});
+    s+=S.eyebrow(R+6,Y(222.9)-6,'WEIGHTED');
+    s+=S.verdict(R+6,Y(222.9)+13,'222.9',{f:S.PRI_INK});
+    for(var x=0;x<12;x+=1){ s+=S.tick(X(x),B+16,M[x]); }
+    s+=S.base(L,R,B);
     set('dFan',s);
   })();
 
   /* 2 · Growth composition */
   (function(){
-    // tf = in-pill numeral colour, picked per fill: ink on green (white
-    // fails there), white on the blue->dark-purple and red->dark-red pills
-    // whose value ends are the dark stops.
-    var rows=[{l:'New advertisers',v:12.7,c:'url(#dgGrn)',tf:C.ink},{l:'Existing accounts',v:4.8,c:'url(#dgBP)',tf:'#fff'},{l:'Lapsed advertisers',v:-8.6,c:'url(#dgRedD)',tf:'#fff'}];
-    var L=112,W=196,zero=L+(8.6/21.3)*W,top=28,rh=44,sc=W/21.3,s='';
-    s+=txt(L-8,18,'RM million',{s:9,w:800,f:C.fnt,a:'end'});
-    s+=ln(zero,top-8,zero,top+rh*3+18,{c:C.fnt,w:1.2});
+    var rows=[{l:'New advertisers',v:12.7,f:S.POS_FILL,vf:C.ink},
+              {l:'Existing accounts',v:4.8,f:S.PRI,vf:'#fff'},
+              {l:'Lapsed advertisers',v:-8.6,f:S.ALARM_FILL,vf:'#fff'}];
+    var L=112,W=196,zero=L+(8.6/21.3)*W,top=30,rh=50,sc=W/21.3,s='';
+    s+=S.eyebrow(L-8,18,'RM MILLION','end');
+    s+=ln(zero,top-8,zero,top+rh*3+22,{c:C.fnt,w:1.2});
     rows.forEach(function(r,i){
       var y=top+rh*i, w=Math.abs(r.v)*sc, x=r.v>=0?zero:zero-w;
-      s+=rect(x,y,w,26,{f:r.c,r:13});
-      s+=txt(L-8,y+17,r.l,{s:10.5,w:700,f:C.ink,a:'end'});
-      s+=txt(x+w-10,y+17.5,(r.v>0?'+':'')+r.v.toFixed(1),{s:12,w:900,f:r.tf,a:'end'});
+      s+=S.pill(x,y,w,r.f,{});
+      s+=S.label(L-8,y+S.BAR_H/2+4,r.l,{a:'end'});
+      s+=S.value(x+w-12,y+S.BAR_H/2+4.5,(r.v>0?'+':'')+r.v.toFixed(1),{f:r.vf,a:'end'});
     });
-    var ny=top+rh*3+2;
-    s+=ln(L-4,ny-8,L+W+32,ny-8,{c:C.rule,w:1.2});
-    s+=rect(zero,ny,8.9*sc,26,{f:'url(#dgInk)',r:13});
-    s+=txt(L-8,ny+17,'Net growth',{s:11,w:900,f:C.ink,a:'end'});
-    s+=txt(zero+8.9*sc-10,ny+17.5,'+8.9',{s:12.5,w:900,f:'#fff',a:'end'});
-    s+=txt(L-8,ny+50,'139.3 → 148.2',{s:12,w:900,f:C.ink,a:'end'});
-    s+=txt(L+4,ny+50,'last year to this year',{s:10,w:600,f:C.fnt});
+    var ny=top+rh*3+4;
+    s+=ln(L-4,ny-10,L+W+32,ny-10,{c:C.rule,w:1.2});
+    s+=S.pill(zero,ny,8.9*sc,'url(#dgInk)',{});
+    s+=S.label(L-8,ny+S.BAR_H/2+4,'Net growth',{w:900,a:'end'});
+    s+=S.value(zero+8.9*sc-12,ny+S.BAR_H/2+4.5,'+8.9',{f:'#fff',a:'end'});
+    s+=S.eyebrow(L-8,ny+S.BAR_H+26,'LAST YEAR TO THIS','end');
+    s+=S.verdict(L+4,ny+S.BAR_H+28,'139.3 → 148.2',{});
     set('dBridge',s);
   })();
 
@@ -5204,26 +5262,30 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
     var st=[{l:'Negotiation',v:51.2,w:25.6,n:37,a:'41d',p:'50%'},
             {l:'Verbal agreement',v:31.6,w:22.1,n:22,a:'24d',p:'70%'},
             {l:'Contracted, not booked',v:28.4,w:27.0,n:14,a:'11d',p:'95%'}];
-    var L=14,W=392,max=51.2,top=30,rh=74,s='';
-    s+=txt(L,16,'OPEN VALUE',{s:8.5,w:800,f:C.fnt,st:'letter-spacing:.1em'});
-    s+=txt(L+W,16,'RM 111.2M · 73 DEALS',{s:8.5,w:800,f:C.fnt,a:'end',st:'letter-spacing:.06em'});
+    var L=14,W=392,max=51.2,top=28,rh=72,s='';
+    s+=S.eyebrow(L,16,'OPEN VALUE');
+    s+=S.eyebrow(L+W,16,'RM 111.2M · 73 DEALS','end');
     st.forEach(function(r,i){
       var y=top+rh*i, w=(r.v/max)*W, ww=(r.w/max)*W;
-      s+=rect(L,y,w,34,{f:C.pur,o:.14,r:17});
-      s+=rect(L,y,ww,34,{f:'url(#dgBP)',r:17});
-      s+=txt(L+14,y+22,r.l,{s:12,w:800,f:'#fff'});
-      s+=txt(L+w-12,y+22,r.v.toFixed(1),{s:13,w:900,f:C.ink,a:'end'});
-      s+=txt(L,y+49,r.n+' deals · '+r.p+' · avg '+r.a,{s:10,w:600,f:C.fnt});
-      s+=txt(L+ww,y+49,'weighted '+r.w.toFixed(1),{s:10,w:800,f:'var(--dec-strategic-ink)',a:'middle'});
+      s+=S.pill(L,y,w,S.TRACK,{o:S.TRACK_O});
+      s+=S.barRow(L,y,ww,r.l,null,r.n+' deals · '+r.p+' · avg '+r.a,{});
+      s+=S.value(L+w-12,y+S.BAR_H/2+4.5,r.v.toFixed(1),{a:'end'});
+      s+=txt(L+ww,y+S.BAR_H+15,'weighted '+r.w.toFixed(1),{s:S.TICK,w:800,f:S.PRI_INK,a:'middle'});
     });
-    var y2=top+rh*3-14;
+    var y2=top+rh*3-8;
     s+=ln(L,y2,L+W,y2,{c:C.rule,w:1.2});
-    s+=txt(L,y2+19,'Weighted total',{s:11,w:800,f:C.ink});
-    s+=txt(L+W,y2+21,'RM 74.7M',{s:16,w:900,f:'var(--dec-strategic-ink)',a:'end'});
+    s+=S.label(L,y2+22,'Weighted total',{w:800});
+    s+=S.verdict(L+W,y2+24,'RM 74.7M',{f:S.PRI_INK,a:'end'});
     set('dFunnel',s);
   })();
 
-  /* 4 · Rep risk quadrant — 14 reps, first-fit labels vs a collision map */
+  /* 4 · Rep risk quadrant — 14 reps, first-fit labels vs a collision map.
+     Plot geometry (L/R/T/B and both scales) is UNCHANGED from the audited
+     version: the 1px label solver below is calibrated against these exact
+     coordinates, so restyling may touch colour and dot chrome but must not
+     move a point. The four tinted zones are gone — three coloured grounds were
+     the loudest thing on the board and the least like the other eight. Only
+     the quadrant that matters keeps a wash. */
   (function(){
     var reps=[
       {n:'Aisyah Rahman',x:118,y:2.5},{n:'Kavitha Raj',x:112,y:2.2},
@@ -5236,29 +5298,27 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
     var L=54,R=486,T=26,B=266;
     var X=function(v){return L+((v-70)/(126-70))*(R-L);}, Y=function(v){return B-((v-0.3)/(2.8-0.3))*(B-T);};
     var s='';
-    s+=rect(X(70),T,X(100)-X(70),Y(1.5)-T,{f:C.warn,o:.10,r:0});
-    s+=rect(X(70),Y(1.5),X(100)-X(70),B-Y(1.5),{f:C.crit,o:.13,r:0});
-    s+=rect(X(100),T,R-X(100),Y(1.5)-T,{f:C.good,o:.11,r:0});
-    s+=ln(X(100),T,X(100),B,{c:C.fnt,d:'3 4'});
-    s+=ln(L,Y(1.5),R,Y(1.5),{c:C.fnt,d:'3 4'});
-    s+=ln(L,B,R,B,{c:C.rule,w:1.5}); s+=ln(L,T,L,B,{c:C.rule,w:1.5});
-    [80,90,100,110,120].forEach(function(v){ s+=txt(X(v),B+15,v+'%',{s:9,f:C.fnt,a:'middle'}); });
-    [0.5,1.0,1.5,2.0,2.5].forEach(function(v){ s+=txt(L-7,Y(v)+3.5,v.toFixed(1)+'×',{s:9,f:C.fnt,a:'end'}); });
-    s+=txt(L+(R-L)/2,B+31,'Attainment today',{s:10,w:800,f:C.mut,a:'middle'});
-    s+='<text transform="translate(16,'+((T+B)/2)+') rotate(-90)" font-size="10" font-weight="800" fill="'+C.mut+'" text-anchor="middle">Pipeline cover</text>';
-    s+=txt(X(101),T+13,'AHEAD · WELL COVERED',{s:8,w:800,f:'var(--dec-good-ink)',st:'letter-spacing:.08em'});
-    s+=txt(X(70.6),B-8,'AT RISK · BEHIND AND THIN',{s:8,w:800,f:'var(--dec-crit-ink)',st:'letter-spacing:.08em'});
-    s+=txt(X(70.6),T+13,'BEHIND · COVERED',{s:8,w:800,f:'var(--dec-warn-ink)',st:'letter-spacing:.08em'});
+    s+=rect(X(70),Y(1.5),X(100)-X(70),B-Y(1.5),{f:C.crit,o:.07,r:0});
+    s+=S.gridV(X(100),T,B);
+    s+=S.gridH(L,R,Y(1.5));
+    s+=S.base(L,R,B); s+=ln(L,T,L,B,{c:C.rule,w:1.5});
+    [80,90,100,110,120].forEach(function(v){ s+=S.tick(X(v),B+16,v+'%'); });
+    [0.5,1.0,1.5,2.0,2.5].forEach(function(v){ s+=S.tick(L-8,Y(v)+3.5,v.toFixed(1)+'×','end'); });
+    s+=S.axis(L+(R-L)/2,B+32,'Attainment today');
+    s+=S.axisRot(16,(T+B)/2,'Pipeline cover');
+    s+=S.eyebrow(X(101),T+13,'AHEAD · WELL COVERED');
+    s+=S.eyebrow(X(70.6),B-8,'AT RISK · BEHIND AND THIN');
+    s+=S.eyebrow(X(70.6),T+13,'BEHIND · COVERED');
     var placed=[{x:X(101)-2,y:T+4,w:120,h:13},{x:X(70.6)-2,y:B-19,w:140,h:13},{x:X(70.6)-2,y:T+4,w:96,h:13}];
     function free(bx,by,bw,bh){
       return !placed.some(function(q){ return !(bx+bw<q.x-1||bx>q.x+q.w+1||by+bh<q.y-1||by>q.y+q.h+1); })
              && bx>2 && bx+bw<636 && by>2 && by+bh<B+34;
     }
     reps.forEach(function(p){
-      var cx=X(p.x), cy=Y(p.y), col=p.r?C.crit:C.der, rad=p.r?6:4.2;
-      if(p.r) s+='<circle cx="'+cx.toFixed(1)+'" cy="'+cy.toFixed(1)+'" r="12" fill="'+C.crit+'" opacity="0.18"/>';
-      s+='<circle cx="'+cx.toFixed(1)+'" cy="'+cy.toFixed(1)+'" r="'+rad+'" fill="'+col+'" stroke="#fff" stroke-width="1.6"/>';
-      var fs=p.r?9.5:8.4, h=p.r?22:11;
+      var cx=X(p.x), cy=Y(p.y), col=p.r?S.ALARM_FILL:S.PRI_LINE;
+      s+=S.dot(cx,cy,col,{big:p.r,halo:p.r});
+      var rad=p.r?6.5:4.5;
+      var fs=p.r?9.5:8.6, h=p.r?22:11;
       var w=Math.max(p.n.length*fs*0.55, p.r?78:0)+2;
       var cands=[[cx+rad+4,cy-h/2],[cx-rad-4-w,cy-h/2],[cx-w/2,cy-rad-h-2],[cx-w/2,cy+rad+2],
                  [cx+rad+4,cy-h-3],[cx+rad+4,cy+3],[cx-rad-4-w,cy-h-3],[cx-rad-4-w,cy+3]];
@@ -5266,45 +5326,46 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
       for(var i=0;i<cands.length;i++){
         if(free(cands[i][0],cands[i][1],w,h)){
           placed.push({x:cands[i][0],y:cands[i][1],w:w,h:h});
-          s+=txt(cands[i][0],cands[i][1]+8.5,p.n,{s:fs,w:p.r?900:700,f:p.r?'var(--dec-crit-ink)':C.ink});
-          if(p.r) s+=txt(cands[i][0],cands[i][1]+19.5,'85% · 0.8× cover',{s:8.6,w:700,f:'var(--dec-crit-ink)'});
+          s+=txt(cands[i][0],cands[i][1]+8.5,p.n,{s:fs,w:p.r?900:700,f:p.r?S.ALARM:C.ink});
+          if(p.r) s+=txt(cands[i][0],cands[i][1]+19.5,'85% · 0.8× cover',{s:S.EYE,w:700,f:S.ALARM});
           break;
         }
       }
     });
-    s+=txt(R+6,T+4,'14 reps',{s:9,w:800,f:C.fnt});
+    s+=S.eyebrow(R+8,T+4,'14 REPS');
     set('dQuad',s);
   })();
 
-  /* 5 · Sold vs sellable — funnel bar language */
+  /* 5 · Sold vs sellable */
   (function(){
     var d=[{l:'TV',cap:88.0,sold:79.4,fill:90,att:97},
            {l:'Addressable',cap:27.0,sold:26.1,fill:97,att:109},
            {l:'Radio',cap:34.0,sold:27.2,fill:80,att:88},
            {l:'Digital',cap:25.0,sold:15.5,fill:62,att:75}];
-    var L=14,W=440,max=88,top=30,rh=58,s='';
-    s+=txt(L,16,'SELLABLE INVENTORY',{s:8.5,w:800,f:C.fnt,st:'letter-spacing:.1em'});
-    s+=txt(L+W,16,'RM 174.0M CAPACITY',{s:8.5,w:800,f:C.fnt,a:'end',st:'letter-spacing:.06em'});
+    var L=14,W=440,max=88,top=30,rh=64,s='';
+    s+=S.eyebrow(L,16,'SELLABLE INVENTORY');
+    s+=S.eyebrow(L+W,16,'RM 174.0M CAPACITY','end');
     d.forEach(function(r,i){
       var y=top+rh*i, cw=(r.cap/max)*W, sw=(r.sold/max)*W;
-      s+=rect(L,y,cw,34,{f:C.pur,o:.14,r:17});
-      s+=rect(L,y,sw,34,{f:'url(#dgBP)',r:17});
-      s+=txt(L+14,y+22,r.l,{s:12,w:800,f:'#fff'});
-      if(sw>110) s+=txt(L+sw-12,y+22,r.sold.toFixed(1),{s:12.5,w:900,f:'#fff',a:'end'});
-      else       s+=txt(L+sw+9,y+22,r.sold.toFixed(1),{s:12.5,w:900,f:C.ink});
-      s+=txt(L,y+49,r.fill+'% of '+r.cap.toFixed(1)+' sellable',{s:10,w:700,f:C.der});
-      s+=txt(L+156,y+49,r.att+'% of target',{s:10,w:800,f:r.att>=100?'var(--dec-good-ink)':'var(--dec-warn-ink)'});
+      s+=S.pill(L,y,cw,S.TRACK,{o:S.TRACK_O});
+      s+=S.barRow(L,y,sw,r.l,null,r.fill+'% of '+r.cap.toFixed(1)+' sellable',{});
+      if(sw>110) s+=S.value(L+sw-12,y+S.BAR_H/2+4.5,r.sold.toFixed(1),{f:'#fff',a:'end'});
+      else       s+=S.value(L+sw+10,y+S.BAR_H/2+4.5,r.sold.toFixed(1),{});
+      s+=txt(L+164,y+S.BAR_H+15,r.att+'% of target',{s:S.TICK,w:800,f:r.att>=100?S.POS:S.ALARM});
     });
-    var y2=top+rh*3+62;
+    var y2=top+rh*4-10;   // -10, not -4: the legend row below overran the 324 viewBox
     s+=ln(L,y2,L+W,y2,{c:C.rule,w:1.2});
-    s+=txt(L,y2+19,'Sold',{s:11,w:800,f:C.ink});
-    s+=txt(L+W,y2+21,'RM 148.2M · 85% fill',{s:14,w:900,f:C.ink,a:'end'});
-    s+=rect(L,y2+30,12,12,{f:'url(#dgBP)',r:6}); s+=txt(L+18,y2+40,'Sold',{s:9.5,w:600,f:C.mut});
-    s+=rect(L+62,y2+30,12,12,{f:C.pur,o:.14,r:6}); s+=txt(L+80,y2+40,'Unsold capacity',{s:9.5,w:600,f:C.mut});
+    s+=S.label(L,y2+22,'Sold',{w:800});
+    s+=S.verdict(L+W,y2+24,'RM 148.2M · 85% fill',{a:'end'});
+    s+=rect(L,y2+34,12,12,{f:S.PRI,r:6}); s+=txt(L+18,y2+44,'Sold',{s:S.TICK,w:600,f:C.mut});
+    s+=rect(L+64,y2+34,12,12,{f:S.TRACK,o:S.TRACK_O,r:6}); s+=txt(L+82,y2+44,'Unsold capacity',{s:S.TICK,w:600,f:C.mut});
     set('dFill',s);
   })();
 
-  /* 6 · Revenue vs contribution — 14 accounts */
+  /* 6 · Revenue vs contribution — 14 accounts. Plot geometry UNCHANGED for the
+     same reason as the quadrant: the label solver is calibrated to it. The 40%
+     margin band became a threshold rule so it matches the quadrant's cross
+     rather than inventing a third way to mark a boundary. */
   (function(){
     var d=[{n:'Maggi Malaysia',x:2.10,y:26},{n:'Shopee',x:1.95,y:16},
            {n:'Lazada MY',x:1.80,y:18},{n:'Petronas Retail',x:1.55,y:21},
@@ -5317,14 +5378,13 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
     var L=56,R=440,T=30,B=228;
     var X=function(v){return L+((v-0.20)/(2.30-0.20))*(R-L);}, Y=function(v){return B-((v-12)/(50-12))*(B-T);};
     var s='';
-    [20,30,40,50].forEach(function(v){ s+=ln(L,Y(v),R,Y(v),{d:'3 5'}); s+=txt(L-7,Y(v)+3.5,v+'%',{s:9,f:C.fnt,a:'end'}); });
-    [0.5,1.0,1.5,2.0].forEach(function(v){ s+=txt(X(v),B+15,v.toFixed(1),{s:9,f:C.fnt,a:'middle'}); s+=ln(X(v),T,X(v),B,{d:'3 5'}); });
-    s+=ln(L,B,R,B,{c:C.rule,w:1.5}); s+=ln(L,T,L,B,{c:C.rule,w:1.5});
-    s+=txt((L+R)/2,B+31,'Revenue, RM million',{s:10,w:800,f:C.mut,a:'middle'});
-    s+='<text transform="translate(17,'+((T+B)/2)+') rotate(-90)" font-size="10" font-weight="800" fill="'+C.mut+'" text-anchor="middle">Gross margin</text>';
-    s+=txt(R+4,T-14,'Bubble = gross profit',{s:9,w:600,f:C.fnt,a:'end'});
-    s+=rect(L,T,R-L,Y(40)-T,{f:C.good,o:.06,r:0});
-    s+=txt(R-6,Y(40)-6,'40%+ MARGIN',{s:8,w:800,f:'var(--dec-good-ink)',a:'end',st:'letter-spacing:.09em'});
+    [20,30,40,50].forEach(function(v){ s+=S.gridH(L,R,Y(v)); s+=S.tick(L-8,Y(v)+3.5,v+'%','end'); });
+    [0.5,1.0,1.5,2.0].forEach(function(v){ s+=S.tick(X(v),B+16,v.toFixed(1)); s+=S.gridV(X(v),T,B); });
+    s+=S.base(L,R,B); s+=ln(L,T,L,B,{c:C.rule,w:1.5});
+    s+=S.axis((L+R)/2,B+32,'Revenue, RM million');
+    s+=S.axisRot(17,(T+B)/2,'Gross margin');
+    s+=ln(L,Y(40),R,Y(40),{c:'#009B58',d:S.REF,w:1.6});
+    s+=S.eyebrow(R-6,Y(40)-7,'40%+ MARGIN','end');
     var placed=[];
     function free(bx,by,bw,bh){
       return !placed.some(function(q){ return !(bx+bw<q.x-1||bx>q.x+q.w+1||by+bh<q.y-1||by>q.y+q.h+1); })
@@ -5332,10 +5392,10 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
     }
     d.sort(function(a,b){ return b.c-a.c; });
     d.forEach(function(p){
-      var hi=p.y>=40, cx=X(p.x), cy=Y(p.y), r=7+p.c*34, col=hi?C.good:C.pur;
+      var hi=p.y>=40, cx=X(p.x), cy=Y(p.y), r=7+p.c*34;
       s+='<circle cx="'+cx.toFixed(1)+'" cy="'+cy.toFixed(1)+'" r="'+r.toFixed(1)+'" fill="'+(hi?'url(#rGrn)':'url(#rPur)')+'" opacity="'+(hi?.55:.45)+'"/>';
-      s+='<circle cx="'+cx.toFixed(1)+'" cy="'+cy.toFixed(1)+'" r="'+r.toFixed(1)+'" fill="none" stroke="'+col+'" stroke-width="1.6"/>';
-      if(r>=15){ s+=txt(cx,cy+3.4,p.c.toFixed(2),{s:9,w:900,f:hi?'var(--dec-good-ink)':'var(--dec-strategic-ink)',a:'middle'});
+      s+='<circle cx="'+cx.toFixed(1)+'" cy="'+cy.toFixed(1)+'" r="'+r.toFixed(1)+'" fill="none" stroke="'+(hi?'#009B58':C.pur)+'" stroke-width="1.6"/>';
+      if(r>=15){ s+=txt(cx,cy+3.4,p.c.toFixed(2),{s:S.TICK,w:900,f:hi?S.POS:S.PRI_INK,a:'middle'});
                  placed.push({x:cx-15,y:cy-6,w:30,h:13}); }
       var w=p.n.length*4.9+2, h=10.5;
       var cands=[[cx-w/2,cy-r-h-2],[cx+r+4,cy-h/2],[cx-r-4-w,cy-h/2],[cx-w/2,cy+r+2],
@@ -5344,91 +5404,98 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
       for(var i=0;i<cands.length;i++){
         if(free(cands[i][0],cands[i][1],w,h)){
           placed.push({x:cands[i][0],y:cands[i][1],w:w,h:h});
-          s+=txt(cands[i][0],cands[i][1]+8,p.n,{s:8.6,w:hi?800:700,f:hi?'var(--dec-good-ink)':C.ink});
+          s+=txt(cands[i][0],cands[i][1]+8,p.n,{s:8.6,w:hi?800:700,f:hi?S.POS:C.ink});
           break;
         }
       }
     });
+    s+=S.eyebrow(R+6,T-12,'BUBBLE = GROSS PROFIT','end');
     set('dBubble',s);
   })();
 
-  /* 7 · Churn by reason */
+  /* 7 · Churn by reason. Recoverable reads POS because that is what it means —
+     timing, not loss — which also retires the last amber on the board. */
   (function(){
-    // Solid #C4111F on the red segments, not the dgRedD gradient: their labels
-    // are CENTRED, and mid-gradient the red lightens to ~4.2:1 under white
-    // text. The solid crit-ink red measures 6.09 everywhere.
-    var seg=[{l:'Budget cycle',v:2.1,c:'url(#dgAmb)',tf:C.ink,of:'var(--dec-warn-ink)'},{l:'Competitive',v:1.4,c:'#C4111F',tf:'#fff',of:'var(--dec-crit-ink)'},
-             {l:'Price',v:0.5,c:'#C4111F',tf:'#fff',of:'var(--dec-crit-ink)'},{l:'Service',v:0.4,c:C.mut,tf:'#fff',of:C.mut}];
-    var L=16,W=448,tot=4.4,y=54,s='',x=L;
-    s+=txt(L,20,'RM 4.4M LAPSED',{s:9,w:800,f:C.fnt,st:'letter-spacing:.1em'});
+    var seg=[{l:'Budget cycle',v:2.1,f:S.POS_FILL,tf:C.ink,of:S.POS},
+             {l:'Competitive',v:1.4,f:S.ALARM_FILL,tf:'#fff',of:S.ALARM},
+             {l:'Price',v:0.5,f:S.ALARM_FILL,tf:'#fff',of:S.ALARM},
+             {l:'Service',v:0.4,f:C.mut,tf:'#fff',of:C.mut}];
+    var L=16,W=448,tot=4.4,y=52,s='',x=L;
+    s+=S.eyebrow(L,20,'RM 4.4M LAPSED');
     seg.forEach(function(g){
       var w=(g.v/tot)*W;
-      s+=rect(x,y,w-6,40,{f:g.c,r:12});
-      if(w>62){ s+=txt(x+(w-6)/2,y+17,g.l,{s:10,w:800,f:g.tf,a:'middle'});
-                s+=txt(x+(w-6)/2,y+31,g.v.toFixed(1),{s:12.5,w:900,f:g.tf,a:'middle'}); }
-      else { s+=txt(x+(w-6)/2,y-6,g.v.toFixed(1),{s:10.5,w:900,f:g.of,a:'middle'}); }
+      s+=S.pill(x,y,w-6,g.f,{});
+      if(w>62){ s+=txt(x+(w-6)/2,y+15,g.l,{s:S.TICK,w:800,f:g.tf,a:'middle'});
+                s+=S.value(x+(w-6)/2,y+29,g.v.toFixed(1),{f:g.tf,a:'middle'}); }
+      else { s+=S.value(x+(w-6)/2,y-8,g.v.toFixed(1),{f:g.of,a:'middle'}); }
       x+=w;
     });
-    var rw=(2.1/tot)*W, sw2=W-rw;
-    s+=ln(L,y+44,L+rw-2,y+44,{c:C.warn,w:2.4,cap:'round'});
-    s+=txt(L+rw/2,y+60,'RECOVERABLE · RM 2.1M',{s:9.5,w:800,f:'var(--dec-warn-ink)',a:'middle',st:'letter-spacing:.06em'});
-    s+=txt(L+rw/2,y+74,'timing, not loss',{s:9.5,w:600,f:C.mut,a:'middle'});
-    s+=ln(L+rw+2,y+44,L+W,y+44,{c:C.crit,w:2.4,cap:'round'});
-    s+=txt(L+rw+sw2/2,y+60,'STRUCTURAL · RM 2.3M',{s:9.5,w:800,f:'var(--dec-crit-ink)',a:'middle',st:'letter-spacing:.06em'});
-    s+=txt(L+rw+sw2/2,y+74,'needs a rate conversation',{s:9.5,w:600,f:C.mut,a:'middle'});
+    var rw=(2.1/tot)*W, sw2=W-rw, yr=y+S.BAR_H+12;
+    s+=ln(L,yr,L+rw-6,yr,{c:'#009B58',w:2.4,cap:'round'});
+    s+=S.eyebrow(L+rw/2,yr+16,'RECOVERABLE · RM 2.1M','middle');
+    s+=txt(L+rw/2,yr+30,'timing, not loss',{s:S.TICK,w:600,f:C.mut,a:'middle'});
+    s+=ln(L+rw+2,yr,L+W,yr,{c:S.ALARM_FILL,w:2.4,cap:'round'});
+    s+=S.eyebrow(L+rw+sw2/2,yr+16,'STRUCTURAL · RM 2.3M','middle');
+    s+=txt(L+rw+sw2/2,yr+30,'needs a rate conversation',{s:S.TICK,w:600,f:C.mut,a:'middle'});
     set('dChurn',s);
   })();
 
   /* 8 · Concentration curve */
   (function(){
     var pts=[[0,0],[1,9.2],[2,16.1],[3,22.4],[5,38],[10,54],[20,71]];
-    var L=52,R=440,T=26,B=196;
+    var L=52,R=440,T=30,B=196;
     var X=function(v){return L+(v/20)*(R-L);}, Y=function(v){return B-(v/80)*(B-T);};
     var s='';
-    [20,40,60,80].forEach(function(v){ s+=ln(L,Y(v),R,Y(v),{d:'3 5'}); s+=txt(L-7,Y(v)+3.5,v+'%',{s:9,f:C.fnt,a:'end'}); });
-    [1,5,10,20].forEach(function(v){ s+=txt(X(v),B+15,'Top '+v,{s:9,f:C.fnt,a:'middle'}); });
-    s+=ln(L,B,R,B,{c:C.rule,w:1.5}); s+=ln(L,T,L,B,{c:C.rule,w:1.5});
+    [20,40,60,80].forEach(function(v){ s+=S.gridH(L,R,Y(v)); s+=S.tick(L-8,Y(v)+3.5,v+'%','end'); });
+    [1,5,10,20].forEach(function(v){ s+=S.tick(X(v),B+16,'Top '+v); });
+    s+=S.base(L,R,B); s+=ln(L,T,L,B,{c:C.rule,w:1.5});
     var p=''; pts.forEach(function(q,i){ p+=(i?' L':'M')+X(q[0]).toFixed(1)+' '+Y(q[1]).toFixed(1); });
     s+=path(p+' L'+X(20).toFixed(1)+' '+B+' L'+X(0).toFixed(1)+' '+B+' Z',{f:'url(#dgPurFade)'});
-    s+=path(p,{s:C.pur,w:3.5});
-    s+=ln(X(5),Y(38),X(5),B,{c:C.warn,d:'4 3',w:1.4});
-    s+='<circle cx="'+X(5).toFixed(1)+'" cy="'+Y(38).toFixed(1)+'" r="6" fill="'+C.warn+'"/>';
-    s+=txt(X(5)+12,Y(38)-13,'TOP 5',{s:8.5,w:800,f:C.fnt,st:'letter-spacing:.1em'});
-    s+=txt(X(5)+12,Y(38)+6,'38%',{s:19,w:900,f:C.ink});
-    s+=txt(X(5)+12,Y(38)+20,'losing two breaches plan',{s:9.5,w:600,f:C.mut});
-    s+=txt(X(1)+6,Y(9.2)-7,'largest 9.2%',{s:9.5,w:700,f:C.fnt});
-    s+='<circle cx="'+X(1).toFixed(1)+'" cy="'+Y(9.2).toFixed(1)+'" r="4" fill="'+C.pur+'"/>';
-    s+=txt((L+R)/2,B+31,'Advertisers by rank',{s:10,w:800,f:C.mut,a:'middle'});
+    s+=path(p,{s:S.PRI_LINE,w:3.5});
+    s+=S.gridV(X(5),Y(38),B);
+    s+=S.dot(X(1),Y(9.2),S.PRI_LINE,{});
+    s+=txt(X(1)+8,Y(9.2)-8,'largest 9.2%',{s:S.TICK,w:700,f:C.fnt});
+    s+=S.dot(X(5),Y(38),S.PRI_LINE,{big:true,halo:true});
+    s+=S.eyebrow(X(5)+13,Y(38)-12,'TOP 5');
+    s+=S.verdict(X(5)+13,Y(38)+7,'38%',{});
+    s+=txt(X(5)+13,Y(38)+21,'losing two breaches plan',{s:S.TICK,w:600,f:C.mut});
+    s+=S.axis((L+R)/2,B+32,'Advertisers by rank');
     set('dConc',s);
   })();
 
-  /* 9 · Us vs market */
+  /* 9 · Us vs market. The share strip below is a small multiple of the same
+     grammar — same dotted rules, same ticks, same baseline — not a second
+     chart style stacked underneath. */
   (function(){
     var mk=[100,101.2,102.4,103.5,104.8,105.9,107.0,108.1];
     var us=[100,100.9,101.9,102.8,103.8,104.7,105.6,106.4];
     var sh=[14.20,14.14,14.12,14.08,14.02,13.95,13.88,13.80];
-    var L=52,R=628,T=26,B=176;
+    var L=52,R=628,T=30,B=170;
     var X=function(i){return L+(R-L)*(i/7);}, Y=function(v){return B-((v-98)/(110-98))*(B-T);};
     var s='';
-    [100,104,108].forEach(function(v){ s+=ln(L,Y(v),R,Y(v),{d:'3 5'}); s+=txt(L-7,Y(v)+3.5,v,{s:9,f:C.fnt,a:'end'}); });
-    s+=ln(L,B,R,B,{c:C.rule,w:1.5});
-    for(var i=0;i<8;i++){ s+=txt(X(i),B+15,M[i],{s:9,f:C.fnt,a:'middle'}); }
+    [100,104,108].forEach(function(v){ s+=S.gridH(L,R,Y(v)); s+=S.tick(L-8,Y(v)+3.5,v,'end'); });
+    s+=S.base(L,R,B);
+    for(var i=0;i<8;i++){ s+=S.tick(X(i),B+16,M[i]); }
     function mkp(a){ var p=''; for(var k=0;k<a.length;k++){ p+=(k?' L':'M')+X(k).toFixed(1)+' '+Y(a[k]).toFixed(1); } return p; }
     function revp(a){ var p=''; for(var k=a.length-1;k>=0;k--){ p+=' L'+X(k).toFixed(1)+' '+Y(a[k]).toFixed(1); } return p; }
     s+=path(mkp(mk)+revp(us)+' Z',{f:'url(#dgRedFade)'});
-    s+=path(mkp(mk),{s:C.fnt,w:2.4,d:'6 4'});
-    s+=path(mkp(us),{s:C.der,w:4});
-    s+=txt(R+4,Y(108.1)+3.5,'market +8.1%',{s:9.5,w:800,f:C.mut});
-    s+=txt(R+4,Y(106.4)+4,'us +6.4%',{s:11,w:900,f:C.der});
-    var sT=222,sB=252;
+    s+=path(mkp(mk),{s:C.fnt,w:2.2,d:S.REF});
+    s+=path(mkp(us),{s:S.PRI_LINE,w:3.5});
+    s+=S.dot(X(7),Y(106.4),S.PRI_LINE,{});
+    s+=txt(R+6,Y(108.1)+3.5,'market +8.1%',{s:S.TICK,w:800,f:C.mut});
+    s+=txt(R+6,Y(106.4)+14,'us +6.4%',{s:S.TICK,w:800,f:S.PRI_INK});
+    var sT=212,sB=248;
     var SY=function(v){return sB-((v-13.6)/(14.4-13.6))*(sB-sT);};
-    s+=txt(L-7,sT+4,'14.4%',{s:8.5,f:C.fnt,a:'end'}); s+=txt(L-7,sB+4,'13.6%',{s:8.5,f:C.fnt,a:'end'});
+    s+=S.eyebrow(L,sT-12,'SHARE OF MARKET');
+    s+=S.gridH(L,R,sT); s+=S.tick(L-8,sT+3.5,'14.4%','end');
+    s+=S.tick(L-8,sB+3.5,'13.6%','end');
     var sp=''; for(var j=0;j<sh.length;j++){ sp+=(j?' L':'M')+X(j).toFixed(1)+' '+SY(sh[j]).toFixed(1); }
     s+=path(sp+' L'+X(7).toFixed(1)+' '+sB+' L'+X(0).toFixed(1)+' '+sB+' Z',{f:'url(#dgRedFade)'});
-    s+=path(sp,{s:C.crit,w:3});
-    s+=txt(R,sT-9,'SHARE OF MARKET',{s:8.5,w:800,f:C.fnt,a:'end',st:'letter-spacing:.1em'});
-    s+=txt(X(0)+4,SY(14.2)-7,'14.2%',{s:9.5,w:800,f:'var(--dec-crit-ink)'});
-    s+=txt(X(7)-4,SY(13.8)-8,'13.8%',{s:13,w:900,f:'var(--dec-crit-ink)',a:'end'});
+    s+=path(sp,{s:S.ALARM_FILL,w:3});
+    s+=S.base(L,R,sB);
+    s+=S.dot(X(7),SY(13.8),S.ALARM_FILL,{});
+    s+=txt(X(0)+6,SY(14.2)-8,'14.2%',{s:S.TICK,w:800,f:S.ALARM});
+    s+=S.verdict(R+6,SY(13.8)+7,'13.8%',{f:S.ALARM,a:'end'});
     set('dShare',s);
   })();
 })();

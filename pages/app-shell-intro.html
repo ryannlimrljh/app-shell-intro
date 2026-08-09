@@ -815,6 +815,77 @@
   .mini-pill:hover{background:var(--color-neutral-3); color:var(--color-neutral-9);}
   @media (prefers-reduced-motion:reduce){ .floating-ask-glow-outer, .floating-ask-glow-inner{ animation:none; } }
 
+
+  /* ---- Actionable Cards overlay -------------------------------------
+     The six hero cards are NOT copied in here: the same six nodes are
+     reparented out of the fan into this grid, and a FLIP carries each one
+     from wherever it was sitting to its slot, un-rotating on the way.
+     Copies would have desynced (each card carries live figures and a
+     Motion-owned inline transform) and the sort would have read as a
+     cross-fade rather than as the mess actually resolving into order.
+
+     z-index 45 is deliberately BELOW .c-sidebar-shell's 50: the rail stays
+     visible and usable beside the grid, which is what the reference shows.
+     The panel's left padding is measured from the rail at open time rather
+     than hardcoded, because the rail auto-collapses 240px -> 72px on load.
+
+     perspective here mirrors .c-card-slider-track's: without it the cards'
+     pointer tilt (rotateX/rotateY, still bound from the fan) would degrade
+     into a flat skew the moment they were reparented out of the track.
+     The negative-margin overlap and the fan's z-index ladder both have to
+     be neutralised for the same reason — they follow .c-card-slide by
+     selector, not by which container it happens to be in. */
+  .c-tidy{position:fixed; inset:0; z-index:45; display:none;}
+  .c-tidy.is-open{display:block;}
+  .c-tidy[hidden]{display:none;}
+  /* Blurred as well as darkened: at 30% alpha alone the greeting and the
+     hand-off links stayed legible through the gaps between cards, which made
+     the grid read as floating over a live page rather than as the thing to
+     look at. The blur sits on the backdrop only — the cards are in the panel
+     above it, so they stay sharp. */
+  .c-tidy-backdrop{position:absolute; inset:0; background:rgba(20,20,20,.34); opacity:0;
+    -webkit-backdrop-filter:blur(6px); backdrop-filter:blur(6px);
+    transition:opacity var(--duration-slow) var(--ease-standard);}
+  .c-tidy.is-shown .c-tidy-backdrop{opacity:1;}
+  .c-tidy-panel{position:absolute; inset:0; display:flex; flex-direction:column; gap:var(--spacing-24);
+    overflow-y:auto; padding:var(--spacing-32);
+    padding-left:calc(var(--tidy-inset-l, 120px) + var(--spacing-32));}
+  .c-tidy-head{display:flex; align-items:flex-start; justify-content:space-between; gap:var(--spacing-24);
+    opacity:0; transform:translateY(-8px);
+    transition:opacity var(--duration-slow) var(--ease-settle), transform var(--duration-slow) var(--ease-settle);}
+  .c-tidy.is-shown .c-tidy-head{opacity:1; transform:none; transition-delay:120ms;}
+  .c-tidy-eyebrow{margin:0 0 var(--spacing-4); font-size:var(--text-caption-size); font-weight:700;
+    letter-spacing:var(--tracking-eyebrow); text-transform:uppercase; color:var(--color-neutral-5);}
+  .c-tidy-head h2{margin:0; font-size:var(--text-h4-size); font-weight:800; letter-spacing:0; color:var(--color-neutral-9);}
+  .c-tidy-head p.c-tidy-sub{margin:var(--spacing-4) 0 0; font-size:var(--text-body2-size); color:var(--color-neutral-5);}
+  /* 40px, not the 36px of .ask-icon-btn: this one is a lone dismiss control
+     on a scrim rather than one of a cluster, and 44 is the touch floor the
+     ruleset asks for once you count the 4px of visual padding around it. */
+  .c-tidy-x{flex:none; width:40px; height:40px; display:flex; align-items:center; justify-content:center;
+    border:0; border-radius:var(--radius-pill); background:var(--color-neutral-1); color:var(--color-neutral-9);
+    box-shadow:var(--shadow-2); font-size:var(--icon-base); cursor:pointer;
+    transition:background-color var(--duration-fast) var(--ease-standard);}
+  .c-tidy-x:hover{background:var(--color-neutral-2);}
+  .c-tidy-x:active{background:var(--color-neutral-3);}
+  .c-tidy-x:focus-visible{outline:2px solid var(--color-obsidian); outline-offset:2px;}
+  .c-tidy-grid{display:grid; grid-template-columns:repeat(3, 340px); gap:var(--spacing-24);
+    justify-content:center; align-content:start; margin:auto; perspective:900px;}
+  .c-tidy-grid .c-card-slide + .c-card-slide{margin-left:0;}
+  .c-tidy-grid .c-card-slide{z-index:auto;}
+  /* The fan pose is a CSS transform on .c-card-slide.is-revealed, and it
+     follows the card into this grid. It has to be cancelled here, not just
+     overridden from JS: Motion writes NO inline transform for an identity
+     pose, so at rest in the grid there is nothing to out-rank the stylesheet
+     and every card sat visibly rotated and displaced out of its own slot.
+     Inline transforms still win while a FLIP is actually in flight. */
+  .c-tidy-grid .c-card-slide,
+  .c-tidy-grid .c-card-slide.is-revealed{transform:none;}
+  @media (max-width:1280px){ .c-tidy-grid{grid-template-columns:repeat(2, 340px);} }
+  @media (max-width:860px){
+    .c-tidy-grid{grid-template-columns:340px;}
+    .c-tidy-panel{padding-left:var(--spacing-16); padding-right:var(--spacing-16);}
+  }
+
   /* Blank placeholder cards — now a slider, not the Content region's
      fixed 4-column box grid (.c-shell-grid), since 8 cards at a
      "larger" width don't fit a static grid without either shrinking
@@ -2278,6 +2349,24 @@
     </div><!-- /.c-shell-main -->
   </div>
 
+  <!-- Actionable Cards overlay. Empty on purpose: the six .c-card-slide
+       nodes are moved in here at open time and back into the fan on close,
+       so there is exactly one copy of each card in the document. -->
+  <div class="c-tidy" id="tidyOverlay" aria-hidden="true">
+    <div class="c-tidy-backdrop" id="tidyBackdrop"></div>
+    <div class="c-tidy-panel" role="dialog" aria-modal="true" aria-labelledby="tidyH">
+      <div class="c-tidy-head">
+        <div>
+          <p class="c-tidy-eyebrow">Actionable cards</p>
+          <h2 id="tidyH">Six things worth your attention</h2>
+          <p class="c-tidy-sub">The same cards as the row above, laid out to read in order.</p>
+        </div>
+        <button class="c-tidy-x" id="tidyX" type="button" aria-label="Close actionable cards"><i class="ph ph-x" aria-hidden="true"></i></button>
+      </div>
+      <div class="c-tidy-grid" id="tidyGrid"></div>
+    </div>
+  </div>
+
   <!-- Card detail modal. The Pace card opens into the live Sales card
        below (.c-modal-sales, shown via .is-pace — ported from
        dashboard-home.html and rescaled to the Pace story); every other
@@ -3036,7 +3125,13 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
       document.addEventListener('click', (e) => {
         if (didDrag) return; // a drag-release click is not an open intent (same signal the slider's own click suppressor uses)
         const card = e.target.closest('.c-card-slide');
-        if (card && cardSlider.contains(card) && !modalSourceCard) {
+        // Also accept cards that have been reparented into the tidy overlay —
+        // they are the same nodes, and the modal's morph is measured from
+        // rects, so it opens correctly from a grid slot too. .c-card-modal's
+        // z-index 90 puts it above the overlay's 45.
+        const tidyGrid = document.getElementById('tidyGrid');
+        const inPlay = cardSlider.contains(card) || (tidyGrid && tidyGrid.contains(card));
+        if (card && inPlay && !modalSourceCard) {
           if (e.target.closest('a, button')) return; // real controls inside a card (e.g. the AI card's CTA button) keep their own meaning
           openCardModal(card);
         }
@@ -3589,19 +3684,170 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
     if (a) a.addEventListener('click', (e) => { e.preventDefault(); window.showSpace(tabId, anchorId); });
   });
 
-  // "Actionable Cards" goes back UP to the fan, which is in the hero and
-  // belongs to neither space, so no tab switch — just scroll and focus it,
-  // since the slider is itself a keyboard-operable region.
+  // "Actionable Cards" now opens the tidy overlay rather than scrolling back
+  // up to the fan. window.showCards is the single entry point so the tidy
+  // script owns the behaviour and this handler stays a one-liner.
   const cardLink = document.querySelector('#dashLink a[href="#cardSlider"]');
   if (cardLink) {
     cardLink.addEventListener('click', (e) => {
       e.preventDefault();
-      const slider = document.getElementById('cardSlider');
-      if (!slider) return;
-      slider.scrollIntoView({ block: 'center' });
-      slider.focus({ preventScroll: true });
+      if (typeof window.showCards === 'function') window.showCards(cardLink);
     });
   }
+})();
+
+// ── Actionable Cards overlay: the fan sorts itself into a grid.
+// A real FLIP on the six hero cards, not a second set of copies. Sequence
+// per card: measure where it is now -> reparent -> neutralise its transform
+// and measure where it landed -> apply the inverse instantly -> release it
+// to the target pose. Centres are compared rather than top-left corners
+// because these cards are rotated, and getBoundingClientRect returns the
+// axis-aligned bounding box of a rotated card, whose corner is not its
+// layout corner — its centre, however, is exactly the layout centre plus
+// the translation, which is the number the FLIP actually needs.
+// Motion owns these transforms (the fan's pose and pointer tilt both run
+// through it), so every step here goes through animate() as well; mixing a
+// CSS transition in would fight the tilt the first time one fired.
+(function () {
+  const overlay = document.getElementById('tidyOverlay');
+  const grid = document.getElementById('tidyGrid');
+  const backdrop = document.getElementById('tidyBackdrop');
+  const closeBtn = document.getElementById('tidyX');
+  const slider = document.getElementById('cardSlider');
+  const track = slider ? slider.querySelector('.c-card-slider-track') : null;
+  if (!overlay || !grid || !track) return;
+
+  const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const FLIP = { duration: 0.72, ease: [0.22, 1, 0.36, 1] };
+  const STEP = 0.045;          // per-card stagger; the row reads as sorting rather than snapping
+  let open = false, returnFocus = null, busy = false;
+
+  const cards = () => Array.from(document.querySelectorAll('.c-card-slide'));
+  const centre = (el) => { const r = el.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; };
+
+  // The fan pose lives in CSS custom properties per nth-child. Read it back
+  // rather than caching: it is the same source enableCardTilt reads, so the
+  // two can never disagree about where "home" is.
+  function homePose(card) {
+    const st = getComputedStyle(card);
+    return { y: parseFloat(st.getPropertyValue('--arc-y')) || 0, rotate: parseFloat(st.getPropertyValue('--arc-rotate')) || 0 };
+  }
+
+  // The rail auto-collapses 240px -> 72px, so its width is measured at open
+  // time instead of hardcoded; the grid then centres in what is left.
+  function syncInset() {
+    const rail = document.querySelector('.c-sidebar-shell');
+    if (!rail) return;
+    // offsetLeft/offsetWidth, not a client rect: the rail parks at
+    // translateX(-120%) until its entrance runs, so its rect reads off-screen
+    // (right edge <= 0) and the grid would centre as if there were no rail at
+    // all. Layout space is immune to that transform — the same reason the
+    // segmented-toggle thumbs are positioned from offsets on this page.
+    overlay.style.setProperty('--tidy-inset-l', Math.max(0, rail.offsetLeft + rail.offsetWidth) + 'px');
+  }
+
+  /* One direction of the FLIP. `poseFor` and `invRotate` are both evaluated
+     BEFORE the reparent, because homePose() reads nth-child custom properties
+     and asking for them mid-move would make the answer depend on which
+     container the card happened to be in at that instant. The reflow between
+     measuring and inverting is forced with offsetWidth rather than a rAF
+     pair: this page runs in contexts that do not always produce animation
+     frames, and a deferred invert there would show one frame of the card
+     already sitting at its destination. */
+  function flip(move, poseFor, order, invRotate) {
+    const list = cards();
+    const first = list.map(centre);
+    const poses = list.map(poseFor);
+    const fromRot = list.map(invRotate);
+    move();
+    list.forEach((c, i) => animate(c, { x: 0, y: poses[i].y, rotate: poses[i].rotate, rotateX: 0, rotateY: 0, scale: 1 }, { duration: 0 }));
+    void grid.offsetWidth;
+    const last = list.map(centre);
+    if (REDUCED.matches) return;   // the end pose is already set; skip the travel
+    list.forEach((c, i) => {
+      // Centres, not corners: these cards are rotated, and a rotated card's
+      // AABB corner is not its layout corner — but its centre is exactly the
+      // layout centre plus the translation, which is what the FLIP needs.
+      const dx = first[i].x - last[i].x, dy = first[i].y - last[i].y;
+      /* ONE animate call, with explicit [from, to] keyframes for everything
+         that travels and fixed values for everything that must not.
+         Separate invert-then-release calls do NOT work here: three animate()
+         calls on the same element in one tick left Motion reading its start
+         values back off a decomposed 3D matrix (the grid has a perspective,
+         so the composite is matrix3d), which produced rotations of 200-290deg
+         and dropped translateX entirely. Stating both ends removes every
+         inference. Same shape as layoutCards' settle, which states the whole
+         transform set for the same reason. */
+      animate(c, {
+        x: [dx, 0],
+        y: [poses[i].y + dy, poses[i].y],
+        rotate: [fromRot[i], poses[i].rotate],
+        rotateX: 0, rotateY: 0, scale: 1
+      }, { ...FLIP, delay: order(i) * STEP });
+    });
+  }
+
+  function openCards(trigger) {
+    if (open || busy) return;
+    busy = true;
+    returnFocus = trigger || null;
+    syncInset();
+    overlay.classList.add('is-open');
+    overlay.setAttribute('aria-hidden', 'false');
+    // Original position recorded as an INDEX among the track's children, not
+    // as nextElementSibling: every sibling here is itself one of the six cards
+    // about to be moved, so insertBefore(card, thatSibling) would throw on the
+    // way back. Re-inserting ascending by index rebuilds the order exactly.
+    overlay._homes = cards().map((c) => ({ card: c, idx: Array.prototype.indexOf.call(track.children, c) }));
+    flip(() => overlay._homes.forEach(({ card }) => grid.appendChild(card)),
+         () => ({ y: 0, rotate: 0 }), (i) => i, (c) => homePose(c).rotate);
+    // Same frame as the reparent would fight the backdrop's own transition,
+    // so the fade is committed after a forced reflow.
+    void overlay.offsetWidth;
+    overlay.classList.add('is-shown');
+    open = true;
+    if (closeBtn) closeBtn.focus({ preventScroll: true });
+    setTimeout(() => { busy = false; }, 120);
+  }
+
+  function closeCards() {
+    if (!open || busy) return;
+    busy = true;
+    // Reverse order so the cards fold back toward the fan's centre-out
+    // stack rather than unwinding left to right.
+    const n = cards().length;
+    flip(() => (overlay._homes || []).forEach(({ card, idx }) => track.insertBefore(card, track.children[idx] || null)),
+         (c) => homePose(c), (i) => n - 1 - i, () => 0);
+    overlay.classList.remove('is-shown');
+    const done = () => {
+      overlay.classList.remove('is-open');
+      overlay.setAttribute('aria-hidden', 'true');
+      busy = false;
+    };
+    // The cards are already back in the track and animating there, so the
+    // overlay only has to outlast its own backdrop fade. Timer rather than
+    // transitionend for this page's usual reason: a backgrounded tab can
+    // miss the event outright and would strand the scrim on screen.
+    setTimeout(done, REDUCED.matches ? 0 : 380);
+    open = false;
+    if (returnFocus && document.contains(returnFocus)) returnFocus.focus({ preventScroll: true });
+    returnFocus = null;
+  }
+
+  window.showCards = openCards;
+  if (closeBtn) closeBtn.addEventListener('click', closeCards);
+  if (backdrop) backdrop.addEventListener('click', closeCards);
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape' || !open) return;
+    // The card detail modal can sit above this overlay; it owns Escape while
+    // it is up, and closing this one out from under it would leave the modal
+    // morphing back to a card that is mid-flight.
+    const modal = document.getElementById('cardModal');
+    if (modal && modal.classList.contains('is-open')) return;
+    closeCards();
+  });
+  // Keep the grid centred against the rail if it is toggled while open.
+  window.addEventListener('resize', () => { if (open) syncInset(); });
 })();
 
 // ── Decisions Space behaviour.

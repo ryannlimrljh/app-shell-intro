@@ -1,0 +1,1151 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Collabrium — Decision workspace v2</title>
+
+<style>
+/* ═══════════════════════════════════════════════════════════════════
+   DECISION WORKSPACE v2 — "Executive Command Center"
+
+   A re-architecture of Mode 3 in leadership-dashboard-tracker.html.
+   Same content, same figures, same decisions. What changes is the
+   ordering of ATTENTION: stake and action are the loud objects,
+   rationale and evidence are one interaction away.
+
+   Deliberately reuses the tracker's own --art-* token set rather than
+   introducing a new palette, so this reads as the same product. The
+   only additions are --imp-* (impact scale) and --z-* (elevation),
+   both of which resolve to existing tokens.
+   ═══════════════════════════════════════════════════════════════════ */
+
+@font-face{font-family:'Mulish'; src:url('../collabrium-dls/fonts/Mulish/Mulish%5Bwght%5D.ttf') format('truetype-variations');
+  font-weight:200 900; font-display:swap;}
+
+:root{
+  /* Ported verbatim from leadership-dashboard-tracker.html so the two
+     files stay visually reconcilable. Do not re-value in isolation. */
+  --art-canvas:#FCFAF5; --art-surface:#FFFFFF; --art-sunk:#F5F2EA;
+  --art-ink:#080808; --art-muted:#5A5A5A; --art-faint:#8E8A80; --art-rule:#E3DED2;
+  --art-accent:#FF5825; --art-good:#00C26E; --art-warn:#FFA425; --art-crit:#FD3343;
+  --art-good-ink:#00734D; --art-warn-ink:#8A5A00; --art-crit-ink:#D01427;
+  --art-strategic:#7C3AED;
+  --art-accent-bg:#FFEEE7;
+  --art-shadow:0 1px 2px rgba(0,0,0,.05), 0 1px 8px rgba(0,0,0,.03);
+  --art-shadow-lift:0 2px 6px rgba(0,0,0,.07), 0 8px 28px rgba(0,0,0,.07);
+
+  /* Type floor. The audit's single most repeated finding was sub-12px
+     text (9.5px keys, 11px chips). 12px is the floor everywhere in this
+     file; --fs-key is the smallest thing allowed to exist. */
+  --fs-key:12px; --fs-body:13px; --fs-lead:15px;
+
+  /* Touch/pointer floor — 44px. WCAG 2.2 AA only demands 24px, which
+     the source already passed at 34px; 44 is the comfort standard and
+     the one this file commits to. Applied via min-height on every
+     interactive element, never via padding guesswork. */
+  --tap:44px;
+
+  --radius:4px;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --art-canvas:#141310; --art-surface:#1D1B17; --art-sunk:#232019;
+    --art-ink:#F3F0E9; --art-muted:#ABA69A; --art-faint:#807B70; --art-rule:#36322B;
+    --art-good-ink:#5BE0A2; --art-warn-ink:#F0C173; --art-crit-ink:#FF8A94;
+    --art-strategic:#C9A6FF; --art-accent-bg:#3A1C10;
+    --art-shadow:0 1px 2px rgba(0,0,0,.4), 0 1px 8px rgba(0,0,0,.3);
+    --art-shadow-lift:0 2px 6px rgba(0,0,0,.5), 0 8px 28px rgba(0,0,0,.45);
+  }
+}
+:root[data-theme="dark"]{
+  --art-canvas:#141310; --art-surface:#1D1B17; --art-sunk:#232019;
+  --art-ink:#F3F0E9; --art-muted:#ABA69A; --art-faint:#807B70; --art-rule:#36322B;
+  --art-good-ink:#5BE0A2; --art-warn-ink:#F0C173; --art-crit-ink:#FF8A94;
+  --art-strategic:#C9A6FF; --art-accent-bg:#3A1C10;
+  --art-shadow:0 1px 2px rgba(0,0,0,.4), 0 1px 8px rgba(0,0,0,.3);
+  --art-shadow-lift:0 2px 6px rgba(0,0,0,.5), 0 8px 28px rgba(0,0,0,.45);
+}
+
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{background:var(--art-canvas); color:var(--art-ink);
+  font-family:'Mulish',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+  font-size:var(--fs-body); line-height:1.5; -webkit-font-smoothing:antialiased;}
+
+.wrap{max-width:1320px; margin:0 auto; padding:28px 24px 96px;}
+@media (max-width:640px){ .wrap{padding:20px 14px 80px;} }
+
+/* Shared: every interactive element clears the tap floor and shows a
+   real focus ring. Declared once here rather than per-component, which
+   is how the source file ended up with four different button heights. */
+button{font:inherit; cursor:pointer; min-height:var(--tap);}
+button:focus-visible, a:focus-visible, [tabindex]:focus-visible{
+  outline:2px solid var(--art-accent); outline-offset:2px; border-radius:2px;}
+@media (prefers-reduced-motion:reduce){
+  *{animation-duration:.01ms !important; transition-duration:.01ms !important;}
+}
+
+/* ── Masthead ─────────────────────────────────────────────────────── */
+.hd{display:flex; align-items:flex-start; justify-content:space-between; gap:20px; flex-wrap:wrap;
+  padding-bottom:16px; border-bottom:1px solid var(--art-rule); margin-bottom:22px;}
+.hd-k{font-size:var(--fs-key); font-weight:800; letter-spacing:.14em; text-transform:uppercase;
+  color:var(--art-accent); margin:0 0 4px;}
+.hd h1{margin:0; font-size:30px; font-weight:900; letter-spacing:-.025em; line-height:1.1;}
+.hd-sub{margin:6px 0 0; font-size:var(--fs-body); color:var(--art-muted); max-width:62ch;}
+.hd-r{display:flex; align-items:center; gap:8px;}
+.tgl{min-height:var(--tap); padding:0 14px; border:1px solid var(--art-rule); background:var(--art-surface);
+  border-radius:999px; font-size:var(--fs-key); font-weight:800; color:var(--art-muted);
+  display:inline-flex; align-items:center; gap:7px; transition:border-color .2s, color .2s;}
+.tgl:hover{border-color:var(--art-accent); color:var(--art-accent);}
+
+/* ═══ ZONE A · EXECUTIVE DIGEST ═══════════════════════════════════════
+   Replaces the 56-word posture paragraph. The paragraph's whole job was
+   to state a verdict; a verdict is one line. Everything the paragraph
+   quantified becomes a badge, so the numbers are scannable instead of
+   embedded mid-sentence. The paragraph itself is not deleted — it moves
+   behind "Full read", because the prose IS the source page's thesis and
+   removing it outright would break that. */
+.digest{background:var(--art-surface); border:1px solid var(--art-rule); border-left:4px solid var(--art-crit);
+  border-radius:var(--radius); box-shadow:var(--art-shadow); padding:20px 22px; margin-bottom:14px;}
+.digest-top{display:flex; align-items:flex-start; justify-content:space-between; gap:24px; flex-wrap:wrap;}
+.digest h2{margin:0; font-size:23px; font-weight:900; letter-spacing:-.02em; line-height:1.25; max-width:30ch;}
+.digest h2 em{font-style:normal; color:var(--art-crit-ink);}
+
+/* Risk gauge: five segments, lit to the current posture. A gauge rather
+   than a number because "how bad" is the one thing on this page with no
+   natural unit — segments give it a scale without inventing a metric. */
+.gauge{display:flex; flex-direction:column; align-items:flex-end; gap:6px; flex:none;}
+.gauge-t{font-size:var(--fs-key); font-weight:800; letter-spacing:.12em; text-transform:uppercase; color:var(--art-muted);}
+.gauge-b{display:flex; gap:3px;}
+.gauge-b i{width:22px; height:8px; border-radius:2px; background:var(--art-rule); display:block;}
+.gauge-b i.on{background:var(--art-warn);}
+.gauge-b i.hot{background:var(--art-crit);}
+.gauge-l{font-size:var(--fs-key); font-weight:800; color:var(--art-crit-ink);}
+
+/* Badge row — the numbers the paragraph used to bury. Each is
+   label + value + direction, and direction is an SVG arrow AND a colour,
+   never colour alone (accessibility: "don't convey by colour alone"). */
+.badges{display:flex; gap:8px; flex-wrap:wrap; margin-top:16px; padding-top:14px; border-top:1px solid var(--art-rule);}
+.badge{display:inline-flex; align-items:center; gap:8px; padding:7px 12px; border-radius:999px;
+  background:var(--art-sunk); border:1px solid var(--art-rule); font-size:var(--fs-key); font-weight:700;
+  color:var(--art-muted); white-space:nowrap;}
+.badge b{font-weight:900; font-variant-numeric:tabular-nums; color:var(--art-ink); font-size:var(--fs-body);}
+.badge svg{flex:none;}
+.badge.dn{border-color:color-mix(in srgb, var(--art-crit) 40%, var(--art-rule));}
+.badge.dn b, .badge.dn svg{color:var(--art-crit-ink);}
+.badge.up{border-color:color-mix(in srgb, var(--art-good) 40%, var(--art-rule));}
+.badge.up b, .badge.up svg{color:var(--art-good-ink);}
+
+.digest-more{margin-top:12px; display:flex; align-items:center; gap:12px; flex-wrap:wrap;}
+.lnk{background:none; border:0; padding:0 2px; min-height:var(--tap); font-size:var(--fs-key); font-weight:800;
+  color:var(--art-accent); text-decoration:underline; text-underline-offset:3px; display:inline-flex; align-items:center; gap:6px;}
+.lnk:hover{color:var(--art-ink);}
+.digest-full{margin:0; padding:14px 16px; background:var(--art-sunk); border-radius:var(--radius);
+  font-size:var(--fs-body); color:var(--art-muted); line-height:1.6;}
+.digest-full[hidden]{display:none;}
+.since{font-size:var(--fs-key); color:var(--art-muted);}
+.since b{color:var(--art-ink); font-weight:800;}
+
+/* ═══ ZONE B · KPI STRIP ══════════════════════════════════════════════
+   Strict three elements per tile: label, value, delta pill. Every
+   supporting clause from the source ("the only headline metric
+   improving", "booked-to-billed 94%", provenance dots) moves into a
+   click-opened popover.
+   Click, NOT hover: the UX ruleset flags hover-only affordances as a
+   High-severity failure, and this board is read on tablets in rooms. */
+.strip{display:grid; grid-template-columns:repeat(6,1fr); gap:0; background:var(--art-surface);
+  border:1px solid var(--art-rule); border-radius:var(--radius); box-shadow:var(--art-shadow);
+  overflow:hidden; margin-bottom:26px;}
+@media (max-width:1100px){ .strip{grid-template-columns:repeat(3,1fr);} }
+@media (max-width:620px){ .strip{grid-template-columns:repeat(2,1fr);} }
+
+.kpi{position:relative; display:flex; flex-direction:column; align-items:flex-start; gap:7px;
+  padding:15px 16px 14px; background:none; border:0; border-right:1px solid var(--art-rule);
+  text-align:left; width:100%; transition:background .18s;}
+.kpi:last-child{border-right:0;}
+@media (max-width:1100px){
+  .kpi:nth-child(3n){border-right:0;}
+  .kpi:nth-child(-n+3){border-bottom:1px solid var(--art-rule);}
+}
+@media (max-width:620px){
+  .kpi{border-right:1px solid var(--art-rule);}
+  .kpi:nth-child(2n){border-right:0;}
+  .kpi:nth-child(-n+4){border-bottom:1px solid var(--art-rule);}
+}
+.kpi:hover{background:var(--art-sunk);}
+.kpi[aria-expanded="true"]{background:var(--art-sunk);}
+.kpi-k{font-size:var(--fs-key); font-weight:800; letter-spacing:.1em; text-transform:uppercase;
+  color:var(--art-muted); display:flex; align-items:center; gap:5px;}
+.kpi-k .info{width:13px; height:13px; opacity:.5; flex:none;}
+.kpi:hover .kpi-k .info{opacity:1; color:var(--art-accent);}
+.kpi-v{font-size:24px; font-weight:900; letter-spacing:-.025em; line-height:1; font-variant-numeric:tabular-nums;
+  color:var(--art-ink);}
+.kpi-v.dn{color:var(--art-crit-ink);}
+.kpi-d{display:inline-flex; align-items:center; gap:5px; padding:3px 8px; border-radius:999px;
+  font-size:var(--fs-key); font-weight:800; font-variant-numeric:tabular-nums;
+  background:var(--art-sunk); border:1px solid var(--art-rule); color:var(--art-muted);}
+.kpi:hover .kpi-d, .kpi[aria-expanded="true"] .kpi-d{background:var(--art-surface);}
+.kpi-d.up{color:var(--art-good-ink); border-color:color-mix(in srgb, var(--art-good) 40%, var(--art-rule));}
+.kpi-d.dn{color:var(--art-crit-ink); border-color:color-mix(in srgb, var(--art-crit) 40%, var(--art-rule));}
+.kpi-d.wn{color:var(--art-warn-ink); border-color:color-mix(in srgb, var(--art-warn) 45%, var(--art-rule));}
+
+/* Bullet bar — the ONE permitted fourth element, and only on tiles that
+   have a real target to be measured against (the chart ruleset: a gauge
+   or bullet is for "a single KPI measured against a defined target").
+   Tiles with no target do not get one, so its presence is information. */
+.kpi-bul{width:100%; height:5px; border-radius:3px; background:var(--art-rule); overflow:hidden; position:relative;}
+.kpi-bul i{position:absolute; inset:0 auto 0 0; border-radius:3px; background:var(--art-warn); display:block;}
+.kpi-bul u{position:absolute; top:-2px; bottom:-2px; width:2px; background:var(--art-ink); border-radius:1px;}
+
+/* Popover: the rationale that used to sit permanently under every tile. */
+.pop{position:absolute; top:calc(100% - 4px); left:12px; right:12px; z-index:40;
+  background:var(--art-surface); border:1px solid var(--art-rule); border-radius:var(--radius);
+  box-shadow:var(--art-shadow-lift); padding:12px 14px; font-size:var(--fs-key); color:var(--art-muted);
+  line-height:1.55; text-align:left; min-width:210px;}
+.pop[hidden]{display:none;}
+.pop b{color:var(--art-ink);}
+.pop .prov{display:inline-flex; align-items:center; gap:5px; font-weight:800; text-transform:uppercase;
+  letter-spacing:.1em; font-size:11.5px; color:var(--art-muted); margin-bottom:6px;}
+.pop .prov i{width:7px; height:7px; border-radius:50%; background:var(--art-strategic); flex:none;}
+
+/* ═══ SECTION RULES ═══════════════════════════════════════════════════ */
+.srule{display:flex; align-items:baseline; gap:12px; flex-wrap:wrap; margin:0 0 12px;}
+.srule h2{margin:0; font-size:var(--fs-body); font-weight:900; letter-spacing:.12em; text-transform:uppercase;}
+.srule p{margin:0; font-size:var(--fs-key); color:var(--art-muted);}
+.srule .count{margin-left:auto; font-size:var(--fs-key); font-weight:800; color:var(--art-muted);
+  font-variant-numeric:tabular-nums;}
+
+/* ═══ ZONE C · DECISION ACTION BANNERS ════════════════════════════════
+   The source wrapped each decision in a 2px full-perimeter tier border,
+   which made seven cards read as seven equal boxes. Here the tier is a
+   4px LEFT stripe only: it marks without enclosing, so the eye runs down
+   the stripe column and reads severity in one pass. */
+.queue{display:flex; flex-direction:column; gap:12px; margin-bottom:30px;}
+.act{position:relative; background:var(--art-surface); border:1px solid var(--art-rule);
+  border-left:4px solid var(--tier-c, var(--art-rule)); border-radius:var(--radius);
+  box-shadow:var(--art-shadow); padding:18px 22px; transition:box-shadow .2s, transform .2s;}
+.act:hover{box-shadow:var(--art-shadow-lift);}
+.act[data-tier="urgent"]{--tier-c:var(--art-crit);}
+.act[data-tier="risk"]{--tier-c:var(--art-warn);}
+.act[data-tier="opp"]{--tier-c:var(--art-good);}
+.act[data-tier="strategic"]{--tier-c:var(--art-strategic);}
+
+.act-hd{display:flex; align-items:flex-start; justify-content:space-between; gap:22px; flex-wrap:wrap;}
+.act-l{flex:1 1 380px; min-width:0;}
+
+/* Tier badge — shape AND colour AND text. Shape is load-bearing: the
+   source established circle/diamond/ring/square so the tier survives
+   greyscale printing and colour-blind readers. Kept exactly. */
+.tier{display:inline-flex; align-items:center; gap:7px; font-size:var(--fs-key); font-weight:800;
+  letter-spacing:.13em; text-transform:uppercase;}
+.tier::before{content:''; width:9px; height:9px; border-radius:50%; background:currentColor; flex:none;}
+.act[data-tier="urgent"] .tier{color:var(--art-crit-ink);}
+.act[data-tier="risk"] .tier{color:var(--art-warn-ink);}
+.act[data-tier="risk"] .tier::before{border-radius:1px; transform:rotate(45deg);}
+.act[data-tier="opp"] .tier{color:var(--art-good-ink);}
+.act[data-tier="opp"] .tier::before{background:transparent; border:1.5px solid currentColor; width:7.5px; height:7.5px;}
+.act[data-tier="strategic"] .tier{color:var(--art-strategic);}
+.act[data-tier="strategic"] .tier::before{border-radius:2px;}
+
+.act h3{margin:9px 0 0; font-size:20px; font-weight:900; letter-spacing:-.02em; line-height:1.28;}
+
+/* Impact tag — the source rendered "RM 17.1M revenue · RM 5.4M gross
+   profit at the blended 31.4% margin" as a body-copy field. Money at
+   stake is the sort key of this entire page, so it gets display weight
+   and a fixed right-hand column: the three tags line up and become a
+   column you can compare down. */
+.impact{flex:none; text-align:right; min-width:132px;}
+.impact-k{font-size:var(--fs-key); font-weight:800; letter-spacing:.11em; text-transform:uppercase; color:var(--art-muted);}
+.impact-v{font-size:26px; font-weight:900; letter-spacing:-.03em; line-height:1.05; font-variant-numeric:tabular-nums;
+  color:var(--tier-c); margin-top:2px;}
+.impact-s{font-size:var(--fs-key); color:var(--art-muted); margin-top:2px;}
+/* Proportional bar — the one place a raw number lies. RM 5.1M next to
+   RM 56.3M reads as "similar size" in text and as 9% of the width here. */
+.impact-bar{margin-top:7px; height:4px; border-radius:2px; background:var(--art-rule); overflow:hidden;}
+.impact-bar i{display:block; height:100%; border-radius:2px; background:var(--tier-c);}
+
+.act-meta{display:flex; align-items:center; gap:9px; flex-wrap:wrap; margin-top:14px;}
+.meta{display:inline-flex; align-items:center; gap:6px; font-size:var(--fs-key); font-weight:700; color:var(--art-muted);}
+.meta b{color:var(--art-ink); font-weight:800;}
+.meta svg{opacity:.6; flex:none;}
+.meta-sep{width:1px; height:13px; background:var(--art-rule); flex:none;}
+.status{display:inline-flex; align-items:center; gap:6px; padding:4px 10px; border-radius:999px;
+  font-size:var(--fs-key); font-weight:800; background:var(--art-sunk); border:1px solid var(--art-rule);
+  color:var(--art-muted);}
+.status::before{content:''; width:7px; height:7px; border-radius:50%; background:var(--art-faint); flex:none;}
+.status[data-s="Scheduled"]{color:var(--art-warn-ink); border-color:color-mix(in srgb, var(--art-warn) 40%, var(--art-rule));}
+.status[data-s="Scheduled"]::before{background:var(--art-warn);}
+.stall{font-size:var(--fs-key); font-weight:800; color:var(--art-crit-ink);}
+
+/* ── Action group: three visually distinct weights ──
+   The source gave Approve a solid fill and then rendered "Ask for
+   options" and "Defer with reason" as byte-identical outline buttons —
+   two tertiary paths competing at secondary weight. Split properly:
+   solid → outline → ghost-with-icon. */
+.act-acts{display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-top:16px;
+  padding-top:14px; border-top:1px solid var(--art-rule);}
+.btn{display:inline-flex; align-items:center; justify-content:center; gap:8px; min-height:var(--tap);
+  padding:0 18px; border-radius:var(--radius); font-size:var(--fs-body); font-weight:800;
+  border:1px solid transparent; transition:background .18s, border-color .18s, color .18s;}
+.btn-1{background:var(--art-ink); color:var(--art-canvas); border-color:var(--art-ink);}
+.btn-1:hover{background:var(--art-accent); border-color:var(--art-accent);}
+.btn-2{background:var(--art-surface); color:var(--art-ink); border-color:var(--art-rule);}
+.btn-2:hover{border-color:var(--art-accent); color:var(--art-accent);}
+.btn-3{background:none; color:var(--art-muted); border-color:transparent; padding:0 12px;}
+.btn-3:hover{color:var(--art-ink); background:var(--art-sunk);}
+.btn-3 svg{opacity:.7;}
+.act-acts .why{margin-left:auto;}
+.why{display:inline-flex; align-items:center; gap:7px; min-height:var(--tap); padding:0 14px;
+  background:none; border:1px solid var(--art-rule); border-radius:var(--radius);
+  font-size:var(--fs-key); font-weight:800; color:var(--art-muted); transition:border-color .18s, color .18s;}
+.why:hover{border-color:var(--art-accent); color:var(--art-accent);}
+.why svg{transition:transform .2s;}
+.why[aria-expanded="true"] svg{transform:rotate(90deg);}
+.why[aria-expanded="true"]{color:var(--art-ink);}
+
+/* Rationale — collapsed by default. This is the "Because / Success looks
+   like / Escalation" grid from the source, unchanged in content. */
+.rat{margin-top:14px; padding:16px 18px; background:var(--art-sunk); border-radius:var(--radius);
+  display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px 28px;}
+.rat[hidden]{display:none;}
+@media (max-width:760px){ .rat{grid-template-columns:1fr;} }
+.rat-i{display:flex; flex-direction:column; gap:3px; min-width:0;}
+.rat-k{font-size:var(--fs-key); font-weight:800; letter-spacing:.11em; text-transform:uppercase; color:var(--art-muted);}
+.rat-v{font-size:var(--fs-body); color:var(--art-muted); line-height:1.55;}
+.rat-v b{color:var(--art-ink); font-weight:800;}
+.rat-ev{grid-column:1/-1; padding-top:12px; border-top:1px solid var(--art-rule);}
+
+/* ═══ HORIZON CONTROL ════════════════════════════════════════════════
+   The control that governs the queue, so it sits ON the queue's header
+   rather than up in the digest — a filter separated from the thing it
+   filters is the classic "why did the page change?" bug.
+   A real radiogroup: roving tabindex, arrow keys, Home/End. The source
+   used role="radio" without arrow-key handling, which WAI-ARIA requires
+   (a radiogroup is one tab stop, not three). */
+.hz{display:inline-flex; align-items:center; gap:4px; padding:3px; border-radius:999px;
+  background:var(--art-sunk); border:1px solid var(--art-rule);}
+.hz button{min-height:36px; padding:0 15px; border:0; border-radius:999px; background:none;
+  font-size:var(--fs-key); font-weight:800; color:var(--art-muted); white-space:nowrap;
+  transition:background .18s, color .18s;}
+/* The 36px pill sits inside a 44px hit area rather than being drawn 44px
+   tall — a segmented control that tall reads as three buttons, not one
+   control. ::before spans the gap so the tap target still clears 44. */
+.hz button{position:relative;}
+.hz button::before{content:''; position:absolute; left:0; right:0; top:50%; height:46px; transform:translateY(-50%);}
+.hz button:hover{color:var(--art-ink);}
+.hz button[aria-checked="true"]{background:var(--art-ink); color:var(--art-canvas);}
+.hz button:focus-visible{outline:2px solid var(--art-accent); outline-offset:2px;}
+
+/* ═══ ZONE D · DEMOTED (out of horizon) ═══════════════════════════════
+   Not a separate component — the SAME decision banner, compacted. That
+   is what makes the horizon switch legible as a re-tiering rather than
+   as two unrelated lists swapping content. Driven off [data-horizon] on
+   the wrapper so the markup's default (week) is already correct with no
+   JS running; the script only moves nodes and flips the attribute. */
+.split{display:flex; align-items:baseline; gap:12px; flex-wrap:wrap; margin:20px 0 2px;}
+.split h3{margin:0; font-size:var(--fs-body); font-weight:900; letter-spacing:.12em; text-transform:uppercase;}
+.split p{margin:0; font-size:var(--fs-key); color:var(--art-muted);}
+
+[data-horizon="week"]    .act:not([data-h~="week"]),
+[data-horizon="quarter"] .act:not([data-h~="quarter"]),
+[data-horizon="fy"]      .act:not([data-h~="fy"]){padding:13px 18px;}
+[data-horizon="week"]    .act:not([data-h~="week"]) h3,
+[data-horizon="quarter"] .act:not([data-h~="quarter"]) h3,
+[data-horizon="fy"]      .act:not([data-h~="fy"]) h3{font-size:15px; margin-top:5px;}
+/* Commitment buttons, the rationale and the impact scale bar all go:
+   a decision you are not being asked to take this horizon should not
+   offer an Approve button. Stake, owner, due and status stay — that is
+   the whole point of keeping it visible. */
+[data-horizon="week"]    .act:not([data-h~="week"]) :is(.act-acts,.rat,.impact-bar,.impact-k,.impact-s),
+[data-horizon="quarter"] .act:not([data-h~="quarter"]) :is(.act-acts,.rat,.impact-bar,.impact-k,.impact-s),
+[data-horizon="fy"]      .act:not([data-h~="fy"]) :is(.act-acts,.rat,.impact-bar,.impact-k,.impact-s){display:none;}
+[data-horizon="week"]    .act:not([data-h~="week"]) .impact-v,
+[data-horizon="quarter"] .act:not([data-h~="quarter"]) .impact-v,
+[data-horizon="fy"]      .act:not([data-h~="fy"]) .impact-v{font-size:18px; color:var(--art-ink);}
+[data-horizon="week"]    .act:not([data-h~="week"]) .act-meta,
+[data-horizon="quarter"] .act:not([data-h~="quarter"]) .act-meta,
+[data-horizon="fy"]      .act:not([data-h~="fy"]) .act-meta{margin-top:7px;}
+
+/* The share-of-market Watch card claims it "becomes a decision" at FY.
+   True only at that horizon, so the note only exists there — otherwise
+   the copy is permanently aspirational. */
+.fy-note{display:none; margin:0; font-size:var(--fs-key); font-weight:800; color:var(--art-strategic);}
+[data-horizon="fy"] .fy-note{display:block;}
+
+/* ═══ ZONE E · WATCH ══════════════════════════════════════════════════
+   Kept buttonless — that was a deliberate call in the source ("Now means
+   act, Watch means not yet") and it is the right one. Compacted to a
+   single value + threshold line each. */
+.watch{display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:34px;}
+@media (max-width:960px){ .watch{grid-template-columns:repeat(2,1fr);} }
+@media (max-width:540px){ .watch{grid-template-columns:1fr;} }
+.wc{background:var(--art-surface); border:1px solid var(--art-rule); border-radius:var(--radius);
+  box-shadow:var(--art-shadow); padding:14px 16px; display:flex; flex-direction:column; gap:6px;}
+.wc-k{font-size:var(--fs-key); font-weight:800; color:var(--art-muted);}
+.wc-v{font-size:19px; font-weight:900; letter-spacing:-.02em; font-variant-numeric:tabular-nums;}
+.wc-v.up{color:var(--art-good-ink);} .wc-v.dn{color:var(--art-crit-ink);}
+.wc-t{margin:auto 0 0; padding-top:9px; border-top:1px dashed var(--art-rule); font-size:var(--fs-key); color:var(--art-muted);}
+.wc-t b{color:var(--art-warn-ink); font-weight:800;}
+
+/* ═══ RIGHT DRAWER · EVIDENCE + LOG ═══════════════════════════════════
+   The nine evidence rows and the four-row decision log were ~40% of the
+   source's vertical space and are consulted, not acted on. They move
+   here. The drawer is a dialog: Escape closes, focus returns to the
+   trigger, and the backdrop is inert canvas rather than a black scrim
+   (matching the app-shell's soft treatment). */
+.drawer-open{position:fixed; right:22px; bottom:22px; z-index:60; display:inline-flex; align-items:center; gap:9px;
+  min-height:var(--tap); padding:0 20px; border-radius:999px; border:1px solid var(--art-ink);
+  background:var(--art-ink); color:var(--art-canvas); font-size:var(--fs-body); font-weight:800;
+  box-shadow:var(--art-shadow-lift); transition:background .18s;}
+.drawer-open:hover{background:var(--art-accent); border-color:var(--art-accent);}
+
+.scrim{position:fixed; inset:0; z-index:70; background:var(--art-canvas); opacity:0;
+  pointer-events:none; transition:opacity .28s ease;}
+.scrim.on{opacity:.72; pointer-events:auto;}
+
+.drawer{position:fixed; top:0; right:0; bottom:0; z-index:80; width:min(520px,100vw);
+  background:var(--art-surface); border-left:1px solid var(--art-rule); box-shadow:var(--art-shadow-lift);
+  transform:translateX(100%); transition:transform .34s cubic-bezier(.16,1,.3,1);
+  display:flex; flex-direction:column;}
+.drawer.on{transform:translateX(0);}
+.drawer-hd{display:flex; align-items:center; gap:12px; padding:16px 18px; border-bottom:1px solid var(--art-rule); flex:none;}
+.drawer-hd h2{margin:0; font-size:var(--fs-lead); font-weight:900; flex:1 1 auto;}
+.drawer-x{width:var(--tap); height:var(--tap); min-height:var(--tap); display:inline-flex; align-items:center;
+  justify-content:center; border:1px solid var(--art-rule); background:var(--art-surface);
+  border-radius:var(--radius); color:var(--art-muted); flex:none;}
+.drawer-x:hover{border-color:var(--art-accent); color:var(--art-accent);}
+.tabs{display:flex; gap:0; padding:0 18px; border-bottom:1px solid var(--art-rule); flex:none;}
+.tab{min-height:var(--tap); padding:0 14px; background:none; border:0; border-bottom:2px solid transparent;
+  font-size:var(--fs-key); font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--art-muted);}
+.tab[aria-selected="true"]{color:var(--art-ink); border-bottom-color:var(--art-accent);}
+.tab:hover{color:var(--art-ink);}
+.drawer-b{flex:1 1 auto; overflow-y:auto; padding:16px 18px 40px;}
+.panel[hidden]{display:none;}
+
+.evr{display:flex; align-items:center; gap:12px; width:100%; min-height:52px; padding:0 12px;
+  background:none; border:1px solid var(--art-rule); border-radius:var(--radius); margin-bottom:8px;
+  text-align:left; font-size:var(--fs-body); font-weight:700; color:var(--art-ink); transition:border-color .18s, background .18s;}
+.evr:hover{border-color:var(--art-accent); background:var(--art-sunk);}
+.evr span{margin-left:auto; font-size:var(--fs-key); font-weight:800; color:var(--art-muted); flex:none;}
+.evr:hover span{color:var(--art-accent);}
+
+.log{width:100%; border-collapse:collapse; font-size:var(--fs-key);}
+.log th{text-align:left; padding:8px 10px; border-bottom:1px solid var(--art-rule); font-size:var(--fs-key);
+  font-weight:800; letter-spacing:.09em; text-transform:uppercase; color:var(--art-muted);}
+.log td{padding:11px 10px; border-bottom:1px solid var(--art-rule); vertical-align:top; color:var(--art-muted); line-height:1.5;}
+.log td b{color:var(--art-ink); font-weight:800; display:block; margin-bottom:2px;}
+.o{display:inline-block; padding:2px 8px; border-radius:999px; font-weight:800; font-size:var(--fs-key);
+  border:1px solid var(--art-rule);}
+.o-open{color:var(--art-warn-ink); border-color:color-mix(in srgb, var(--art-warn) 40%, var(--art-rule));}
+.o-wait{color:var(--art-muted);}
+.o-done{color:var(--art-good-ink); border-color:color-mix(in srgb, var(--art-good) 40%, var(--art-rule));}
+.o-moot{color:var(--art-strategic);}
+
+.foot{margin-top:34px; padding-top:16px; border-top:1px solid var(--art-rule);
+  font-size:var(--fs-key); color:var(--art-muted); line-height:1.65;}
+.foot b{color:var(--art-ink);}
+</style>
+</head>
+<body>
+
+<!-- data-horizon defaults to "week" in the markup, not from script: the
+     compact/full re-tiering below is pure CSS, so the correct view is
+     already painted before (and without) JS. -->
+<div class="wrap" id="root" data-horizon="week">
+
+  <header class="hd">
+    <div>
+      <p class="hd-k">Collabrium · Astro Media Sales</p>
+      <h1>Decision workspace</h1>
+      <p class="hd-sub">Same figures as Mode 2. Ordered by what is at stake, with the reasoning one click away rather than always on screen.</p>
+    </div>
+    <div class="hd-r">
+      <button class="tgl" id="themeBtn" type="button" aria-label="Toggle light or dark theme">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+        <span id="themeLbl">Dark</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ═══ ZONE A · EXECUTIVE DIGEST ═══ -->
+  <section class="digest" aria-labelledby="digest-h">
+    <div class="digest-top">
+      <h2 id="digest-h">Plan is reachable. <em>Share is not.</em></h2>
+      <div class="gauge">
+        <span class="gauge-t">Posture</span>
+        <div class="gauge-b" role="img" aria-label="Risk posture: 4 of 5 — elevated">
+          <i class="on"></i><i class="on"></i><i class="on"></i><i class="hot"></i><i></i>
+        </div>
+        <span class="gauge-l">Elevated · 4 of 5</span>
+      </div>
+    </div>
+
+    <div class="badges">
+      <span class="badge dn">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M12 5v14M19 12l-7 7-7-7"/></svg>
+        Forecast gap <b>RM 17.1M</b>
+      </span>
+      <span class="badge">Pipeline cover <b>6.5&times;</b></span>
+      <span class="badge dn">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M12 5v14M19 12l-7 7-7-7"/></svg>
+        Share <b>&minus;0.4pt</b>
+      </span>
+      <span class="badge up">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+        Margin <b>+0.8pt</b>
+      </span>
+      <span class="badge dn">Lapsed <b>RM 4.4M</b></span>
+    </div>
+
+    <div class="digest-more">
+      <button class="lnk" type="button" id="fullBtn" aria-expanded="false" aria-controls="fullRead">Full read</button>
+      <span class="since"><b>Since Monday:</b> forecast +RM 1.2M · one Negotiation deal slipped to Q4 · Petronas reset 7 days undiarised · no decisions closed.</span>
+    </div>
+    <p class="digest-full" id="fullRead" hidden>Revenue is growing and margin is improving, but plan and share are both at risk. RM&nbsp;111.2M of pipeline is open against a RM&nbsp;17.1M gap, so the shortfall is a conversion question — while Digital's unsold shelf and RM&nbsp;4.4M of lapsed revenue say the demand underneath it is thinner than the growth rate suggests.</p>
+  </section>
+
+  <!-- ═══ ZONE B · KPI STRIP ═══ -->
+  <div class="strip" role="group" aria-label="Business health metrics">
+
+    <button class="kpi" type="button" aria-expanded="false" aria-controls="p1">
+      <span class="kpi-k">Forecast
+        <svg class="info" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+      </span>
+      <span class="kpi-v">RM 222.9M</span>
+      <span class="kpi-d dn">RM 17.1M short</span>
+      <span class="kpi-bul" role="img" aria-label="222.9 of 240.0 plan"><i style="width:92.9%"></i><u style="left:100%"></u></span>
+      <span class="pop" id="p1" hidden>
+        <span class="prov"><i></i>Pending source</span>
+        Weighted basis, against a <b>RM 240.0M</b> plan. Commit lands RM 210.2M, best case RM 239.4M — the plan line is only touched by best case. <b>+RM 1.2M</b> since Monday.
+      </span>
+    </button>
+
+    <button class="kpi" type="button" aria-expanded="false" aria-controls="p2">
+      <span class="kpi-k">Gross margin
+        <svg class="info" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+      </span>
+      <span class="kpi-v">31.4%</span>
+      <span class="kpi-d up">+0.8pt</span>
+      <span class="pop" id="p2" hidden>The only headline metric improving. Blended across all four media lines; every "at stake" figure on this page converts revenue to gross profit at this rate.</span>
+    </button>
+
+    <button class="kpi" type="button" aria-expanded="false" aria-controls="p3">
+      <span class="kpi-k">Net retention
+        <svg class="info" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+      </span>
+      <span class="kpi-v">97.3%</span>
+      <span class="kpi-d wn">Below 100%</span>
+      <span class="pop" id="p3" hidden>
+        <span class="prov"><i></i>Derived</span>
+        Computed from the growth bridge: <b>RM 8.6M lapsed</b> against RM 4.8M of expansion on existing accounts. Retention, not acquisition, is the exposure.
+      </span>
+    </button>
+
+    <button class="kpi" type="button" aria-expanded="false" aria-controls="p4">
+      <span class="kpi-k">Share of market
+        <svg class="info" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+      </span>
+      <span class="kpi-v dn">13.8%</span>
+      <span class="kpi-d dn">&minus;0.4pt YTD</span>
+      <span class="pop" id="p4" hidden>
+        <span class="prov"><i></i>Pending source</span>
+        We grew 6.4% in a market growing 8.1%. Accelerating — <b>&minus;0.2pt in the last 60 days</b> alone. Roughly RM 4.3M of revenue that existed and went elsewhere.
+      </span>
+    </button>
+
+    <button class="kpi" type="button" aria-expanded="false" aria-controls="p5">
+      <span class="kpi-k">Cash at risk
+        <svg class="info" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+      </span>
+      <span class="kpi-v">RM 12.4M</span>
+      <span class="kpi-d wn">&gt; 60 days</span>
+      <span class="pop" id="p5" hidden>
+        <span class="prov"><i></i>Pending source</span>
+        Overdue beyond 60 days. Booked-to-billed sits at <b>94%</b> — the remaining 6% is a billing question, not a selling one.
+      </span>
+    </button>
+
+    <button class="kpi" type="button" aria-expanded="false" aria-controls="p6">
+      <span class="kpi-k">Decisions due
+        <svg class="info" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+      </span>
+      <span class="kpi-v">3</span>
+      <span class="kpi-d wn">1 stalled</span>
+      <span class="pop" id="p6" hidden>
+        <span class="prov"><i></i>Pending source</span>
+        Three at full weight this week, four more open beyond it. <b>0 closed</b> since the last review — the Petronas reset has been undiarised for 7 days.
+      </span>
+    </button>
+
+  </div>
+
+  <!-- ═══ ZONE C · DECISION QUEUE ═══ -->
+  <div class="srule">
+    <h2>Decide now</h2>
+    <p id="qSub">Three decisions this week — ordered by what is at stake</p>
+    <div class="hz" role="radiogroup" aria-label="Decision horizon" id="hz">
+      <button type="button" role="radio" data-hz="week" aria-checked="true" tabindex="0">This week</button>
+      <button type="button" role="radio" data-hz="quarter" aria-checked="false" tabindex="-1">This quarter</button>
+      <button type="button" role="radio" data-hz="fy" aria-checked="false" tabindex="-1">FY outlook</button>
+    </div>
+    <span class="count" id="qCount">RM 78.5M in play</span>
+  </div>
+
+  <div class="queue" id="queue">
+
+    <!-- D2 leads: RM 56.3M is 3.3× the next largest. The source ordered
+         D1 first by narrative; ordering by stake is the page's stated
+         promise ("ordered by what is at stake, not by what is easy to
+         chart"), so the sort is now literally true. -->
+    <article class="act" data-h="week" data-tier="urgent" aria-labelledby="a2">
+      <div class="act-hd">
+        <div class="act-l">
+          <span class="tier">Urgent</span>
+          <h3 id="a2">Name an executive sponsor for each top-five account</h3>
+        </div>
+        <div class="impact">
+          <div class="impact-k">At stake</div>
+          <div class="impact-v">RM 56.3M</div>
+          <div class="impact-s">RM 17.7M GP</div>
+          <div class="impact-bar" role="img" aria-label="Largest exposure on this board"><i style="width:100%"></i></div>
+        </div>
+      </div>
+      <div class="act-meta">
+        <span class="meta"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> <b>Leadership</b></span>
+        <span class="meta-sep"></span>
+        <span class="meta"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg> by <b>12 Aug</b></span>
+        <span class="meta-sep"></span>
+        <span class="status" data-s="Not started">Not started</span>
+      </div>
+      <div class="act-acts">
+        <button class="btn btn-1" type="button">Approve</button>
+        <button class="btn btn-2" type="button">Ask for options</button>
+        <button class="btn btn-3" type="button">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+          Defer
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <button class="why" type="button" aria-expanded="false" aria-controls="r2">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
+          Why
+        </button>
+      </div>
+      <div class="rat" id="r2" hidden>
+        <div class="rat-i"><span class="rat-k">Because</span><span class="rat-v">The top five advertisers carry <b>38% of revenue — RM 56.3M</b>. At 9.2% no single account can sink the year, but losing two breaches plan.</span></div>
+        <div class="rat-i"><span class="rat-k">Success looks like</span><span class="rat-v">Five named executive sponsors, each with a standing quarterly contact rhythm in the diary.</span></div>
+        <div class="rat-i"><span class="rat-k">Owner</span><span class="rat-v"><b>Leadership</b> · accountable: Bryan Wong</span></div>
+        <div class="rat-i"><span class="rat-k">Escalation</span><span class="rat-v">Board note if any top-five account goes 30 days without executive contact.</span></div>
+        <div class="rat-i rat-ev"><span class="rat-k">Evidence</span><span class="rat-v">Concentration curve — <b>How much rests on how few</b>. <button class="lnk" type="button" data-panel="cConc">Open panel</button></span></div>
+      </div>
+    </article>
+
+    <article class="act" data-h="week" data-tier="urgent" aria-labelledby="a1">
+      <div class="act-hd">
+        <div class="act-l">
+          <span class="tier">Urgent</span>
+          <h3 id="a1">Close the RM 17.1M gap — name the eight deals</h3>
+        </div>
+        <div class="impact">
+          <div class="impact-k">At stake</div>
+          <div class="impact-v">RM 17.1M</div>
+          <div class="impact-s">RM 5.4M GP</div>
+          <div class="impact-bar" role="img" aria-label="30 percent of the largest exposure"><i style="width:30%"></i></div>
+        </div>
+      </div>
+      <div class="act-meta">
+        <span class="meta"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> <b>Sales lead</b></span>
+        <span class="meta-sep"></span>
+        <span class="meta"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg> by <b>15 Aug</b> — before forecast lock</span>
+        <span class="meta-sep"></span>
+        <span class="status" data-s="Not started">Not started</span>
+      </div>
+      <div class="act-acts">
+        <button class="btn btn-1" type="button">Approve</button>
+        <button class="btn btn-2" type="button">Ask for options</button>
+        <button class="btn btn-3" type="button">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+          Defer
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <button class="why" type="button" aria-expanded="false" aria-controls="r1">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
+          Why
+        </button>
+      </div>
+      <div class="rat" id="r1" hidden>
+        <div class="rat-i"><span class="rat-k">Because</span><span class="rat-v">Weighted forecast lands RM 222.9M against a RM 240.0M plan. RM 111.2M is open across 73 deals; <b>RM 51.2M sits in Negotiation at 50%</b> and averages 41 days — the oldest cohort.</span></div>
+        <div class="rat-i"><span class="rat-k">Success looks like</span><span class="rat-v">Eight named deals with an executive sponsor each, together covering RM 17.1M weighted.</span></div>
+        <div class="rat-i"><span class="rat-k">Owner</span><span class="rat-v"><b>Sales lead</b> · accountable: Bryan Wong</span></div>
+        <div class="rat-i"><span class="rat-k">Escalation</span><span class="rat-v">Rate approval required above 12% discount.</span></div>
+        <div class="rat-i rat-ev"><span class="rat-k">Evidence</span><span class="rat-v">Pipeline by stage, and the cumulative plan fan. <button class="lnk" type="button" data-panel="cFunnel">Open panel</button></span></div>
+      </div>
+    </article>
+
+    <article class="act" data-h="week" data-tier="risk" aria-labelledby="a3">
+      <div class="act-hd">
+        <div class="act-l">
+          <span class="tier">Risk</span>
+          <h3 id="a3">Fund Digital demand, not inventory</h3>
+        </div>
+        <div class="impact">
+          <div class="impact-k">At stake</div>
+          <div class="impact-v">RM 5.1M</div>
+          <div class="impact-s">RM 1.6M GP</div>
+          <div class="impact-bar" role="img" aria-label="9 percent of the largest exposure"><i style="width:9%"></i></div>
+        </div>
+      </div>
+      <div class="act-meta">
+        <span class="meta"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> <b>Daniel Tan</b></span>
+        <span class="meta-sep"></span>
+        <span class="meta"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg> by <b>15 Aug</b></span>
+        <span class="meta-sep"></span>
+        <span class="status" data-s="Not started">Not started</span>
+      </div>
+      <div class="act-acts">
+        <button class="btn btn-1" type="button">Approve</button>
+        <button class="btn btn-2" type="button">Ask for options</button>
+        <button class="btn btn-3" type="button">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+          Defer
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <button class="why" type="button" aria-expanded="false" aria-controls="r3">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
+          Why
+        </button>
+      </div>
+      <div class="rat" id="r3" hidden>
+        <div class="rat-i"><span class="rat-k">Because</span><span class="rat-v">Digital sold <b>62% of its inventory</b> and reached only 75% of target. The shelf was full — this is a demand problem, not a supply one.</span></div>
+        <div class="rat-i"><span class="rat-k">Success looks like</span><span class="rat-v">Budget moved from inventory acquisition into demand generation, with fill rate above 75% by Q4.</span></div>
+        <div class="rat-i"><span class="rat-k">Owner</span><span class="rat-v"><b>Daniel Tan</b></span></div>
+        <div class="rat-i"><span class="rat-k">Escalation</span><span class="rat-v">Reopen at the Q3 inventory commit if fill rate has not moved.</span></div>
+        <div class="rat-i rat-ev"><span class="rat-k">Evidence</span><span class="rat-v">Sold against sellable, by media line. <button class="lnk" type="button" data-panel="cFill">Open panel</button></span></div>
+      </div>
+    </article>
+
+    <!-- Split marker. JS moves cards across it on horizon change so DOM
+         order always matches visual order — the source's own note: CSS
+         `order` alone told keyboard and screen-reader users the opposite
+         of what sighted users saw (WCAG 1.3.2 / 2.4.3). -->
+    <div class="split" id="split">
+      <h3>Also open</h3>
+      <p id="splitSub">Beyond this horizon — visible, not competing</p>
+    </div>
+
+    <article class="act" data-h="quarter" data-tier="opp" aria-labelledby="a4">
+      <div class="act-hd">
+        <div class="act-l">
+          <span class="tier">Opportunity</span>
+          <h3 id="a4">Buy more addressable inventory</h3>
+        </div>
+        <div class="impact">
+          <div class="impact-k">At stake</div>
+          <div class="impact-v">RM 2.6M</div>
+          <div class="impact-s">RM 0.8M GP</div>
+          <div class="impact-bar" role="img" aria-label="5 percent of the largest exposure"><i style="width:5%"></i></div>
+        </div>
+      </div>
+      <div class="act-meta">
+        <span class="meta"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> <b>Aisyah Rahman</b></span>
+        <span class="meta-sep"></span>
+        <span class="meta"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg> by <b>Q3 inventory commit</b></span>
+        <span class="meta-sep"></span>
+        <span class="status" data-s="Not started">Not started</span>
+      </div>
+      <div class="act-acts">
+        <button class="btn btn-1" type="button">Approve</button>
+        <button class="btn btn-2" type="button">Ask for options</button>
+        <button class="btn btn-3" type="button">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+          Defer
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <button class="why" type="button" aria-expanded="false" aria-controls="r4">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
+          Why
+        </button>
+      </div>
+      <div class="rat" id="r4" hidden>
+        <div class="rat-i"><span class="rat-k">Because</span><span class="rat-v">Addressable is <b>97% sold out</b> and the only line beating plan at 109% — its ceiling is supply, not selling.</span></div>
+        <div class="rat-i"><span class="rat-k">Success looks like</span><span class="rat-v">Additional addressable volume contracted for Q4.</span></div>
+        <div class="rat-i"><span class="rat-k">Owner</span><span class="rat-v"><b>Aisyah Rahman</b> · accountable: Leadership</span></div>
+        <div class="rat-i rat-ev"><span class="rat-k">Evidence</span><span class="rat-v">Sold against sellable, by media line. <button class="lnk" type="button" data-panel="cFill">Open panel</button></span></div>
+      </div>
+    </article>
+
+    <article class="act" data-h="quarter" data-tier="risk" aria-labelledby="a5">
+      <div class="act-hd">
+        <div class="act-l">
+          <span class="tier">Risk</span>
+          <h3 id="a5">Move Daniel to prospecting, not closing</h3>
+        </div>
+        <div class="impact">
+          <div class="impact-k">At stake</div>
+          <div class="impact-v">RM 2.4M</div>
+          <div class="impact-s">RM 0.8M GP</div>
+          <div class="impact-bar" role="img" aria-label="4 percent of the largest exposure"><i style="width:4%"></i></div>
+        </div>
+      </div>
+      <div class="act-meta">
+        <span class="meta"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> <b>Sales lead</b></span>
+        <span class="meta-sep"></span>
+        <span class="meta"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg> by <b>Q4 territory plan</b></span>
+        <span class="meta-sep"></span>
+        <span class="status" data-s="Not started">Not started</span>
+      </div>
+      <div class="act-acts">
+        <button class="btn btn-1" type="button">Approve</button>
+        <button class="btn btn-2" type="button">Ask for options</button>
+        <button class="btn btn-3" type="button">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+          Defer
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <button class="why" type="button" aria-expanded="false" aria-controls="r5">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
+          Why
+        </button>
+      </div>
+      <div class="rat" id="r5" hidden>
+        <div class="rat-i"><span class="rat-k">Because</span><span class="rat-v">85% attainment with only <b>0.8&times; pipeline cover</b> is a top-of-funnel gap. Coaching on closing technique would have been the wrong quarter's work.</span></div>
+        <div class="rat-i"><span class="rat-k">Success looks like</span><span class="rat-v">His cover ratio above 1.5&times; within one quarter.</span></div>
+        <div class="rat-i"><span class="rat-k">Owner</span><span class="rat-v"><b>Sales lead</b> · accountable: Bryan Wong</span></div>
+        <div class="rat-i"><span class="rat-k">Escalation</span><span class="rat-v">None — a management decision. It appears here because the board's own evidence overturned an earlier one; see the log.</span></div>
+        <div class="rat-i rat-ev"><span class="rat-k">Evidence</span><span class="rat-v">Rep attainment against pipeline cover. <button class="lnk" type="button" data-panel="cQuad">Open panel</button></span></div>
+      </div>
+    </article>
+
+    <article class="act" data-h="quarter" data-tier="risk" aria-labelledby="a6">
+      <div class="act-hd">
+        <div class="act-l">
+          <span class="tier">Risk</span>
+          <h3 id="a6">Diarise Petronas for the Q3 budget reset</h3>
+        </div>
+        <div class="impact">
+          <div class="impact-k">At stake</div>
+          <div class="impact-v">RM 2.1M</div>
+          <div class="impact-s">RM 0.7M GP</div>
+          <div class="impact-bar" role="img" aria-label="4 percent of the largest exposure"><i style="width:4%"></i></div>
+        </div>
+      </div>
+      <div class="act-meta">
+        <span class="meta"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> <b>Aisyah Rahman</b></span>
+        <span class="meta-sep"></span>
+        <span class="meta"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg> decided <b>5 Aug</b></span>
+        <span class="meta-sep"></span>
+        <span class="status" data-s="Scheduled">Scheduled</span>
+        <span class="stall">stalled 7 days</span>
+      </div>
+      <div class="act-acts">
+        <button class="btn btn-1" type="button">Approve</button>
+        <button class="btn btn-2" type="button">Ask for options</button>
+        <button class="btn btn-3" type="button">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+          Defer
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <button class="why" type="button" aria-expanded="false" aria-controls="r6">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
+          Why
+        </button>
+      </div>
+      <div class="rat" id="r6" hidden>
+        <div class="rat-i"><span class="rat-k">Because</span><span class="rat-v"><b>RM 2.1M of the RM 4.4M lapsed</b> was a budget-cycle gap, not a loss. It needs a calendar, not a discount.</span></div>
+        <div class="rat-i"><span class="rat-k">Success looks like</span><span class="rat-v">A meeting in the diary inside the reset window.</span></div>
+        <div class="rat-i"><span class="rat-k">Owner</span><span class="rat-v"><b>Aisyah Rahman</b> · accountable: Sales lead</span></div>
+        <div class="rat-i rat-ev"><span class="rat-k">Evidence</span><span class="rat-v">Lapsed revenue split by cause. <button class="lnk" type="button" data-panel="cChurn">Open panel</button></span></div>
+      </div>
+    </article>
+
+    <article class="act" data-h="fy" data-tier="strategic" aria-labelledby="a7">
+      <div class="act-hd">
+        <div class="act-l">
+          <span class="tier">Strategic</span>
+          <h3 id="a7">Take the share question to the board</h3>
+        </div>
+        <div class="impact">
+          <div class="impact-k">At stake</div>
+          <div class="impact-v">RM 4.3M</div>
+          <div class="impact-s">RM 1.4M GP</div>
+          <div class="impact-bar" role="img" aria-label="8 percent of the largest exposure"><i style="width:8%"></i></div>
+        </div>
+      </div>
+      <div class="act-meta">
+        <span class="meta"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> <b>Leadership</b></span>
+        <span class="meta-sep"></span>
+        <span class="meta"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg> by <b>next board meeting</b></span>
+        <span class="meta-sep"></span>
+        <span class="status" data-s="Not started">Not started</span>
+      </div>
+      <div class="act-acts">
+        <button class="btn btn-1" type="button">Approve</button>
+        <button class="btn btn-2" type="button">Ask for options</button>
+        <button class="btn btn-3" type="button">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+          Defer
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <button class="why" type="button" aria-expanded="false" aria-controls="r7">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
+          Why
+        </button>
+      </div>
+      <div class="rat" id="r7" hidden>
+        <div class="rat-i"><span class="rat-k">Because</span><span class="rat-v">Growing 6.4% in a market growing 8.1% moved share from 14.2% to <b>13.8%</b> — roughly RM 4.3M of revenue that existed and went elsewhere. Every other panel on this board calls this a good year.</span></div>
+        <div class="rat-i"><span class="rat-k">Success looks like</span><span class="rat-v">A board-agreed position on whether to defend share or bank margin.</span></div>
+        <div class="rat-i"><span class="rat-k">Owner</span><span class="rat-v"><b>Leadership</b> · accountable: Bryan Wong</span></div>
+        <div class="rat-i"><span class="rat-k">Escalation</span><span class="rat-v">Only the board can set that posture.</span></div>
+        <div class="rat-i rat-ev"><span class="rat-k">Evidence</span><span class="rat-v">Our indexed growth against the market. <button class="lnk" type="button" data-panel="cShare">Open panel</button></span></div>
+      </div>
+    </article>
+
+  </div>
+
+  <!-- ═══ ZONE E · WATCH ═══ -->
+  <div class="srule">
+    <h2>Watch</h2>
+    <p>Material, not yet actionable — each carries the threshold that would promote it</p>
+  </div>
+  <div class="watch">
+    <div class="wc">
+      <span class="wc-k">Negotiation ageing</span><span class="wc-v">41 days</span>
+      <p class="wc-t">Escalates past <b>45 days</b></p>
+    </div>
+    <div class="wc">
+      <span class="wc-k">Contracted, not booked</span><span class="wc-v">RM 28.4M</span>
+      <p class="wc-t">Escalates if ageing <b>doubles</b></p>
+    </div>
+    <div class="wc">
+      <span class="wc-k">Share of market</span><span class="wc-v dn">13.8%</span>
+      <p class="wc-t">Escalates on a further <b>&minus;0.2pt</b></p>
+      <p class="fy-note">Now a decision above</p>
+    </div>
+    <div class="wc">
+      <span class="wc-k">Gross margin</span><span class="wc-v up">31.4%</span>
+      <p class="wc-t">Escalates below <b>30.5%</b></p>
+    </div>
+  </div>
+
+  <p class="foot"><b>This is a layout study, not new analysis.</b> Every figure reconciles to Mode 2 of the leadership dashboard tracker — same forecast, same concentration, same fill rates. What changed is the ordering: stake and action are the loud objects; rationale, evidence and the decision log are one interaction away. Deadlines, statuses, the cash metric and all "since last review" deltas remain an operating layer no dataset supplies.</p>
+
+</div>
+
+<button class="drawer-open" id="drawerBtn" type="button" aria-haspopup="dialog">
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8"/></svg>
+  Evidence &amp; log
+</button>
+
+<div class="scrim" id="scrim"></div>
+
+<aside class="drawer" id="drawer" role="dialog" aria-modal="true" aria-labelledby="drawer-h" aria-hidden="true">
+  <div class="drawer-hd">
+    <h2 id="drawer-h">Evidence &amp; log</h2>
+    <button class="drawer-x" id="drawerX" type="button" aria-label="Close">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </button>
+  </div>
+  <div class="tabs" role="tablist" aria-label="Drawer sections">
+    <button class="tab" role="tab" id="tabE" aria-selected="true" aria-controls="panE" type="button">Evidence</button>
+    <button class="tab" role="tab" id="tabL" aria-selected="false" aria-controls="panL" type="button">Decision log</button>
+  </div>
+  <div class="drawer-b">
+
+    <div class="panel" id="panE" role="tabpanel" aria-labelledby="tabE">
+      <button class="evr" type="button" data-panel="cFan">Cumulative revenue against plan <span>Mode 2 &rarr;</span></button>
+      <button class="evr" type="button" data-panel="cBridge">Where the RM 8.9M of growth came from <span>Mode 2 &rarr;</span></button>
+      <button class="evr" type="button" data-panel="cFunnel">Pipeline by stage <span>Mode 2 &rarr;</span></button>
+      <button class="evr" type="button" data-panel="cQuad">Which reps are actually at risk <span>Mode 2 &rarr;</span></button>
+      <button class="evr" type="button" data-panel="cFill">Sold against what we had to sell <span>Mode 2 &rarr;</span></button>
+      <button class="evr" type="button" data-panel="cBubble">Revenue against contribution <span>Mode 2 &rarr;</span></button>
+      <button class="evr" type="button" data-panel="cChurn">Why RM 4.4M walked <span>Mode 2 &rarr;</span></button>
+      <button class="evr" type="button" data-panel="cConc">How much rests on how few <span>Mode 2 &rarr;</span></button>
+      <button class="evr" type="button" data-panel="cShare">Us against the market <span>Mode 2 &rarr;</span></button>
+    </div>
+
+    <div class="panel" id="panL" role="tabpanel" aria-labelledby="tabL" hidden>
+      <table class="log">
+        <caption class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);">Decisions taken, when, by whom, and what has happened since</caption>
+        <thead><tr><th scope="col">Decision</th><th scope="col">By</th><th scope="col">Outcome</th></tr></thead>
+        <tbody>
+          <tr><td><b>Diarise Petronas for the Q3 budget reset</b>5 Aug</td><td>Aisyah Rahman</td><td><span class="o o-open">Scheduled</span> — still no meeting in the diary, 7 days</td></tr>
+          <tr><td><b>Rate review for AirAsia</b>1 Aug</td><td>Sales lead</td><td><span class="o o-wait">Awaiting client</span></td></tr>
+          <tr><td><b>Restructure the Tealive package</b>28 Jul</td><td>Aisyah Rahman</td><td><span class="o o-done">Closed</span> — won back RM 0.3M of RM 0.5M</td></tr>
+          <tr><td><b>Coach Daniel on closing technique</b>21 Jul</td><td>Sales lead</td><td><span class="o o-moot">Moot</span> — the rep quadrant showed a prospecting gap, not a closing one</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</aside>
+
+<script>
+(function(){
+  'use strict';
+
+  /* ── Generic disclosure: any button with aria-expanded + aria-controls
+     toggles its target's [hidden]. One handler for the KPI popovers, the
+     "Why" rationale panels and the digest's Full read, rather than three
+     near-identical ones. ── */
+  function wire(btn){
+    var target = document.getElementById(btn.getAttribute('aria-controls'));
+    if(!target) return;
+    btn.addEventListener('click', function(e){
+      e.stopPropagation();
+      var open = btn.getAttribute('aria-expanded') === 'true';
+      // KPI popovers are mutually exclusive — two open popovers overlap.
+      if(btn.classList.contains('kpi')) closePops();
+      btn.setAttribute('aria-expanded', String(!open));
+      target.hidden = open;
+    });
+  }
+  function closePops(){
+    document.querySelectorAll('.kpi[aria-expanded="true"]').forEach(function(k){
+      k.setAttribute('aria-expanded','false');
+      var t = document.getElementById(k.getAttribute('aria-controls'));
+      if(t) t.hidden = true;
+    });
+  }
+  document.querySelectorAll('[aria-expanded][aria-controls]').forEach(wire);
+
+  // Click-away and Escape close the popovers (they are transient, unlike
+  // the Why panels, which persist until toggled back).
+  document.addEventListener('click', closePops);
+  document.addEventListener('keydown', function(e){ if(e.key === 'Escape') closePops(); });
+
+  /* ── Drawer: focus moves in on open and returns to the trigger on
+     close, which is the part most hand-rolled drawers skip. ── */
+  var drawer = document.getElementById('drawer'),
+      scrim  = document.getElementById('scrim'),
+      dBtn   = document.getElementById('drawerBtn'),
+      dX     = document.getElementById('drawerX'),
+      lastFocus = null;
+
+  /* The trigger is passed in rather than read off document.activeElement:
+     the drawer has several openers (the FAB and every "Open panel" link
+     inside a rationale), and activeElement is unreliable for any opener
+     invoked without a real pointer/keyboard focus first. Falls back to
+     the FAB so focus can never be dropped on the body. */
+  function openDrawer(trigger){
+    lastFocus = (trigger && trigger.focus) ? trigger : dBtn;
+    drawer.classList.add('on'); scrim.classList.add('on');
+    drawer.setAttribute('aria-hidden','false');
+    dX.focus();
+  }
+  function closeDrawer(){
+    drawer.classList.remove('on'); scrim.classList.remove('on');
+    drawer.setAttribute('aria-hidden','true');
+    (lastFocus || dBtn).focus();
+  }
+  dBtn.addEventListener('click', function(){ openDrawer(dBtn); });
+  dX.addEventListener('click', closeDrawer);
+  scrim.addEventListener('click', closeDrawer);
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape' && drawer.classList.contains('on')) closeDrawer();
+  });
+
+  /* ── Drawer tabs ── */
+  var tabE = document.getElementById('tabE'), tabL = document.getElementById('tabL'),
+      panE = document.getElementById('panE'), panL = document.getElementById('panL');
+  function selectTab(on, off, onPan, offPan){
+    on.setAttribute('aria-selected','true'); off.setAttribute('aria-selected','false');
+    onPan.hidden = false; offPan.hidden = true;
+  }
+  tabE.addEventListener('click', function(){ selectTab(tabE, tabL, panE, panL); });
+  tabL.addEventListener('click', function(){ selectTab(tabL, tabE, panL, panE); });
+
+  /* ── Evidence links: in the real shell these deep-link into Mode 2.
+     Here they open the drawer on the Evidence tab so the affordance is
+     honest rather than dead. ── */
+  document.querySelectorAll('[data-panel]').forEach(function(b){
+    b.addEventListener('click', function(e){
+      e.stopPropagation();
+      if(!drawer.classList.contains('on')) openDrawer(b);
+      selectTab(tabE, tabL, panE, panL);
+    });
+  });
+
+  /* ══ Horizon ═════════════════════════════════════════════════════════
+     Re-tiers the queue: decisions matching the horizon stay at full
+     weight above the split, the rest compact below it. The compacting
+     itself is CSS off [data-horizon]; this only moves nodes so reading
+     order matches visual order, and keeps the labels honest. ── */
+  var root   = document.getElementById('root'),
+      hzGrp  = document.getElementById('hz'),
+      queue  = document.getElementById('queue'),
+      split  = document.getElementById('split'),
+      qSub   = document.getElementById('qSub'),
+      qCount = document.getElementById('qCount');
+
+  /* Captured ONCE as the canonical D2,D1,D3,D4,D5,D6,D7 order. Filtering
+     this fixed list rather than re-reading the live DOM is what stops the
+     demoted group from re-shuffling according to click history. */
+  var cards = [].slice.call(queue.querySelectorAll('.act'));
+
+  var HZ = {
+    week:    {sub:'Three decisions this week — ordered by what is at stake',  total:'RM 78.5M in play'},
+    quarter: {sub:'Three decisions this quarter — ordered by what is at stake', total:'RM 7.1M in play'},
+    fy:      {sub:'One decision for the year',                                 total:'RM 4.3M in play'}
+  };
+
+  function setHorizon(hz){
+    if(!HZ[hz]) return;
+    root.setAttribute('data-horizon', hz);
+
+    var inHz = function(c){ return (c.dataset.h || '').split(/\s+/).indexOf(hz) > -1; };
+    cards.filter(inHz).forEach(function(c){ queue.insertBefore(c, split); });
+    cards.filter(function(c){ return !inHz(c); }).forEach(function(c){ queue.appendChild(c); });
+
+    /* A demoted card's rationale is display:none'd by CSS, but its "Why"
+       button would still report aria-expanded="true" — a control claiming
+       to expose something no longer in the accessibility tree. Collapse
+       every demoted panel on switch so state and reality agree. */
+    cards.filter(function(c){ return !inHz(c); }).forEach(function(c){
+      var w = c.querySelector('.why[aria-expanded="true"]');
+      if(w){ w.setAttribute('aria-expanded','false');
+             var t = document.getElementById(w.getAttribute('aria-controls'));
+             if(t) t.hidden = true; }
+    });
+
+    qSub.textContent   = HZ[hz].sub;
+    qCount.textContent = HZ[hz].total;
+
+    hzGrp.querySelectorAll('[data-hz]').forEach(function(b){
+      var on = b.dataset.hz === hz;
+      b.setAttribute('aria-checked', String(on));
+      b.tabIndex = on ? 0 : -1;   // roving tabindex: one tab stop per group
+    });
+  }
+
+  hzGrp.addEventListener('click', function(e){
+    var b = e.target.closest('[data-hz]');
+    if(b) setHorizon(b.dataset.hz);
+  });
+
+  /* Arrow keys, Home/End — required for role="radiogroup" and missing from
+     the source, where all three radios sat in the tab order instead. */
+  hzGrp.addEventListener('keydown', function(e){
+    var btns = [].slice.call(hzGrp.querySelectorAll('[data-hz]')),
+        i = btns.indexOf(document.activeElement);
+    if(i < 0) return;
+    var next = null;
+    if(e.key === 'ArrowRight' || e.key === 'ArrowDown') next = btns[(i + 1) % btns.length];
+    else if(e.key === 'ArrowLeft' || e.key === 'ArrowUp') next = btns[(i - 1 + btns.length) % btns.length];
+    else if(e.key === 'Home') next = btns[0];
+    else if(e.key === 'End')  next = btns[btns.length - 1];
+    if(next){ e.preventDefault(); setHorizon(next.dataset.hz); next.focus(); }
+  });
+
+  setHorizon('week');
+
+  /* ── Theme toggle ── */
+  var themeBtn = document.getElementById('themeBtn'), themeLbl = document.getElementById('themeLbl');
+  themeBtn.addEventListener('click', function(){
+    var dark = document.documentElement.getAttribute('data-theme') === 'dark';
+    document.documentElement.setAttribute('data-theme', dark ? 'light' : 'dark');
+    themeLbl.textContent = dark ? 'Dark' : 'Light';
+  });
+})();
+</script>
+</body>
+</html>

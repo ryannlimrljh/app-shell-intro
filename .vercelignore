@@ -1,0 +1,14 @@
+# Files kept in the repo but deliberately NOT uploaded to the deployment.
+#
+# This project has no build step: Vercel serves the repo as static files, so
+# anything committed under pages/ is reachable at a public URL. That is fine for
+# the pages meant to be shown and a problem for the ones kept only as source
+# material, which is what this file is for.
+#
+# pages/decision-workspace-v2.html is the 9 Aug prototype the current Decision
+# Space was ported from. It is retained because two comments in
+# pages/app-shell-intro.html cite it as the provenance of that port, so deleting
+# it would leave those comments pointing at nothing. It must not ship: it is a
+# pre-port snapshot, so its copy and numbers now contradict the live page, and
+# anyone who found the URL would reasonably read it as current.
+pages/decision-workspace-v2.html

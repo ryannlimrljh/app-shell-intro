@@ -1134,7 +1134,7 @@
     .c-dash-panel .c-dec-reveal > p.c-dash-note{transition:none;}
   }
 
-  /* ---- Actionable Cards overlay -------------------------------------
+  /* ---- Hero Cards overlay -------------------------------------
      The six hero cards are NOT copied in here: the same six nodes are
      reparented out of the fan into this grid, and a FLIP carries each one
      from wherever it was sitting to its slot, un-rotating on the way.
@@ -1986,9 +1986,9 @@
         </div>
         <!-- Every label names the destination it actually lands on, and all
              three are wired (the old "Clean up cards" was href="#" and did
-             nothing). "Actionable Cards" returns to the fan above, so it
+             nothing). "Hero Cards" returns to the fan above, so it
              gets no down-arrow — the other two go down into the spaces. -->
-        <p class="c-canvas-dashlink" id="dashLink">Get more done, straight to your <a href="#spaceDecisions">Decision Space &#8595;</a> | <a href="#dashboard">Performance Space &#8595;</a> | <a href="#cardSlider">Actionable Cards &#9633;</a></p>
+        <p class="c-canvas-dashlink" id="dashLink">Get more done, straight to your <a href="#spaceDecisions">Decision Space &#8595;</a> | <a href="#dashboard">Performance Space &#8595;</a> | <a href="#cardSlider">Hero Cards &#9633;</a></p>
         </div><!-- /.c-canvas-hero -->
 
         <!-- ── Section 2 — the two spaces.
@@ -2764,12 +2764,12 @@
     </div>
   </div>
 
-  <!-- Actionable Cards overlay. Empty on purpose: the six .c-card-slide
+  <!-- Hero Cards overlay. Empty on purpose: the six .c-card-slide
        nodes are moved in here at open time and back into the fan on close,
        so there is exactly one copy of each card in the document. -->
   <div class="c-tidy" id="tidyOverlay" aria-hidden="true">
     <div class="c-tidy-backdrop" id="tidyBackdrop"></div>
-    <div class="c-tidy-panel" role="dialog" aria-modal="true" aria-label="Actionable cards" tabindex="-1">
+    <div class="c-tidy-panel" role="dialog" aria-modal="true" aria-label="Hero cards" tabindex="-1">
       <div class="c-tidy-grid" id="tidyGrid"></div>
     </div>
   </div>
@@ -4091,7 +4091,7 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
     if (a) a.addEventListener('click', (e) => { e.preventDefault(); window.showSpace(tabId, anchorId); });
   });
 
-  // "Actionable Cards" now opens the tidy overlay rather than scrolling back
+  // "Hero Cards" now opens the tidy overlay rather than scrolling back
   // up to the fan. window.showCards is the single entry point so the tidy
   // script owns the behaviour and this handler stays a one-liner.
   const cardLink = document.querySelector('#dashLink a[href="#cardSlider"]');
@@ -4207,7 +4207,7 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
   });
 })();
 
-// ── Actionable Cards overlay: the fan sorts itself into a grid.
+// ── Hero Cards overlay: the fan sorts itself into a grid.
 // A real FLIP on the six hero cards, not a second set of copies. Sequence
 // per card: measure where it is now -> reparent -> neutralise its transform
 // and measure where it landed -> apply the inverse instantly -> release it

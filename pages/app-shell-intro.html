@@ -1173,9 +1173,20 @@
      be left on a trigger that is now behind a scrim. */
   .c-tidy-panel:focus{outline:none;}
   .c-tidy-grid{display:grid; grid-template-columns:repeat(3, 340px); gap:var(--spacing-24);
-    justify-content:center; align-content:start; margin:auto; perspective:900px;}
+    justify-content:center; align-content:start; margin-inline:auto; perspective:900px;}
   .c-tidy-grid .c-card-slide + .c-card-slide{margin-left:0;}
   .c-tidy-grid .c-card-slide{z-index:auto;}
+  /* Off-fan cards: in the track but not rendered there, because the fan shows
+     one role and this overlay is the whole library.
+     A class, not [hidden]: .c-card declares display:flex and the UA sheet's
+     [hidden]{display:none} carries zero specificity, so it loses — the same
+     trap the disclosure rows hit. A class also keeps the accessibility tree
+     honest, since overriding display on a [hidden] element renders something
+     the attribute still claims is irrelevant.
+     The grid rule below is what makes all twelve appear in the overlay with no
+     JS toggling at open time. */
+  .c-card-slide.is-off-fan{display:none;}
+  .c-tidy-grid .c-card-slide.is-off-fan{display:flex;}
   /* The fan pose is a CSS transform on .c-card-slide.is-revealed, and it
      follows the card into this grid. It has to be cancelled here, not just
      overridden from JS: Motion writes NO inline transform for an identity
@@ -1670,7 +1681,9 @@
   .c-hcard-avatar{width:28px; height:28px; border:2px solid var(--color-neutral-1); margin-left:-8px;}
   .c-hcard-avatar:first-child{margin-left:0;}
   .c-hcard-bar{width:100%; height:6px; margin-top:auto; border-radius:var(--radius-pill); background:var(--color-neutral-2); overflow:hidden;}
-  .c-hcard-bar-fill{width:72%; height:100%; background:var(--color-obsidian);}
+  /* Percentage is per card via --hcard-bar-pct; 72% stays the fallback so the
+     team card that predates the variable is unchanged. */
+  .c-hcard-bar-fill{width:var(--hcard-bar-pct, 72%); height:100%; background:var(--color-obsidian);}
   .c-hcard-barlabel{display:block; margin:calc(-1 * var(--spacing-8)) 0 0; font-size:var(--text-caption-size); color:var(--color-neutral-5);} /* bar + its caption pair tightly (gap minus 8px = 4px), same pairing rule as headline + support */
 
   /* Card 6/6 — AI next-best-action (closing): the deliberate outlier —
@@ -1876,7 +1889,7 @@
             <span class="c-userpicker-avatar">BW</span>
             <span class="c-userpicker-text">
               <span class="c-userpicker-name">Bryan Wong</span>
-              <span class="c-userpicker-role">Administrator</span>
+              <span class="c-userpicker-role">Head of Revenue</span>
             </span>
           </button>
         </div>
@@ -1909,8 +1922,76 @@
         </div>
         <div class="c-card-slider" id="cardSlider" tabindex="0" role="region" aria-roledescription="carousel" aria-label="Highlights" style="margin-top:var(--spacing-32)">
           <div class="c-card-slider-track">
-            <div class="c-card c-card-slide">
+            <!-- ── Leadership cards. These are what the fan renders: data-role decides
+                 membership, and the rep cards below are in the same track but off-fan
+                 (see .c-card-slide.is-off-fan). Children 1-6 on purpose — the fan pose is
+                 nth-child-scoped and only six poses exist. ── -->
+            <div class="c-card c-card-slide" data-role="leadership">
               <span class="c-hcard-ribbon" role="img" aria-label="Focus 1 of 3"><span class="c-hcard-ribbon-band" aria-hidden="true">Focus 1</span></span>
+              <span class="c-hcard-label">Plan</span>
+              <h4>RM 17.1M short of plan</h4>
+              <p>Weighted RM 222.9M against a RM 240.0M plan</p>
+              <div class="c-hcard-bar" style="--hcard-bar-pct:92.9%"><div class="c-hcard-bar-fill"></div></div>
+              <span class="c-hcard-barlabel">92.9% of plan on the weighted case</span>
+              <span class="c-hcard-rec">Only best case touches the line. 73 deals are still open.</span>
+              <span class="c-hcard-cta">Name the eight deals <i class="ph ph-arrow-right"></i></span>
+            </div>
+            <div class="c-card c-card-slide" data-role="leadership">
+              <span class="c-hcard-ribbon" role="img" aria-label="Focus 2 of 3"><span class="c-hcard-ribbon-band" aria-hidden="true">Focus 2</span></span>
+              <span class="c-hcard-label">Concentration</span>
+              <h4>Top five carry 38% of revenue</h4>
+              <div class="c-hcard-list">
+                <div class="c-hcard-list-row"><span>Largest advertiser</span><span class="c-badge c-badge-neutral">9.2%</span></div>
+                <div class="c-hcard-list-row"><span>Top five combined</span><span class="c-badge c-badge-warning">38%</span></div>
+                <div class="c-hcard-list-row"><span>At stake</span><span class="c-badge c-badge-neutral">RM 56.3M</span></div>
+              </div>
+              <span class="c-hcard-rec">No single account can sink the year. Losing two breaches plan.</span>
+              <span class="c-hcard-cta">Name an executive sponsor <i class="ph ph-arrow-right"></i></span>
+            </div>
+            <div class="c-card c-card-slide c-stat" data-role="leadership">
+              <span class="c-stat-label">Share of market</span>
+              <div class="c-stat-value hero">13.8%</div>
+              <p>Down 0.4pt YTD, in a market growing 8.1%</p>
+              <span class="c-stat-trend down">&#9660; we grew 6.4%</span>
+              <svg class="c-hcard-sparkline" viewBox="0 0 200 40" preserveAspectRatio="none" aria-hidden="true">
+                <polyline points="0,8 30,10 60,9 90,14 120,16 150,22 180,26 200,32" fill="none" style="stroke:var(--color-red)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <span class="c-hcard-rec">Roughly RM 4.3M of revenue that existed and went elsewhere.</span>
+              <span class="c-hcard-cta">Take it to the board <i class="ph ph-arrow-right"></i></span>
+            </div>
+            <div class="c-card c-card-slide" data-role="leadership">
+              <span class="c-hcard-label">Retention</span>
+              <h4>RM 8.6M walked out</h4>
+              <p>Against RM 12.7M won from new advertisers</p>
+              <div class="c-hcard-list">
+                <div class="c-hcard-list-row"><span>New advertisers</span><span class="c-badge c-badge-success">+RM 12.7M</span></div>
+                <div class="c-hcard-list-row"><span>Lapsed</span><span class="c-badge c-badge-warning">&minus;RM 8.6M</span></div>
+                <div class="c-hcard-list-row"><span>Net new business</span><span class="c-badge c-badge-neutral">+RM 4.1M</span></div>
+              </div>
+              <span class="c-hcard-rec">Retention, not acquisition, is the exposure.</span>
+              <span class="c-hcard-cta">See why they left <i class="ph ph-arrow-right"></i></span>
+            </div>
+            <div class="c-card c-card-slide c-hcard-ai" data-role="leadership">
+              <span class="c-hcard-label">&#129302; Needs a date</span>
+              <h4>Petronas reset undiarised 7 days</h4>
+              <div class="c-hcard-tags">
+                <span class="c-tag">3 decisions due</span>
+                <span class="c-tag">1 stalled</span>
+                <span class="c-tag">RM 2.1M winnable</span>
+              </div>
+              <button class="c-hcard-cta-btn" type="button">Diarise the reset</button>
+            </div>
+            <div class="c-card c-card-slide" data-role="leadership">
+              <span class="c-hcard-ribbon" role="img" aria-label="Focus 3 of 3"><span class="c-hcard-ribbon-band" aria-hidden="true">Focus 3</span></span>
+              <span class="c-hcard-label">Inventory</span>
+              <h4>Digital hit 75% of target</h4>
+              <p>62% of RM 25.0M sellable went out the door</p>
+              <div class="c-hcard-bar" style="--hcard-bar-pct:62%"><div class="c-hcard-bar-fill"></div></div>
+              <span class="c-hcard-barlabel">62% fill &middot; 75% of target</span>
+              <span class="c-hcard-rec">The stock was there, so it is demand, not supply. RM 5.1M at stake.</span>
+              <span class="c-hcard-cta">Fund Digital demand <i class="ph ph-arrow-right"></i></span>
+            </div>
+            <div class="c-card c-card-slide" data-role="sales">
               <span class="c-hcard-label">Pipeline</span>
               <h4>3 deals need a nudge</h4>
               <div class="c-hcard-list">
@@ -1921,8 +2002,7 @@
               <span class="c-hcard-rec">Start with MediaCorp. It's been quiet longest (12d).</span>
               <span class="c-hcard-cta">Nudge MediaCorp <i class="ph ph-arrow-right"></i></span>
             </div>
-            <div class="c-card c-card-slide c-hcard-risk">
-              <span class="c-hcard-ribbon" role="img" aria-label="Focus 2 of 3"><span class="c-hcard-ribbon-band" aria-hidden="true">Focus 2</span></span>
+            <div class="c-card c-card-slide c-hcard-risk" data-role="sales">
               <span class="c-hcard-label"><i class="ph-fill ph-warning"></i> At risk</span>
               <h4>Sunway Retail</h4>
               <p>Engagement down 30% · renews in 21 days</p>
@@ -1933,7 +2013,7 @@
               <span class="c-hcard-rec">Renewal is in 21 days, and a save call this week beats a discount later.</span>
               <span class="c-hcard-cta">Book save call <i class="ph ph-arrow-right"></i></span>
             </div>
-            <div class="c-card c-card-slide c-stat c-hcard-pace">
+            <div class="c-card c-card-slide c-stat c-hcard-pace" data-role="sales">
               <span class="c-stat-label">Pace</span>
               <div class="c-stat-value hero">RM2.4M</div>
               <p>MTD vs RM2.1M run-rate</p>
@@ -1944,7 +2024,7 @@
               <span class="c-hcard-rec">Two deals close this week. Land them and October starts ahead too.</span>
               <span class="c-hcard-cta">See closing deals <i class="ph ph-arrow-right"></i></span>
             </div>
-            <div class="c-card c-card-slide">
+            <div class="c-card c-card-slide" data-role="sales">
               <span class="c-hcard-label">Upsell</span>
               <div class="c-hcard-thumb">
                 <i class="ph-fill ph-play-circle"></i>
@@ -1955,7 +2035,7 @@
               <span class="c-hcard-rec">3 of your clients fit the same influencer playbook.</span>
               <span class="c-hcard-cta">Clone this pitch <i class="ph ph-arrow-right"></i></span>
             </div>
-            <div class="c-card c-card-slide c-stat c-hcard-team">
+            <div class="c-card c-card-slide c-stat c-hcard-team" data-role="sales">
               <span class="c-stat-label">SEA team</span>
               <span class="c-hcard-trophy" aria-hidden="true">🏆</span>
               <div class="c-stat-value hero">#2</div>
@@ -1964,15 +2044,14 @@
                 <span class="c-userpicker-avatar c-hcard-avatar">JL</span>
                 <span class="c-userpicker-avatar c-hcard-avatar">KW</span>
                 <span class="c-userpicker-avatar c-hcard-avatar">SM</span>
-                <span class="c-userpicker-avatar c-hcard-avatar">BW</span>
+                <span class="c-userpicker-avatar c-hcard-avatar">DT</span>
               </div>
               <div class="c-hcard-bar"><div class="c-hcard-bar-fill"></div></div>
               <span class="c-hcard-barlabel">RM120K behind #1</span>
               <span class="c-hcard-rec">Closing PetronasBiz (RM150K) takes #1.</span>
               <span class="c-hcard-cta">Draft outreach <i class="ph ph-arrow-right"></i></span>
             </div>
-            <div class="c-card c-card-slide c-hcard-ai">
-              <span class="c-hcard-ribbon" role="img" aria-label="Focus 3 of 3"><span class="c-hcard-ribbon-band" aria-hidden="true">Focus 3</span></span>
+            <div class="c-card c-card-slide c-hcard-ai" data-role="sales">
               <span class="c-hcard-label">🤖 Next best action</span>
               <h4>Call PetronasBiz</h4>
               <div class="c-hcard-tags">
@@ -4233,7 +4312,26 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
   const STEP = 0.045;          // per-card stagger; the row reads as sorting rather than snapping
   let open = false, returnFocus = null, busy = false;
 
+  /* Which role the fan is composed for. The overlay is the full library and
+     ignores this — that asymmetry is the whole feature: one track, one copy of
+     every card, two audiences. When card configuration lands, this constant is
+     the only thing that has to become a setting. */
+  const FAN_ROLE = 'leadership';
   const cards = () => Array.from(document.querySelectorAll('.c-card-slide'));
+  /* Applied here rather than hardcoded in the markup so role membership has a
+     single owner. Cards with no data-role stay on the fan, so the attribute is
+     opt-out and a new card cannot vanish by forgetting it. */
+  cards().forEach((c) => {
+    const role = c.dataset.role;
+    c.classList.toggle('is-off-fan', !!role && role !== FAN_ROLE);
+  });
+  /* A card that never renders in the fan is never seen by the reveal observer,
+     so it never gets .is-revealed and would sit at the base opacity:0 even once
+     the grid makes it display:flex. Granting it up front is correct — inside the
+     overlay it genuinely is revealed — and its entrance is animated from 0
+     explicitly below, so there is no flash of a fully-opaque card first. */
+  cards().forEach((c) => { if (c.classList.contains('is-off-fan')) c.classList.add('is-revealed'); });
+  const travels = (c) => !c.classList.contains('is-off-fan');
   const centre = (el) => { const r = el.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; };
 
   // The fan pose lives in CSS custom properties per nth-child. Read it back
@@ -4252,16 +4350,41 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
      pair: this page runs in contexts that do not always produce animation
      frames, and a deferred invert there would show one frame of the card
      already sitting at its destination. */
-  function flip(move, poseFor, order, invRotate) {
-    const list = cards();
+  const OFF_FADE = 0.22;   // off-fan cards' fade, both directions
+  function flip(move, poseFor, order, invRotate, dir) {
+    /* Only cards that were actually on screen can be FLIPped. An off-fan card is
+       display:none in the track, so centre() returns 0,0 for it and the inverse
+       would launch it from the viewport corner. They are animated separately as
+       an entrance, which is also the honest reading: things that were visible
+       move, things that were not appear. */
+    const list = cards().filter(travels);
+    const entering = cards().filter((c) => !travels(c));
     const first = list.map(centre);
     const poses = list.map(poseFor);
     const fromRot = list.map(invRotate);
     move();
     list.forEach((c, i) => animate(c, { x: 0, y: poses[i].y, rotate: poses[i].rotate, rotateX: 0, rotateY: 0, scale: 1 }, { duration: 0 }));
+    // Held at the start of their entrance while the travellers are measured, so
+    // a forced reflow cannot show them at full opacity for a frame.
+    entering.forEach((c) => animate(c, { opacity: 0, y: 14, rotate: 0, rotateX: 0, rotateY: 0, scale: 1 }, { duration: 0 }));
     void grid.offsetWidth;
     const last = list.map(centre);
-    if (REDUCED.matches) return;   // the end pose is already set; skip the travel
+    if (REDUCED.matches) {
+      entering.forEach((c) => animate(c, { opacity: dir === 'out' ? 0 : 1, y: 0 }, { duration: 0 }));
+      return;   // the end pose is already set; skip the travel
+    }
+    if (dir === 'out') {
+      /* Leaving: fade them where they stand, in the grid. They must NOT be
+         reparented first — the track re-applies display:none the instant they
+         land there, so a fade started after the move would never be seen. The
+         caller reparents them once this has finished. */
+      entering.forEach((c) => animate(c, { opacity: [1, 0], y: [0, 10] },
+        { duration: OFF_FADE, ease: [0.4, 0, 1, 1] }));
+    } else {
+      // Behind the travellers: the sort reads as the cause and this as the effect.
+      entering.forEach((c, i) => animate(c, { opacity: [0, 1], y: [14, 0] },
+        { duration: 0.42, ease: [0.22, 1, 0.36, 1], delay: list.length * STEP + i * STEP }));
+    }
     list.forEach((c, i) => {
       // Centres, not corners: these cards are rotated, and a rotated card's
       // AABB corner is not its layout corner — but its centre is exactly the
@@ -4297,7 +4420,7 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
     // way back. Re-inserting ascending by index rebuilds the order exactly.
     overlay._homes = cards().map((c) => ({ card: c, idx: Array.prototype.indexOf.call(track.children, c) }));
     flip(() => overlay._homes.forEach(({ card }) => grid.appendChild(card)),
-         () => ({ y: 0, rotate: 0 }), (i) => i, (c) => homePose(c).rotate);
+         () => ({ y: 0, rotate: 0 }), (i) => i, (c) => homePose(c).rotate, 'in');
     // Same frame as the reparent would fight the backdrop's own transition,
     // so the fade is committed after a forced reflow.
     void overlay.offsetWidth;
@@ -4312,9 +4435,21 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
     busy = true;
     // Reverse order so the cards fold back toward the fan's centre-out
     // stack rather than unwinding left to right.
-    const n = cards().length;
-    flip(() => (overlay._homes || []).forEach(({ card, idx }) => track.insertBefore(card, track.children[idx] || null)),
-         (c) => homePose(c), (i) => n - 1 - i, () => 0);
+    /* Count the TRAVELLERS, not every card. flip() hands `order` indices into
+       the filtered list, so counting all twelve made the reverse stagger start
+       at 11 * STEP and the fan reassembled half a second late. */
+    const homes = overlay._homes || [];
+    const goingHome = homes.filter(({ card }) => travels(card));
+    const n = goingHome.length;
+    flip(() => goingHome.forEach(({ card, idx }) => track.insertBefore(card, track.children[idx] || null)),
+         (c) => homePose(c), (i) => n - 1 - i, () => 0, 'out');
+    /* The off-fan six return after their fade. Inserting ascending by index
+       still rebuilds the exact order: the travellers already hold 0-5, so these
+       land at 6-11 behind them. */
+    setTimeout(() => {
+      homes.filter(({ card }) => !travels(card))
+           .forEach(({ card, idx }) => track.insertBefore(card, track.children[idx] || null));
+    }, REDUCED.matches ? 0 : OFF_FADE * 1000 + 20);
     overlay.classList.remove('is-shown');
     const done = () => {
       overlay.classList.remove('is-open');

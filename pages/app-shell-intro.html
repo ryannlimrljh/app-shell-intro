@@ -150,14 +150,20 @@
      dashboard-home spellings (floating-ask*, ask-*, mini-pill) so the
      two files stay diffable; only the wrap is renamed to this page's
      c-canvas-* convention. */
-  .c-canvas-askbox{--ask-morph-dur:420ms; --ask-morph-ease:cubic-bezier(.22,1,.36,1); position:absolute; left:50%; bottom:var(--spacing-24); z-index:20; width:min(620px, calc(100% - var(--spacing-32))); opacity:0; transform:translate(-50%, 16px); transition:opacity 550ms cubic-bezier(.16,1,.3,1), transform 550ms cubic-bezier(.16,1,.3,1);}
-  .c-canvas-askbox.is-revealed{opacity:1; transform:translate(-50%, 0); transition-delay:1150ms;}
+  /* --ask-push is a second, independent translate term carried by all three
+     states. --ask-shift parks the collapsed pill beside the dock; --ask-push
+     is the Evidence panel shoving the box (either size) out of its way. They
+     have to be separate variables because they are owned by different events
+     and either can change without the other. Both ride the same transform,
+     so both animate on the box's own morph timing for free. */
+  .c-canvas-askbox{--ask-morph-dur:420ms; --ask-morph-ease:cubic-bezier(.22,1,.36,1); position:absolute; left:50%; bottom:var(--spacing-24); z-index:20; width:min(620px, calc(100% - var(--spacing-32))); opacity:0; transform:translate(calc(-50% + var(--ask-push, 0px)), 16px); transition:opacity 550ms cubic-bezier(.16,1,.3,1), transform 550ms cubic-bezier(.16,1,.3,1);}
+  .c-canvas-askbox.is-revealed{opacity:1; transform:translate(calc(-50% + var(--ask-push, 0px)), 0); transition-delay:1150ms;}
   /* Collapsed: the same element, narrowed to a pill and moved beside the dock.
      Declared after .is-revealed so it wins the tie on source order. --ask-* are
      written by the script from the dock's live rect, so the pill lands beside
      Evidence at any width without hardcoding either box. */
   .c-canvas-askbox.is-collapsed{width:var(--ask-w, 240px); bottom:var(--ask-bottom, var(--spacing-24));
-    transform:translate(calc(-50% + var(--ask-shift, 0px)), 0);}
+    transform:translate(calc(-50% + var(--ask-shift, 0px) + var(--ask-push, 0px)), 0);}
   /* Set by the script once the entrance has played, and declared after
      .is-collapsed so it governs BOTH directions with one timing. Without it the
      collapse ran at 360ms and the expansion fell through to the entrance rule's
@@ -277,7 +283,12 @@
   }
   @media (prefers-reduced-motion: reduce){
     .c-shell-content{scroll-behavior:auto;}
-    .c-canvas-askbox,.c-canvas-askbox .floating-ask,.c-canvas-askbox .floating-ask-more{transition:none;}
+    /* .is-morphable has to be named explicitly: it declares its own
+       transition at (0,2,0) and this override is (0,1,0), and a media query
+       adds no specificity — so the bare selector lost the cascade and the
+       box kept animating its collapse under reduced motion. The panel push
+       rides the same transition, which is what surfaced it. */
+    .c-canvas-askbox,.c-canvas-askbox.is-morphable,.c-canvas-askbox .floating-ask,.c-canvas-askbox .floating-ask-more{transition:none;}
     .c-canvas-date{transition:none;}
   }
   /* ── Ideal-board grid + panels. 12-col grid, spans set per panel.
@@ -672,8 +683,17 @@
      no width measurement, and the offsets that keep them clear of the
      assistant box live in one place. Evidence is last, so its right edge is
      still the corner .c-dec-panel morphs out of. */
-  .c-dock{position:absolute; right:var(--spacing-24); bottom:178px; z-index:25; display:flex; align-items:center; gap:var(--spacing-12);}
+  /* pointer-events:none is load-bearing, not defensive. The dock is a
+     positioning wrapper that overlaps the ask box in the same corner, and it
+     out-stacks it (25 vs 20). In Performance Space its only child hides with
+     visibility, so the empty wrapper was still eating clicks meant for the
+     collapsed pill parked under it — the pill was live only in the ~37px
+     strip that stuck out past the dock. The trigger opts back in below; a
+     visibility:hidden FAB cannot be hit either way, which is what makes one
+     rule correct in both spaces. */
+  .c-dock{position:absolute; right:var(--spacing-24); bottom:178px; z-index:25; display:flex; align-items:center; gap:var(--spacing-12); pointer-events:none;}
   @media (min-width:1180px){ .c-dock{bottom:var(--spacing-24);} }
+  .c-dec-fab{pointer-events:auto;}
 
 
   .c-dec-fab{display:inline-flex; align-items:center; gap:var(--spacing-8); height:44px; padding:0 var(--spacing-20); border-radius:var(--radius-pill); border:1px solid var(--color-obsidian); background:var(--color-obsidian); color:var(--color-neutral-1); font-family:inherit; font-size:var(--text-body2-size); font-weight:700; cursor:pointer; box-shadow:var(--shadow-3);
@@ -684,7 +704,17 @@
   .c-dec-fab:hover{background:var(--color-neutral-8); border-color:var(--color-neutral-8);}
   .c-dec-fab i{font-size:var(--icon-sm);}
 
-  .c-dec-panel{position:absolute; top:var(--spacing-16); right:var(--spacing-24); bottom:178px; z-index:75;
+  /* Own timing rather than the shared --duration-slow: this is the largest
+     surface on the page that morphs out of a 163x44 pill, and the shared
+     360ms/--ease-settle pair is tuned for small controls. The curve was
+     picked by sampling candidates through WAAPI rather than by eye: at 30%
+     of the run --ease-settle is already 84% done and the chat fold's curve
+     78%, both of which read as a pop followed by an invisible settle. This
+     one is 58% at 30% and 87% at 50%, so the unfold is still visibly moving
+     through the middle of the run and still decelerates into place. Verify
+     by pausing the transition, not by watching it. */
+  .c-dec-panel{--dp-dur:520ms; --dp-ease:cubic-bezier(.4,.6,.28,1); --dp-fade:300ms;
+    position:absolute; top:var(--spacing-16); right:var(--spacing-24); bottom:178px; z-index:75;
     width:min(400px, calc(100% - var(--spacing-48)));
     background:var(--color-neutral-1); border:1px solid var(--color-neutral-3);
     box-shadow:var(--shadow-4); display:flex; flex-direction:column; overflow:hidden;
@@ -694,14 +724,14 @@
        not run yet. */
     transform-origin:100% 100%; transform:scale(var(--morph-sx, .4), var(--morph-sy, .06));
     border-radius:var(--radius-pill); opacity:0; visibility:hidden;
-    transition:transform var(--duration-slow) var(--ease-settle), border-radius var(--duration-slow) var(--ease-settle), opacity var(--duration-base) var(--ease-standard), visibility 0s linear var(--duration-slow);}
+    transition:transform var(--dp-dur) var(--dp-ease), border-radius var(--dp-dur) var(--dp-ease), opacity var(--dp-fade) var(--ease-standard), visibility 0s linear var(--dp-dur);}
   .c-dec-panel.is-open{transform:none; border-radius:var(--radius-lg); opacity:1; visibility:visible;
-    transition:transform var(--duration-slow) var(--ease-settle), border-radius var(--duration-slow) var(--ease-settle), opacity var(--duration-base) var(--ease-standard), visibility 0s;}
+    transition:transform var(--dp-dur) var(--dp-ease), border-radius var(--dp-dur) var(--dp-ease), opacity var(--dp-fade) var(--ease-standard), visibility 0s;}
   /* Contents fade rather than scale with the box, and wait until it has most of
      its size — otherwise the morph reads as a squashed screenshot being
      stretched. They leave first on the way out. */
   .c-dec-panel > *{opacity:0; transition:opacity var(--duration-fast) var(--ease-standard);}
-  .c-dec-panel.is-open > *{opacity:1; transition:opacity var(--duration-base) var(--ease-standard) 160ms;}
+  .c-dec-panel.is-open > *{opacity:1; transition:opacity var(--duration-base) var(--ease-standard) 240ms;}
   @media (min-width:1180px){ .c-dec-panel{bottom:var(--spacing-24);} }
   .c-dec-panel-hd{display:flex; align-items:center; gap:var(--spacing-12); padding:var(--spacing-16) var(--spacing-16) var(--spacing-12); flex:none;}
   .c-dec-panel-hd h3{margin:0; font-size:var(--text-h5-size); font-weight:800; flex:1 1 auto;}
@@ -958,7 +988,19 @@
   .c-chat-inputwrap{position:relative; max-width:760px; margin:0 auto;}
   .c-chat-input{position:relative; z-index:10; display:flex; flex-direction:column; gap:var(--spacing-12);
     padding:var(--spacing-16); border:0; border-radius:var(--radius-lg);
-    background:var(--color-neutral-1); box-shadow:var(--shadow-4);}
+    background:var(--color-neutral-1); box-shadow:var(--shadow-2);}
+  /* Deliberately NOT plus-lighter here, unlike the launcher. Over
+     canvas-warm #FCFAF5 that blend mode has 3/5/10 levels of headroom left
+     in R/G/B, which on a 762px-wide ring rendered as nothing at all — the
+     layers were running and measurably present, just not visible. Normal
+     blending composites the colour unconditionally, and the opacities are
+     what hold it below the small box rather than above it. The shadow above
+     drops to --shadow-2 for the same reason: a 48px grey bloom over the same
+     ring is what the glow was competing with. */
+  .c-chat-inputwrap .floating-ask-glow-outer{inset:-7px; border-radius:calc(var(--radius-lg) + 7px);
+    filter:blur(13px); opacity:.4; mix-blend-mode:normal;}
+  .c-chat-inputwrap .floating-ask-glow-inner{inset:-1.5px; border-radius:calc(var(--radius-lg) + 1.5px);
+    filter:blur(2px); opacity:.5; mix-blend-mode:normal;}
   .c-chat-input input{width:100%; border:0; outline:none; background:transparent; font-family:inherit;
     font-size:var(--text-body1-size); color:var(--color-neutral-9);}
   .c-chat-input input::placeholder{color:var(--color-neutral-5);}
@@ -2635,11 +2677,6 @@
                   <span class="c-chat-model">Reading: this workspace</span>
                   <button class="c-chat-send" type="button" aria-label="Send"><i class="ph ph-arrow-up" aria-hidden="true"></i></button>
                 </div>
-              </div>
-              <div class="prompt-row-mini">
-                <button class="mini-pill" type="button">Show the eight deals</button>
-                <button class="mini-pill" type="button">Compare to last quarter</button>
-                <button class="mini-pill" type="button">Who owns Petronas?</button>
               </div>
             </div>
           </div>
@@ -4433,6 +4470,7 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
     syncMorph();
     void drawer.offsetHeight; // commit the start geometry before the class flips, or there is nothing to transition from
     drawer.classList.add('is-open');
+    document.dispatchEvent(new CustomEvent('decpanel:opened')); // the ask box parks itself clear of the panel; see applyAskPush
     drawer.setAttribute('aria-hidden', 'false');
     drawerBtn.classList.remove('is-visible'); // the pill becomes the panel, so it must not sit behind it
     void drawer.offsetHeight; // flush the visibility change — a still-hidden element cannot take focus
@@ -4462,7 +4500,7 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
     if (REDUCED.matches) { announce(); }
     else {
       drawer.addEventListener('transitionend', onEnd);
-      closeTimer = setTimeout(announce, 420); // > the 360ms transform
+      closeTimer = setTimeout(announce, 580); // > the 520ms transform (--dp-dur)
     }
     if (restoreFocus) (lastFocus || drawerBtn).focus();
   }
@@ -5033,6 +5071,54 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
       askBox.style.setProperty('--ask-bottom', getComputedStyle(dock).bottom);
     }
 
+    /* The Evidence panel opens over this corner: it is 400px wide at the same
+       24px right gutter, z-index 75 against the box's 20, and full-height at
+       >=1180px, so an open panel completely buries the box (measured: the box's
+       glow was visible only where it stuck out beneath the panel). Rather than
+       hide the assistant — it is meant to be permanently reachable — slide it
+       left by exactly the overlap.
+       The panel's geometry is read in layout space (offsetWidth + its computed
+       right gutter) because it is mid-morph when the event fires and its client
+       rect is still the scaled closed pose.
+       The BOX's width, though, must not be measured at all. This element
+       transitions `width` between the pill and the full box, so offsetWidth and
+       getComputedStyle both return the in-flight value — measured once at 482px
+       mid-collapse, which put the push 141px too far. The target width is
+       derived from the state instead, so the answer is the same whenever it is
+       asked. ASK_BOX_W and the 32px inset below restate
+       `width:min(620px, calc(100% - var(--spacing-32)))` from the CSS; they are
+       a deliberate duplication of that declaration, the same arrangement
+       ASK_PILL_W already has with --ask-w, and they have to move together. */
+    const PANEL_GAP = 16;
+    const ASK_BOX_W = 620, ASK_BOX_INSET = 32;
+    let panelOpen = false;
+    function applyAskPush() {
+      let push = 0;
+      const host = askBox.offsetParent;
+      const panel = document.getElementById('decDrawer');
+      if (panelOpen && host && panel) {
+        const hostW = host.clientWidth;
+        const gutter = parseFloat(getComputedStyle(panel).right) || 0;
+        const panelLeft = hostW - gutter - panel.offsetWidth;
+        // Called only after .is-collapsed has been written for this state (see
+        // syncAsk), so the class is the authority on which pose we are sizing
+        // for. --ask-shift likewise only participates while that class is in
+        // force; reading it unconditionally would double-count the park.
+        const isPill = askBox.classList.contains('is-collapsed');
+        const shift = isPill ? (parseFloat(askBox.style.getPropertyValue('--ask-shift')) || 0) : 0;
+        const centre = hostW / 2 + shift;
+        const half = (isPill ? ASK_PILL_W : Math.min(ASK_BOX_W, hostW - ASK_BOX_INSET)) / 2;
+        const overlap = (centre + half) - (panelLeft - PANEL_GAP);
+        // Never push further than the left gutter allows: on a narrow content
+        // region the box cannot fully clear the panel, and sliding it off the
+        // left edge to try would be worse than a partial overlap.
+        if (overlap > 0) push = -Math.min(overlap, Math.max(0, centre - half - PANEL_GAP));
+      }
+      askBox.style.setProperty('--ask-push', Math.round(push) + 'px');
+    }
+    document.addEventListener('decpanel:opened', () => { panelOpen = true; applyAskPush(); });
+    document.addEventListener('decpanel:closed', () => { panelOpen = false; applyAskPush(); });
+
     /* Asymmetric thresholds on purpose. Collapse once past 240, then HOLD the
        pill all the way back up and only return to the box at the very top.
        A single threshold flipped the box back mid-scroll and flip-flopped
@@ -5052,6 +5138,9 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
       const changed = collapsed !== was;
       if (changed) syncAskGeometry();
       askBox.classList.toggle('is-collapsed', collapsed);
+      // After the toggle, never before: applyAskPush sizes for whichever pose
+      // the class now names, and syncAskGeometry runs a step too early for that.
+      applyAskPush();
       if (changed) {
         // Tell the choreography to land its final sentence before the line is
         // measured, so the travel is computed against the real text and not a
@@ -5094,7 +5183,7 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
     syncAsk();
     // Webfonts change the Evidence pill's width, and with it the dock's left
     // edge, so the first measurement has to be re-taken once they are in.
-    if (document.fonts && document.fonts.ready) document.fonts.ready.then(syncAskGeometry);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { syncAskGeometry(); applyAskPush(); });
     // After the entrance has finished, hand the transition over to the morph
     // timing — before that, .is-revealed's slower glide is the one we want.
     setTimeout(() => askBox.classList.add('is-morphable'), 1800);

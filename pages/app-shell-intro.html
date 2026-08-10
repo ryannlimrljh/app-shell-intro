@@ -375,6 +375,14 @@
   .c-dash .sp6{grid-column:span 6;} .c-dash .sp7{grid-column:span 7;} .c-dash .sp8{grid-column:span 8;} .c-dash .sp12{grid-column:span 12;}
   @media (max-width:1100px){ .c-dash .sp2{grid-column:span 4;} .c-dash .sp4{grid-column:span 6;} .c-dash .sp5,.c-dash .sp6,.c-dash .sp7,.c-dash .sp8{grid-column:span 12;} }
   @media (max-width:640px){ .c-dash .sp2,.c-dash .sp4{grid-column:span 12;} }
+  /* Section rules inside the 12-column grid. Everything visual comes from
+     .c-dec-rule; this only places the rule as a full-width item and gives it
+     more space above than below, so it binds to the panels it introduces
+     instead of floating between two groups. No bottom margin: the grid's own
+     20px gap already supplies the space underneath, and .c-dec-rule's
+     margin-bottom would stack on top of it. */
+  .c-dash-grid > .c-dash-rule{grid-column:1/-1; margin:var(--spacing-24) 0 0;}
+  .c-dash-grid > .c-dash-rule:first-child{margin-top:0;}
   .c-dash-panel{height:100%;}
   .c-dash-panel-head{display:flex; align-items:baseline; justify-content:space-between; gap:var(--spacing-8);}
   .c-dash-panel-head h4{margin:0;}
@@ -2594,6 +2602,12 @@
           </div>
           <div class="c-dash-grid">
 
+            <!-- ── Section rules. Decision Space's .c-dec-rule, reused so the two spaces
+                 read as one product; .c-dash-rule only does the grid placement. ── -->
+            <div class="c-dec-rule c-dash-rule c-rise">
+              <h3>Where we stand</h3>
+              <p>The five numbers every panel below explains</p>
+            </div>
 
             <div class="c-dash-w c-rise sp4"><div class="c-stat is-lead">
               <span class="c-stat-label">Will we hit RM 240.0M?</span>
@@ -2617,6 +2631,11 @@
               <span class="c-stat-trend"><span class="c-dash-dn">▼ 0.4pt</span><span class="period">market grew 8.1%</span></span>
             </div></div>
 
+            <div class="c-dec-rule c-dash-rule c-rise">
+              <h3>Plan and growth</h3>
+              <p>Delivery against plan, and what is driving it</p>
+            </div>
+
             <div class="c-dash-w c-rise sp6"><div class="c-card c-dash-panel">
               <div class="c-dash-panel-head"><div><h4>Cumulative revenue against plan, with the three closes</h4>
                 <p class="c-dash-panel-sub">Actual to August, then commit / weighted / best case to December</p></div><button class="c-dec-disclose c-dash-detail" type="button" aria-expanded="false" aria-controls="dashNote1">Detail</button></div>
@@ -2631,6 +2650,11 @@
               <div class="c-dash-chart"><div id="dBridge" class="c-vx"></div></div>
               <div class="c-dec-reveal" id="dashNote2" hidden><p class="c-dash-note"><b>New business is doing the work; existing accounts are nearly flat.</b> Of RM 8.9M growth, RM 12.7M came from new advertisers and RM 8.6M walked out, leaving only RM 4.8M from the accounts we already had. Retention, not acquisition, is the exposure.</p></div>
             </div></div>
+
+            <div class="c-dec-rule c-dash-rule c-rise">
+              <h3>Closing the gap</h3>
+              <p>The pipeline, the people and the inventory it rests on</p>
+            </div>
 
             <div class="c-dash-w c-rise sp6"><div class="c-card c-dash-panel">
               <div class="c-dash-panel-head"><div><h4>Pipeline by stage</h4>
@@ -2652,6 +2676,11 @@
               <div class="c-dash-chart"><div id="dFill" class="c-vx"></div></div>
               <div class="c-dec-reveal" id="dashNote5" hidden><p class="c-dash-note"><b>The solid bar is what we sold; the pale remainder went unsold.</b> Digital sold 62% of its inventory and reached 75% of target. The stock was there, so it is a demand problem. Addressable is the opposite at 97% sold out, so its 109% is <b>capped by supply</b>. Sell Digital harder; buy more addressable.</p></div>
             </div></div>
+
+            <div class="c-dec-rule c-dash-rule c-rise">
+              <h3>Where we are exposed</h3>
+              <p>What the headline numbers do not say</p>
+            </div>
 
             <div class="c-dash-w c-rise sp6"><div class="c-card c-dash-panel">
               <div class="c-dash-panel-head"><div><h4>Revenue against contribution</h4>
@@ -2691,8 +2720,13 @@
               <div class="c-dec-reveal" id="dashNote9" hidden><p class="c-dash-note"><b>The most uncomfortable panel here.</b> Growing 6.4% in a market growing 8.1% means share fell from 14.2% to 13.8%, about RM 4.3M of revenue that existed and went elsewhere. Every other widget on this board calls this a good year. Only this one calls it a loss.</p></div>
             </div></div>
 
+            <div class="c-dec-rule c-dash-rule c-rise">
+              <h3>What to do next</h3>
+              <p>The board's own conclusions, stated as decisions</p>
+            </div>
+
             <div class="c-dash-w c-rise sp6"><div class="c-card c-dash-panel">
-              <div class="c-dash-panel-head"><div><h4>What this board says to do next</h4>
+              <div class="c-dash-panel-head"><div><h4>Six moves, each with a number and an owner</h4>
                 <p class="c-dash-panel-sub">Each line traces to a panel above · the point of the exercise</p></div><button class="c-dec-disclose c-dash-detail" type="button" aria-expanded="false" aria-controls="dashNote10">Detail</button></div>
               <div class="c-dash-scroll"><div class="c-datatable"><table>
                 <caption class="c-dash-vh">Recommended actions with amount at stake, owner and source panel</caption>
@@ -2706,7 +2740,7 @@
                   <tr><td><b>Take the share question to the board</b></td><td>Growth is real but sub-market, share fell 0.4pt</td><td class="num">RM 4.3M</td><td>Leadership</td><td>Us against the market</td></tr>
                 </tbody>
               </table></div></div>
-              <div class="c-dec-reveal" id="dashNote10" hidden><p class="c-dash-note">Six moves, each with a number and an owner, the board's own conclusions, stated as decisions rather than as charts.</p></div>
+              <div class="c-dec-reveal" id="dashNote10" hidden><p class="c-dash-note">Nothing here is new. Every line is a conclusion one of the panels above already reached, restated as a decision with an owner attached.</p></div>
             </div></div>
 
           </div>

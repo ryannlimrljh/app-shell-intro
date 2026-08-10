@@ -257,9 +257,20 @@
      guessed: without this the "Across the business" heading landed at
      y=60 underneath a bar occupying 48–101. */
   .c-dash{margin-top:0; scroll-margin-top:calc(var(--spacing-8) + 45px + var(--spacing-12));}
-  .c-dash-head{display:flex; align-items:center; justify-content:flex-end; gap:var(--spacing-16); flex-wrap:wrap; padding:var(--spacing-16) 0 var(--spacing-24);}
+  /* The row carries the filter on the left and the period toggle on the
+     right, and wraps to two lines when they no longer fit side by side
+     (measured: below ~1180px of content width).
+     margin-left:auto on the toggle rather than justify-content:space-between
+     on the row — space-between is only "pushed apart" while both are on ONE
+     line. Once the row wraps, the toggle is the only item on line 2 and
+     space-between parks a lone item at the START of its line, dumping the
+     toggle hard-left under the filter. An auto margin holds it right in
+     both states. */
+  .c-dash-head{display:flex; align-items:center; gap:var(--spacing-16); flex-wrap:wrap; padding:var(--spacing-16) 0 var(--spacing-24);}
+  .c-dash-head > .seg-toggle{margin-left:auto;}
 
-  /* ── Media / Segment filter bar, ported from the ideal board
+  /* ── Media / Segment filter, ported from the ideal board and sharing
+     .c-dash-head with the period toggle
      (leadership-dashboard-tracker.html: .filters / .fg / .chip). Two
      single-select groups over the data's own dimensions.
      Restyled, not copied: the tracker draws its chips from its own --art-*
@@ -269,7 +280,7 @@
      rather than "choose one". Hence a page-local pill, but sized to the DS's
      own selectable filter control (.c-filter-trigger, 32px) so it sits on
      the same scale as the rest of the kit. */
-  .c-dash-filters{display:flex; align-items:center; gap:var(--spacing-24); flex-wrap:wrap; padding:0 0 var(--spacing-24);}
+  .c-dash-filters{display:flex; align-items:center; gap:var(--spacing-24); flex-wrap:wrap;}
   /* The visible label IS the group's accessible name (aria-labelledby), not a
      duplicate of an aria-label — two copies drift apart the first time the
      copy changes. */
@@ -2406,11 +2417,34 @@
              strings, so they render correctly even while this panel is
              still hidden. -->
         <section id="dashboard" class="c-dash" aria-label="Across the business">
-          <!-- Title and subtitle removed; the row survives only to carry the
-               period toggle, which is why it is now right-aligned. The section
-               takes aria-label instead of aria-labelledby, or it would lose
-               its accessible name along with the heading. -->
+          <!-- Title and subtitle removed; the row now carries both of the
+               board's slice controls — filter left, period right — which is why
+               it is space-between rather than the right-aligned row it was when
+               the toggle sat in it alone. The section takes aria-label instead
+               of aria-labelledby, or it would lose its accessible name along
+               with the heading. -->
           <div class="c-dash-head">
+            <!-- Media / Segment filter, ported from the ideal board. Shares the
+                 header row with the period toggle: all three answer "which slice
+                 am I looking at", so two separate bars read as two unrelated
+                 controls. Media and Segment stay paired — lifting only Media up
+                 here would leave half a control behind. -->
+            <div class="c-dash-filters">
+              <div class="c-filterbar" role="radiogroup" aria-labelledby="dashMediaL" id="dashMedia">
+                <span class="c-dash-flabel" id="dashMediaL">Media</span>
+                <button class="c-fpill" type="button" role="radio" aria-checked="true" tabindex="0" data-media="all">All</button>
+                <button class="c-fpill" type="button" role="radio" aria-checked="false" tabindex="-1" data-media="tv">TV</button>
+                <button class="c-fpill" type="button" role="radio" aria-checked="false" tabindex="-1" data-media="aa">AA</button>
+                <button class="c-fpill" type="button" role="radio" aria-checked="false" tabindex="-1" data-media="radio">Radio</button>
+                <button class="c-fpill" type="button" role="radio" aria-checked="false" tabindex="-1" data-media="digital">Digital</button>
+              </div>
+              <div class="c-filterbar" role="radiogroup" aria-labelledby="dashSegmentL" id="dashSegment">
+                <span class="c-dash-flabel" id="dashSegmentL">Segment</span>
+                <button class="c-fpill" type="button" role="radio" aria-checked="true" tabindex="0" data-segment="all">All</button>
+                <button class="c-fpill" type="button" role="radio" aria-checked="false" tabindex="-1" data-segment="key">Key &amp; Agency</button>
+                <button class="c-fpill" type="button" role="radio" aria-checked="false" tabindex="-1" data-segment="govt">Govt / SME / Regional</button>
+              </div>
+            </div>
             <!-- radiogroup, not tablist: no tabpanels exist and there's no
                  arrow-key roving-tabindex behaviour, so tab/tabpanel
                  semantics would over-promise. Matches the app switcher's
@@ -2422,25 +2456,6 @@
               <button class="seg-toggle-btn active" type="button" role="radio" aria-checked="true"><span class="seg-toggle-label">MTD</span></button>
               <button class="seg-toggle-btn" type="button" role="radio" aria-checked="false"><span class="seg-toggle-label">QTD</span></button>
               <button class="seg-toggle-btn" type="button" role="radio" aria-checked="false"><span class="seg-toggle-label">YTD</span></button>
-            </div>
-          </div>
-          <!-- Media / Segment filter, ported from the ideal board. Its own row
-               below .c-dash-head, matching the tracker's order: period control
-               above, filters between the header and the grid. -->
-          <div class="c-dash-filters">
-            <div class="c-filterbar" role="radiogroup" aria-labelledby="dashMediaL" id="dashMedia">
-              <span class="c-dash-flabel" id="dashMediaL">Media</span>
-<button class="c-fpill" type="button" role="radio" aria-checked="true" tabindex="0" data-media="all">All</button>
-<button class="c-fpill" type="button" role="radio" aria-checked="false" tabindex="-1" data-media="tv">TV</button>
-<button class="c-fpill" type="button" role="radio" aria-checked="false" tabindex="-1" data-media="aa">AA</button>
-<button class="c-fpill" type="button" role="radio" aria-checked="false" tabindex="-1" data-media="radio">Radio</button>
-<button class="c-fpill" type="button" role="radio" aria-checked="false" tabindex="-1" data-media="digital">Digital</button>
-            </div>
-            <div class="c-filterbar" role="radiogroup" aria-labelledby="dashSegmentL" id="dashSegment">
-              <span class="c-dash-flabel" id="dashSegmentL">Segment</span>
-<button class="c-fpill" type="button" role="radio" aria-checked="true" tabindex="0" data-segment="all">All</button>
-<button class="c-fpill" type="button" role="radio" aria-checked="false" tabindex="-1" data-segment="key">Key &amp; Agency</button>
-<button class="c-fpill" type="button" role="radio" aria-checked="false" tabindex="-1" data-segment="govt">Govt / SME / Regional</button>
             </div>
           </div>
           <div class="c-dash-grid">

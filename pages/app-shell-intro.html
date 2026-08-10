@@ -258,6 +258,50 @@
      y=60 underneath a bar occupying 48–101. */
   .c-dash{margin-top:0; scroll-margin-top:calc(var(--spacing-8) + 45px + var(--spacing-12));}
   .c-dash-head{display:flex; align-items:center; justify-content:flex-end; gap:var(--spacing-16); flex-wrap:wrap; padding:var(--spacing-16) 0 var(--spacing-24);}
+
+  /* ── Media / Segment filter bar, ported from the ideal board
+     (leadership-dashboard-tracker.html: .filters / .fg / .chip). Two
+     single-select groups over the data's own dimensions.
+     Restyled, not copied: the tracker draws its chips from its own --art-*
+     palette, which does not exist here. The DS has no selectable filter pill
+     — .c-filter-pill is the *applied-filter* token (24px, neutral-2, with a
+     remove ×), so using it here would say "already applied, click to remove"
+     rather than "choose one". Hence a page-local pill, but sized to the DS's
+     own selectable filter control (.c-filter-trigger, 32px) so it sits on
+     the same scale as the rest of the kit. */
+  .c-dash-filters{display:flex; align-items:center; gap:var(--spacing-24); flex-wrap:wrap; padding:0 0 var(--spacing-24);}
+  /* The visible label IS the group's accessible name (aria-labelledby), not a
+     duplicate of an aria-label — two copies drift apart the first time the
+     copy changes. */
+  .c-dash-flabel{font-size:var(--text-caption-size); font-weight:800; letter-spacing:var(--tracking-eyebrow);
+    text-transform:uppercase; color:var(--color-neutral-5); margin-right:var(--spacing-4);}
+  .c-fpill{display:inline-flex; align-items:center; height:32px; padding:0 var(--spacing-16);
+    border:1px solid var(--color-neutral-3); border-radius:var(--radius-pill);
+    background:var(--color-neutral-1); color:var(--color-neutral-5);
+    font-family:inherit; font-size:var(--text-body2-size); font-weight:700; white-space:nowrap; cursor:pointer;
+    transition:background var(--duration-fast) var(--ease-standard), border-color var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard);}
+  .c-fpill:hover{border-color:var(--color-neutral-5); color:var(--color-neutral-9);}
+  .c-fpill[aria-checked="true"]{background:var(--color-obsidian); border-color:var(--color-obsidian); color:var(--color-neutral-1);}
+  .c-fpill:focus-visible{outline:2px solid var(--color-obsidian); outline-offset:2px;}
+  /* 32px matches the DS and this page's other filter controls (the horizon
+     seg-toggle is 26px), but it is under the 44px touch floor. Rather than
+     break scale everywhere for a control that is mostly used with a mouse,
+     the floor is met where it actually applies. */
+  @media (pointer:coarse){ .c-fpill{height:44px; padding:0 var(--spacing-20);} }
+  @media (max-width:900px){ .c-dash-filters{gap:var(--spacing-12);} }
+
+  /* The one board whose data genuinely carries media lines. dFill plots TV /
+     Addressable / Radio / Digital, so it can answer the Media filter without
+     anyone inventing a number; the other eight have no media or segment
+     dimension in them and deliberately do not respond. The hook is a
+     data-media attribute emitted per row by charts.jsx — an explicit
+     contract, rather than dimming the Nth <g> and hoping the order holds. */
+  #dFill g[data-media]{transition:opacity var(--duration-base) var(--ease-standard);}
+  #dFill g[data-media].is-dim{opacity:.18;}
+  @media (prefers-reduced-motion:reduce){
+    .c-fpill{transition:none;}
+    #dFill g[data-media]{transition:none;}
+  }
   /* ---- Scroll-in reveal, one element at a time (.c-rise).
      WHY this replaced the old section-level gate: #dashboard is many viewports
      tall, so a single .is-revealed at first pixel meant every widget below the
@@ -2378,6 +2422,25 @@
               <button class="seg-toggle-btn active" type="button" role="radio" aria-checked="true"><span class="seg-toggle-label">MTD</span></button>
               <button class="seg-toggle-btn" type="button" role="radio" aria-checked="false"><span class="seg-toggle-label">QTD</span></button>
               <button class="seg-toggle-btn" type="button" role="radio" aria-checked="false"><span class="seg-toggle-label">YTD</span></button>
+            </div>
+          </div>
+          <!-- Media / Segment filter, ported from the ideal board. Its own row
+               below .c-dash-head, matching the tracker's order: period control
+               above, filters between the header and the grid. -->
+          <div class="c-dash-filters">
+            <div class="c-filterbar" role="radiogroup" aria-labelledby="dashMediaL" id="dashMedia">
+              <span class="c-dash-flabel" id="dashMediaL">Media</span>
+<button class="c-fpill" type="button" role="radio" aria-checked="true" tabindex="0" data-media="all">All</button>
+<button class="c-fpill" type="button" role="radio" aria-checked="false" tabindex="-1" data-media="tv">TV</button>
+<button class="c-fpill" type="button" role="radio" aria-checked="false" tabindex="-1" data-media="aa">AA</button>
+<button class="c-fpill" type="button" role="radio" aria-checked="false" tabindex="-1" data-media="radio">Radio</button>
+<button class="c-fpill" type="button" role="radio" aria-checked="false" tabindex="-1" data-media="digital">Digital</button>
+            </div>
+            <div class="c-filterbar" role="radiogroup" aria-labelledby="dashSegmentL" id="dashSegment">
+              <span class="c-dash-flabel" id="dashSegmentL">Segment</span>
+<button class="c-fpill" type="button" role="radio" aria-checked="true" tabindex="0" data-segment="all">All</button>
+<button class="c-fpill" type="button" role="radio" aria-checked="false" tabindex="-1" data-segment="key">Key &amp; Agency</button>
+<button class="c-fpill" type="button" role="radio" aria-checked="false" tabindex="-1" data-segment="govt">Govt / SME / Regional</button>
             </div>
           </div>
           <div class="c-dash-grid">
@@ -5308,6 +5371,66 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
      by esbuild into a committed file — the page stays build-free at deploy
      time and pulls no chart code from a CDN at runtime. -->
 <script src="assets/charts.bundle.js"></script>
+
+<script>
+// ── Media / Segment filter (Performance Space). Two single-select groups,
+// ported from the ideal board. Radiogroup semantics: click selects, arrows move
+// AND select, Home/End jump to the ends, and tabindex roves so the group is one
+// tab stop rather than five.
+//
+// What it actually drives: only #dFill, whose data carries real media lines
+// (TV / Addressable / Radio / Digital). Choosing a medium dims the other rows.
+// The remaining eight boards have no media or segment dimension in their data,
+// so they hold still on purpose — re-slicing them would mean inventing figures
+// and presenting them as measurements. Segment is wired as a control but has
+// nothing to drive yet for the same reason.
+(function () {
+  const fill = document.getElementById('dFill');
+
+  function applyMedia(v) {
+    if (!fill) return;
+    // Queried per call, not cached: the charts mount asynchronously from the
+    // bundle, so a list taken at init would be empty on the first change.
+    fill.querySelectorAll('g[data-media]').forEach((g) => {
+      g.classList.toggle('is-dim', v !== 'all' && g.dataset.media !== v);
+    });
+  }
+
+  function wire(groupId, key, onPick) {
+    const group = document.getElementById(groupId);
+    if (!group) return;
+    const pills = Array.from(group.querySelectorAll('.c-fpill'));
+
+    function select(pill, focus) {
+      pills.forEach((p) => {
+        const on = p === pill;
+        p.setAttribute('aria-checked', String(on));
+        p.tabIndex = on ? 0 : -1;
+      });
+      if (focus) pill.focus();
+      onPick(pill.dataset[key]);
+    }
+
+    group.addEventListener('click', (e) => {
+      const pill = e.target.closest('.c-fpill');
+      if (pill) select(pill);
+    });
+    group.addEventListener('keydown', (e) => {
+      const i = pills.indexOf(document.activeElement);
+      if (i < 0) return;
+      let next = null;
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') next = pills[(i + 1) % pills.length];
+      else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') next = pills[(i - 1 + pills.length) % pills.length];
+      else if (e.key === 'Home') next = pills[0];
+      else if (e.key === 'End') next = pills[pills.length - 1];
+      if (next) { e.preventDefault(); select(next, true); }
+    });
+  }
+
+  wire('dashMedia', 'media', applyMedia);
+  wire('dashSegment', 'segment', () => {});
+})();
+</script>
 
 </body>
 </html>

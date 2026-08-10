@@ -216,11 +216,17 @@ function Quad({ id }) {
 /* ── 5 · Sold vs sellable ────────────────────────────────────────────────── */
 function Fill({ id }) {
   const w = 480, h = 324, L = 14, W = 440, top = 30, rh = 64, max = 88;
+  /* k is the Media filter's key, not decoration: this is the only board whose
+     data has media lines at all, so it is the only one that can answer that
+     filter without a number being invented. 'aa' is the filter's spelling of
+     Addressable. The page dims the non-matching rows off this attribute — an
+     explicit contract, rather than page CSS counting <g> children and breaking
+     the next time a row is reordered. */
   const d = [
-    { l: 'TV', cap: 88.0, sold: 79.4, fill: 90, att: 97 },
-    { l: 'Addressable', cap: 27.0, sold: 26.1, fill: 97, att: 109 },
-    { l: 'Radio', cap: 34.0, sold: 27.2, fill: 80, att: 88 },
-    { l: 'Digital', cap: 25.0, sold: 15.5, fill: 62, att: 75 },
+    { k: 'tv', l: 'TV', cap: 88.0, sold: 79.4, fill: 90, att: 97 },
+    { k: 'aa', l: 'Addressable', cap: 27.0, sold: 26.1, fill: 97, att: 109 },
+    { k: 'radio', l: 'Radio', cap: 34.0, sold: 27.2, fill: 80, att: 88 },
+    { k: 'digital', l: 'Digital', cap: 25.0, sold: 15.5, fill: 62, att: 75 },
   ];
   const y2 = top + rh * 4 - 10;
   return (
@@ -230,7 +236,7 @@ function Fill({ id }) {
       {d.map((r, i) => {
         const yy = top + rh * i, cw = (r.cap / max) * W, sw = (r.sold / max) * W;
         return (
-          <Group key={r.l}>
+          <Group key={r.l} data-media={r.k}>
             <Bar x={L} y={yy} w={cw} fill={C.TRACK} opacity={0.12} />
             <Bar x={L} y={yy} w={sw} fill={g(id, 'sweep')} />
             <text x={L + 14} y={yy + BAR.H / 2 + 4} {...labelProps({ fill: '#fff', weight: 800 })}>{r.l}</text>

@@ -54,7 +54,18 @@
      clips without becoming a scroll container, so overflow-y stays
      visible and the sticky space tabs keep resolving against
      .c-shell-content (their real scrollport) rather than against this. */
-  .c-shell-main{position:relative; overflow-x:clip;}
+  /* --fan-bleed is how far the hero row may paint past the content column on
+     the left, so a card slides under the nav rail instead of being cut off at
+     a hard edge. It does NOT have to equal the rail's width: the slider pairs
+     an equal negative margin and padding, so the two cancel and the first card
+     still starts at the content column whatever the rail is doing. It only has
+     to overshoot the rail, which is why the collapse/expand transition needs no
+     involvement here.
+     overflow-clip-margin, not overflow-x:visible: it allows the paint without
+     making this a scroll container, so the document scrollbar that the clip was
+     added to kill cannot come back. */
+  :root{--fan-bleed:420px;}
+  .c-shell-main{position:relative; overflow-x:clip; overflow-clip-margin:var(--fan-bleed);}
 
   /* Top-center canvas date — "[Day], [Date]", e.g. "Wednesday, August
      5". Absolutely positioned against the Content region (.c-shell-main,
@@ -177,6 +188,11 @@
   .c-canvas-askbox.is-collapsed .floating-ask-glow-inner{border-radius:var(--radius-pill);}
   .c-canvas-askbox.is-collapsed .floating-ask{grid-template-rows:auto 0fr;}
   .c-canvas-askbox.is-collapsed .floating-ask-more{padding-top:0; opacity:0;}
+  /* overflow-x must be stated. This is the scrollport (overflow-y:auto), and a
+     `visible` cross axis computes to `auto` — which would turn the fan's
+     negative margin into real horizontal scroll and put a bar across the page.
+     clip + the same allowance lets the row paint out without scrolling. */
+  .c-shell-content{overflow-x:clip; overflow-clip-margin:var(--fan-bleed);}
   .c-shell-content{padding-bottom:184px;} /* box height (~138) + its 24px bottom offset + breathing room — the box never moves, so this is what keeps the last widget scrollable clear of it */
 
   /* Canvas hero — greeting + card row + dashboard hand-off line, held to
@@ -1240,7 +1256,8 @@
      since the slider clips at the content edge a half-card reads as a
      rendering fault rather than as something you can scroll. mandatory means
      every resting position has a card flush to the left edge. */
-  .c-card-slider{overflow-x:auto; overflow-anchor:none; scroll-snap-type:x mandatory; cursor:grab; outline:none; -webkit-overflow-scrolling:touch; scrollbar-width:none; margin-right:calc(-1 * var(--page-gutter));}
+  .c-card-slider{overflow-x:auto; overflow-anchor:none; scroll-snap-type:x mandatory; cursor:grab; outline:none; -webkit-overflow-scrolling:touch; scrollbar-width:none; margin-right:calc(-1 * var(--page-gutter));
+    margin-left:calc(-1 * var(--fan-bleed)); padding-left:var(--fan-bleed); scroll-padding-left:var(--fan-bleed);}
   .c-card-slider::-webkit-scrollbar{display:none;}
   .c-card-slider.is-dragging{cursor:grabbing; scroll-snap-type:none; user-select:none;}
   .c-card-slider-track{display:flex; gap:0; width:max-content; padding:16px 64px 96px; perspective:900px;}

@@ -1236,7 +1236,11 @@
      64px is also what the leftmost card's -12deg rotation needs: its
      corner extends ~31px past its layout box, and the track's own
      overflow box would otherwise clip it. */
-  .c-card-slider{overflow-x:auto; overflow-anchor:none; scroll-snap-type:x proximity; cursor:grab; outline:none; -webkit-overflow-scrolling:touch; scrollbar-width:none; margin-right:calc(-1 * var(--page-gutter));}
+  /* mandatory, not proximity: with proximity the row can rest mid-card, and
+     since the slider clips at the content edge a half-card reads as a
+     rendering fault rather than as something you can scroll. mandatory means
+     every resting position has a card flush to the left edge. */
+  .c-card-slider{overflow-x:auto; overflow-anchor:none; scroll-snap-type:x mandatory; cursor:grab; outline:none; -webkit-overflow-scrolling:touch; scrollbar-width:none; margin-right:calc(-1 * var(--page-gutter));}
   .c-card-slider::-webkit-scrollbar{display:none;}
   .c-card-slider.is-dragging{cursor:grabbing; scroll-snap-type:none; user-select:none;}
   .c-card-slider-track{display:flex; gap:0; width:max-content; padding:16px 64px 96px; perspective:900px;}
@@ -4685,6 +4689,10 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
     // about to be moved, so insertBefore(card, thatSibling) would throw on the
     // way back. Re-inserting ascending by index rebuilds the order exactly.
     overlay._homes = cards().map((c) => ({ card: c, idx: Array.prototype.indexOf.call(track.children, c) }));
+    /* Emptying the track collapses its scrollWidth, which forces the slider's
+       scrollLeft to 0; refilling it does not put that back. Without this the fan
+       returns scrolled to a different card than the one the reader left. */
+    overlay._scrollLeft = slider ? slider.scrollLeft : 0;
     flip(() => overlay._homes.forEach(({ card }) => grid.appendChild(card)),
          () => ({ y: 0, rotate: 0 }), (i) => i, (c) => homePose(c).rotate, 'in');
     // Same frame as the reparent would fight the backdrop's own transition,
@@ -4709,6 +4717,9 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
     const n = goingHome.length;
     flip(() => goingHome.forEach(({ card, idx }) => track.insertBefore(card, track.children[idx] || null)),
          (c) => homePose(c), (i) => n - 1 - i, () => 0, 'out');
+    // Restored after the reparent, so the track has its width back and the
+    // assignment is not clamped to 0.
+    if (slider && overlay._scrollLeft != null) slider.scrollLeft = overlay._scrollLeft;
     /* The off-fan six return after their fade. Inserting ascending by index
        still rebuilds the exact order: the travellers already hold 0-5, so these
        land at 6-11 behind them. */

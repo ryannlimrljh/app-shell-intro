@@ -1405,6 +1405,40 @@
      are scoped under .c-modal-sales to avoid colliding with future
      modal content. All colors/sizes are DS tokens, per the source
      file's own token discipline. */
+  /* ---- Card brief. One panel per hero card, shown by .is-active from
+     openCardModal — the same authored-markup-plus-a-class arrangement the
+     Sales panel uses, so there is no runtime templating and the copy stays
+     editable in the markup.
+     No Approve/Defer here on purpose: those live on the decision cards and are
+     wired there. A second unwired copy would be a control that claims a
+     capability it does not have. ---- */
+  .c-cbrief{display:none; flex-direction:column; gap:var(--spacing-12); height:100%;
+    padding:var(--spacing-32); overflow-y:auto;}
+  .c-cbrief.is-active{display:flex;}
+  .c-cbrief-eyebrow{font-size:var(--text-caption-size); font-weight:800; letter-spacing:var(--tracking-eyebrow);
+    text-transform:uppercase; color:var(--color-neutral-5);}
+  .c-cbrief h3{margin:0; font-size:var(--text-h4-size); font-weight:800; line-height:1.25; color:var(--color-neutral-9);}
+  .c-cbrief-verdict{margin:var(--spacing-8) 0 0; font-size:var(--text-h1-size); font-weight:900;
+    line-height:1; letter-spacing:-0.02em; font-variant-numeric:tabular-nums; color:var(--color-neutral-9);}
+  .c-cbrief-vsub{margin:0; font-size:var(--text-body2-size); color:var(--color-neutral-5);}
+  .c-cbrief-why{display:flex; flex-direction:column; gap:var(--spacing-4);
+    margin-top:var(--spacing-8); padding:var(--spacing-16); border-radius:var(--radius-md);
+    background:var(--color-neutral-2);}
+  .c-cbrief-k{font-size:var(--text-caption-size); font-weight:700; letter-spacing:var(--tracking-eyebrow);
+    text-transform:uppercase; color:var(--color-neutral-5);}
+  .c-cbrief-why p{margin:0; font-size:var(--text-body2-size); line-height:1.6; color:var(--color-neutral-9);}
+  .c-cbrief-rows{display:flex; flex-direction:column;}
+  .c-cbrief-row{display:flex; align-items:baseline; justify-content:space-between; gap:var(--spacing-12);
+    padding:var(--spacing-8) 0; border-top:1px solid var(--color-neutral-2); font-size:var(--text-body2-size);}
+  .c-cbrief-row:first-child{border-top:none;}
+  .c-cbrief-row span:first-child{color:var(--color-neutral-5);}
+  .c-cbrief-row span:last-child{font-weight:800; font-variant-numeric:tabular-nums; color:var(--color-neutral-9);}
+  /* margin-top:auto pins the actions to the bottom however short the brief is,
+     the same rule .c-hcard-cta uses on the cards themselves. */
+  .c-cbrief-acts{display:flex; flex-wrap:wrap; gap:var(--spacing-8); margin-top:auto; padding-top:var(--spacing-8);}
+  .c-cbrief-act i{font-size:var(--icon-sm);}
+  .c-cbrief-src{margin:0; font-size:var(--text-caption-size); color:var(--color-neutral-5);}
+
   .c-modal-sales{display:none; flex-direction:column; gap:var(--spacing-12); height:100%; padding:var(--spacing-32); overflow-y:auto;}
   .c-card-modal.is-pace .c-modal-sales{display:flex;}
   .c-modal-sales .panel-head{display:flex; align-items:center; justify-content:space-between; gap:var(--spacing-12); margin-bottom:var(--spacing-8);}
@@ -1926,7 +1960,7 @@
                  membership, and the rep cards below are in the same track but off-fan
                  (see .c-card-slide.is-off-fan). Children 1-6 on purpose — the fan pose is
                  nth-child-scoped and only six poses exist. ── -->
-            <div class="c-card c-card-slide" data-role="leadership">
+            <div class="c-card c-card-slide" data-role="leadership" data-modal="plan">
               <span class="c-hcard-ribbon" role="img" aria-label="Focus 1 of 3"><span class="c-hcard-ribbon-band" aria-hidden="true">Focus 1</span></span>
               <span class="c-hcard-label">Plan</span>
               <h4>RM 17.1M short of plan</h4>
@@ -1936,7 +1970,7 @@
               <span class="c-hcard-rec">Only best case touches the line. 73 deals are still open.</span>
               <span class="c-hcard-cta">Name the eight deals <i class="ph ph-arrow-right"></i></span>
             </div>
-            <div class="c-card c-card-slide" data-role="leadership">
+            <div class="c-card c-card-slide" data-role="leadership" data-modal="conc">
               <span class="c-hcard-ribbon" role="img" aria-label="Focus 2 of 3"><span class="c-hcard-ribbon-band" aria-hidden="true">Focus 2</span></span>
               <span class="c-hcard-label">Concentration</span>
               <h4>Top five carry 38% of revenue</h4>
@@ -1948,7 +1982,7 @@
               <span class="c-hcard-rec">No single account can sink the year. Losing two breaches plan.</span>
               <span class="c-hcard-cta">Name an executive sponsor <i class="ph ph-arrow-right"></i></span>
             </div>
-            <div class="c-card c-card-slide" data-role="leadership">
+            <div class="c-card c-card-slide" data-role="leadership" data-modal="digital">
               <span class="c-hcard-ribbon" role="img" aria-label="Focus 3 of 3"><span class="c-hcard-ribbon-band" aria-hidden="true">Focus 3</span></span>
               <span class="c-hcard-label">Inventory</span>
               <h4>Digital hit 75% of target</h4>
@@ -1958,7 +1992,7 @@
               <span class="c-hcard-rec">The stock was there, so it is demand, not supply. RM 5.1M at stake.</span>
               <span class="c-hcard-cta">Fund Digital demand <i class="ph ph-arrow-right"></i></span>
             </div>
-            <div class="c-card c-card-slide c-stat" data-role="leadership">
+            <div class="c-card c-card-slide c-stat" data-role="leadership" data-modal="share">
               <span class="c-stat-label">Share of market</span>
               <div class="c-stat-value hero">13.8%</div>
               <p>Down 0.4pt YTD, in a market growing 8.1%</p>
@@ -1969,7 +2003,7 @@
               <span class="c-hcard-rec">Roughly RM 4.3M of revenue that existed and went elsewhere.</span>
               <span class="c-hcard-cta">Take it to the board <i class="ph ph-arrow-right"></i></span>
             </div>
-            <div class="c-card c-card-slide" data-role="leadership">
+            <div class="c-card c-card-slide" data-role="leadership" data-modal="retention">
               <span class="c-hcard-label">Retention</span>
               <h4>RM 8.6M walked out</h4>
               <p>Against RM 12.7M won from new advertisers</p>
@@ -1981,7 +2015,7 @@
               <span class="c-hcard-rec">Retention, not acquisition, is the exposure.</span>
               <span class="c-hcard-cta">See why they left <i class="ph ph-arrow-right"></i></span>
             </div>
-            <div class="c-card c-card-slide c-hcard-ai" data-role="leadership">
+            <div class="c-card c-card-slide c-hcard-ai" data-role="leadership" data-modal="date">
               <span class="c-hcard-label">&#129302; Needs a date</span>
               <h4>Petronas reset undiarised 7 days</h4>
               <div class="c-hcard-tags">
@@ -1991,7 +2025,7 @@
               </div>
               <button class="c-hcard-cta-btn" type="button">Diarise the reset</button>
             </div>
-            <div class="c-card c-card-slide" data-role="sales">
+            <div class="c-card c-card-slide" data-role="sales" data-modal="pipeline">
               <span class="c-hcard-label">Pipeline</span>
               <h4>3 deals need a nudge</h4>
               <div class="c-hcard-list">
@@ -2002,7 +2036,7 @@
               <span class="c-hcard-rec">Start with MediaCorp. It's been quiet longest (12d).</span>
               <span class="c-hcard-cta">Nudge MediaCorp <i class="ph ph-arrow-right"></i></span>
             </div>
-            <div class="c-card c-card-slide c-hcard-risk" data-role="sales">
+            <div class="c-card c-card-slide c-hcard-risk" data-role="sales" data-modal="risk">
               <span class="c-hcard-label"><i class="ph-fill ph-warning"></i> At risk</span>
               <h4>Sunway Retail</h4>
               <p>Engagement down 30% · renews in 21 days</p>
@@ -2024,7 +2058,7 @@
               <span class="c-hcard-rec">Two deals close this week. Land them and October starts ahead too.</span>
               <span class="c-hcard-cta">See closing deals <i class="ph ph-arrow-right"></i></span>
             </div>
-            <div class="c-card c-card-slide" data-role="sales">
+            <div class="c-card c-card-slide" data-role="sales" data-modal="upsell">
               <span class="c-hcard-label">Upsell</span>
               <div class="c-hcard-thumb">
                 <i class="ph-fill ph-play-circle"></i>
@@ -2035,7 +2069,7 @@
               <span class="c-hcard-rec">3 of your clients fit the same influencer playbook.</span>
               <span class="c-hcard-cta">Clone this pitch <i class="ph ph-arrow-right"></i></span>
             </div>
-            <div class="c-card c-card-slide c-stat c-hcard-team" data-role="sales">
+            <div class="c-card c-card-slide c-stat c-hcard-team" data-role="sales" data-modal="team">
               <span class="c-stat-label">SEA team</span>
               <span class="c-hcard-trophy" aria-hidden="true">🏆</span>
               <div class="c-stat-value hero">#2</div>
@@ -2051,7 +2085,7 @@
               <span class="c-hcard-rec">Closing PetronasBiz (RM150K) takes #1.</span>
               <span class="c-hcard-cta">Draft outreach <i class="ph ph-arrow-right"></i></span>
             </div>
-            <div class="c-card c-card-slide c-hcard-ai" data-role="sales">
+            <div class="c-card c-card-slide c-hcard-ai" data-role="sales" data-modal="nba">
               <span class="c-hcard-label">🤖 Next best action</span>
               <h4>Call PetronasBiz</h4>
               <div class="c-hcard-tags">
@@ -2930,6 +2964,223 @@
         <span class="c-hcard-rec" id="revenueRec">6 days into the month, you've booked RM 2.40M, RM 0.30M (14.3%) clear of the RM 2.10M that flat pace would have banked by now, on a RM 0.40M-a-day average. Hold that through the 25 days left and the month closes near RM 12.40M, beating the RM 10.85M run rate by RM 1.55M.</span>
         <span class="c-hcard-cta" id="revenueCta">Break down this month <i class="ph ph-arrow-right"></i></span>
       </div>
+      <div class="c-cbrief" data-modal="plan" role="document">
+        <span class="c-cbrief-eyebrow">Plan</span>
+        <h3>Will we hit RM 240.0M?</h3>
+        <p class="c-cbrief-verdict">RM 222.9M</p>
+        <p class="c-cbrief-vsub">weighted forecast &middot; RM 17.1M short</p>
+        <div class="c-cbrief-why">
+          <span class="c-cbrief-k">Because</span>
+          <p>RM 111.2M is open across 73 deals, and RM 51.2M of that sits in Negotiation at 50% on an average age of 41 days. The shortfall is conversion, not a shortage of deals.</p>
+        </div>
+        <div class="c-cbrief-rows">
+          <div class="c-cbrief-row"><span>Commit case</span><span>RM 210.2M</span></div>
+          <div class="c-cbrief-row"><span>Weighted</span><span>RM 222.9M</span></div>
+          <div class="c-cbrief-row"><span>Best case</span><span>RM 239.4M</span></div>
+          <div class="c-cbrief-row"><span>Plan</span><span>RM 240.0M</span></div>
+        </div>
+        <div class="c-cbrief-acts">
+          <button class="c-btn c-btn-md c-btn-primary c-cbrief-act" type="button" data-decision="dec-a1">Name the eight deals</button>
+          <button class="c-btn c-btn-md c-btn-secondary c-cbrief-act" type="button" data-panel="dFan"><i class="ph ph-chart-line" aria-hidden="true"></i>See the evidence</button>
+        </div>
+        <p class="c-cbrief-src">Evidence: Cumulative revenue against plan</p>
+      </div>
+      <div class="c-cbrief" data-modal="conc" role="document">
+        <span class="c-cbrief-eyebrow">Concentration</span>
+        <h3>How much rests on how few</h3>
+        <p class="c-cbrief-verdict">38%</p>
+        <p class="c-cbrief-vsub">of revenue sits with five advertisers</p>
+        <div class="c-cbrief-why">
+          <span class="c-cbrief-k">Because</span>
+          <p>The largest advertiser is 9.2%, so no single account can sink the year. Two of the top five leaving would breach plan on its own.</p>
+        </div>
+        <div class="c-cbrief-rows">
+          <div class="c-cbrief-row"><span>Largest advertiser</span><span>9.2%</span></div>
+          <div class="c-cbrief-row"><span>Top five combined</span><span>38%</span></div>
+          <div class="c-cbrief-row"><span>Revenue at stake</span><span>RM 56.3M</span></div>
+          <div class="c-cbrief-row"><span>Gross profit</span><span>RM 17.7M</span></div>
+        </div>
+        <div class="c-cbrief-acts">
+          <button class="c-btn c-btn-md c-btn-primary c-cbrief-act" type="button" data-decision="dec-a2">Name an executive sponsor</button>
+          <button class="c-btn c-btn-md c-btn-secondary c-cbrief-act" type="button" data-panel="dConc"><i class="ph ph-chart-line" aria-hidden="true"></i>See the evidence</button>
+        </div>
+        <p class="c-cbrief-src">Evidence: Cumulative share by advertiser rank</p>
+      </div>
+      <div class="c-cbrief" data-modal="digital" role="document">
+        <span class="c-cbrief-eyebrow">Inventory</span>
+        <h3>Digital sold 62% and hit 75% of target</h3>
+        <p class="c-cbrief-verdict">RM 5.1M</p>
+        <p class="c-cbrief-vsub">at stake in inventory that went unsold</p>
+        <div class="c-cbrief-why">
+          <span class="c-cbrief-k">Because</span>
+          <p>The stock was there and did not move, so the constraint is demand, not supply. Addressable is the mirror image: 97% sold out, and its 109% of target is capped by what we own.</p>
+        </div>
+        <div class="c-cbrief-rows">
+          <div class="c-cbrief-row"><span>TV</span><span>97% of target</span></div>
+          <div class="c-cbrief-row"><span>Addressable</span><span>109% of target</span></div>
+          <div class="c-cbrief-row"><span>Radio</span><span>88% of target</span></div>
+          <div class="c-cbrief-row"><span>Digital</span><span>75% of target</span></div>
+        </div>
+        <div class="c-cbrief-acts">
+          <button class="c-btn c-btn-md c-btn-primary c-cbrief-act" type="button" data-decision="dec-a3">Fund Digital demand</button>
+          <button class="c-btn c-btn-md c-btn-secondary c-cbrief-act" type="button" data-panel="dFill"><i class="ph ph-chart-line" aria-hidden="true"></i>See the evidence</button>
+        </div>
+        <p class="c-cbrief-src">Evidence: Sold against what we had to sell</p>
+      </div>
+      <div class="c-cbrief" data-modal="share" role="document">
+        <span class="c-cbrief-eyebrow">Market</span>
+        <h3>Share fell while revenue grew</h3>
+        <p class="c-cbrief-verdict">13.8%</p>
+        <p class="c-cbrief-vsub">down 0.4pt YTD, in a market growing 8.1%</p>
+        <div class="c-cbrief-why">
+          <span class="c-cbrief-k">Because</span>
+          <p>We grew 6.4% against a market growing 8.1%. Every other board here reads this as a good year; only this one reads it as a loss.</p>
+        </div>
+        <div class="c-cbrief-rows">
+          <div class="c-cbrief-row"><span>Our growth</span><span>6.4%</span></div>
+          <div class="c-cbrief-row"><span>Market growth</span><span>8.1%</span></div>
+          <div class="c-cbrief-row"><span>Share</span><span>14.2% to 13.8%</span></div>
+          <div class="c-cbrief-row"><span>Revenue gone elsewhere</span><span>RM 4.3M</span></div>
+        </div>
+        <div class="c-cbrief-acts">
+          <button class="c-btn c-btn-md c-btn-primary c-cbrief-act" type="button" data-decision="dec-a7">Take it to the board</button>
+          <button class="c-btn c-btn-md c-btn-secondary c-cbrief-act" type="button" data-panel="dShare"><i class="ph ph-chart-line" aria-hidden="true"></i>See the evidence</button>
+        </div>
+        <p class="c-cbrief-src">Evidence: Indexed growth against the market</p>
+      </div>
+      <div class="c-cbrief" data-modal="retention" role="document">
+        <span class="c-cbrief-eyebrow">Retention</span>
+        <h3>New business is carrying the year</h3>
+        <p class="c-cbrief-verdict">+RM 4.1M</p>
+        <p class="c-cbrief-vsub">net new business, on RM 12.7M won</p>
+        <div class="c-cbrief-why">
+          <span class="c-cbrief-k">Because</span>
+          <p>Of RM 8.9M growth, RM 12.7M came from new advertisers and RM 8.6M walked out, leaving RM 4.8M from accounts we already had. Retention, not acquisition, is the exposure.</p>
+        </div>
+        <div class="c-cbrief-rows">
+          <div class="c-cbrief-row"><span>New advertisers</span><span>+RM 12.7M</span></div>
+          <div class="c-cbrief-row"><span>Lapsed</span><span>&minus;RM 8.6M</span></div>
+          <div class="c-cbrief-row"><span>Existing accounts</span><span>+RM 4.8M</span></div>
+          <div class="c-cbrief-row"><span>Net new business</span><span>+RM 4.1M</span></div>
+        </div>
+        <div class="c-cbrief-acts">
+          <button class="c-btn c-btn-md c-btn-secondary c-cbrief-act" type="button" data-panel="dBridge"><i class="ph ph-chart-line" aria-hidden="true"></i>See the evidence</button>
+        </div>
+        <p class="c-cbrief-src">Evidence: Where the growth came from</p>
+      </div>
+      <div class="c-cbrief" data-modal="date" role="document">
+        <span class="c-cbrief-eyebrow">Decisions</span>
+        <h3>The Petronas reset is still not in the diary</h3>
+        <p class="c-cbrief-verdict">7 days</p>
+        <p class="c-cbrief-vsub">undiarised, with the budget window opening next week</p>
+        <div class="c-cbrief-why">
+          <span class="c-cbrief-k">Because</span>
+          <p>RM 2.1M of the lapsed revenue is a budget-cycle gap, which is a calendar problem rather than a discount problem. It stays winnable only while the window is open.</p>
+        </div>
+        <div class="c-cbrief-rows">
+          <div class="c-cbrief-row"><span>Decisions due</span><span>3</span></div>
+          <div class="c-cbrief-row"><span>Stalled</span><span>1</span></div>
+          <div class="c-cbrief-row"><span>Winnable on timing</span><span>RM 2.1M</span></div>
+          <div class="c-cbrief-row"><span>Cash at risk</span><span>RM 12.4M</span></div>
+        </div>
+        <div class="c-cbrief-acts">
+          <button class="c-btn c-btn-md c-btn-primary c-cbrief-act" type="button" data-decision="dec-a6">Diarise the reset</button>
+          <button class="c-btn c-btn-md c-btn-secondary c-cbrief-act" type="button" data-panel="dChurn"><i class="ph ph-chart-line" aria-hidden="true"></i>See the evidence</button>
+        </div>
+        <p class="c-cbrief-src">Evidence: Why RM 4.4M walked</p>
+      </div>
+      <div class="c-cbrief" data-modal="pipeline" role="document">
+        <span class="c-cbrief-eyebrow">Pipeline</span>
+        <h3>Three deals have gone quiet</h3>
+        <p class="c-cbrief-verdict">3</p>
+        <p class="c-cbrief-vsub">deals stalled five days or longer</p>
+        <div class="c-cbrief-why">
+          <span class="c-cbrief-k">Because</span>
+          <p>MediaCorp has been quiet longest at 12 days. Negotiation-stage deals age 41 days on average, so silence this early is the cheapest thing on the board to fix.</p>
+        </div>
+        <div class="c-cbrief-rows">
+          <div class="c-cbrief-row"><span>MediaCorp</span><span>12d stalled</span></div>
+          <div class="c-cbrief-row"><span>Genting F&amp;B</span><span>7d stalled</span></div>
+          <div class="c-cbrief-row"><span>AirAsia Retail</span><span>5d stalled</span></div>
+        </div>
+        <div class="c-cbrief-acts">
+          <button class="c-btn c-btn-md c-btn-secondary c-cbrief-act" type="button" data-panel="dFunnel"><i class="ph ph-chart-line" aria-hidden="true"></i>See the evidence</button>
+        </div>
+        <p class="c-cbrief-src">Evidence: Pipeline by stage</p>
+      </div>
+      <div class="c-cbrief" data-modal="risk" role="document">
+        <span class="c-cbrief-eyebrow">At risk</span>
+        <h3>Sunway Retail renews in 21 days</h3>
+        <p class="c-cbrief-verdict">&minus;30%</p>
+        <p class="c-cbrief-vsub">engagement, going into a renewal window</p>
+        <div class="c-cbrief-why">
+          <span class="c-cbrief-k">Because</span>
+          <p>A save call this week beats a discount later. The renewal date is the only part of this with a deadline attached.</p>
+        </div>
+        <div class="c-cbrief-rows">
+          <div class="c-cbrief-row"><span>Renews in</span><span>21 days</span></div>
+          <div class="c-cbrief-row"><span>Engagement</span><span>&minus;30%</span></div>
+        </div>
+        <div class="c-cbrief-acts">
+          <button class="c-btn c-btn-md c-btn-secondary c-cbrief-act" type="button" data-panel="dChurn"><i class="ph ph-chart-line" aria-hidden="true"></i>See the evidence</button>
+        </div>
+        <p class="c-cbrief-src">Evidence: Why RM 4.4M walked</p>
+      </div>
+      <div class="c-cbrief" data-modal="upsell" role="document">
+        <span class="c-cbrief-eyebrow">Upsell</span>
+        <h3>TrendCafe is outperforming its playbook</h3>
+        <p class="c-cbrief-verdict">2.3x</p>
+        <p class="c-cbrief-vsub">ROAS via Collab Influencers</p>
+        <div class="c-cbrief-why">
+          <span class="c-cbrief-k">Because</span>
+          <p>Three other clients fit the same influencer playbook. The pitch already exists and has not been cloned.</p>
+        </div>
+        <div class="c-cbrief-rows">
+          <div class="c-cbrief-row"><span>ROAS</span><span>2.3x</span></div>
+          <div class="c-cbrief-row"><span>Comparable clients</span><span>3</span></div>
+        </div>
+        <div class="c-cbrief-acts">
+          <button class="c-btn c-btn-md c-btn-secondary c-cbrief-act" type="button" data-panel="dBubble"><i class="ph ph-chart-line" aria-hidden="true"></i>See the evidence</button>
+        </div>
+        <p class="c-cbrief-src">Evidence: Revenue against contribution</p>
+      </div>
+      <div class="c-cbrief" data-modal="team" role="document">
+        <span class="c-cbrief-eyebrow">SEA team</span>
+        <h3>Second in the region this month</h3>
+        <p class="c-cbrief-verdict">#2</p>
+        <p class="c-cbrief-vsub">RM 120K behind first place</p>
+        <div class="c-cbrief-why">
+          <span class="c-cbrief-k">Because</span>
+          <p>Closing PetronasBiz at RM 150K takes the top spot outright.</p>
+        </div>
+        <div class="c-cbrief-rows">
+          <div class="c-cbrief-row"><span>Gap to #1</span><span>RM 120K</span></div>
+          <div class="c-cbrief-row"><span>PetronasBiz</span><span>RM 150K</span></div>
+        </div>
+        <div class="c-cbrief-acts">
+          <button class="c-btn c-btn-md c-btn-secondary c-cbrief-act" type="button" data-panel="dQuad"><i class="ph ph-chart-line" aria-hidden="true"></i>See the evidence</button>
+        </div>
+        <p class="c-cbrief-src">Evidence: Which reps are actually at risk</p>
+      </div>
+      <div class="c-cbrief" data-modal="nba" role="document">
+        <span class="c-cbrief-eyebrow">Next best action</span>
+        <h3>Call PetronasBiz</h3>
+        <p class="c-cbrief-verdict">RM 150K</p>
+        <p class="c-cbrief-vsub">the deal that changes the ranking</p>
+        <div class="c-cbrief-why">
+          <span class="c-cbrief-k">Because</span>
+          <p>Renews in 30 days, the budget opens next week, and two proposals are still unopened. The call is the unblock.</p>
+        </div>
+        <div class="c-cbrief-rows">
+          <div class="c-cbrief-row"><span>Renews in</span><span>30 days</span></div>
+          <div class="c-cbrief-row"><span>Budget opens</span><span>next week</span></div>
+          <div class="c-cbrief-row"><span>Unopened proposals</span><span>2</span></div>
+        </div>
+        <div class="c-cbrief-acts">
+          <button class="c-btn c-btn-md c-btn-secondary c-cbrief-act" type="button" data-panel="dChurn"><i class="ph ph-chart-line" aria-hidden="true"></i>See the evidence</button>
+        </div>
+        <p class="c-cbrief-src">Evidence: Why RM 4.4M walked</p>
+      </div>
     </div>
   </div>
 
@@ -3225,6 +3476,9 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
         modalPanel.style.transform = '';
         modalPanel.style.opacity = '';
         cardModal.classList.remove('is-pace');    // Sales content hides with the modal; next open re-decides
+        // Same contract for the briefs: hide all, let the next open choose.
+        cardModal.querySelectorAll('.c-cbrief.is-active').forEach((b) => b.classList.remove('is-active'));
+        modalPanel.setAttribute('aria-label', 'Card detail');
         modalPanel.setAttribute('aria-label', 'Card detail');
       }
       function openCardModal(card) {
@@ -3255,8 +3509,20 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
           cardModal.classList.add('is-pace');
           modalPanel.setAttribute('aria-label', 'Sales detail');
           openSalesModal();
+        } else if (card.dataset.modal) {
+          /* Every other card opens its brief: authored markup shown by a class,
+             the same arrangement as the Sales panel above. The dialog's
+             accessible name becomes the brief's own claim, so a screen reader
+             announces what opened rather than a generic "Card detail". */
+          const brief = cardModal.querySelector('.c-cbrief[data-modal="' + card.dataset.modal + '"]');
+          if (brief) {
+            brief.classList.add('is-active');
+            const h = brief.querySelector('h3');
+            modalPanel.setAttribute('aria-label', h ? h.textContent.trim() : 'Card detail');
+          }
         }
       }
+      window.closeCardModal = closeCardModal;
       function closeCardModal() {
         if (!modalSourceCard) return;
         if (REDUCED_MOTION) {
@@ -4767,10 +5033,25 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
   // Both kinds of evidence trigger take the same route. The drawer has to
   // close first: it is aria-modal, so leaving it open over the board it
   // just navigated to would trap focus behind a scrim.
+  /* "Decide in Decision Space" on a card brief. Deliberately a jump rather than
+     a copy of Approve/Ask/Defer: those live on the decision card and are wired
+     there, and a second unwired set here would claim a capability it does not
+     have. */
+  document.querySelectorAll('[data-decision]').forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (typeof window.closeCardModal === 'function') window.closeCardModal();
+      window.showSpace('tabDecisions', btn.dataset.decision);
+    });
+  });
+
   document.querySelectorAll('[data-panel]').forEach((btn) => {
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
       closeDrawer({ restoreFocus: false });
+      // A brief's evidence button is one of these too, and it sits inside the
+      // card modal — leaving that open would scroll the board to behind a scrim.
+      if (typeof window.closeCardModal === 'function') window.closeCardModal();
       citePanel(btn.dataset.panel);
     });
   });

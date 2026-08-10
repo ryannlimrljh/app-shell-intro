@@ -149,7 +149,7 @@ function Quad({ id }) {
   const w = 640, h = 312, L = 54, R = 486, T0 = 26, B = 266;
   const reps = [
     { n: 'Aisyah Rahman', x: 118, y: 2.5 }, { n: 'Kavitha Raj', x: 112, y: 2.2 },
-    { n: 'Bryan Wong', x: 106, y: 1.9 }, { n: 'Wei Ling Ho', x: 101, y: 1.75 },
+    { n: 'Wei Ling Ho', x: 101, y: 1.75 },
     { n: 'Hafiz Osman', x: 121, y: 1.45 }, { n: 'Nurul Izzah', x: 108, y: 1.15 },
     { n: 'Arvind Kumar', x: 103, y: 0.85 }, { n: 'Siti Marina', x: 97, y: 1.35 },
     { n: 'Mei Chen', x: 88, y: 2.4 }, { n: 'Faizal Hamid', x: 92, y: 2.05 },
@@ -208,7 +208,7 @@ function Quad({ id }) {
           </Group>
         );
       })}
-      <text x={R + 8} y={T0 + 4} {...eyebrowProps()}>14 REPS</text>
+      <text x={R + 8} y={T0 + 4} {...eyebrowProps()}>13 REPS</text>
     </Board>
   );
 }

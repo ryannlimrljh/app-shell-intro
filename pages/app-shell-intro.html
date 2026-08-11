@@ -1175,9 +1175,13 @@
      behind is quiet enough on its own, so the blur that was compensating for
      a 34% black wash is gone — it was doing no work and cost a compositing
      layer the size of the viewport. */
+  /* --ease-standard, not the CSS keyword `ease`: this scrim comes up under a
+     grid whose cards are travelling on a decelerated curve, and `ease` starts
+     slow, so the wash used to lag the cards it is supposed to sit behind.
+     Exit is .32s against .5s in — dismissal should not be admired. */
   .c-tidy-backdrop{position:absolute; inset:0; background:var(--color-canvas-warm); opacity:0;
-    transition:opacity .5s ease;}
-  .c-tidy.is-shown .c-tidy-backdrop{opacity:.88;}
+    transition:opacity .32s var(--ease-standard);}
+  .c-tidy.is-shown .c-tidy-backdrop{opacity:.88; transition-duration:.5s;}
   .c-tidy-panel{position:absolute; inset:0; display:flex; flex-direction:column; gap:var(--spacing-24);
     overflow-y:auto; padding:var(--spacing-32);
     padding-left:var(--spacing-32);}
@@ -1352,7 +1356,7 @@
      transition rule can't linger and hijack unrelated later opacity/
      transform changes on card children (e.g. the AI card CTA's own
      fast hover fade). */
-  .c-hcard-skeleton{position:absolute; inset:0; z-index:2; display:flex; flex-direction:column; gap:var(--spacing-16); padding:inherit; border-radius:inherit; background:inherit; transition:opacity .45s ease, transform .45s ease;}
+  .c-hcard-skeleton{position:absolute; inset:0; z-index:2; display:flex; flex-direction:column; gap:var(--spacing-16); padding:inherit; border-radius:inherit; background:inherit; transition:opacity .45s cubic-bezier(.22,1,.36,1), transform .45s cubic-bezier(.22,1,.36,1);}
   .c-skeleton-bar{display:block; border-radius:var(--radius-pill); background:linear-gradient(90deg, var(--color-neutral-2) 30%, var(--color-neutral-3) 50%, var(--color-neutral-2) 70%); background-size:300% 100%; animation:c-skeleton-shimmer 1.6s linear infinite;}
   .c-skeleton-bar--eyebrow{width:34%; height:10px;}
   .c-skeleton-bar--title{width:72%; height:22px;}
@@ -1361,7 +1365,12 @@
   .c-hcard-ai .c-skeleton-bar{background:linear-gradient(90deg, rgba(255,255,255,.08) 30%, rgba(255,255,255,.16) 50%, rgba(255,255,255,.08) 70%); background-size:300% 100%;}
   @keyframes c-skeleton-shimmer{from{background-position:100% 0;} to{background-position:-200% 0;}}
   .c-card-slide.is-loading > :not(.c-hcard-skeleton){opacity:0; transform:translateY(10px); transition:none;}
-  .c-card-slide.is-loaded > :not(.c-hcard-skeleton){transition:opacity .5s ease, transform .5s cubic-bezier(.22,1,.36,1); transition-delay:var(--content-delay, 0ms);}
+  /* Both halves on ONE curve. They were split — opacity on the keyword `ease`,
+     transform on this one — so the card had finished rising while it was
+     still washed out, and the last of the fade arrived after the movement
+     had stopped. The skeleton above crossfades against these same 450ms, so
+     it shares the curve too. */
+  .c-card-slide.is-loaded > :not(.c-hcard-skeleton){transition:opacity .5s cubic-bezier(.22,1,.36,1), transform .5s cubic-bezier(.22,1,.36,1); transition-delay:var(--content-delay, 0ms);}
 
   /* Hover on the fanned cards. .is-settled is added from JS once a
      card's entrance transition has finished; from that point Motion
@@ -1401,9 +1410,12 @@
      backdrop can transition after display flips. */
   .c-card-modal{position:fixed; inset:0; z-index:90; display:none; align-items:center; justify-content:center; perspective:1200px;}
   .c-card-modal.is-open{display:flex;}
-  .c-card-modal-backdrop{position:absolute; inset:0; background:var(--color-canvas-warm); opacity:0; transition:opacity .5s ease;}
-  .c-card-modal.is-shown .c-card-modal-backdrop{opacity:.88;}
-  .c-card-modal-panel{position:relative; width:min(590px, calc(100vw - 64px)); height:min(680px, calc(100vh - 64px)); background:var(--color-neutral-1); border:1px solid var(--color-neutral-3); border-radius:var(--radius-lg); box-shadow:0 25px 50px -12px rgba(0,0,0,.25); transform-origin:top left; transition:transform .6s cubic-bezier(.16,1,.3,1), opacity .4s ease;}
+  /* Matches the swing it sits behind, and clears faster than it arrives —
+     the close swing is .55s against the open's .8s, so a .5s scrim on the
+     way out would still be fading after the card had landed. */
+  .c-card-modal-backdrop{position:absolute; inset:0; background:var(--color-canvas-warm); opacity:0; transition:opacity .32s var(--ease-standard);}
+  .c-card-modal.is-shown .c-card-modal-backdrop{opacity:.88; transition-duration:.5s;}
+  .c-card-modal-panel{position:relative; width:min(590px, calc(100vw - 64px)); height:min(680px, calc(100vh - 64px)); background:var(--color-neutral-1); border:1px solid var(--color-neutral-3); border-radius:var(--radius-lg); box-shadow:0 25px 50px -12px rgba(0,0,0,.25); transform-origin:top left; transition:transform .6s cubic-bezier(.16,1,.3,1), opacity .4s cubic-bezier(.16,1,.3,1);}
   /* Perspective swing (2026-08-06 spec): one keyframe track serves all six
      cards and both swing directions — the flight is parameterized by inline
      custom properties set from JS at open/close time (--sw-dx/-dy/-sx/-sy =
@@ -1507,7 +1519,15 @@
      thumb (Switch's own thumb-slide mechanics); the inactive period
      keeps its headline value visible inside its pill. */
   .seg-toggle{position:relative; display:inline-flex; align-items:center; padding:3px; background:var(--color-neutral-2); border-radius:var(--radius-pill); gap:2px;}
-  .seg-toggle-thumb{position:absolute; top:3px; left:3px; height:26px; width:0; border-radius:var(--radius-pill); background:var(--color-neutral-1); box-shadow:var(--shadow-1); transition:left var(--duration-base) var(--ease-settle), width var(--duration-base) var(--ease-settle);}
+  /* translateX, not `left`. `left` is a layout property, so every frame of
+     every press ran layout -> paint -> composite for a shape that only moves.
+     left:3px stays as the resting origin and JS offsets from it, so the
+     positioning maths is unchanged: 3 + (offsetLeft - 3).
+     `width` still animates. The thumb is a pill, and the scaleX that would
+     take width off the layout path too would stretch its rounded ends into
+     ovals — one small absolutely-positioned box relayouting is the cheaper
+     of the two costs. */
+  .seg-toggle-thumb{position:absolute; top:3px; left:3px; height:26px; width:0; border-radius:var(--radius-pill); background:var(--color-neutral-1); box-shadow:var(--shadow-1); transition:transform var(--duration-base) var(--ease-settle), width var(--duration-base) var(--ease-settle);}
   .seg-toggle-btn{position:relative; z-index:1; display:inline-flex; align-items:center; height:26px; padding:0 14px; border:0; background:transparent; border-radius:var(--radius-pill); font-family:inherit; cursor:pointer; transition:color var(--duration-fast) var(--ease-standard);}
   .seg-toggle-label{font-size:var(--text-caption-size); font-weight:700; color:var(--color-neutral-5);}
   .seg-toggle-btn.active .seg-toggle-label{color:var(--color-neutral-9);}
@@ -3723,7 +3743,9 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
         // space — transform-immune. (.seg-toggle is position:relative,
         // so offsetLeft is already relative to the track.)
         const thumb = document.getElementById('revenuePeriodThumb');
-        thumb.style.left = activeBtn.offsetLeft + 'px';
+        // translateX off the CSS resting origin (left:3px), not `left` itself:
+        // see .seg-toggle-thumb in <style> for why.
+        thumb.style.transform = 'translateX(' + (activeBtn.offsetLeft - 3) + 'px)';
         thumb.style.width = activeBtn.offsetWidth + 'px';
       }
 
@@ -5312,7 +5334,7 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
     const active = hzGroup.querySelector('.seg-toggle-btn.active');
     const thumb = hzGroup.querySelector('.seg-toggle-thumb');
     if (!active || !thumb) return;
-    thumb.style.left = active.offsetLeft + 'px';
+    thumb.style.transform = 'translateX(' + (active.offsetLeft - 3) + 'px)';
     thumb.style.width = active.offsetWidth + 'px';
   }
 
@@ -5794,7 +5816,7 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
     const active = periodToggle.querySelector('.seg-toggle-btn.active');
     const thumb = periodToggle.querySelector('.seg-toggle-thumb');
     if (!active || !thumb) return;
-    thumb.style.left = active.offsetLeft + 'px';
+    thumb.style.transform = 'translateX(' + (active.offsetLeft - 3) + 'px)';
     thumb.style.width = active.offsetWidth + 'px';
   }
   if (periodToggle) {

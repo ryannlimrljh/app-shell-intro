@@ -178,9 +178,10 @@
      gap. `padding` is already in .floating-ask's morph transition, so the line
      slides aside on the same curve rather than jumping when the mark appears. */
   .c-canvas-askbox.is-collapsed .floating-ask{border-radius:var(--radius-pill); padding:var(--spacing-12) var(--spacing-16) var(--spacing-12) 48px;}
-  /* The AI mark. Obsidian circle + fill sparkle, which is .c-chat-ai-mark's
-     recipe at 24px instead of 28 — same glyph and same ground, so the pill and
-     the conversation it opens read as one assistant rather than two marks.
+  /* The AI mark, and now the page's only one: the assistant overlay used to
+     stamp the same obsidian circle on every AI turn, which was redundant once
+     the reader's own turns are the tinted, right-aligned ones. Here it earns
+     its place, because the collapsed pill has nothing else that says what it is.
      Absolute, not a flex child of the field: .floating-ask is a
      two-row grid, so a flow child would have become a grid item, and an
      absolute one can arrive on opacity + transform alone instead of on a width
@@ -1031,17 +1032,13 @@
 
   /* Thread column */
   .c-chat-main{display:flex; flex-direction:column; min-width:0; min-height:0;}
+  /* space-between with a single child is deliberate: the close button that used
+     to be the second one is gone (the veil and Escape both close this), and the
+     rule is what a right-aligned control would rejoin. */
   .c-chat-hd{display:flex; align-items:flex-start; justify-content:space-between; gap:var(--spacing-16);
     padding:var(--spacing-20) var(--spacing-24); border-bottom:1px solid var(--color-neutral-3);}
   .c-chat-hd h2{margin:0; font-size:var(--text-h5-size); font-weight:800; letter-spacing:0; color:var(--color-neutral-9);}
   .c-chat-hd p{margin:var(--spacing-4) 0 0; font-size:var(--text-caption-size); color:var(--color-neutral-5);}
-  .c-chat-x{flex:none; width:40px; height:40px; display:flex; align-items:center; justify-content:center;
-    border:0; border-radius:var(--radius-pill); background:transparent; color:var(--color-neutral-9);
-    font-size:var(--icon-base); cursor:pointer;
-    transition:background-color var(--duration-fast) var(--ease-standard);}
-  .c-chat-x:hover{background:var(--color-neutral-2);}
-  .c-chat-x:active{background:var(--color-neutral-3);}
-  .c-chat-x:focus-visible{outline:2px solid var(--color-obsidian); outline-offset:2px;}
   .c-chat-body{flex:1 1 auto; min-height:0; overflow-y:auto; overscroll-behavior:contain;
     padding:var(--spacing-24); display:flex; flex-direction:column; gap:var(--spacing-24);}
   .c-chat-scroll{width:100%; max-width:760px; margin:0 auto; display:flex; flex-direction:column; gap:var(--spacing-24);}
@@ -1052,8 +1049,6 @@
      being boxed in. */
   .c-chat-msg.is-me .c-chat-bubble{max-width:78%; padding:var(--spacing-12) var(--spacing-16);
     background:var(--color-neutral-2); border-radius:var(--radius-md); color:var(--color-neutral-9);}
-  .c-chat-ai-mark{width:28px; height:28px; flex:none; display:flex; align-items:center; justify-content:center;
-    border-radius:var(--radius-pill); background:var(--color-obsidian); color:var(--color-neutral-1); font-size:15px;}
   .c-chat-bubble{font-size:var(--text-body1-size); line-height:1.65; color:var(--color-neutral-9);}
   .c-chat-bubble p{margin:0 0 var(--spacing-12);}
   .c-chat-bubble p:last-child{margin-bottom:0;}
@@ -2959,7 +2954,6 @@
             <h2 id="chatTitle">Where the RM 17.1M gap sits</h2>
             <p>Collabrium assistant &middot; reading this workspace</p>
           </div>
-          <button class="c-chat-x" id="chatX" type="button" aria-label="Close assistant"><i class="ph ph-x" aria-hidden="true"></i></button>
         </header>
 
         <div class="c-chat-body" id="chatBody">
@@ -2968,7 +2962,6 @@
               <div class="c-chat-bubble"><p>We&rsquo;re RM 17.1M short on plan. Is that a pipeline problem or a conversion problem?</p></div>
             </div>
             <div class="c-chat-msg is-ai">
-              <span class="c-chat-ai-mark" aria-hidden="true"><i class="ph-fill ph-sparkle"></i></span>
               <div class="c-chat-bubble">
                 <p>Conversion. There is <b>RM 111.2M</b> of open pipeline against a RM 17.1M gap, 6.5&times; cover, so there is no shortage of deals to work.</p>
                 <p>What is missing is close rate in the back half of the funnel. Negotiation-stage deals have been ageing 41 days on average, and the plan line is only touched by best case.</p>
@@ -2979,7 +2972,6 @@
               <div class="c-chat-bubble"><p>So which deals do I actually chase this week?</p></div>
             </div>
             <div class="c-chat-msg is-ai">
-              <span class="c-chat-ai-mark" aria-hidden="true"><i class="ph-fill ph-sparkle"></i></span>
               <div class="c-chat-bubble">
                 <p>Eight of them cover the gap on their own. In order of what is at stake:</p>
                 <ul>
@@ -4589,7 +4581,6 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
   const overlay = document.getElementById('chatOverlay');
   const shell = document.getElementById('chatShell');
   const veil = document.getElementById('chatVeil');
-  const closeBtn = document.getElementById('chatX');
   const input = document.getElementById('chatInput');
   const askBox = document.getElementById('askBox');
   if (!overlay || !shell) return;
@@ -4630,7 +4621,7 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
       shell.classList.add('is-folding-open');
     }
     // The composer is the point of the overlay, so that is where focus goes.
-    (input || closeBtn || shell).focus({ preventScroll: true });
+    (input || shell).focus({ preventScroll: true });
   }
 
   function closeChat() {
@@ -4666,7 +4657,6 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
   });
 
   window.showChat = openChat;
-  if (closeBtn) closeBtn.addEventListener('click', closeChat);
   if (veil) veil.addEventListener('click', closeChat);
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && open) closeChat(); });
   // Focus trap: a full takeover that let Tab reach the page behind would put

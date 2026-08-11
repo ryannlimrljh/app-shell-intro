@@ -12,7 +12,12 @@ Live: <https://app-shell-intro.vercel.app/pages/landing-v1.html>
 python3 -m http.server 8791
 ```
 
-Then <http://localhost:8791/pages/landing-v1.html>.
+Then <http://localhost:8791/pages/landing-v2.html> for the working version,
+or <http://localhost:8791/pages/landing-v1.html> for the frozen one.
+
+`/` redirects to **v1**, so the deployed root keeps showing the version that
+shipped. One line in `vercel.json` moves it to v2 when v2 is ready to be the
+thing people see.
 
 No build step, no framework, no bundler at serve time. `pages/landing-v1.html`
 is one self-contained file — markup, a `<style>` block and its scripts — linking
@@ -25,7 +30,8 @@ serves `Last-Modified` and browsers hold onto this page.
 
 | Path | What it is |
 |---|---|
-| `pages/landing-v1.html` | the prototype. Everything is in here. |
+| `pages/landing-v2.html` | **the working version. New implementation goes here.** |
+| `pages/landing-v1.html` | the previous version, frozen. Kept so v2 can be diffed against it |
 | `pages/assets/charts.bundle.js` | committed chart bundle — built, not hand-edited |
 | `pages/decision-workspace-v2.html` | the pre-port snapshot two comments in the page cite as provenance. Kept for that reason, and excluded from the deploy by `.vercelignore`. |
 | `pages/leadership-dashboard-tracker.html` | the reference board Performance Space was ported from |

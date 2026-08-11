@@ -14,8 +14,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Mulish:wght@400;500;600;700;800;900&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400;1,8..60,600&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css" />
 <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css" />
-<link rel="stylesheet" href="../collabrium-dls/tokens.css" />
-<link rel="stylesheet" href="../collabrium-dls/components.css" />
+<link rel="stylesheet" href="../collabrium-dls/tokens.css?v=f278e40" />
+<link rel="stylesheet" href="../collabrium-dls/components.css?v=f278e40" />
 <style>
   *{box-sizing:border-box;}
   /* overflow:hidden is a guarantee, not a workaround. This is a
@@ -79,7 +79,7 @@
      Still built from the same h1/body1 type tokens .c-shell-page-header
      itself uses, not new sizes — the only new thing here is the
      centered layout. Name is read from the sidebar account row's own
-     .c-userpicker-name (see script below) rather than a second hardcoded
+     .c-search-input-title (see script below) rather than a second hardcoded
      "Bryan" — one source for the name, not two copies that can drift. */
   .c-canvas-greeting{text-align:center; padding:0 var(--page-gutter);}
   .c-canvas-greeting h1{margin:0 0 var(--spacing-8); font-family:var(--font-primary); font-size:var(--text-h1-size); font-weight:var(--text-h1-weight); color:var(--color-neutral-9);}
@@ -237,6 +237,13 @@
      canvas. Below the pinned state it sits in .c-space's own top margin,
      where there is nothing to cover, so it is invisible until needed. */
   .c-space-tabs::before{content:''; position:absolute; left:0; right:0; bottom:100%; height:calc(var(--section-gap) + var(--spacing-8)); background:var(--color-canvas-warm);}
+  /* The word "Space" is droppable, which is the whole reason the markup wraps
+     it in a span. The rule was never written, so it never dropped: measured at
+     375px the two tabs wanted 291px inside a 223px bar. Abbreviating to
+     "Decision" / "Performance" brings them to ~199px, which fits.
+     Found by scripts/sync-collabrium-ds.py, whose UNSTYLED check flags any
+     c-* class in the markup that nothing anywhere styles. */
+  @media (max-width:640px){ .c-space-tabs-w{display:none;} }
   /* Icons and count badges removed: with only two tabs the label carries it,
      and dropping both is what let the pair fit a 375px viewport on one line
      without also dropping the word "Space" (they cost ~64px between them). */
@@ -1805,7 +1812,7 @@
   /* Card 5/6 — Team standing: also a Stat/KPI card in spirit (reuses
      .c-stat + .c-stat-label + .c-stat-value.hero for "#2"), centered
      rather than left-aligned since it's a single hero figure. Avatar
-     circles reuse collabrium-dls's own .c-userpicker-avatar (already
+     circles reuse collabrium-dls's own .c-search-input-avatar (already
      used elsewhere on this page for the sidebar account avatar)
      rather than reinventing that recipe — only the overlapping-stack
      treatment (ring border, negative margin) is new/page-local. The
@@ -1916,7 +1923,7 @@
      SidebarNav sub-part yet (DESIGN-SYSTEM.md's Footer row says
      "sign-out, account, or help slot" but specs no row anatomy of its
      own) — composed from UserPicker's existing avatar/name/role classes
-     (.c-userpicker-*) rather than inventing new ones, same "compose,
+     (.c-search-input-*) rather than inventing new ones, same "compose,
      don't invent" rule App Shell follows elsewhere. It's a <button> now
      (was a plain div) since it opens the account menu below. Collapse
      behavior mirrors nav items: text hides, avatar stays and
@@ -1924,7 +1931,7 @@
   .c-sidebar-account{display:flex; align-items:center; gap:var(--spacing-12); width:100%; padding:var(--spacing-8) var(--spacing-12); margin-bottom:var(--spacing-4); border:none; background:transparent; border-radius:var(--radius-sm); font-family:inherit; text-align:left; cursor:pointer; transition:background-color var(--duration-fast) var(--ease-standard);}
   .c-sidebar-account:hover{background:var(--color-neutral-2);}
   .c-sidebar.is-collapsed .c-sidebar-account{justify-content:center; padding:var(--spacing-8) 0;}
-  .c-sidebar.is-collapsed .c-sidebar-account .c-userpicker-text{display:none;}
+  .c-sidebar.is-collapsed .c-sidebar-account .c-search-input-text{display:none;}
 
   /* Account menu — opens above the trigger (it's pinned to the bottom,
      so there's no room below), Settings + Log out. No existing
@@ -1969,6 +1976,18 @@
      kind of control. */
   .c-sidebar-logo{border:none; background:transparent; padding:var(--spacing-4); border-radius:var(--radius-sm); cursor:pointer; transition:background-color var(--duration-fast) var(--ease-standard);}
   .c-sidebar-logo:hover{background:var(--color-neutral-2);}
+  /* Sizing the logo <img> is OURS now. collabrium-dls provided
+     `.c-sidebar-logo img{height:22px}` and a 24px collapsed variant until the
+     2026-08-11 sync, which replaced them with .c-sidebar-logo-live-wrap — an
+     iframe embedding logo.html so the default mark can animate. Without a
+     height the SVG fell back to its intrinsic size and the rail filled with a
+     giant orange block.
+     The DS's live-iframe shape is NOT adopted here, on purpose: this logo is
+     also the app-switcher trigger and swaps its src between the department
+     lockup and the collapsed coin, which an iframe embed cannot do. Values are
+     the DS's own last-published ones, so nothing drifts visually. */
+  .c-sidebar-logo img{height:22px; width:auto; display:block;}
+  .c-sidebar.is-collapsed .c-sidebar-logo img{height:24px; width:24px;}
 
   /* App switcher menu — same popover convention and same off-DOM/
      position:fixed/z-index:60 reasoning as .c-account-menu above (see
@@ -2068,10 +2087,10 @@
         <button class="c-sidebar-item" type="button"><i class="ph-fill ph-chart-bar"></i><span class="label">Reports</span><span class="c-sidebar-hover-text">Reports</span></button>
         <div class="c-sidebar-footer">
           <button class="c-sidebar-account" type="button" id="accountMenuTrigger" aria-haspopup="menu" aria-expanded="false" aria-controls="accountMenu">
-            <span class="c-userpicker-avatar">BW</span>
-            <span class="c-userpicker-text">
-              <span class="c-userpicker-name">Bryan Wong</span>
-              <span class="c-userpicker-role">Head of Revenue</span>
+            <span class="c-search-input-avatar">BW</span>
+            <span class="c-search-input-text">
+              <span class="c-search-input-title">Bryan Wong</span>
+              <span class="c-search-input-subtitle">Head of Revenue</span>
             </span>
           </button>
         </div>
@@ -2222,10 +2241,10 @@
               <div class="c-stat-value hero">#2</div>
               <p>this month</p>
               <div class="c-hcard-avatars">
-                <span class="c-userpicker-avatar c-hcard-avatar">JL</span>
-                <span class="c-userpicker-avatar c-hcard-avatar">KW</span>
-                <span class="c-userpicker-avatar c-hcard-avatar">SM</span>
-                <span class="c-userpicker-avatar c-hcard-avatar">DT</span>
+                <span class="c-search-input-avatar c-hcard-avatar">JL</span>
+                <span class="c-search-input-avatar c-hcard-avatar">KW</span>
+                <span class="c-search-input-avatar c-hcard-avatar">SM</span>
+                <span class="c-search-input-avatar c-hcard-avatar">DT</span>
               </div>
               <div class="c-hcard-bar"><div class="c-hcard-bar-fill"></div></div>
               <span class="c-hcard-barlabel">RM120K behind #1</span>
@@ -3397,7 +3416,7 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
   // date above: the time-of-day segment is read from the visitor's own
   // system clock (new Date().getHours()), not hardcoded to "Good
   // morning" regardless of when the page is actually opened. First name
-  // is read from the sidebar account row's own .c-userpicker-name text
+  // is read from the sidebar account row's own .c-search-input-title text
   // (currently "Bryan Wong") rather than a second hardcoded "Bryan" —
   // one source for the name, so the greeting can't drift out of sync
   // with the account row if that name ever changes.
@@ -3405,7 +3424,7 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
   if (greetingText) {
     const hour = new Date().getHours();
     const timeOfDay = hour < 12 ? 'morning' : hour < 17 ? 'afternoon' : 'evening';
-    const fullName = document.querySelector('.c-userpicker-name');
+    const fullName = document.querySelector('.c-search-input-title');
     const firstName = fullName ? fullName.textContent.trim().split(' ')[0] : '';
     greetingText.textContent = `Good ${timeOfDay}, ${firstName}`;
   }

@@ -5,43 +5,48 @@ npm run sync:ds              # fetch, update collabrium-dls/, report what broke
 npm run sync:ds -- --check   # report only, change nothing
 ```
 
-Run it whenever a teammate lands design-system work, and before any push to
-Vercel. It exits non-zero when something needs migrating, so it also works as a
-gate in a hook or CI later.
+Run it whenever a teammate lands design-system work, and before any deploy. It
+exits non-zero when something needs migrating, so it also works as a gate in a
+hook or CI later.
 
-## How this repo is wired
+## Topology
 
-The design system and this prototype are the **same repo**. There is no second
-remote to add and nothing to re-point:
+This project is standalone. The design system lives in a **different repo**,
+reached through a fetch-only remote:
 
-| | |
-|---|---|
-| `origin` | `astroproductdesign/Collabrium-DS` — the team repo. `collabrium-dls/` is the system, `pages/` is what we build on it. **Fetch from here. Never push here.** |
-| `personal` | `ryannlimrljh/app-shell-intro` — our own repo, the Vercel deploy target. `git push personal app-shell-intro-page:main` |
+| Remote | Repo | Role |
+|---|---|---|
+| `origin` | `ryannlimrljh/app-shell-intro` | ours. The Vercel deploy target. `git push origin main` |
+| `collabrium-ds` | `astroproductdesign/Collabrium-DS` | the team's design system. **Fetch only** — its push URL is deliberately set to a bogus value so a stray `git push collabrium-ds` fails loudly instead of landing a prototype in the team repo. |
 
-The page links `../collabrium-dls/tokens.css` and `components.css` directly, so
-whatever is checked out in this folder *is* what renders.
+`collabrium-dls/` here is a **vendored copy** of that repo's `collabrium-dls/`
+directory. The page links `../collabrium-dls/tokens.css` and `components.css`
+directly, so whatever is checked out here is what renders.
 
-## Why the script takes a path instead of merging
+If the remote is ever missing, the script says so and gives you the command:
 
-`origin/main` has moved 1,763 files and +116k lines since this branch forked,
-including a vendored copy of Chart.js. This branch is what gets pushed to
-`personal` and deployed, so `git merge origin/main` would drag all of it onto
-the deploy. The script does `git checkout origin/main -- collabrium-dls/`
-instead: the system, and nothing else.
+```bash
+git remote add collabrium-ds https://github.com/astroproductdesign/Collabrium-DS.git
+```
 
-The cost of that choice is real and worth naming — this branch never gets any
-*other* fix from `main`. That is the right trade while `pages/` exists only
-here, and it stops being right the day this prototype merges back.
+## Why a path-scoped checkout and not a merge
+
+The two repos share history — this project began life as a branch of that one —
+so git *can* merge them, and that is exactly what to avoid. That repo carries
+1,763 files this project has no use for, including a vendored copy of Chart.js.
+A merge would pull all of it into a prototype that deploys as static files.
+
+The script does `git checkout collabrium-ds/main -- collabrium-dls/`: the one
+path the page actually links, and nothing else.
 
 ## Why the `?v=` on the stylesheet links
 
-The script rewrites the two `<link>` hrefs to `?v=<upstream-sha>` on every
-sync. Without it a browser holding the old CSS keeps serving it after a
-successful pull, and the sync looks like it did nothing — that happened on the
-first run here: `components.css` on disk had `.c-search-input-avatar` while the
-live page still had `.c-userpicker` rules applying. The SHA changes exactly
-when the content does, so the refetch is automatic.
+The script rewrites the two `<link>` hrefs to `?v=<upstream-sha>` on every sync.
+Without it a browser holding the old CSS keeps serving it after a successful
+pull, and the sync looks like it did nothing — that happened on the first run:
+`components.css` on disk had `.c-search-input-avatar` while the live page still
+had `.c-userpicker` rules applying. The SHA changes exactly when the content
+does, so the refetch is automatic.
 
 ## What the drift check looks for
 
@@ -59,8 +64,8 @@ something the others miss:
 All three earned their place on the first run:
 
 - **DROPPED UPSTREAM** found the `.c-userpicker-*` → `.c-search-input-*` rename
-  (4 classes, PR #22 rebuilt User picker as Search input; the declarations came
-  across byte-identical).
+  (4 classes; the system rebuilt User picker as Search input and the
+  declarations came across byte-identical).
 - **RULES REMOVED** found `.c-sidebar-logo img{height:22px}` gone while
   `.c-sidebar-logo` stayed — the sidebar logo had blown up to its intrinsic
   size and nothing else flagged it.
@@ -72,8 +77,8 @@ All three earned their place on the first run:
 
 A rule whose **declarations** changed — same selector, different values. If
 upstream restyles `.c-card` from an 8px radius to 12px, the page just looks
-different and the check stays quiet. Read `git diff --cached collabrium-dls/`
-after a sync, and compare against <https://collabrium-dls.vercel.app/#components>.
+different and the check stays quiet. Read `git diff collabrium-dls/` after a
+sync, and compare against <https://collabrium-dls.vercel.app/#components>.
 
 ## Adding another page
 
@@ -90,8 +95,10 @@ Not migrated, and each is a real decision rather than an oversight:
 | `.c-fpill` | 22× | `.c-chip-filter` / `.c-chip-group` |
 | `.c-chat-fpill` | 12× | `.c-chip-filter` |
 | `.seg-toggle` | 41× | `.c-segctl` / `.c-seg-pill` |
-| `.c-app-switcher-*` | 14× | `.c-dept-trigger` / `.c-dept-dropdown` / `.c-dept-option` |
 
-Migrating them **will** change how the filters, toggles and app switcher look —
-the system's versions are not pixel-identical to what is on the page. Worth
-doing as its own pass, against the live reference, not folded into a sync.
+The main nav's department switcher **was** migrated — see the
+`.c-dept-trigger` / `.c-dept-dropdown` work — so that pattern is the worked
+example for doing the rest. Migrating the remaining three **will** change how
+the filters and toggles look; the system's versions are not pixel-identical to
+what is on the page. Worth doing as its own pass, against the live reference,
+not folded into a sync.

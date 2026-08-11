@@ -49,7 +49,12 @@ import sys
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 DS_DIR = 'collabrium-dls'
-UPSTREAM = 'origin/main'
+# The design system is a SEPARATE repo now. It used to be `origin/main`, back
+# when this prototype lived inside astroproductdesign/Collabrium-DS as a branch.
+# Standing alone, `origin` is our own deploy repo, so the system needs its own
+# fetch-only remote — see scripts/README.md for the topology.
+DS_REMOTE = 'collabrium-ds'
+UPSTREAM = f'{DS_REMOTE}/main'
 # Every page that links the design system. Add to this list, do not widen it to
 # a glob: a page that does NOT link the DS would produce meaningless findings.
 PAGES = ['pages/app-shell-intro.html']
@@ -136,8 +141,12 @@ def main():
     if dirty and not args.check:
         sys.exit(f'{DS_DIR}/ has uncommitted changes; commit or stash them first:\n{dirty}')
 
-    print(f'Fetching {UPSTREAM.split("/")[0]} …')
-    git('fetch', UPSTREAM.split('/')[0], '--quiet')
+    remotes = git('remote').split()
+    if DS_REMOTE not in remotes:
+        sys.exit(f'No `{DS_REMOTE}` remote. Add it with:\n'
+                 f'  git remote add {DS_REMOTE} https://github.com/astroproductdesign/Collabrium-DS.git')
+    print(f'Fetching {DS_REMOTE} …')
+    git('fetch', DS_REMOTE, '--quiet')
 
     diff = git('diff', '--stat', 'HEAD', UPSTREAM, '--', DS_DIR)
     if not diff:

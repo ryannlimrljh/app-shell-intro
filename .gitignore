@@ -3,3 +3,6 @@
 .worktrees
 .superpowers/
 node_modules/
+
+# Local dev-server config, machine-specific.
+.claude/

@@ -174,7 +174,27 @@
   .c-canvas-askbox.is-morphable{transition:transform var(--ask-morph-dur) var(--ask-morph-ease), width var(--ask-morph-dur) var(--ask-morph-ease), bottom var(--ask-morph-dur) var(--ask-morph-ease);}
   /* Pill radius on the card AND both glow layers, or the glow keeps square
      corners around a rounded pill. */
-  .c-canvas-askbox.is-collapsed .floating-ask{border-radius:var(--radius-pill); padding:var(--spacing-12) var(--spacing-16);}
+  /* Collapsed padding-left is 48, not 16: 16 gutter + the 24px mark + an 8px
+     gap. `padding` is already in .floating-ask's morph transition, so the line
+     slides aside on the same curve rather than jumping when the mark appears. */
+  .c-canvas-askbox.is-collapsed .floating-ask{border-radius:var(--radius-pill); padding:var(--spacing-12) var(--spacing-16) var(--spacing-12) 48px;}
+  /* The AI mark. Obsidian circle + fill sparkle, which is .c-chat-ai-mark's
+     recipe at 24px instead of 28 — same glyph and same ground, so the pill and
+     the conversation it opens read as one assistant rather than two marks.
+     Absolute, not a flex child of the field: .floating-ask is a
+     two-row grid, so a flow child would have become a grid item, and an
+     absolute one can arrive on opacity + transform alone instead of on a width
+     that would run layout every frame of the 420ms morph.
+     left:16px in BOTH poses. Expanded it is invisible and sits over the input's
+     left edge, which costs nothing; collapsed it lands in the gutter the
+     padding above just opened. */
+  .floating-ask-mark{position:absolute; left:var(--spacing-16); top:50%; z-index:2;
+    width:24px; height:24px; flex:none; display:flex; align-items:center; justify-content:center;
+    border-radius:var(--radius-pill); background:var(--color-obsidian); color:var(--color-neutral-1);
+    font-size:14px; line-height:1; pointer-events:none;
+    opacity:0; transform:translateY(-50%) scale(.5);
+    transition:opacity var(--ask-morph-dur) var(--ask-morph-ease), transform var(--ask-morph-dur) var(--ask-morph-ease);}
+  .c-canvas-askbox.is-collapsed .floating-ask-mark{opacity:1; transform:translateY(-50%) scale(1);}
   .c-canvas-askbox.is-collapsed .floating-ask-glow-outer,
   .c-canvas-askbox.is-collapsed .floating-ask-glow-inner{border-radius:var(--radius-pill);}
   .c-canvas-askbox.is-collapsed .floating-ask{grid-template-rows:auto 0fr;}
@@ -917,6 +937,8 @@
     100%    { transform:translateX(0); }
   }
   @media (prefers-reduced-motion:reduce){
+    /* The mark stays — it IS the affordance — but arrives without the scale. */
+    .floating-ask-mark{transition:none; transform:translateY(-50%);}
     .c-canvas-askbox.is-collapsed .floating-ask-ghost{display:none;}
     .c-canvas-askbox.is-collapsed .floating-ask-ghost-p{position:absolute; inset:0; display:flex; align-items:center; pointer-events:none; white-space:nowrap; font-size:var(--text-body1-size); color:var(--color-neutral-5);}
   }
@@ -2880,6 +2902,11 @@
         <div class="floating-ask-glow-outer" aria-hidden="true"></div>
         <div class="floating-ask-glow-inner" aria-hidden="true"></div>
         <div class="floating-ask">
+          <!-- The AI mark. Only shown once the box is a pill: expanded, the
+               composer's own toolbar and send button already say what this is.
+               aria-hidden because the input's aria-label already names it, and
+               a second announcement would be noise. -->
+          <span class="floating-ask-mark" aria-hidden="true"><i class="ph-fill ph-sparkle"></i></span>
           <div class="floating-ask-field">
             <input type="text" aria-label="Ask anything" />
             <!-- The running line. A span, not a ::placeholder, so it can be
@@ -5613,22 +5640,23 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
   const dock = document.getElementById('dock');
   if (askBox && dock) {
     const askInputEl = askBox.querySelector('input');
-    /* 200, not 260. The gap to Evidence measured a correct 12px, but a 260px
-       pill holding a short label left ~60px of dead space inside its own right
-       end — which is what read as "too far apart". Narrowing the pill moves the
-       content closer without cramping the seam itself. */
-    const ASK_PILL_W = 200;
+    /* 236. It was 260, then 200 — a 260px pill holding a short label left ~60px
+       of dead space inside its own right end, which is what read as "too far
+       apart". The 36px back on top of 200 pays for the AI mark and its gap:
+       without it the running line's window would have dropped 168 -> 136 and
+       the marquee would travel further and longer to show the same sentence. */
+    const ASK_PILL_W = 236;
     const ASK_GAP = 8;   // explicit: the dock's gap token no longer has a layout job there, so reading it back would couple to nothing
 
-    /* The running line, collapsed. 200px of pill less its 16px side padding
-       leaves 168px against a ~330px sentence, so the line has to travel for
-       the whole thing to be readable. Distance comes from the text's own
+    /* The running line, collapsed. 236px of pill less 48px of left padding (the
+       AI mark's gutter) and 16px of right leaves 172px against a ~330px
+       sentence, so the line has to travel for the whole thing to be readable. Distance comes from the text's own
        width and the duration from the distance, so the speed is constant
        whatever sentence is showing and a line that already fits parks on a
        no-op instead of jittering. */
     const ghost = askBox.querySelector('.floating-ask-ghost');
     const ghostT = askBox.querySelector('.floating-ask-ghost-t');
-    const PILL_INNER = ASK_PILL_W - 32;
+    const PILL_INNER = ASK_PILL_W - 64;  // 48 left (mark gutter) + 16 right, per .is-collapsed .floating-ask
     const MARQUEE_PX_PER_S = 60;
     const MARQUEE_TRAVEL_FRACTION = 0.64; // the two travel legs of @keyframes ask-marquee; the other 36% is the holds at each end
     function syncMarquee() {

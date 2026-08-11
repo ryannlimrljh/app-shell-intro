@@ -1969,25 +1969,6 @@
   .c-account-menu-item:hover{background:var(--color-neutral-2);}
   .c-account-menu-item i{flex:none; font-size:16px; color:var(--color-neutral-5);}
 
-  /* Logo — now a menu trigger, same "wrap the existing element in a
-     <button>, reset the button chrome, keep everything else" move
-     .c-sidebar-account already made. Row padding/radius/hover echo the
-     account row's own so both triggers in this rail read as the same
-     kind of control. */
-  .c-sidebar-logo{border:none; background:transparent; padding:var(--spacing-4); border-radius:var(--radius-sm); cursor:pointer; transition:background-color var(--duration-fast) var(--ease-standard);}
-  .c-sidebar-logo:hover{background:var(--color-neutral-2);}
-  /* Sizing the logo <img> is OURS now. collabrium-dls provided
-     `.c-sidebar-logo img{height:22px}` and a 24px collapsed variant until the
-     2026-08-11 sync, which replaced them with .c-sidebar-logo-live-wrap — an
-     iframe embedding logo.html so the default mark can animate. Without a
-     height the SVG fell back to its intrinsic size and the rail filled with a
-     giant orange block.
-     The DS's live-iframe shape is NOT adopted here, on purpose: this logo is
-     also the app-switcher trigger and swaps its src between the department
-     lockup and the collapsed coin, which an iframe embed cannot do. Values are
-     the DS's own last-published ones, so nothing drifts visually. */
-  .c-sidebar-logo img{height:22px; width:auto; display:block;}
-  .c-sidebar.is-collapsed .c-sidebar-logo img{height:24px; width:24px;}
 
   /* App switcher menu — same popover convention and same off-DOM/
      position:fixed/z-index:60 reasoning as .c-account-menu above (see
@@ -2024,13 +2005,11 @@
      consistent size, not an inconsistent one. Bumped from 18px to 22px
      ("enlarge the logos") — still comfortable in the 200px menu (matched
      to .c-account-menu's width) even for the widest lockup. */
-  .c-app-switcher-menu{display:none; position:fixed; width:200px; z-index:60; background:var(--color-neutral-1); border:1px solid var(--color-neutral-3); border-radius:var(--radius-md); box-shadow:var(--shadow-3); padding:var(--spacing-4); overflow:hidden;}
-  .c-app-switcher-menu.is-open{display:block;}
-  .c-app-switcher-item{display:flex; align-items:center; gap:var(--spacing-12); width:100%; height:40px; padding:0 var(--spacing-8); border:none; background:transparent; border-radius:var(--radius-sm); cursor:pointer; transition:background-color var(--duration-fast) var(--ease-standard);}
-  .c-app-switcher-item:hover{background:var(--color-neutral-2);}
-  .c-app-switcher-item img{height:22px; width:auto; display:block;}
-  .c-app-switcher-item i{flex:none; margin-left:auto; font-size:16px; color:var(--color-obsidian); visibility:hidden;}
-  .c-app-switcher-item.is-active i{visibility:visible;}
+  /* Only the placement is ours; everything visual comes from the system's
+     .c-dept-dropdown. position:fixed + z-index because .c-sidebar clips, and
+     [hidden] is what the system's own .c-dept-dropdown[hidden] keys off, so
+     the panel is toggled by attribute rather than by a page-local class. */
+  .c-dept-dropdown{position:fixed; z-index:60;}
 
   /* ── Short desktop. Everything above is sized for a fold of about 788px and
      up, where the greeting, the fan, the quick links and the ask box all sit
@@ -2074,13 +2053,18 @@
     <div class="c-sidebar-shell" id="shellSidebarShell">
       <nav class="c-sidebar" id="shellSidebarNav">
         <div class="c-sidebar-header">
-          <button class="c-sidebar-logo" type="button" id="appSwitcherTrigger" aria-haspopup="menu" aria-expanded="false" aria-controls="appSwitcherMenu">
-            <img class="js-sidebar-logo-img"
-                 src="../collabrium-dls/logo-lockups/collabrium-default-logo.svg"
-                 data-expanded-src="../collabrium-dls/logo-lockups/collabrium-default-logo.svg"
-                 data-collapsed-src="../collabrium-dls/SVG/coin.svg"
-                 alt="Collabrium" />
+          <!-- Department switcher, the system's own (.c-dept-*). Three marks, and
+               CSS picks which is visible rather than JS swapping one src:
+               the live wrap is the animated default, the static img is a picked
+               department's lockup, and the collapsed icon is shown only by
+               .c-sidebar.is-collapsed rules in components.css. -->
+          <button class="c-dept-trigger js-dept-trigger" type="button" aria-haspopup="listbox"
+                  aria-expanded="false" aria-label="Switch department" aria-controls="deptDropdown">
+            <span class="c-sidebar-logo-live-wrap js-dept-logo-live"><iframe src="../collabrium-dls/logo.html" title="Collabrium" scrolling="no"></iframe></span>
+            <img class="c-dept-logo-static js-dept-logo-static" alt="" style="display:none" />
+            <i class="ph ph-caret-down js-dept-chevron c-dept-chevron"></i>
           </button>
+          <img class="c-sidebar-logo-collapsed js-dept-logo-collapsed" src="../collabrium-dls/SVG/coin.svg" alt="Collabrium" />
         </div>
         <div class="c-sidebar-section">Overview</div>
         <button class="c-sidebar-item active" type="button"><i class="ph-fill ph-house"></i><span class="label">Dashboard</span><span class="c-sidebar-hover-text">Dashboard</span></button>
@@ -3392,11 +3376,31 @@
     <button class="c-account-menu-item" type="button" role="menuitem"><i class="ph-fill ph-sign-out"></i><span>Log out</span></button>
   </div>
 
-  <div class="c-app-switcher-menu" id="appSwitcherMenu" role="menu" aria-hidden="true">
-    <button class="c-app-switcher-item" type="button" role="menuitemradio" data-engine="studio" aria-checked="false"><img src="assets/logos/collab-studio.svg" alt="Studio" /><i class="ph-fill ph-check"></i></button>
-    <button class="c-app-switcher-item" type="button" role="menuitemradio" data-engine="sales" aria-checked="false"><img src="assets/logos/collab-sales.svg" alt="Sales" /><i class="ph-fill ph-check"></i></button>
-    <button class="c-app-switcher-item" type="button" role="menuitemradio" data-engine="influencers" aria-checked="false"><img src="assets/logos/collab-influencers.svg" alt="Influencers" /><i class="ph-fill ph-check"></i></button>
-    <button class="c-app-switcher-item" type="button" role="menuitemradio" data-engine="content" aria-checked="false"><img src="assets/logos/collab-content.svg" alt="Content" /><i class="ph-fill ph-check"></i></button>
+  <!-- Outside .c-sidebar and position:fixed, unlike the system's own
+       absolutely-positioned .c-dept-dropdown: .c-sidebar sets overflow-x:clip,
+       so a panel positioned inside it is clipped at the rail's edge. Same
+       escape the account menu and the collapsed hover-label already take. -->
+  <div class="c-dept-dropdown" id="deptDropdown" role="listbox" aria-label="Departments" hidden>
+    <div class="c-dept-option is-active" role="option" aria-selected="true" aria-label="Collabrium (Default)" data-dept="default" data-name="Collabrium (Default)" data-element-icon="../collabrium-dls/SVG/coin.svg">
+      <span class="c-dept-option-logo"><img src="../collabrium-dls/logo-lockups/collabrium-default-logo.svg" alt="" style="--logo-scale:0.6" /></span>
+      <i class="ph ph-check c-dept-check"></i>
+    </div>
+    <div class="c-dept-option" role="option" aria-selected="false" aria-label="Studio" data-dept="studio" data-name="Studio" data-logo="../collabrium-dls/logo-lockups/collabStudio.svg" data-element-icon="../collabrium-dls/SVG/fire.svg">
+      <span class="c-dept-option-logo"><img src="../collabrium-dls/logo-lockups/collabStudio.svg" alt="" /></span>
+      <i class="ph ph-check c-dept-check"></i>
+    </div>
+    <div class="c-dept-option" role="option" aria-selected="false" aria-label="Sales" data-dept="sales" data-name="Sales" data-logo="../collabrium-dls/logo-lockups/collabSales.svg" data-element-icon="../collabrium-dls/SVG/gold.svg">
+      <span class="c-dept-option-logo"><img src="../collabrium-dls/logo-lockups/collabSales.svg" alt="" /></span>
+      <i class="ph ph-check c-dept-check"></i>
+    </div>
+    <div class="c-dept-option" role="option" aria-selected="false" aria-label="Influencers" data-dept="influencers" data-name="Influencers" data-logo="../collabrium-dls/logo-lockups/collabInfluencers.svg" data-element-icon="../collabrium-dls/SVG/earth.svg">
+      <span class="c-dept-option-logo"><img src="../collabrium-dls/logo-lockups/collabInfluencers.svg" alt="" /></span>
+      <i class="ph ph-check c-dept-check"></i>
+    </div>
+    <div class="c-dept-option" role="option" aria-selected="false" aria-label="Content" data-dept="content" data-name="Content" data-logo="../collabrium-dls/logo-lockups/collabContent.svg" data-element-icon="../collabrium-dls/SVG/wood.svg">
+      <span class="c-dept-option-logo"><img src="../collabrium-dls/logo-lockups/collabContent.svg" alt="" /></span>
+      <i class="ph ph-check c-dept-check"></i>
+    </div>
   </div>
 
 <script type="module">
@@ -4098,8 +4102,9 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
     nav.classList.toggle('is-collapsed', collapsed);
     sidebarToggle.setAttribute('aria-label', collapsed ? 'Expand sidebar' : 'Collapse sidebar');
 
-    const img = nav.querySelector('.js-sidebar-logo-img');
-    img.src = collapsed ? img.dataset.collapsedSrc : img.dataset.expandedSrc;
+    // The logo is not touched here any more. components.css owns which mark
+    // shows at which width (.c-sidebar.is-collapsed .c-sidebar-logo-live-wrap
+    // / .c-sidebar-logo-collapsed), so a JS src swap would only fight it.
 
     const arrow = sidebarToggle.querySelector('.js-sidebar-toggle-arrow');
     arrow.setAttribute('d', collapsed ? 'M11.5 7 14 10l-2.5 3' : 'M13.5 7 11 10l2.5 3');
@@ -4200,67 +4205,75 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
     });
   }
 
-  // Sidebar header — app switcher. Click the logo to pick which
-  // engine's lockup it shows (Studio / Sales / Influencers / Content).
-  // Same position:fixed/JS-positioned/z-index:60 popover pattern as the
-  // account menu above (see its CSS comment for the full clipping +
-  // stacking rationale) — opens *below* the trigger instead of above,
-  // since the logo sits at the top of the rail with room underneath.
-  // Selecting an item swaps the sidebar's *expanded* logo image (via
-  // the same data-expanded-src attribute setSidebarCollapsed() already
-  // reads) to that engine's lockup and re-renders immediately if the
-  // rail isn't currently collapsed; the collapsed coin icon is shared
-  // across all four engines on purpose — none of the source files is a
-  // compact square mark, so collapsed state stays engine-agnostic.
-  const appSwitcherTrigger = document.getElementById('appSwitcherTrigger');
-  const appSwitcherMenu = document.getElementById('appSwitcherMenu');
-  if (appSwitcherTrigger && appSwitcherMenu) {
-    const logoImg = appSwitcherTrigger.querySelector('.js-sidebar-logo-img');
-    function positionAppSwitcherMenu() {
-      const rect = appSwitcherTrigger.getBoundingClientRect();
-      const menuWidth = appSwitcherMenu.offsetWidth || 240;
-      const left = Math.max(8, Math.min(rect.left, window.innerWidth - menuWidth - 8));
-      appSwitcherMenu.style.left = left + 'px';
-      appSwitcherMenu.style.top = (rect.bottom + 8) + 'px';
+  /* Department switcher. The system supplies the markup contract (data-dept /
+     data-logo / data-element-icon on each .c-dept-option) and every visual
+     rule; this wires them up and does the one thing the system cannot, which
+     is position a fixed panel next to a trigger inside a clipping rail. */
+  const deptTrigger = document.querySelector('.js-dept-trigger');
+  const deptDropdown = document.getElementById('deptDropdown');
+  if (deptTrigger && deptDropdown) {
+    const liveMark = deptTrigger.querySelector('.js-dept-logo-live');
+    const staticMark = deptTrigger.querySelector('.js-dept-logo-static');
+    const collapsedMark = document.querySelector('.js-dept-logo-collapsed');
+    const chevron = deptTrigger.querySelector('.js-dept-chevron');
+
+    function positionDeptDropdown() {
+      const rect = deptTrigger.getBoundingClientRect();
+      const w = deptDropdown.offsetWidth || 240;
+      deptDropdown.style.left = Math.max(8, Math.min(rect.left, window.innerWidth - w - 8)) + 'px';
+      deptDropdown.style.top = (rect.bottom + 8) + 'px';
     }
-    function closeAppSwitcherMenu() {
-      appSwitcherMenu.classList.remove('is-open');
-      appSwitcherMenu.setAttribute('aria-hidden', 'true');
-      appSwitcherTrigger.setAttribute('aria-expanded', 'false');
+    function closeDept() {
+      deptDropdown.hidden = true;
+      deptTrigger.setAttribute('aria-expanded', 'false');
+      if (chevron) chevron.classList.replace('ph-caret-up', 'ph-caret-down');
     }
-    function openAppSwitcherMenu() {
-      positionAppSwitcherMenu();
-      appSwitcherMenu.classList.add('is-open');
-      appSwitcherMenu.setAttribute('aria-hidden', 'false');
-      appSwitcherTrigger.setAttribute('aria-expanded', 'true');
+    function openDept() {
+      deptDropdown.hidden = false;   // unhidden BEFORE measuring: offsetWidth is 0 while hidden
+      positionDeptDropdown();
+      deptTrigger.setAttribute('aria-expanded', 'true');
+      if (chevron) chevron.classList.replace('ph-caret-down', 'ph-caret-up');
     }
-    appSwitcherTrigger.addEventListener('click', (e) => {
+
+    deptTrigger.addEventListener('click', (e) => {
       e.stopPropagation();
-      const isOpen = appSwitcherMenu.classList.contains('is-open');
-      if (isOpen) closeAppSwitcherMenu(); else openAppSwitcherMenu();
+      if (deptDropdown.hidden) openDept(); else closeDept();
     });
-    appSwitcherMenu.addEventListener('click', (e) => {
-      const item = e.target.closest('.c-app-switcher-item');
-      if (!item) return;
-      appSwitcherMenu.querySelectorAll('.c-app-switcher-item').forEach((btn) => {
-        const active = btn === item;
-        btn.classList.toggle('is-active', active);
-        btn.setAttribute('aria-checked', String(active));
+
+    deptDropdown.addEventListener('click', (e) => {
+      const opt = e.target.closest('.c-dept-option');
+      if (!opt) return;
+      deptDropdown.querySelectorAll('.c-dept-option').forEach((o) => {
+        const on = o === opt;
+        o.classList.toggle('is-active', on);
+        o.setAttribute('aria-selected', String(on));
       });
-      logoImg.dataset.expandedSrc = item.querySelector('img').src;
-      if (!logoImg.closest('.c-sidebar').classList.contains('is-collapsed')) {
-        logoImg.src = logoImg.dataset.expandedSrc;
+      // The default department has no data-logo, which is what selects the
+      // animated mark over a static lockup — absence is the signal, so there
+      // is no separate "is this the default" flag to keep in step.
+      const logo = opt.dataset.logo;
+      if (logo) {
+        staticMark.src = logo;
+        staticMark.alt = opt.dataset.name || '';
+        staticMark.style.display = '';
+        liveMark.style.display = 'none';
+      } else {
+        staticMark.style.display = 'none';
+        staticMark.removeAttribute('src');
+        liveMark.style.display = '';
       }
-      closeAppSwitcherMenu();
+      if (collapsedMark && opt.dataset.elementIcon) collapsedMark.src = opt.dataset.elementIcon;
+      deptTrigger.setAttribute('aria-label', 'Switch department, ' + (opt.dataset.name || ''));
+      closeDept();
     });
+
     document.addEventListener('click', (e) => {
-      if (!appSwitcherMenu.classList.contains('is-open')) return;
-      if (e.target.closest('#appSwitcherMenu') || e.target.closest('#appSwitcherTrigger')) return;
-      closeAppSwitcherMenu();
+      if (deptDropdown.hidden) return;
+      if (e.target.closest('#deptDropdown') || e.target.closest('.js-dept-trigger')) return;
+      closeDept();
     });
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') closeAppSwitcherMenu();
-    });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeDept(); });
+    window.addEventListener('resize', () => { if (!deptDropdown.hidden) positionDeptDropdown(); });
   }
 
   // Wipe intro. Sequence: blank warm canvas → a single slanted panel

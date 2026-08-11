@@ -4,7 +4,7 @@ A build-free prototype of the Collabrium app shell: an intro sequence, a hero
 card fan, an assistant, and two working spaces — Decision Space and Performance
 Space.
 
-Live: <https://app-shell-intro.vercel.app/pages/app-shell-intro.html>
+Live: <https://app-shell-intro.vercel.app/pages/landing-v1.html>
 
 ## Run it
 
@@ -12,9 +12,9 @@ Live: <https://app-shell-intro.vercel.app/pages/app-shell-intro.html>
 python3 -m http.server 8791
 ```
 
-Then <http://localhost:8791/pages/app-shell-intro.html>.
+Then <http://localhost:8791/pages/landing-v1.html>.
 
-No build step, no framework, no bundler at serve time. `pages/app-shell-intro.html`
+No build step, no framework, no bundler at serve time. `pages/landing-v1.html`
 is one self-contained file — markup, a `<style>` block and its scripts — linking
 only the design system's two stylesheets.
 
@@ -25,7 +25,7 @@ serves `Last-Modified` and browsers hold onto this page.
 
 | Path | What it is |
 |---|---|
-| `pages/app-shell-intro.html` | the prototype. Everything is in here. |
+| `pages/landing-v1.html` | the prototype. Everything is in here. |
 | `pages/assets/charts.bundle.js` | committed chart bundle — built, not hand-edited |
 | `pages/decision-workspace-v2.html` | the pre-port snapshot two comments in the page cite as provenance. Kept for that reason, and excluded from the deploy by `.vercelignore`. |
 | `pages/leadership-dashboard-tracker.html` | the reference board Performance Space was ported from |

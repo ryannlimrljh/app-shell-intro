@@ -57,7 +57,7 @@ DS_REMOTE = 'collabrium-ds'
 UPSTREAM = f'{DS_REMOTE}/main'
 # Every page that links the design system. Add to this list, do not widen it to
 # a glob: a page that does NOT link the DS would produce meaningless findings.
-PAGES = ['pages/app-shell-intro.html']
+PAGES = ['pages/landing-v1.html']
 
 
 def git(*args, check=True):

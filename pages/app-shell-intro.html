@@ -1022,11 +1022,45 @@
   .c-chat-threads-h{margin:var(--spacing-12) 0 var(--spacing-4); padding:0 var(--spacing-12);
     font-size:var(--text-caption-size); font-weight:700; letter-spacing:var(--tracking-eyebrow);
     text-transform:uppercase; color:var(--color-neutral-5);}
-  .c-chat-thread{display:block; width:100%; padding:var(--spacing-8) var(--spacing-12); border:0;
+  /* Pillar filter. .c-fpill is Performance Space's chip verbatim — same shape,
+     same checked treatment, same radiogroup semantics — and .c-chat-fpill only
+     shrinks it for a 256px rail: 26px against 32px, caption type, tighter
+     padding. The coarse-pointer floor is restated because the base rule's
+     44px would blow the rail apart at three chips per row. */
+  .c-chat-pillars{display:flex; flex-wrap:wrap; align-items:center; gap:var(--spacing-4) 6px;}
+  .c-chat-flabel{width:100%; font-size:var(--text-label3-size); font-weight:800;
+    letter-spacing:var(--tracking-eyebrow); text-transform:uppercase; color:var(--color-neutral-5);}
+  .c-chat-fpill{height:26px; padding:0 10px; font-size:var(--text-caption-size); gap:5px;}
+  @media (pointer:coarse){ .c-chat-fpill{height:32px; padding:0 var(--spacing-12);} }
+  .c-chat-fcount{font-variant-numeric:tabular-nums; opacity:.6; font-weight:700;}
+  /* A pillar with no history is shown and unusable rather than removed: the
+     point of chips over grouping is that the whole pillar set stays visible. */
+  .c-chat-fpill[aria-disabled="true"]{opacity:.4; cursor:default;}
+  .c-chat-fpill[aria-disabled="true"]:hover{border-color:var(--color-neutral-3); color:var(--color-neutral-5);}
+  .c-chat-thread{display:flex; flex-direction:column; gap:1px; width:100%; padding:var(--spacing-8) var(--spacing-12); border:0;
     border-radius:var(--radius-sm); background:transparent; color:var(--color-neutral-5);
     font-family:inherit; font-size:var(--text-body2-size); text-align:left; cursor:pointer;
-    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
     transition:background-color var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard);}
+  .c-chat-thread-t{display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  /* The pillar line, and the reason it is TEXT and not a coloured spine: under
+     "All" it is the only thing saying where a thread came from, and colour
+     alone carrying meaning is the one thing the accessibility rules rule out.
+     Hidden once a pillar is selected, where the chip already says it. */
+  /* NOT uppercased, unlike every other eyebrow on this page. The pillar names
+     are camelCase products — "CollabSales" — and the eyebrow recipe renders
+     them COLLABSALES, which reads as one long word and loses the seam the
+     capital S provides. The convention loses to the name. */
+  .c-chat-thread-p{display:block; font-size:var(--text-label3-size); font-weight:700;
+    color:var(--color-neutral-4); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .c-chat-threads:not([data-pillar-scope="all"]) .c-chat-thread-p{display:none;}
+  /* Classes, not [hidden]: these declare display, and the UA sheet's
+     [hidden]{display:none} carries zero specificity, so it would lose — the
+     same trap the disclosure rows and the off-fan hero cards hit. */
+  .c-chat-thread.is-off-pillar,
+  .c-chat-threads-h.is-off-pillar,
+  .c-chat-empty.is-off-pillar{display:none;}
+  .c-chat-empty{margin:var(--spacing-12) 0 0; padding:0 var(--spacing-12);
+    font-size:var(--text-caption-size); color:var(--color-neutral-5);}
   .c-chat-thread:hover{background:var(--color-neutral-2); color:var(--color-neutral-9);}
   .c-chat-thread.is-active{background:var(--color-neutral-2); color:var(--color-neutral-9); font-weight:700;}
 
@@ -2936,15 +2970,28 @@
     <div class="c-chat-shell" id="chatShell" role="dialog" aria-modal="true" aria-labelledby="chatTitle">
       <aside class="c-chat-rail">
         <button class="c-chat-new" type="button"><i class="ph ph-plus" aria-hidden="true"></i>New chat</button>
-        <div class="c-chat-threads">
+        <div class="c-chat-pillars" id="chatPillars" role="radiogroup" aria-labelledby="chatPillarsL">
+          <span class="c-chat-flabel" id="chatPillarsL">Pillar</span>
+          <button class="c-fpill c-chat-fpill" type="button" role="radio" aria-checked="true" tabindex="0" data-pillar="all">All<span class="c-chat-fcount" aria-hidden="true"></span></button>
+            <button class="c-fpill c-chat-fpill" type="button" role="radio" aria-checked="false" tabindex="-1" data-pillar="sales">Sales<span class="c-chat-fcount" aria-hidden="true"></span></button>
+            <button class="c-fpill c-chat-fpill" type="button" role="radio" aria-checked="false" tabindex="-1" data-pillar="influencers">Influencers<span class="c-chat-fcount" aria-hidden="true"></span></button>
+            <button class="c-fpill c-chat-fpill" type="button" role="radio" aria-checked="false" tabindex="-1" data-pillar="studio">Studio<span class="c-chat-fcount" aria-hidden="true"></span></button>
+            <button class="c-fpill c-chat-fpill" type="button" role="radio" aria-checked="false" tabindex="-1" data-pillar="content">Content<span class="c-chat-fcount" aria-hidden="true"></span></button>
+        </div>
+        <div class="c-chat-threads" data-pillar-scope="all">
           <p class="c-chat-threads-h">Today</p>
-          <button class="c-chat-thread is-active" type="button">Where the RM 17.1M gap sits</button>
-          <button class="c-chat-thread" type="button">Which eight deals would close it</button>
+          <button class="c-chat-thread is-active" type="button" data-pillar="sales"><span class="c-chat-thread-t">Where the RM 17.1M gap sits</span><span class="c-chat-thread-p">CollabSales</span></button>
+          <button class="c-chat-thread" type="button" data-pillar="sales"><span class="c-chat-thread-t">Which eight deals would close it</span><span class="c-chat-thread-p">CollabSales</span></button>
+          <button class="c-chat-thread" type="button" data-pillar="influencers"><span class="c-chat-thread-t">Which creators fit the Genting F&amp;B brief</span><span class="c-chat-thread-p">CollabInfluencers</span></button>
+
           <p class="c-chat-threads-h">Earlier this week</p>
-          <button class="c-chat-thread" type="button">Digital inventory against demand</button>
-          <button class="c-chat-thread" type="button">Why RM 4.4M lapsed</button>
-          <button class="c-chat-thread" type="button">Which reps are actually at risk</button>
-          <button class="c-chat-thread" type="button">Petronas budget reset: who owns it</button>
+          <button class="c-chat-thread" type="button" data-pillar="sales"><span class="c-chat-thread-t">Digital inventory against demand</span><span class="c-chat-thread-p">CollabSales</span></button>
+          <button class="c-chat-thread" type="button" data-pillar="studio"><span class="c-chat-thread-t">Turnaround on the AirAsia cutdowns</span><span class="c-chat-thread-p">CollabStudio</span></button>
+          <button class="c-chat-thread" type="button" data-pillar="sales"><span class="c-chat-thread-t">Why RM 4.4M lapsed</span><span class="c-chat-thread-p">CollabSales</span></button>
+          <button class="c-chat-thread" type="button" data-pillar="content"><span class="c-chat-thread-t">What is scheduled for the Raya push</span><span class="c-chat-thread-p">CollabContent</span></button>
+          <button class="c-chat-thread" type="button" data-pillar="sales"><span class="c-chat-thread-t">Which reps are actually at risk</span><span class="c-chat-thread-p">CollabSales</span></button>
+          <button class="c-chat-thread" type="button" data-pillar="sales"><span class="c-chat-thread-t">Petronas budget reset: who owns it</span><span class="c-chat-thread-p">CollabSales</span></button>
+          <p class="c-chat-empty">No conversations in this pillar yet.</p>
         </div>
       </aside>
 
@@ -4659,6 +4706,81 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
   window.showChat = openChat;
   if (veil) veil.addEventListener('click', closeChat);
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && open) closeChat(); });
+  /* Pillar filter over the thread list. Recency stays the reading order and the
+     pillar filters across it, rather than pillars becoming folders — "what was
+     I just doing" is the common re-entry, and a folder structure answers the
+     rarer question at its expense.
+     Radiogroup semantics are the same contract as the Media/Segment filter in
+     Performance Space: click selects, arrows move AND select, Home/End jump to
+     the ends, and tabindex roves so the group is one tab stop rather than five.
+     The code is separate because that one is closed over its own chart. */
+  (function () {
+    const group = document.getElementById('chatPillars');
+    const list = document.querySelector('.c-chat-threads');
+    if (!group || !list) return;
+    const pills = Array.from(group.querySelectorAll('.c-chat-fpill'));
+    const empty = list.querySelector('.c-chat-empty');
+
+    // Counted from the DOM, never typed into the markup: a typed count is
+    // wrong the first time a thread is added.
+    const threads = Array.from(list.querySelectorAll('.c-chat-thread'));
+    pills.forEach((p) => {
+      const k = p.dataset.pillar;
+      const n = k === 'all' ? threads.length : threads.filter((t) => t.dataset.pillar === k).length;
+      const badge = p.querySelector('.c-chat-fcount');
+      if (badge) badge.textContent = String(n);
+      if (!n) { p.setAttribute('aria-disabled', 'true'); p.tabIndex = -1; }
+    });
+
+    function apply(scope) {
+      list.dataset.pillarScope = scope;
+      threads.forEach((t) => {
+        t.classList.toggle('is-off-pillar', scope !== 'all' && t.dataset.pillar !== scope);
+      });
+      // A heading with nothing left under it goes too, or the rail shows
+      // "EARLIER THIS WEEK" above empty space. Walk forward from each heading
+      // to the next one; DOM order is the grouping, so nothing else is needed.
+      list.querySelectorAll('.c-chat-threads-h').forEach((h) => {
+        let any = false;
+        for (let n = h.nextElementSibling; n && !n.classList.contains('c-chat-threads-h'); n = n.nextElementSibling) {
+          if (n.classList.contains('c-chat-thread') && !n.classList.contains('is-off-pillar')) { any = true; break; }
+        }
+        h.classList.toggle('is-off-pillar', !any);
+      });
+      if (empty) empty.classList.toggle('is-off-pillar', threads.some((t) => !t.classList.contains('is-off-pillar')));
+    }
+
+    function select(pill, focus) {
+      if (pill.getAttribute('aria-disabled') === 'true') return;
+      pills.forEach((p) => {
+        const on = p === pill;
+        p.setAttribute('aria-checked', String(on));
+        p.tabIndex = on ? 0 : -1;
+      });
+      if (focus) pill.focus();
+      apply(pill.dataset.pillar);
+    }
+
+    group.addEventListener('click', (e) => {
+      const pill = e.target.closest('.c-chat-fpill');
+      if (pill) select(pill);
+    });
+    group.addEventListener('keydown', (e) => {
+      const i = pills.indexOf(document.activeElement);
+      if (i < 0) return;
+      let next = null;
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') next = pills[(i + 1) % pills.length];
+      else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') next = pills[(i - 1 + pills.length) % pills.length];
+      else if (e.key === 'Home') next = pills[0];
+      else if (e.key === 'End') next = pills[pills.length - 1];
+      if (!next) return;
+      e.preventDefault();
+      select(next, true);
+    });
+
+    apply('all');
+  })();
+
   // Focus trap: a full takeover that let Tab reach the page behind would put
   // focus on controls the reader cannot see.
   shell.addEventListener('keydown', (e) => {

@@ -40,6 +40,22 @@ serves `Last-Modified` and browsers hold onto this page.
 (`astroproductdesign/Collabrium-DS`), pulled through a fetch-only
 `collabrium-ds` remote.
 
+**This project's copy is the only one it reads.** Every link in the page is
+relative (`../collabrium-dls/tokens.css`), so it resolves inside this folder and
+nowhere else. That matters because several other copies exist on this machine,
+at various ages:
+
+| Copy | State |
+|---|---|
+| `mothership/collabrium-dls/` | **this one.** Current, and what the page loads |
+| `~/Documents/GitHub/Collabrium-DS/collabrium-dls/` | the old home. Same content today, but it drifts the moment either side syncs |
+| `~/.claude/skills/collabrium-dls/` | the installed Claude skill. Stale, and has no `components.css` at all |
+| `~/Desktop/collabrium-dls/`, `~/Desktop/Collabrium-DS-main/` | older loose copies |
+
+If a component ever looks wrong, check which copy you are reading before you
+change anything. Run `npm run sync:ds` to bring this one current; the others are
+not this project's business.
+
 ```bash
 npm run sync:ds              # pull the latest, and report what it breaks here
 npm run sync:ds -- --check   # report only

@@ -67,31 +67,21 @@
   :root{--fan-bleed:420px;}
   .c-shell-main{position:relative; overflow-x:clip; overflow-clip-margin:var(--fan-bleed);}
 
-  /* Top-center canvas date — "[Day], [Date]", e.g. "Wednesday, August
-     5". Absolutely positioned against the Content region (.c-shell-main,
-     see above) and centred on it, so it sits directly over the centred
-     greeting below it. It is not tied to the wipe/nav choreography, so
-     it's already there under the wipe panel from first paint, same as
-     the canvas itself. z-index sits above the plain canvas but below
-     the wipe panel (100)/account menu (20)/hover label, so the wipe
-     still sweeps over it correctly. Text/styling reuses Page header's
-     own subtitle recipe (body2, Neutral-5) since there's no other
-     "small label text on canvas" precedent to draw from. */
-  .c-canvas-date{position:absolute; top:var(--spacing-24); left:50%; transform:translateX(-50%); z-index:5; margin:0; font-family:var(--font-primary); font-size:var(--text-body2-size); font-weight:var(--text-body2-weight); color:var(--color-neutral-5); pointer-events:none; transition:opacity var(--duration-base) var(--ease-standard);}
-  /* Fixed date predates the page scrolling; it collided with card text at scrollTop ~520, so it fades once the container scrolls. */
-  .c-canvas-date.is-scrolled-away{opacity:0; pointer-events:none;}
-
   /* Content region — personalized greeting. Centered, unlike Page
      header (left-aligned title/subtitle, App Shell's documented
      top-of-screen pattern) — this is a different shape (a dashboard
      "hero" greeting, not the shell's structural header), so it's a new
      page-local block rather than a reuse of .c-shell-page-header.
+     padding-top is --spacing-24, not the --spacing-60 it opened with: the
+     date row used to sit in that band, and with the row gone the 60px read
+     as an unexplained hole above the greeting AND cost the quick links
+     their place in the fold.
      Still built from the same h1/body1 type tokens .c-shell-page-header
      itself uses, not new sizes — the only new thing here is the
      centered layout. Name is read from the sidebar account row's own
      .c-userpicker-name (see script below) rather than a second hardcoded
      "Bryan" — one source for the name, not two copies that can drift. */
-  .c-canvas-greeting{text-align:center; padding:var(--spacing-60) var(--page-gutter) 0;}
+  .c-canvas-greeting{text-align:center; padding:var(--spacing-24) var(--page-gutter) 0;}
   .c-canvas-greeting h1{margin:0 0 var(--spacing-8); font-family:var(--font-primary); font-size:var(--text-h1-size); font-weight:var(--text-h1-weight); color:var(--color-neutral-9);}
   .c-canvas-greeting p{margin:0; font-family:var(--font-primary); font-size:var(--text-body1-size); font-weight:var(--text-body1-weight); color:var(--color-neutral-5);}
 
@@ -119,26 +109,25 @@
      550ms curve as the greeting above, but delayed 900ms so it lands
      as the last beat — after the cards (which start ~260ms in) are
      already arriving, not before the row it's meant to follow.
-     NEGATIVE top margin, on purpose: the slider track carries 96px of
-     bottom padding purely as clip-safety for the fan's rotated card
-     corners (see .c-card-slider-track), which left this line sitting
-     128px below the centre card vs the 48px between the greeting and
-     the cards. -48px pulls it up into that mostly-empty padding band
-     so the measured centre-line rhythm is symmetric (48px above the
-     row, 48px below). Safe: the dipped corners live at the row's far
+     NEGATIVE top margin, on purpose: the slider track carries its bottom
+     padding purely as clip-safety for the fan's rotated card corners (see
+     .c-card-slider-track), which would otherwise leave this line stranded
+     that far below the centre card. The pull lifts it into the mostly-empty
+     band so the rhythm above and below the row reads as even. Safe: the dipped corners live at the row's far
      left/right, the centre column is clear, and position:relative
      lifts this line above the slider box it now overlaps, so the
      link's hit target can't be shadowed by the slider's drag-to-
      scroll surface. */
-  /* The card track carries 96px of bottom padding for the fan's tilt, so
-     this used to be pulled back up into it by -48px. Now only -12px, which
-     leaves a clear gap under the cards instead of tucking the line against
-     them. The hero is min-height, so the extra height just extends it. */
-  .c-canvas-dashlink{position:relative; margin:-12px 0 0; text-align:center; font-family:var(--font-primary); font-size:var(--text-body1-size); font-weight:var(--text-body1-weight); color:var(--color-neutral-5); opacity:0; transform:translateY(16px); transition:opacity 550ms cubic-bezier(.16,1,.3,1), transform 550ms cubic-bezier(.16,1,.3,1);}
+  /* The card track's bottom padding is clip-safety for the fan's tilt, so this
+     line is pulled back up into it. It was -48px against 96px of padding, then
+     -12px. Now -16px against 72px: the band shrank, so the pull grew slightly
+     to keep the gap under the cards looking the same. */
+  .c-canvas-dashlink{position:relative; margin:-16px 0 0; text-align:center; font-family:var(--font-primary); font-size:var(--text-body1-size); font-weight:var(--text-body1-weight); color:var(--color-neutral-5); opacity:0; transform:translateY(16px); transition:opacity 550ms cubic-bezier(.16,1,.3,1), transform 550ms cubic-bezier(.16,1,.3,1);}
   .c-canvas-dashlink.is-revealed{opacity:1; transform:translateY(0); transition-delay:900ms;}
   .c-canvas-dashlink a{color:var(--color-obsidian); font-weight:700; text-decoration:underline; text-underline-offset:3px; transition:color var(--duration-fast) var(--ease-standard);}
   .c-canvas-dashlink a:hover{color:var(--color-neutral-8);}
   .c-canvas-dashlink a:active{color:var(--color-neutral-7);}
+
 
   /* ---- Ask box — the assistant entry point, ported from
      dashboard-home.html's floating-ask (Desktop/collabrium-screens).
@@ -360,7 +349,6 @@
        box kept animating its collapse under reduced motion. The panel push
        rides the same transition, which is what surfaced it. */
     .c-canvas-askbox,.c-canvas-askbox.is-morphable,.c-canvas-askbox .floating-ask,.c-canvas-askbox .floating-ask-more{transition:none;}
-    .c-canvas-date{transition:none;}
   }
   /* ── Ideal-board grid + panels. 12-col grid, spans set per panel.
      Panels are stock DS .c-card (padding/radius/shadow all its own);
@@ -1265,11 +1253,21 @@
      rendering fault rather than as something you can scroll. mandatory means
      every resting position has a card flush to the left edge. */
   .c-card-slider{overflow-x:auto; overflow-anchor:none; scroll-snap-type:x mandatory; cursor:grab; outline:none; -webkit-overflow-scrolling:touch; scrollbar-width:none; margin-right:calc(-1 * var(--page-gutter));
-    margin-left:calc(-1 * var(--fan-bleed)); padding-left:var(--fan-bleed); scroll-padding-left:var(--fan-bleed);}
+    margin-left:calc(-1 * var(--fan-bleed)); padding-left:var(--fan-bleed); scroll-padding-left:var(--fan-bleed);
+    /* Was an inline margin-top:--spacing-32 on the element. Moved here so the
+       hero's three vertical gaps are all readable in one place, and tightened
+       to 24 as part of fitting the fold. */
+    margin-top:var(--spacing-24);}
   .c-card-slider::-webkit-scrollbar{display:none;}
   .c-card-slider.is-dragging{cursor:grabbing; scroll-snap-type:none; user-select:none;}
-  .c-card-slider-track{display:flex; gap:0; width:max-content; padding:16px 64px 96px; perspective:900px;}
-  .c-card-slide{flex:0 0 340px; width:340px; min-height:400px; scroll-snap-align:start; position:relative;}
+  .c-card-slider-track{display:flex; gap:0; width:max-content; padding:4px 64px 64px; perspective:900px;}
+  /* min-height is a floor for the SHORT cards only. Measured with offsetHeight
+     (layout space -- a getBoundingClientRect height here is a ROTATED bounding
+     box and reads ~40px too tall), the six fan cards' own content is
+     281 / 319 / 263 / 323 / 342 / 265, so Retention at 342 is the real floor.
+     400 -> 344 keeps a common floor a hair above that: it is what let the row
+     lose 56px, and going below 342 would mean cutting the cards' copy. */
+  .c-card-slide{flex:0 0 340px; width:340px; min-height:344px; scroll-snap-align:start; position:relative;}
 
   /* ---- Convex-arc fan layout (per reference: cards splayed like a
      hand of book covers). Each card carries two custom properties —
@@ -1284,19 +1282,26 @@
      steeper to cover the extra card. Overlap comes from gap:0 on the
      track plus a negative margin here; z-index stacks so cards tuck
      behind their neighbour toward the centre (1 < 2 < 3 > 4 > 5 > 6),
-     and the track's padding was widened (16px top, 64px right, 96px
-     bottom) so nothing clips against the slider's overflow box: a
-     12deg-rotated 340x400 card's corners extend ~31px past its layout
-     box on every side, so the outermost cards need 40px (dip) + ~31px
-     (rotation) + hover-scale headroom below, and ~31px + headroom to
-     the right of the last card. */
+     and the track carries padding (8px top, 64px right, 72px bottom) so
+     nothing clips against the slider's overflow box: .c-card-slider is a
+     scroll container, so it clips at its padding box, and a 12deg-rotated
+     340x385 card's corners extend ~31px past its layout box on every side.
+     The bottom therefore needs (peak dip) + ~31px + hover-scale headroom,
+     and the right needs ~31px + headroom past the last card.
+     The dip came down from a 40px peak to 14px to fit the whole hero in one
+     desktop fold, and the 96px bottom padding came down to 64px WITH it — not
+     instead of it. Cutting the padding while leaving a 40px dip is what would
+     slice the outer two cards' bottom corners. 64px is (14 dip + ~32 rotation
+     + ~10 for the 1.05 hover scale + spare); the original 96 carried the same
+     ~15px of spare against a 40px dip, so this is the same safety margin, not
+     a thinner one. */
   .c-card-slide + .c-card-slide{margin-left:-26px;}
-  .c-card-slide:nth-child(1){--arc-rotate:-12deg; --arc-y:40px; z-index:1;}
-  .c-card-slide:nth-child(2){--arc-rotate:-6deg;  --arc-y:15px; z-index:2;}
+  .c-card-slide:nth-child(1){--arc-rotate:-12deg; --arc-y:14px; z-index:1;}
+  .c-card-slide:nth-child(2){--arc-rotate:-6deg;  --arc-y:6px; z-index:2;}
   .c-card-slide:nth-child(3){--arc-rotate:0deg;   --arc-y:0px;  z-index:6;}
-  .c-card-slide:nth-child(4){--arc-rotate:4deg;   --arc-y:8px;  z-index:5;}
-  .c-card-slide:nth-child(5){--arc-rotate:8deg;   --arc-y:22px; z-index:4;}
-  .c-card-slide:nth-child(6){--arc-rotate:12deg;  --arc-y:40px; z-index:3;}
+  .c-card-slide:nth-child(4){--arc-rotate:4deg;   --arc-y:4px;  z-index:5;}
+  .c-card-slide:nth-child(5){--arc-rotate:8deg;   --arc-y:8px; z-index:4;}
+  .c-card-slide:nth-child(6){--arc-rotate:12deg;  --arc-y:14px; z-index:3;}
 
   /* Card entrance — each card fades/glides in independently, not the
      slider as one block, per feedback ("each card randomly move in
@@ -1926,6 +1931,31 @@
   .c-app-switcher-item img{height:22px; width:auto; display:block;}
   .c-app-switcher-item i{flex:none; margin-left:auto; font-size:16px; color:var(--color-obsidian); visibility:hidden;}
   .c-app-switcher-item.is-active i{visibility:visible;}
+
+  /* ── Short desktop. Everything above is sized for a fold of about 800px and
+     up, where the greeting, the fan, the quick links and the ask box all sit
+     clear of one another. Below that the ask box — absolute at bottom:24, so
+     always in the fold — starts covering the quick-links line: measured at
+     1280x720 the links end at 610 and the box top is 558.
+     This block buys back those pixels out of whitespace only, never card
+     content: the row's floor is the tallest card's own content (342px,
+     Retention), so there is nothing to take there without cutting copy.
+     Four properties only, and the omissions are deliberate. The fan's dip and
+     the track padding sized off it are NOT here: enableCardTilt() reads
+     --arc-y once and hands the card's transform to Motion as an inline style,
+     so a media-query value for it is dead on arrival (measured: inline
+     translateY(24px) while the query's 14px was the computed value). Anything
+     JS bakes has to be set in the base rules, which is where the dip now
+     lives.
+     Placed at the end of the sheet on purpose: a media query adds no
+     specificity, so source order is the only thing that makes these win over
+     .c-card-slider (declared ~1100 lines above) and .c-canvas-askbox. */
+  @media (min-width:768px) and (max-height:780px){
+    .c-canvas-greeting{padding-top:var(--spacing-8);}
+    .c-card-slider{margin-top:var(--spacing-12);}
+    .c-canvas-dashlink{margin-top:-20px;}
+    .c-canvas-askbox{bottom:var(--spacing-16);}
+  }
 </style>
 </head>
 <body>
@@ -1967,12 +1997,11 @@
     </div>
     <div class="c-shell-main">
 
-      <!-- Date banner and ask box are siblings of the scroll container,
-           not children of it: both are absolute against .c-shell-main
-           (see their CSS), so keeping them outside .c-shell-content makes
-           "these do not scroll" structural rather than a consequence of
-           which ancestor happens to be positioned. -->
-      <p class="c-canvas-date" id="canvasDate"></p>
+      <!-- The ask box is a sibling of the scroll container, not a child of
+           it: it is absolute against .c-shell-main (see its CSS), so keeping
+           it outside .c-shell-content makes "this does not scroll" structural
+           rather than a consequence of which ancestor happens to be
+           positioned. -->
 
       <div class="c-shell-content">
 
@@ -1983,7 +2012,7 @@
           <h1 id="greetingH1"><span id="greetingText"></span> <span aria-hidden="true">🌻</span>.</h1>
           <p id="greetingSubtitle">Here's what needs your eyes today. I've flagged your top 3.</p>
         </div>
-        <div class="c-card-slider" id="cardSlider" tabindex="0" role="region" aria-roledescription="carousel" aria-label="Highlights" style="margin-top:var(--spacing-32)">
+        <div class="c-card-slider" id="cardSlider" tabindex="0" role="region" aria-roledescription="carousel" aria-label="Highlights">
           <div class="c-card-slider-track">
             <!-- ── Leadership cards. These are what the fan renders: data-role decides
                  membership, and the rep cards below are in the same track but off-fan
@@ -3265,22 +3294,6 @@
 import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
 
 (function () {
-  // Top-center canvas date — "[Day], [Date]". No explicit locale passed
-  // to toLocaleDateString, so it renders in whatever locale the user's
-  // own browser/OS is set to ("follow system setting") rather than a
-  // hardcoded "en-US" — weekday/month names and date order all follow
-  // the visitor's actual system, not an assumption baked into the page.
-  // Computed once on load, not a live-updating clock — this page has no
-  // need to notice a real midnight rollover.
-  const canvasDate = document.getElementById('canvasDate');
-  if (canvasDate) {
-    canvasDate.textContent = new Date().toLocaleDateString(undefined, {
-      weekday: 'long',
-      month: 'long',
-      day: 'numeric',
-    });
-  }
-
   // Content region greeting — "Good [morning/afternoon/evening],
   // [First name]". Same "follow system setting" idea as the canvas
   // date above: the time-of-day segment is read from the visitor's own
@@ -5803,17 +5816,6 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
     positionDashThumb(); // offsetLeft/offsetWidth read 0 while hidden, so the thumb must be re-measured now that the panel has a layout box
   });
 
-  // Date banner — fade once the container scrolls. WHY: the fixed date predates
-  // the page scrolling at all; once Section 2 made the container scroll, it
-  // floated over card text (collision at scrollTop ~520), so hide it off-top.
-  const canvasDate = document.querySelector('.c-canvas-date');
-  if (canvasDate) {
-    const onShellScroll = () => {
-      canvasDate.classList.toggle('is-scrolled-away', shellContent.scrollTop > 40);
-    };
-    shellContent.addEventListener('scroll', onShellScroll, { passive: true });
-    onShellScroll(); // evaluate initial state rather than assuming scrollTop 0 (reloads restore it)
-  }
 })();
 
 // ── Section 2b: element-level scroll reveal (.c-rise).

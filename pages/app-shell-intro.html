@@ -149,7 +149,7 @@
      shared .is-revealed pattern as the beat AFTER the dashlink (1150ms
      vs its 900ms) — the translateX centering rides inside the same
      transform as the reveal's rise. Inner class names keep their
-     dashboard-home spellings (floating-ask*, ask-*, mini-pill) so the
+     dashboard-home spellings (floating-ask*, ask-*) so the
      two files stay diffable; only the wrap is renamed to this page's
      c-canvas-* convention. */
   /* --ask-push is a second, independent translate term carried by all three
@@ -884,6 +884,8 @@
     transition:grid-template-rows var(--ask-morph-dur) var(--ask-morph-ease), border-radius var(--ask-morph-dur) var(--ask-morph-ease), padding var(--ask-morph-dur) var(--ask-morph-ease);}
   /* min-height:0 so the 0fr row can actually collapse; the vertical padding
      animates with it or it would floor the collapsed height. */
+  /* Still a flex column though the toolbar is its only child now: the gap is
+     inert with one child, and the column is what a second row would join. */
   .floating-ask-more{overflow:hidden; min-height:0; display:flex; flex-direction:column; gap:var(--spacing-12); padding-top:var(--spacing-12);
     transition:padding-top var(--ask-morph-dur) var(--ask-morph-ease), opacity calc(var(--ask-morph-dur) * .7) var(--ease-standard);}
   .floating-ask input{width:100%; border:0; outline:none; background:transparent; font-family:inherit; font-size:var(--text-body1-size); color:var(--color-neutral-9);}
@@ -927,9 +929,6 @@
   .ask-send:active{background:var(--color-neutral-7);}
   /* Mini suggestion pills — the Filters/Tag pill spec (24px, caption/700,
      Neutral-2 fill), not a new one-off size. */
-  .prompt-row-mini{display:flex; flex-wrap:wrap; gap:6px; justify-content:center;}
-  .mini-pill{display:inline-flex; align-items:center; height:24px; padding:0 10px; border:0; border-radius:var(--radius-pill); background:var(--color-neutral-2); color:var(--color-neutral-5); font-family:inherit; font-size:var(--text-caption-size); font-weight:700; cursor:pointer;}
-  .mini-pill:hover{background:var(--color-neutral-3); color:var(--color-neutral-9);}
   @media (prefers-reduced-motion:reduce){ .floating-ask-glow-outer, .floating-ask-glow-inner{ animation:none; } }
 
 
@@ -1269,11 +1268,9 @@
      (layout space -- a getBoundingClientRect height here is a ROTATED bounding
      box and reads ~40px too tall), the six fan cards' own content is
      281 / 319 / 263 / 323 / 342 / 265, so Retention at 342 is the real floor.
-     400 -> 344 was what let the row lose 56px, and going below 342 would mean
-     cutting the cards' copy. 354 is that floor plus the 10px asked for; the
-     fan's overshoot is unchanged by it (a taller card rotates to the same
-     +-31px of corner), so the track padding still clears it. */
-  .c-card-slide{flex:0 0 340px; width:340px; min-height:354px; scroll-snap-align:start; position:relative;}
+     400 -> 344 keeps a common floor a hair above that: it is what let the row
+     lose 56px, and going below 342 would mean cutting the cards' copy. */
+  .c-card-slide{flex:0 0 340px; width:340px; min-height:344px; scroll-snap-align:start; position:relative;}
 
   /* ---- Convex-arc fan layout (per reference: cards splayed like a
      hand of book covers). Each card carries two custom properties —
@@ -1942,11 +1939,14 @@
   .c-app-switcher-item i{flex:none; margin-left:auto; font-size:16px; color:var(--color-obsidian); visibility:hidden;}
   .c-app-switcher-item.is-active i{visibility:visible;}
 
-  /* ── Short desktop. Everything above is sized for a fold of about 800px and
+  /* ── Short desktop. Everything above is sized for a fold of about 752px and
      up, where the greeting, the fan, the quick links and the ask box all sit
-     clear of one another. Below that the ask box — absolute at bottom:24, so
-     always in the fold — starts covering the quick-links line: measured at
-     1280x720 the links end at 610 and the box top is 558.
+     clear of one another: the base rhythm ends its links at 612 against an
+     ask-box top of (viewport - 126). Below that the box — absolute at
+     bottom:24, so always in the fold — starts covering the quick-links line.
+     The cutoff was 799 until the composer's four suggestion pills came out and
+     took 36px off the box (138 -> 102 measured); keeping 799 after that would
+     have cramped every 752-799px laptop for a budget that no longer binds.
      This block buys back those pixels out of whitespace only, never card
      content: the row's floor is the tallest card's own content (342px,
      Retention), so there is nothing to take there without cutting copy.
@@ -1960,7 +1960,7 @@
      Placed at the end of the sheet on purpose: a media query adds no
      specificity, so source order is the only thing that makes these win over
      .c-card-slider (declared ~1100 lines above) and .c-canvas-askbox. */
-  @media (min-width:768px) and (max-height:799px){
+  @media (min-width:768px) and (max-height:751px){
     /* 8 and 8 rather than 28 and 12, so the gaps read 20px and 22px instead of
        40px and 26px. The track padding is NOT touched: it is clip-safety, and
        trading it for whitespace would slice the fan's corners.
@@ -2875,12 +2875,6 @@
                 <button class="ask-icon-btn" type="button" aria-label="Voice input"><i class="ph ph-microphone"></i></button>
                 <button class="ask-send" type="button" aria-label="Send"><i class="ph ph-arrow-up"></i></button>
               </div>
-            </div>
-            <div class="prompt-row-mini">
-              <button class="mini-pill" type="button">Show top clients</button>
-              <button class="mini-pill" type="button">Compare to last quarter</button>
-              <button class="mini-pill" type="button">List overdue invoices</button>
-              <button class="mini-pill" type="button">Who's ahead of quota?</button>
             </div>
           </div>
         </div>

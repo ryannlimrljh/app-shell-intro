@@ -773,6 +773,24 @@
         }
 
         if (phase === 'in') {
+          // chars === 0 means a quote is starting, so no credit should be on
+          // screen. For every quote after the first, the fade phase already
+          // took it off and this is a no-op. It exists for the FIRST one:
+          // the no-JS fallback in the markup ships the credit with .is-in
+          // and a name in it, which it has to, or a scriptless page would
+          // show a quote with no author. Nothing was clearing that class, so
+          // on every load the fallback's author sat at full opacity while a
+          // different, shuffled quote typed itself out underneath — the wrong
+          // name against the right words, for the length of a whole quote.
+          // Doing it here rather than at init is deliberate: init runs even
+          // when the page is never painted (loaded in a background tab, where
+          // rAF does not fire at all), and stripping the class there left
+          // that page showing the fallback quote with its author removed and
+          // nothing to replace it. Tied to the first frame instead, the
+          // fallback stays whole until the moment the loop actually takes
+          // over, and the clear happens in the same frame as the first
+          // render, so there is no state in between.
+          if (chars === 0) attrib.classList.remove('is-in');
           line.classList.add('is-typing');
           render(index, chars);
           if (chars < lengths[index]) {

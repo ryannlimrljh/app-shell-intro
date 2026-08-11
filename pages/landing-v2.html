@@ -2043,6 +2043,110 @@
     .c-canvas-dashlink{margin-top:var(--spacing-8);}
     .c-canvas-askbox{bottom:var(--spacing-16);}
   }
+
+  /* Deck dots. Declared outside the media query so the base state is
+     display:none — the query below turns them on, rather than the query
+     having to turn them off everywhere else. */
+  .c-stack-dots{display:none;}
+
+  /* ══ Mobile hero ══════════════════════════════════════════════════════
+     Everything below 640: the greeting's type, and the fan becoming a deck.
+     Placed last in the sheet on purpose (see note above). */
+  @media (max-width:640px){
+    /* 32 -> 16. This is what takes the content column from 223px to 255px at
+       a 375 viewport, which is the width the deck's outermost card needs for
+       its rim. The 88px the collapsed sidebar rail costs is not addressed
+       here; that is the shell's own layout, not the hero's. */
+    :root{--page-gutter:var(--spacing-16);}
+
+    /* The greeting was paying the page gutter twice — .c-shell-content's and
+       its own — and rendered 32px type into 159px, three lines deep. */
+    .c-canvas-greeting{padding:0;}
+    .c-canvas-greeting h1{font-size:24px; line-height:30px;}
+    .c-canvas-greeting p{font-size:var(--text-body2-size); line-height:22px;}
+
+    /* ---- The deck.
+       --stack-grow is per-step scale, not per-step translate: scaling about a
+       top-centre origin grows a card sideways AND downward at once, which is
+       all three rims (left, right, bottom) out of one compositor property. A
+       translate would have given the bottom rim only.
+       --stack-drop reserves the room the deepest card's growth needs below the
+       front card, so the deck does not sit on top of the dashboard link. At
+       .024 per step over 3 visible steps that is ~7.2% of a ~430px card. */
+    .c-card-slider{--stack-grow:.024; --stack-drop:36px;
+      /* No longer a scroll container: overflow visible, snap off, and the
+         fan's full-bleed margins and leading inset all cancelled. touch-action
+         pan-y keeps vertical page scrolling native while horizontal gestures
+         reach the swipe handler instead of being eaten by a scroll. */
+      overflow:visible; scroll-snap-type:none; touch-action:pan-y; cursor:default;
+      margin:var(--spacing-20) 0 0; padding:0; scroll-padding-left:0;}
+    .c-card-slider-track{display:block; position:relative; width:auto;
+      padding:0 0 var(--stack-drop); perspective:none;}
+
+    /* Every card sits at the same origin; --stack-d (0 = front, set from JS)
+       is the only thing that separates them. --arc-* are zeroed because the
+       fan pose is meaningless here AND because enableCardTilt reads them off
+       computed style — if the tilt gate below ever fails open, it bakes an
+       identity transform rather than a fan pose. */
+    .c-card-slider-track > .c-card-slide{
+      --arc-y:0px; --arc-rotate:0deg;
+      --stack-scale:calc(1 + var(--stack-d, 0) * var(--stack-grow));
+      position:absolute; top:0; left:0; width:100%; margin:0; flex:none;
+      transform-origin:50% 0;
+      transform:translateY(24px) scale(var(--stack-scale));
+      z-index:calc(20 - var(--stack-d, 0));}
+    .c-card-slider-track > .c-card-slide.is-revealed{
+      transform:translateY(0) scale(var(--stack-scale));}
+
+    /* The front card is the only one in flow, so it is what gives the track
+       its height — which is in turn what the absolute cards scale against.
+       :first-child is the pre-JS fallback: .is-off-fan is applied by a script
+       further down the file, so the deck's first paint is deferred one
+       macrotask, and without this the track would briefly have no in-flow
+       child and collapse to zero height. .is-stacked is set once JS owns it. */
+    .c-card-slider-track:not(.is-stacked) > .c-card-slide:first-child,
+    .c-card-slider-track > .c-card-slide.is-stack-front{
+      position:relative; top:auto; left:auto; z-index:20;}
+    .c-card-slider-track > .c-card-slide.is-stack-front{--stack-d:0;}
+
+    /* Cards behind read as the deck's grey edges rather than as more white
+       cards — only their rims are ever visible, and white-on-white loses the
+       stack entirely against the warm canvas. */
+    .c-card-slider-track > .c-card-slide:not(.is-stack-front){
+      background:var(--color-neutral-2);}
+    /* Past the third card back the rims stop being legible and start being
+       noise, so the rest wait at the same depth with nothing showing. */
+    .c-card-slider-track > .c-card-slide.is-stack-buried{opacity:0; pointer-events:none;}
+
+    /* .is-settled turns transitions off so Motion's spring is not fighting a
+       CSS transition. In deck mode Motion owns nothing (see the tilt gate in
+       the script), so this has to come back or the cards teleport. */
+    .c-card-slider-track > .c-card-slide.is-settled{
+      transition:transform 420ms cubic-bezier(.22,1,.36,1),
+                 opacity 260ms var(--ease-standard),
+                 background 260ms var(--ease-standard);
+      cursor:pointer;}
+
+    /* Dots. 44px tall always; the width shrinks from 44 only because six of
+       them at full width want 264px against a 255px column. The hit target is
+       the button, not the 7px pip it draws. */
+    .c-stack-dots{display:flex; justify-content:center; gap:0; margin-top:var(--spacing-12);}
+    .c-stack-dot{flex:0 1 44px; min-width:36px; height:44px; padding:0; border:0;
+      background:none; cursor:pointer; display:flex; align-items:center; justify-content:center;
+      -webkit-tap-highlight-color:transparent;}
+    .c-stack-dot::after{content:''; display:block; width:7px; height:7px;
+      border-radius:var(--radius-pill); background:var(--color-neutral-4);
+      transition:width var(--duration-base) var(--ease-settle), background var(--duration-base) var(--ease-settle);}
+    .c-stack-dot.is-on::after{width:20px; background:var(--color-obsidian);}
+    .c-stack-dot:focus-visible{outline:2px solid var(--color-obsidian); outline-offset:-6px; border-radius:var(--radius-sm);}
+  }
+
+  /* The deck's positions carry meaning (which card is front), so they stay —
+     only the travel between them goes. */
+  @media (prefers-reduced-motion:reduce){
+    .c-card-slider-track > .c-card-slide.is-settled{transition:none;}
+    .c-stack-dot::after{transition:none;}
+  }
 </style>
 </head>
 <body>
@@ -2247,6 +2351,11 @@
             </div>
           </div>
         </div>
+        <!-- Deck affordance, mobile only (display:none above 640). Built from
+             JS so it can never disagree with how many cards are actually on
+             the fan, and it is also the keyboard/screen-reader route to cards
+             2-6 — a swipe is not one. -->
+        <div class="c-stack-dots" id="cardStackDots" role="tablist" aria-label="Highlight cards"></div>
         <!-- Every label names the destination it actually lands on, and all
              three are wired (the old "Clean up cards" was href="#" and did
              nothing). "Hero Cards" returns to the fan above, so it
@@ -3443,6 +3552,105 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
   // itself.
   const cardSlider = document.getElementById('cardSlider');
   if (cardSlider) {
+    /* ---- Mobile deck. Below 640 the fan stops being a scroll container and
+       becomes a stack: one card in flow, the rest absolutely on top of it,
+       separated only by --stack-d (0 = front). Everything visual is in the
+       media query at the end of <style>; this owns which card is front. */
+    const STACK_MQ = window.matchMedia('(max-width:640px)');
+    const STACK_VISIBLE = 3;           // cards showing a rim behind the front one
+    const SWIPE_MIN_PX = 40;           // below this a horizontal drag is a tap, not a swipe
+    const stackTrack = cardSlider.querySelector('.c-card-slider-track');
+    /* On-fan cards only. The other six are .is-off-fan (display:none here —
+       they render in the tidy-grid overlay), and that class is applied by a
+       script further down the file, which is why the first paint below is
+       deferred rather than reading FAN_ROLE a second time. */
+    const stackCards = () => Array.from(stackTrack.children)
+      .filter((c) => c.classList.contains('c-card-slide') && !c.classList.contains('is-off-fan'));
+    let stackTop = 0;
+    let stackDotsBuilt = false;
+
+    function paintStack() {
+      const cs = stackCards();
+      const n = cs.length;
+      if (!n) return;
+      stackTop = ((stackTop % n) + n) % n;
+      stackTrack.classList.add('is-stacked');
+      cs.forEach((card, j) => {
+        const depth = (j - stackTop + n) % n;
+        // Clamped, not raw: everything past STACK_VISIBLE parks at the same
+        // depth and is hidden, so the deck never scales a card off the screen.
+        card.style.setProperty('--stack-d', String(Math.min(depth, STACK_VISIBLE)));
+        card.classList.toggle('is-stack-front', depth === 0);
+        card.classList.toggle('is-stack-buried', depth > STACK_VISIBLE);
+        // Only the front card is readable, so it is the only one announced.
+        card.setAttribute('aria-hidden', depth === 0 ? 'false' : 'true');
+      });
+      const dots = document.getElementById('cardStackDots');
+      if (dots) Array.from(dots.children).forEach((b, j) => {
+        b.classList.toggle('is-on', j === stackTop);
+        b.setAttribute('aria-selected', j === stackTop ? 'true' : 'false');
+        b.tabIndex = j === stackTop ? 0 : -1;   // roving tabindex, one stop for the whole row
+      });
+    }
+    function stackStep(dir) { stackTop += dir; paintStack(); }
+
+    function buildStackDots() {
+      if (stackDotsBuilt) return;
+      const dots = document.getElementById('cardStackDots');
+      if (!dots) return;
+      const cs = stackCards();
+      if (!cs.length) return;          // nothing to label yet; applyStackMode runs again on change
+      stackDotsBuilt = true;
+      cs.forEach((card, j) => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'c-stack-dot';
+        b.setAttribute('role', 'tab');
+        // Named, not just numbered — "Concentration" tells you where you are
+        // going and a bare "3 of 6" does not.
+        const label = card.querySelector('.c-hcard-label, .c-stat-label');
+        b.setAttribute('aria-label',
+          `${label ? label.textContent.trim() + ', ' : ''}card ${j + 1} of ${cs.length}`);
+        b.addEventListener('click', () => { stackTop = j; paintStack(); });
+        dots.appendChild(b);
+      });
+    }
+
+    /* Motion owns a card's inline transform for good once enableCardTilt has
+       run (it re-states the fan pose as Motion values), so entering deck mode
+       has to hand it back. Motion writes either the transform shorthand or the
+       individual properties depending on version; clear all four. */
+    function releaseCardTransform(card) {
+      card.style.transform = '';
+      card.style.translate = '';
+      card.style.rotate = '';
+      card.style.scale = '';
+      delete card.dataset.tiltEnabled;
+    }
+
+    function applyStackMode() {
+      const cs = stackCards();
+      if (STACK_MQ.matches) {
+        cs.forEach(releaseCardTransform);
+        buildStackDots();
+        paintStack();
+      } else {
+        stackTrack.classList.remove('is-stacked');
+        cs.forEach((c) => {
+          c.style.removeProperty('--stack-d');
+          c.classList.remove('is-stack-front', 'is-stack-buried');
+          c.removeAttribute('aria-hidden');
+          // Cards that already finished their entrance get their tilt back;
+          // ones still arriving pick it up from the settle handler as usual.
+          if (c.classList.contains('is-settled')) enableCardTilt(c);
+        });
+      }
+    }
+    STACK_MQ.addEventListener('change', applyStackMode);
+    // One macrotask, not immediate: .is-off-fan is applied by a later script
+    // block, and stackCards() would otherwise count all twelve.
+    setTimeout(applyStackMode, 0);
+
     let isDragging = false;
     let dragStartX = 0;
     let scrollLeftAtDragStart = 0;
@@ -3464,16 +3672,26 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
       // only time it's needed (to keep receiving moves after the
       // pointer leaves the slider mid-drag).
     });
+    let dragDx = 0; // last horizontal travel, read by endDrag to decide swipe vs tap
     cardSlider.addEventListener('pointermove', (e) => {
       if (!isDragging) return;
       const dx = e.clientX - dragStartX;
+      dragDx = dx;
       if (Math.abs(dx) > 3 && !didDrag) {
         didDrag = true;
         cardSlider.setPointerCapture(e.pointerId);
       }
-      cardSlider.scrollLeft = scrollLeftAtDragStart - dx;
+      // In deck mode there is nothing to scroll — the gesture advances the
+      // stack on release instead (see endDrag).
+      if (!STACK_MQ.matches) cardSlider.scrollLeft = scrollLeftAtDragStart - dx;
     });
     function endDrag() {
+      // Direction reads the way the cards move, not the way the finger does:
+      // dragging left pulls the next card in, same as the fan scrolling left.
+      if (STACK_MQ.matches && didDrag && Math.abs(dragDx) >= SWIPE_MIN_PX) {
+        stackStep(dragDx < 0 ? 1 : -1);
+      }
+      dragDx = 0;
       isDragging = false;
       cardSlider.classList.remove('is-dragging');
     }
@@ -3486,6 +3704,7 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
     cardSlider.addEventListener('keydown', (e) => {
       if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
       e.preventDefault();
+      if (STACK_MQ.matches) { stackStep(e.key === 'ArrowRight' ? 1 : -1); return; }
       const track = cardSlider.querySelector('.c-card-slider-track');
       const gap = track ? parseFloat(getComputedStyle(track).columnGap || getComputedStyle(track).gap) || 0 : 0;
       const card = cardSlider.querySelector('.c-card-slide');
@@ -3517,6 +3736,11 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
     // outright while an actual slider drag is in progress.
     function enableCardTilt(card) {
       if (card.dataset.tiltEnabled) return; // both the transitionend path and the setTimeout fallback below call this — enable once
+      // Deck mode: the tilt is a mouse-hover affordance that does nothing on a
+      // phone EXCEPT permanently hand this card's transform to Motion, which
+      // is the transform the deck's scale needs. Bail before the flag is set,
+      // so applyStackMode can still enable it if the viewport crosses back.
+      if (STACK_MQ.matches) return;
       card.dataset.tiltEnabled = 'true';
       const MAX_TILT_DEG = 12;
       // From here on Motion owns this card's whole inline transform.

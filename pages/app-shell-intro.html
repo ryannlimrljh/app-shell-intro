@@ -72,16 +72,16 @@
      top-of-screen pattern) — this is a different shape (a dashboard
      "hero" greeting, not the shell's structural header), so it's a new
      page-local block rather than a reuse of .c-shell-page-header.
-     padding-top is --spacing-24, not the --spacing-60 it opened with: the
-     date row used to sit in that band, and with the row gone the 60px read
-     as an unexplained hole above the greeting AND cost the quick links
-     their place in the fold.
+     No padding-top at all now (it opened at --spacing-60, then --spacing-24).
+     The date row used to sit in that band; with the row gone it was a second,
+     undeclared top margin stacked on .c-shell-content's own --section-gap,
+     and the 24px it cost was better spent on the gap below the greeting.
      Still built from the same h1/body1 type tokens .c-shell-page-header
      itself uses, not new sizes — the only new thing here is the
      centered layout. Name is read from the sidebar account row's own
      .c-userpicker-name (see script below) rather than a second hardcoded
      "Bryan" — one source for the name, not two copies that can drift. */
-  .c-canvas-greeting{text-align:center; padding:var(--spacing-24) var(--page-gutter) 0;}
+  .c-canvas-greeting{text-align:center; padding:0 var(--page-gutter);}
   .c-canvas-greeting h1{margin:0 0 var(--spacing-8); font-family:var(--font-primary); font-size:var(--text-h1-size); font-weight:var(--text-h1-weight); color:var(--color-neutral-9);}
   .c-canvas-greeting p{margin:0; font-family:var(--font-primary); font-size:var(--text-body1-size); font-weight:var(--text-body1-weight); color:var(--color-neutral-5);}
 
@@ -1258,10 +1258,10 @@
     margin-left:calc(-1 * var(--fan-bleed)); padding-left:var(--fan-bleed); scroll-padding-left:var(--fan-bleed);
     /* Was an inline margin-top:--spacing-32 on the element. Moved here so the
        hero's three vertical gaps are all readable in one place.
-       14px, not the 26px the gap actually measures: the track's 30px top
+       28px, not the 40px the gap actually measures: the track's 30px top
        padding contributes to the gap too, and the fan's top corners eat 18px
-       of the pair. 14 + 30 - 18 = 26. */
-    margin-top:14px;}
+       of the pair. 28 + 30 - 18 = 40. */
+    margin-top:28px;}
   .c-card-slider::-webkit-scrollbar{display:none;}
   .c-card-slider.is-dragging{cursor:grabbing; scroll-snap-type:none; user-select:none;}
   .c-card-slider-track{display:flex; gap:0; width:max-content; padding:30px 64px 60px; perspective:900px;}
@@ -1269,9 +1269,11 @@
      (layout space -- a getBoundingClientRect height here is a ROTATED bounding
      box and reads ~40px too tall), the six fan cards' own content is
      281 / 319 / 263 / 323 / 342 / 265, so Retention at 342 is the real floor.
-     400 -> 344 keeps a common floor a hair above that: it is what let the row
-     lose 56px, and going below 342 would mean cutting the cards' copy. */
-  .c-card-slide{flex:0 0 340px; width:340px; min-height:344px; scroll-snap-align:start; position:relative;}
+     400 -> 344 was what let the row lose 56px, and going below 342 would mean
+     cutting the cards' copy. 354 is that floor plus the 10px asked for; the
+     fan's overshoot is unchanged by it (a taller card rotates to the same
+     +-31px of corner), so the track padding still clears it. */
+  .c-card-slide{flex:0 0 340px; width:340px; min-height:354px; scroll-snap-align:start; position:relative;}
 
   /* ---- Convex-arc fan layout (per reference: cards splayed like a
      hand of book covers). Each card carries two custom properties —
@@ -1959,10 +1961,11 @@
      specificity, so source order is the only thing that makes these win over
      .c-card-slider (declared ~1100 lines above) and .c-canvas-askbox. */
   @media (min-width:768px) and (max-height:799px){
-    .c-canvas-greeting{padding-top:var(--spacing-8);}
-    /* 8 and 8 rather than 14 and 12, so the gaps read 20px and 22px instead of
-       26px and 26px. The track padding is NOT touched: it is clip-safety, and
-       trading it for whitespace would slice the fan's corners. */
+    /* 8 and 8 rather than 28 and 12, so the gaps read 20px and 22px instead of
+       40px and 26px. The track padding is NOT touched: it is clip-safety, and
+       trading it for whitespace would slice the fan's corners.
+       No greeting padding-top override: the base is 0 now, so one would ADD
+       the band back rather than shrink it. */
     .c-card-slider{margin-top:var(--spacing-8);}
     .c-canvas-dashlink{margin-top:var(--spacing-8);}
     .c-canvas-askbox{bottom:var(--spacing-16);}

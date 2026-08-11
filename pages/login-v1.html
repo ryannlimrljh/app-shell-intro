@@ -1,0 +1,893 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Collabrium · Sign in</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<!-- Same weight list as landing-v2: Mulish 800 is the heading token and
+     the eyebrow/labels are 700, so both cuts have to be real faces rather
+     than faux-bolded. Source Serif 4 is here for one element only, the
+     brand statement in the left panel. -->
+<link href="https://fonts.googleapis.com/css2?family=Mulish:wght@400;500;600;700;800;900&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400;1,8..60,600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css" />
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css" />
+<link rel="stylesheet" href="../collabrium-dls/tokens.css?v=f278e40" />
+<link rel="stylesheet" href="../collabrium-dls/components.css?v=f278e40" />
+<style>
+  *{box-sizing:border-box;}
+  html,body{margin:0; height:100%;}
+  /* Warm canvas is now the page itself, not one half of it. That is the
+     app shell's own arrangement (.c-shell sets this background) and it is
+     what lets the sign-in panel float the way the main nav floats: the
+     nav is a white card inset from a warm shell, and a white panel needs
+     a warm surface behind it to read as lifted rather than as a seam. */
+  body{font-family:var(--font-primary); color:var(--color-neutral-9); background:var(--color-canvas-warm);}
+
+  /* ── Shell. Two columns, split at 52/48 rather than 50/50: the brand
+       statement is set in a serif at display size and wants the longer
+       measure, while the sign-in side is a single button and a paragraph
+       and reads better narrow. Below 900px the brand column is not
+       squeezed, it is dropped to a header strip (see the media query). */
+  .login{position:relative; overflow:hidden; display:grid; grid-template-columns:52fr 48fr; min-height:100dvh;}
+
+  .login > *{position:relative; z-index:1;}
+
+  /* ── The wash. Three blurred colour fields drifting behind everything, in
+       the canvas the panel floats on.
+       What it is made of, and what it is not: the three fills are the
+       documented elemental tints, Fire, Gold and Water, in their -bg-strong
+       (16%) form. Nothing new is mixed. The strong variants are used rather
+       than the 8% ones because 60px of blur and an opacity in the .3-.55
+       range eat most of a tint's presence, and the effective colour on screen
+       lands back around the 8% level the system documents for a fill. The
+       first pass ran .42-.7 and was legibly a coloured background rather than
+       a canvas with warmth in it; these are those values less about a fifth.
+       Water earns its place as the only cool note: two warm fields alone
+       drift like a single stain, and a cool counterweight is what makes the
+       movement read rather than the colour.
+       It hangs off .login, not off the brand column. That is where the
+       earlier single glow started, and clipped to the column its right edge
+       got cut while still near full opacity, drawing a hard vertical seam on
+       the column boundary. Page-level it passes under the panel, and only the
+       canvas around and beside the panel shows it. */
+  .login-wash{
+    position:absolute; inset:0; z-index:0; overflow:hidden; pointer-events:none;
+  }
+  .login-wash span{
+    position:absolute; display:block; border-radius:50%;
+    /* The blur is static. Only transform is animated — filter is one of the
+       properties that cannot be composited cheaply per frame, so animating
+       the blur itself would re-rasterise a 900px layer every frame. Blurred
+       once, then moved, it is a texture upload the compositor reuses. */
+    filter:blur(60px);
+    will-change:transform;
+  }
+  /* Radial rather than flat fills, so each field fades out on its own terms
+     instead of relying on the blur to soften a hard circular edge. */
+  .login-wash .w1{
+    left:-6%; top:34%; width:900px; height:900px; opacity:.55;
+    background:radial-gradient(circle at center, var(--color-fire-bg-strong) 0%, rgba(255,222,211,.45) 45%, rgba(255,222,211,0) 70%);
+    animation:wash-1 47s var(--ease-flow) infinite;
+  }
+  .login-wash .w2{
+    left:22%; top:-16%; width:760px; height:760px; opacity:.44;
+    background:radial-gradient(circle at center, var(--color-gold-bg-strong) 0%, rgba(255,237,211,.42) 45%, rgba(255,237,211,0) 70%);
+    animation:wash-2 61s var(--ease-flow) infinite;
+  }
+  .login-wash .w3{
+    left:6%; top:8%; width:680px; height:680px; opacity:.3;
+    background:radial-gradient(circle at center, var(--color-water-bg-strong) 0%, rgba(208,227,251,.38) 45%, rgba(208,227,251,0) 70%);
+    animation:wash-3 73s var(--ease-flow) infinite;
+  }
+
+  /* 47s, 61s and 73s: three co-prime-ish periods, so the three fields never
+     re-align into a pose the eye can recognise as the start of a loop. This
+     steps outside the system's 80-900ms duration ladder on purpose — that
+     ladder is for UI state changes, where 900ms is already slow. Ambient
+     drift at 900ms would be a strobe. Named tokens are still used for the
+     easing: --ease-flow is the Water curve, "continuous", which is the one
+     documented curve that describes this.
+     translate3d and scale only, both compositor-friendly. Amplitudes are
+     deliberately small (under 9% of the viewport) — the goal is that you
+     cannot catch it moving, only notice that it has moved. */
+  @keyframes wash-1{
+    0%   {transform:translate3d(0,0,0) scale(1);}
+    33%  {transform:translate3d(5%,-6%,0) scale(1.08);}
+    66%  {transform:translate3d(-4%,4%,0) scale(.96);}
+    100% {transform:translate3d(0,0,0) scale(1);}
+  }
+  @keyframes wash-2{
+    0%   {transform:translate3d(0,0,0) scale(1);}
+    40%  {transform:translate3d(-7%,6%,0) scale(1.06);}
+    75%  {transform:translate3d(4%,3%,0) scale(.94);}
+    100% {transform:translate3d(0,0,0) scale(1);}
+  }
+  @keyframes wash-3{
+    0%   {transform:translate3d(0,0,0) scale(1);}
+    45%  {transform:translate3d(8%,5%,0) scale(1.1);}
+    80%  {transform:translate3d(-3%,-5%,0) scale(1);}
+    100% {transform:translate3d(0,0,0) scale(1);}
+  }
+
+  /* ── Left: brand. No fill and no divider of its own. The canvas is the
+       page's, and the panel opposite provides the edge.
+       Two grid rows rather than flex with space-between: the row that held
+       the element dots and the tagline is gone, and space-between across
+       the two survivors would have pinned the statement to the bottom
+       edge. auto/1fr keeps the logo at the top and centres the statement
+       in everything below it, which is where it sat before. */
+  .login-brand{
+    display:grid; grid-template-rows:auto 1fr; align-items:center;
+    padding:var(--spacing-48) var(--spacing-60);
+  }
+
+  /* The logo is the live asset (logo.html), embedded rather than
+     screenshotted, per the design system's standing rule. Same clip-and-
+     offset anatomy as the system's own .c-sidebar-logo-live-wrap, and for
+     the same reason: logo.html wraps its SVG in `padding:1rem 0`, so the
+     embed is 32px taller than the mark itself. The wrap is the mark's own
+     box (208 wide, and 208 × 182/1022 = 37 tall on the SVG's viewBox
+     ratio), the iframe is that plus the padding, and top:-16px pulls the
+     top half of it out of view. Sizing the iframe to 37 instead would
+     just crop the wordmark, which is what it did on the first pass. */
+  .login-logo-wrap{width:208px; height:37px; overflow:hidden; position:relative;}
+  .login-logo-wrap iframe{position:absolute; top:-16px; left:0; width:208px; height:69px; border:0; pointer-events:none;}
+
+  .login-statement{max-width:520px;}
+  /* 16 rather than 20 below the eyebrow. The serif display line carries 16px
+     of its own leading above the cap height (40px type on a 56px line), so
+     the optical gap is the margin plus that half-leading: 20 measured as ~36
+     and read as detached from the label. 16 lands it at ~32, and the eyebrow
+     sits as a kicker on the quote rather than as its own paragraph. */
+  .login-eyebrow{
+    margin:0 0 var(--spacing-16);
+    font-size:var(--text-label3-size); line-height:var(--text-label3-lh);
+    font-weight:var(--text-label3-weight); letter-spacing:var(--tracking-eyebrow);
+    text-transform:uppercase; color:var(--color-neutral-5);
+  }
+  /* Source Serif 4's only appearance on this page. It is a brand
+     statement at display size, which is the sanctioned use; everything
+     functional below stays Mulish. Italics carry the department names
+     because that is the sentence's emphasis, not decoration.
+     display:grid with every child in cell 1/1 is how the typed carousel
+     reserves its height. All three messages exist in the box at once; two
+     of them are ghosts at visibility:hidden, so the box is always as tall
+     as the LONGEST message and the panel beside it never moves as the text
+     changes. That is the "reserve space for async content" rule, and it is
+     the one thing a typed carousel gets wrong by default: sized to the
+     live line, the whole column would jump on every character. */
+  .login-statement h2{
+    display:grid; margin:0;
+    font-family:var(--font-secondary);
+    font-size:var(--text-display-size); line-height:var(--text-display-lh);
+    font-weight:var(--text-display-weight); letter-spacing:0;
+    color:var(--color-neutral-9);
+  }
+  .login-statement h2 > *{grid-area:1/1;}
+  .login-statement h2 em{font-style:italic; font-weight:inherit;}
+  /* Ghosts take visibility:hidden rather than opacity:0 so assistive tech
+     skips them; the readable copy of all three messages lives in the
+     .login-sr block below. */
+  .login-type-ghost{visibility:hidden;}
+  /* align-self:start — every quote begins on the same line, immediately under
+     the eyebrow, and the slack left over by a short quote all collects at the
+     bottom of the box where nothing is anchored.
+     This was center for one round, which was the right call only while the
+     credit was a sibling BELOW the reserved box: top-aligning then left the
+     credit stranded at the box's foot, far from a short quote. The credit
+     moved inside the line, so it now rides up with the text and top-aligning
+     costs nothing. Centering was also what made the eyebrow look like it had
+     a huge bottom margin: a one-line quote was being pushed ~145px down its
+     own box, and the gap read as margin rather than as slack.
+     The opacity transition is the message's exit: the line fades out whole
+     rather than being backspaced away. --duration-base is 220ms, inside the
+     150-300ms band for a micro-interaction. On easing: the guidance is
+     ease-in for an exit and the system ships no ease-in token, so this uses
+     --ease-standard rather than inventing a curve, which the DS forbids. */
+  .login-type-line{align-self:start; transition:opacity var(--duration-base) var(--ease-standard);}
+  .login-type-line.is-fading{opacity:0;}
+
+  /* Attribution. Mulish, not the serif: the quote is the brand-statement
+     moment and the credit under it is a label, which is the line the design
+     system draws between its two faces. Sized as label3 (11px/700 at the
+     eyebrow tracking) so it pairs with the eyebrow above the quote rather
+     than competing with the quote itself.
+     It lives INSIDE the typed line, as a block after the text, not as a
+     sibling under the <h2>. As a sibling it sat below the whole reserved box
+     — fine when all three messages were about the same length, wrong the
+     moment quotes vary: "Many hands make light work." is one line in a box
+     six lines tall, and its credit would have floated ~270px beneath it.
+     Inside the line it follows the quote's own last line, always.
+     min-height reserves its single line whether or not a name is showing, so
+     the box does not resize between the quote landing and the credit
+     arriving. No name is long enough to wrap here, so one line is the
+     whole budget. */
+  .login-attrib{
+    display:block; margin:var(--spacing-20) 0 0; min-height:var(--text-label3-lh);
+    font-size:var(--text-label3-size); line-height:var(--text-label3-lh);
+    font-weight:var(--text-label3-weight); letter-spacing:var(--tracking-eyebrow);
+    text-transform:uppercase; color:var(--color-neutral-5);
+    opacity:0; transition:opacity var(--duration-base) var(--ease-standard);
+  }
+  /* Arrives after the last character of the quote lands, not with it. */
+  .login-attrib.is-in{opacity:1;}
+
+  /* The caret. A background-filled span rather than a border-right, so its
+     width is set in one place, and inline-block with vertical-align so it
+     sits on the text's own baseline at any size. It stops blinking while
+     characters are being typed or deleted (.is-typing) — a caret that
+     blinks mid-word reads as two things happening instead of one. */
+  .login-caret{
+    display:inline-block; width:3px; height:0.9em; margin-left:2px;
+    vertical-align:-0.08em; background:var(--color-orange);
+    animation:login-blink 1s steps(1, end) infinite;
+  }
+  .login-type-line.is-typing .login-caret{animation:none;}
+  @keyframes login-blink{0%,49%{opacity:1;} 50%,100%{opacity:0;}}
+
+  /* Readable-but-invisible copy of the full statement. The typed line is
+     aria-hidden (a live region emitting one character at a time is unusable
+     with a screen reader), so this is what actually carries the content to
+     assistive tech: all three sentences, in order, as static text.
+     clip-path + 1px box rather than display:none or visibility:hidden,
+     both of which would hide it from AT as well. */
+  .login-sr{
+    position:absolute; width:1px; height:1px; margin:-1px; padding:0;
+    overflow:hidden; clip-path:inset(50%); white-space:nowrap; border:0;
+  }
+
+  /* ── Right: sign in, as a floating panel. Same anatomy as the main nav
+       in the app shell, borrowed deliberately so the two surfaces read as
+       one system: white fill, 1px Neutral-3 border, --radius-lg 20px, and
+       a 16px inset from the shell edge (.c-shell gives .c-sidebar-shell
+       margin:16). The shadow is --shadow-3, which is the step landing-v2
+       puts on the nav for the same reason, and every shadow in this system
+       is Neutral-4 grey rather than black.
+       .login-auth is the grid cell and owns only the inset; the card is
+       the child, so the panel's own padding and the gap to the viewport
+       stay independent of each other.
+       The perspective belongs to the cell, not to the card: a perspective on
+     the transformed element itself is applied per-child and the tilt reads
+     flat. Same split .c-card-slider-track uses for the fan. 1800px rather
+     than the fan's 900px because this surface is text, and landing-v2's own
+     note on .c-dec-queue says it: the shallower the perspective, the more a
+     tilt distorts long lines. A login panel can afford no distortion. */
+  .login-auth{display:flex; padding:var(--spacing-16); perspective:1800px;}
+  .login-auth-card{
+    /* flex:1 with a max-width, plus margin-left:auto, so the card keeps its
+       16px inset from the viewport edge and gives the width it no longer
+       needs back to the canvas on its left, next to the statement. */
+    flex:1; max-width:620px; margin-left:auto;
+    display:flex; align-items:center; justify-content:center;
+    /* 32, down from 48. Both this and the width above serve one goal: the
+       four text lines inside (lede, button title, button caption, and the two
+       footnotes) each fit on ONE line at desktop widths. The measurements
+       that set these numbers: the lede needs ~470px, the shield footnote ~455
+       including its icon and indent, the help line ~400. So the content
+       column needs ~480, and 620 - 64 = 556 clears it with room to spare. */
+    padding:var(--spacing-32);
+    background:var(--color-neutral-1);
+    border:1px solid var(--color-neutral-3);
+    border-radius:var(--radius-lg);
+    box-shadow:var(--shadow-3);
+    /* Motion writes the transform per frame from JS once tilt is enabled;
+       this is only the starting pose and the will-change hint. The shadow
+       is NOT Motion's: the hover handler swaps it to --shadow-4 and this
+       transition is what keeps that swap from being a hard cut. Only
+       box-shadow is transitioned, never transform, or the transition would
+       re-smooth every frame Motion writes into mush (landing-v2 hit exactly
+       that on the fan and had to switch its own transition off). */
+    transform-style:preserve-3d;
+    will-change:transform;
+    transition:box-shadow var(--duration-base) var(--ease-standard);
+  }
+  /* 480, up from 400. This cap, not the card's width or its padding, is what
+     was actually wrapping every line: at 400 the lede broke after "your" no
+     matter how wide the card around it got. Widening the card without lifting
+     this would have changed nothing but the amount of white space. */
+  .login-auth-inner{width:100%; max-width:480px;}
+  .login-auth h1{
+    margin:0 0 var(--spacing-12);
+    font-size:var(--text-h1-size); line-height:var(--text-h1-lh);
+    font-weight:var(--text-h1-weight); letter-spacing:var(--text-h1-tracking);
+  }
+  .login-lede{
+    margin:0 0 var(--spacing-32);
+    font-size:var(--text-body1-size); line-height:var(--text-body1-lh);
+    font-weight:var(--text-body1-weight); color:var(--color-neutral-5);
+  }
+
+  /* The SSO button. .c-btn .c-btn-primary .c-btn-lg gives it the
+     obsidian fill, the 16px radius and the 48px height; the two-line
+     label needs more room than 48px, so the height is released here and
+     vertical padding takes over. The label is a stacked block with its
+     own line-height, which is the fix for the run-together text in the
+     reference: the title and the qualifier are separate elements, not
+     one string that happens to wrap. */
+  .login-sso{
+    width:100%; height:auto; justify-content:flex-start;
+    gap:var(--spacing-16); padding:var(--spacing-16) var(--spacing-20);
+    text-align:left;
+  }
+  .login-sso-mark{
+    flex:none; width:32px; height:32px; border-radius:var(--radius-sm);
+    display:flex; align-items:center; justify-content:center;
+    background:rgba(255,255,255,.12); color:var(--color-neutral-1);
+  }
+  .login-sso-mark i{font-size:var(--icon-base);}
+  .login-sso-label{display:flex; flex-direction:column; gap:2px; min-width:0;}
+  .login-sso-label b{font-size:var(--text-body1-size); line-height:var(--text-body1-lh); font-weight:var(--text-body1-strong-weight);}
+  .login-sso-label span{
+    font-size:var(--text-caption-size); line-height:var(--text-caption-lh);
+    font-weight:var(--text-caption-weight); color:rgba(255,255,255,.72);
+  }
+  /* Pushed to the trailing edge by margin rather than by
+     justify-content:space-between, so the mark and the label stay one
+     content-first group and only the arrow is pinned right. */
+  .login-sso-go{margin-left:auto; flex:none; font-size:var(--icon-base); transition:transform var(--duration-fast) var(--ease-standard);}
+  .login-sso:hover .login-sso-go{transform:translateX(3px);}
+
+  /* Working state. The button is disabled while the redirect is in
+     flight, and .c-btn:disabled would otherwise repaint it neutral-4 grey,
+     which reads as "this control is unavailable" rather than "this is
+     happening". So the busy state re-asserts the obsidian fill and lets
+     the spinner and the status line carry the change. Deliberately no
+     opacity drop: 72% obsidian on white lands on the same mid-grey the
+     disabled rule was going to give, which was the whole thing being
+     avoided. Specificity is class + attribute, matching :disabled's, so
+     this wins on source order (page style loads after components.css). */
+  .login-sso[aria-busy="true"]{background:var(--color-obsidian); color:var(--color-neutral-1); cursor:progress;}
+  .login-spinner{
+    width:18px; height:18px; flex:none; border-radius:var(--radius-pill);
+    border:2px solid rgba(255,255,255,.32); border-top-color:var(--color-neutral-1);
+    animation:login-spin var(--duration-ambient) linear infinite;
+  }
+  @keyframes login-spin{to{transform:rotate(360deg);}}
+
+  /* The status line sits directly under the button, where the thing it
+     describes is. min-height reserves its one line at rest so the footnotes
+     below do not jump down the moment it fills in. */
+  .login-status{margin:var(--spacing-12) 0 0; min-height:var(--text-caption-lh);}
+
+  .login-rule{margin:var(--spacing-20) 0; border:0; border-top:1px solid var(--color-neutral-2);}
+
+  .login-note{display:flex; align-items:center; gap:var(--spacing-8); margin:0;
+    font-size:var(--text-body2-size); line-height:var(--text-body2-lh); color:var(--color-neutral-5);}
+  .login-note i{font-size:var(--icon-sm); color:var(--color-green);}
+  /* Second line of the footnote block. A single-button screen with no
+     recourse is a dead end for anyone whose access has not been
+     provisioned yet, so this is the way out. Not in the reference
+     screenshot; flagged as an addition.
+     It now carries its own icon, so it is the same flex row as .login-note
+     above rather than a paragraph faking that row's indent. The
+     padding-left:calc(icon + gap) that used to align the two is gone: a real
+     icon and a real gap put the text on the same vertical for real, and the
+     alignment can no longer drift from the row it is aligning to.
+     The icon stays at the inherited text colour, per the system's rule that
+     icons take the colour around them and do not reach for an elemental one
+     outside a surface that owns it. That also keeps the shield's green as the
+     only coloured mark in the block, which is what makes it read as a signal
+     rather than as decoration. */
+  .login-help{
+    display:flex; align-items:center; gap:var(--spacing-8);
+    margin:var(--spacing-12) 0 0;
+    font-size:var(--text-body2-size); line-height:var(--text-body2-lh); color:var(--color-neutral-5);
+  }
+  .login-help i{font-size:var(--icon-sm); flex:none;}
+  .login-help a{color:var(--color-neutral-9); font-weight:var(--text-body2-strong-weight); text-decoration:underline; text-underline-offset:2px;}
+
+  /* ── 1280px and up takes the display-size step the type scale
+       specifies for wide viewports. Only the statement moves: the
+       sign-in column is a fixed reading width and gains nothing from
+       larger type. */
+  @media (min-width:1280px){
+    .login-statement h2{font-size:var(--text-display-size-lg); line-height:var(--text-display-lh-lg);}
+  }
+
+  /* ── Under 900px the split would give the serif statement a measure it
+       cannot hold, so the brand panel stops being a panel: it becomes a
+       short header strip with the logo and the eyebrow, the statement and
+       the element row come out, and sign-in takes the full width. */
+  @media (max-width:899px){
+    /* grid-template-rows is doing real work here. One column and two auto
+       rows against min-height:100dvh splits the leftover viewport height
+       between them, which stretched the header strip to ~220px and floated
+       the logo in the middle of it. auto/1fr gives the strip its content
+       height and hands the rest to sign-in. */
+    .login{grid-template-columns:1fr; grid-template-rows:auto 1fr; min-height:100dvh;}
+    /* No divider under the strip: the panel below is a floating card now,
+       so the edge is already drawn by its own border. */
+    /* Back to flex from the desktop grid: one child left in the strip, so
+       the two-row arrangement has nothing to arrange. */
+    .login-brand{
+      display:flex; flex-direction:row; align-items:center; gap:var(--spacing-16);
+      padding:var(--spacing-24);
+    }
+    .login-statement{display:none;}
+    /* No max-width and no auto margin here: the card is the full width of
+       the viewport less its inset, so both would fight that. */
+    .login-auth-card{max-width:none; margin-left:0;}
+    /* The glow moves under the panel and stays visible in the strip and in
+       the canvas around the card, so it is kept rather than switched off. */
+    .login::after{left:50%; bottom:-420px; width:620px; height:620px;}
+    /* The card still floats, at the same 16px inset, but its own padding
+       comes down from 48 to 24: at 375px, 48 either side leaves the button
+       label under 240px and it starts wrapping. */
+    .login-auth{padding:0 var(--spacing-16) var(--spacing-16);}
+    .login-auth-card{align-items:flex-start; padding:var(--spacing-32) var(--spacing-24);}
+    .login-auth-inner{margin:0 auto;}
+  }
+
+  /* ── Narrow phones. At 375 the button ran out of room and broke its own
+       title across two lines ("Continue with Astro / AD"), which is the
+       exact defect this build set out to fix on the wide layout, arriving
+       from the other direction. The budget: 375 less the 16px card inset,
+       less the card's 24px padding, leaves 295 for the button. Three
+       things buy the title its single line, in ascending order of how much
+       they cost the design:
+         · the trailing arrow goes. The whole row is the target and the
+           arrow only ever said "this goes somewhere", which the label
+           already says.
+         · horizontal padding 20 -> 16, and the icon chip 32 -> 28.
+         · the title takes white-space:nowrap, so if the budget is ever
+           wrong again it overflows visibly instead of quietly wrapping.
+       The caption below it is still free to wrap onto a second line. That
+       one is fine wrapped; the title is not. */
+  @media (max-width:599px){
+    .login-sso{padding:var(--spacing-16); gap:var(--spacing-12);}
+    .login-sso-mark{width:28px; height:28px;}
+    .login-sso-label b{white-space:nowrap;}
+    .login-sso-go{display:none;}
+  }
+
+  /* Reduced motion. The tilt is the only motion on the page that moves a
+     large surface, and it is decorative: nothing about signing in depends
+     on it. The JS gates on this same query, so this rule is the belt to its
+     braces, clearing any transform Motion may already have written. */
+  @media (prefers-reduced-motion:reduce){
+    .login-auth-card{transform:none !important; will-change:auto;}
+    .login-sso:hover .login-sso-go{transform:none;}
+    /* The wash stops, it does not disappear. Its opening pose is a composed
+       arrangement of the three fields, so paused it still reads as intended
+       colour in the canvas rather than as a missing element. */
+    .login-wash span{animation:none; will-change:auto;}
+  }
+</style>
+</head>
+<body>
+
+  <main class="login">
+
+    <!-- Purely decorative, and first in the markup so it sits under
+         everything without needing a z-index fight. -->
+    <div class="login-wash" aria-hidden="true">
+      <span class="w1"></span>
+      <span class="w2"></span>
+      <span class="w3"></span>
+    </div>
+
+    <section class="login-brand" aria-label="About Collabrium">
+      <div class="login-logo-wrap"><iframe src="../collabrium-dls/logo.html" title="Collabrium" scrolling="no"></iframe></div>
+
+      <div class="login-statement">
+        <p class="login-eyebrow">Astro Digital Growth OS</p>
+        <!-- One quote is written in here in full, with its attribution, as
+             the no-JS fallback: if the script never runs, that is what stays
+             on screen, a complete quotation rather than an empty box. The
+             loop clears it before the first keystroke. Everything else (the
+             other 49, and the ghosts that reserve the box's height) is built
+             by the script from its QUOTES array, so there is no second copy
+             of the set to keep in sync here.
+             aria-hidden because the rotation is ambient decoration; the
+             brand statement AT actually needs is the .login-sr line below,
+             which does not change. -->
+        <h2 aria-hidden="true"><span class="login-type-line" id="typeLine"><span class="login-type-text" id="typeText">Alone we can do so little; together we can do so much.</span><span class="login-attrib is-in" id="typeAttrib">Helen Keller</span></span></h2>
+        <p class="login-sr">Collabrium brings Astro's Sales, Media, Influence, Content and Studio teams into one system of record, so no rep, no editor and no strategist is ever the last to be informed.</p>
+      </div>
+
+    </section>
+
+    <section class="login-auth" aria-label="Sign in">
+      <div class="login-auth-card">
+      <div class="login-auth-inner">
+        <h1>Sign in here.</h1>
+        <p class="login-lede">Use your Astro Network ID to open your Collabrium workspace.</p>
+
+        <button class="c-btn c-btn-primary c-btn-lg login-sso" type="button" id="ssoBtn">
+          <span class="login-sso-mark" id="ssoMark" aria-hidden="true"><i class="ph-fill ph-squares-four"></i></span>
+          <span class="login-sso-label">
+            <b>Continue with Astro ID</b>
+            <span>Azure Network ID, single sign-on</span>
+          </span>
+          <i class="ph ph-arrow-right login-sso-go" id="ssoGo" aria-hidden="true"></i>
+        </button>
+
+        <p class="c-helper login-status" id="ssoStatus" role="status" aria-live="polite"></p>
+
+        <hr class="login-rule" />
+
+        <p class="login-note"><i class="ph-fill ph-shield-check" aria-hidden="true"></i>Protected by Azure AD, with role-based access and audit logging</p>
+        <p class="login-help"><i class="ph-fill ph-user-plus" aria-hidden="true"></i><span>No workspace yet? <a href="mailto:collabrium@astro.com.my">Ask your workspace admin</a> to add you.</span></p>
+      </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    // Draft behaviour only. There is no identity provider wired up here:
+    // the button shows the state a real redirect would put the user in,
+    // then lands on the app shell so the screen can be walked through
+    // end to end. Whatever replaces this keeps the same three moments
+    // (idle, in flight, gone), so the markup above does not have to
+    // change when the real handoff arrives.
+    (function () {
+      var btn = document.getElementById('ssoBtn');
+      var mark = document.getElementById('ssoMark');
+      var go = document.getElementById('ssoGo');
+      var status = document.getElementById('ssoStatus');
+
+      btn.addEventListener('click', function () {
+        if (btn.getAttribute('aria-busy') === 'true') return;
+        btn.setAttribute('aria-busy', 'true');
+        btn.disabled = true;
+        mark.innerHTML = '<span class="login-spinner"></span>';
+        go.style.visibility = 'hidden';
+        status.textContent = 'Taking you to Astro ID…';
+        setTimeout(function () { window.location.href = 'landing-v2.html'; }, 1100);
+      });
+    })();
+  </script>
+
+  <script>
+    // ── Typed statement carousel.
+    //
+    // Three messages, typed out, held, deleted, next. The copy is the only
+    // thing in here anyone should need to edit: add or reorder entries in
+    // MESSAGES and everything else — the height the box reserves, the
+    // no-JS fallback's sibling, the timing — follows from it.
+    //
+    // Asterisks mark the italic runs, matching the emphasis the static
+    // statement used to carry on the department names. Typing plain text
+    // would have been simpler and would have dropped that treatment, which
+    // is a real part of how the brand statement reads, so the typewriter
+    // works in segments rather than in one flat string: each message is
+    // split on '*' into alternating roman/italic runs, and the renderer
+    // rebuilds only as much of each run as has been "typed" so far.
+    (function () {
+      // Fifty quotes on working together and on getting started, each with
+      // its attribution. Two rules shaped the selection:
+      //
+      //  · Length. The box reserves the height of the LONGEST entry, and
+      //    that height is dead space under every shorter one, so nothing
+      //    here runs past about 95 characters. A long quote does not cost
+      //    itself, it costs all forty-nine of the others.
+      //  · Attribution that holds up. Anything whose usual credit is
+      //    disputed or apocryphal was dropped rather than printed with a
+      //    name that is probably wrong: the Satoro "drop/ocean" line, the
+      //    Seneca "luck is preparation" line, "the best way to predict the
+      //    future" (Drucker or Lincoln, depending on who is quoting it), and
+      //    the Goethe "whatever you can do" line, which is Anster's loose
+      //    translation rather than Goethe. Proverbs are credited to their
+      //    tradition, which is the honest form for them.
+      //
+      // Asterisks still mark italic runs (see markup() below) — no quote
+      // uses one today, but a title inside a quotation would need it.
+      var QUOTES = [
+        ['Alone we can do so little; together we can do so much.', 'Helen Keller'],
+        ['If you want to go fast, go alone. If you want to go far, go together.', 'African proverb'],
+        ['Talent wins games, but teamwork wins championships.', 'Michael Jordan'],
+        ['Coming together is a beginning; keeping together is progress; working together is success.', 'Henry Ford'],
+        ['Many hands make light work.', 'John Heywood'],
+        ['The whole is greater than the sum of its parts.', 'Aristotle'],
+        ['No one can whistle a symphony. It takes an orchestra to play it.', 'H. E. Luccock'],
+        ['The strength of the team is each member. The strength of each member is the team.', 'Phil Jackson'],
+        ['It is amazing what you can accomplish if you do not care who gets the credit.', 'Harry S. Truman'],
+        ['Great things in business are never done by one person.', 'Steve Jobs'],
+        ['Unity is strength, division is weakness.', 'Swahili proverb'],
+        ['Two heads are better than one.', 'John Heywood'],
+        ['One arrow is easily broken, but not ten in a bundle.', 'Japanese proverb'],
+        ['Sticks in a bundle are unbreakable.', 'Kenyan proverb'],
+        ['Where there is unity there is always victory.', 'Publilius Syrus'],
+        ['None of us is as smart as all of us.', 'Ken Blanchard'],
+        ['Light is the task where many share the toil.', 'Homer'],
+        ['Individual commitment to a group effort makes a team work.', 'Vince Lombardi'],
+        ['A single bracelet does not jingle.', 'Congolese proverb'],
+        ['The way a team plays as a whole determines its success.', 'Babe Ruth'],
+        ['If everyone is moving forward together, then success takes care of itself.', 'Henry Ford'],
+        ['Teamwork begins by building trust.', 'Patrick Lencioni'],
+        ['A rising tide lifts all boats.', 'Proverb'],
+        ['One finger cannot lift a pebble.', 'Iranian proverb'],
+        ['Behind an able man there are always other able men.', 'Chinese proverb'],
+        ['Whether you think you can or you think you cannot, you are right.', 'Henry Ford'],
+        ['The best way out is always through.', 'Robert Frost'],
+        ['Fall seven times, stand up eight.', 'Japanese proverb'],
+        ['Well done is better than well said.', 'Benjamin Franklin'],
+        ['Energy and persistence conquer all things.', 'Benjamin Franklin'],
+        ['It always seems impossible until it is done.', 'Nelson Mandela'],
+        ['The secret of getting ahead is getting started.', 'Mark Twain'],
+        ['Do what you can, with what you have, where you are.', 'Theodore Roosevelt'],
+        ['Quality is not an act, it is a habit.', 'Aristotle'],
+        ['A journey of a thousand miles begins with a single step.', 'Lao Tzu'],
+        ['He who has a why to live can bear almost any how.', 'Friedrich Nietzsche'],
+        ['What we do now echoes in eternity.', 'Marcus Aurelius'],
+        ['The impediment to action advances action.', 'Marcus Aurelius'],
+        ['Little strokes fell great oaks.', 'Benjamin Franklin'],
+        ['Genius is one percent inspiration and ninety-nine percent perspiration.', 'Thomas Edison'],
+        ['I have not failed. I have found ten thousand ways that will not work.', 'Thomas Edison'],
+        ['We suffer more in imagination than in reality.', 'Seneca'],
+        ['Begin, be bold, and venture to be wise.', 'Horace'],
+        ['By failing to prepare, you are preparing to fail.', 'Benjamin Franklin'],
+        ['The way to get started is to quit talking and begin doing.', 'Walt Disney'],
+        ['Perfection is not attainable, but if we chase it we can catch excellence.', 'Vince Lombardi'],
+        ['Success is the sum of small efforts, repeated day in and day out.', 'Robert Collier'],
+        ['The future depends on what you do today.', 'Mahatma Gandhi'],
+        ['You miss one hundred percent of the shots you never take.', 'Wayne Gretzky'],
+        ['It does not matter how slowly you go, so long as you do not stop.', 'Confucius'],
+      ];
+
+      // Shuffled once per load, then cycled in that order, so the loop shows
+      // all fifty before repeating any of them and two people opening the
+      // page do not get the same opener. Delete this call to run them in the
+      // order written above.
+      (function shuffle(a) {
+        for (var i = a.length - 1; i > 0; i--) {
+          var j = Math.floor(Math.random() * (i + 1));
+          var t = a[i]; a[i] = a[j]; a[j] = t;
+        }
+      })(QUOTES);
+
+      var MESSAGES = QUOTES.map(function (row) { return row[0]; });
+      var CREDITS = QUOTES.map(function (row) { return row[1]; });
+
+      // Milliseconds. TYPE is per character and deliberately not uniform:
+      // JITTER varies it by ±40%, because a perfectly even cadence is the
+      // tell that separates a typewriter effect from typing.
+      //
+      // Messages leave by fading out whole, not by backspacing. FADE has to
+      // match the opacity transition on .login-type-line in the stylesheet
+      // (--duration-base, 220ms) with a little slack, or the text is wiped
+      // while still partly visible.
+      //
+      // HOLD has gone 2800 -> 5200 -> 8600. Each of these is a quotation with
+      // an author, not a label: the longest runs ~95 characters, roughly 3s of
+      // reading, and a login screen is somewhere people arrive mid-thought. At
+      // 8.6s the whole beat for a long quote is about 3s of typing plus 8.6s
+      // still, near 12s per quote, so the fifty-quote loop runs about ten
+      // minutes end to end. Nobody sits on a sign-in screen that long, which
+      // is the point: the set exists so the quote is different each visit, not
+      // so anyone watches it cycle.
+      var TYPE = 34, JITTER = 0.4, HOLD = 8600, FADE = 300, GAP = 380;
+
+      // textEl, not text: segments() below already binds `text` as its
+      // per-segment string, and two different `text`s in one closure is a
+      // trap even when the scoping happens to work out.
+      var line = document.getElementById('typeLine');
+      var textEl = document.getElementById('typeText');
+      var attrib = document.getElementById('typeAttrib');
+      var h2 = line && line.parentNode;
+      if (!line || !textEl || !attrib || !h2) return;
+
+      // '*' delimits italic runs: odd indices after the split are the
+      // emphasised ones.
+      function segments(msg) {
+        return msg.split('*').map(function (text, i) {
+          return { text: text, em: i % 2 === 1 };
+        });
+      }
+
+      function markup(segs, chars) {
+        // chars = how many characters of the whole message to show. Each
+        // run takes its share in order and the rest is dropped, so an
+        // italic run appears letter by letter like any other.
+        var left = chars, html = '';
+        for (var i = 0; i < segs.length; i++) {
+          if (left <= 0) break;
+          var slice = segs[i].text.slice(0, left);
+          left -= slice.length;
+          if (!slice) continue;
+          html += segs[i].em ? '<em>' + slice + '</em>' : slice;
+        }
+        return html;
+      }
+
+      var all = MESSAGES.map(segments);
+      var lengths = all.map(function (segs) {
+        return segs.reduce(function (n, s) { return n + s.text.length; }, 0);
+      });
+
+      // Height reservation. One hidden full copy of every quote — text AND a
+      // credit line, so the ghost measures what the live line will actually
+      // occupy — dropped into the same grid cell as the live line. The <h2>
+      // is then always as tall as the longest quote can render AT THE CURRENT
+      // WIDTH, which is why this is a real element per quote and not a
+      // measured min-height: which quote is tallest changes with the column's
+      // width, and the browser re-solves that on resize for free.
+      // Fifty of these is fifty spans of static text in one grid cell. They
+      // are laid out once and never touched again, and they are what buys a
+      // box that never resizes; measured 366px at 1366 wide.
+      all.forEach(function (segs, i) {
+        var ghost = document.createElement('span');
+        ghost.className = 'login-type-ghost';
+        ghost.setAttribute('aria-hidden', 'true');
+        ghost.innerHTML = markup(segs, lengths[i]) +
+          '<span class="login-attrib">' + CREDITS[i] + '</span>';
+        h2.appendChild(ghost);
+      });
+
+      var caret = document.createElement('span');
+      caret.className = 'login-caret';
+      caret.setAttribute('aria-hidden', 'true');
+
+      // Only the text half is rebuilt per frame. The credit is a persistent
+      // element: recreating it every frame would restart its opacity
+      // transition from scratch each time, so it would never fade in.
+      function render(i, chars) {
+        textEl.innerHTML = markup(all[i], chars);
+        textEl.appendChild(caret);
+      }
+
+      // Reduced motion: no per-character typing and no caret blink, but the
+      // quotes still rotate, because stopping on whichever one loaded first
+      // would turn a fifty-quote loop into a single static line. A
+      // whole-string swap on a timer is not the kind of movement the
+      // preference is asking us to stop.
+      var still = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+      // One rAF loop driving a four-phase state machine, rather than a
+      // chain of setTimeouts calling each other. Two reasons, and the first
+      // is a bug this replaced: a setTimeout chain in a backgrounded tab is
+      // throttled to about one call per second, so a page left in a
+      // background tab came back to a half-typed sentence crawling out a
+      // letter at a time. Guarding that by hand (clear on hide, restart on
+      // show) is the wrong shape — rAF simply does not run while the page
+      // is not being painted, and resumes on the next paint, so the pause
+      // is the platform's job and the state survives it untouched.
+      // Second, the phase boundaries are compared against real elapsed
+      // time, so nothing accumulates drift if a frame is late.
+      // in -> hold -> fade -> gap -> in, on the next message.
+      var phase = 'in', index = 0, chars = 0, nextAt = 0, frame = null;
+
+      function reset() {
+        phase = 'in'; index = 0; chars = 0; nextAt = 0;
+        line.classList.remove('is-typing', 'is-fading');
+        attrib.classList.remove('is-in');
+      }
+
+      function step(now) {
+        frame = requestAnimationFrame(step);
+        if (now < nextAt) return;
+
+        // The reduced-motion path shares this loop: whole message in,
+        // whole message out, no intermediate character states.
+        if (still.matches) {
+          line.classList.remove('is-typing');
+          textEl.innerHTML = markup(all[index], lengths[index]);
+          attrib.textContent = CREDITS[index];
+          attrib.classList.add('is-in');
+          index = (index + 1) % all.length;
+          nextAt = now + HOLD + 1400;
+          return;
+        }
+
+        if (phase === 'in') {
+          line.classList.add('is-typing');
+          render(index, chars);
+          if (chars < lengths[index]) {
+            chars++;
+            nextAt = now + TYPE * (1 + (Math.random() * 2 - 1) * JITTER);
+          } else {
+            line.classList.remove('is-typing'); // caret blinks again on the hold
+            // The credit lands only now, after the last character of the
+            // quote. Showing it while the quote is still typing would give
+            // away the author before the words, and it would sit there
+            // attached to half a sentence.
+            attrib.textContent = CREDITS[index];
+            attrib.classList.add('is-in');
+            phase = 'hold';
+            nextAt = now + HOLD;
+          }
+          return;
+        }
+
+        // The hold has expired: start the fade. The class change is all this
+        // does — the transition in the stylesheet runs it, and the loop just
+        // waits out FADE before touching the text.
+        if (phase === 'hold') {
+          line.classList.add('is-fading');
+          attrib.classList.remove('is-in'); // quote and credit leave together
+          phase = 'fade';
+          nextAt = now + FADE;
+          return;
+        }
+
+        // Faded out. Clear the text FIRST, then un-fade, both inside this one
+        // frame: the other order would snap the finished message back to full
+        // opacity for a frame before it was replaced, which reads as a flash.
+        if (phase === 'fade') {
+          chars = 0;
+          index = (index + 1) % all.length;
+          render(index, 0);
+          line.classList.remove('is-fading');
+          phase = 'gap';
+          nextAt = now + GAP;
+          return;
+        }
+
+        // gap — an empty line with a blinking caret, the beat before typing
+        // starts again.
+        phase = 'in';
+      }
+
+      // Honour the preference if it is changed while the page is open.
+      still.addEventListener('change', function () {
+        cancelAnimationFrame(frame);
+        reset();
+        frame = requestAnimationFrame(step);
+      });
+
+      frame = requestAnimationFrame(step);
+    })();
+  </script>
+
+  <script type="module">
+    // Pointer tilt on the sign-in panel, same mechanism as the hero card
+    // fan in landing-v2: Motion from the same CDN and version, the same
+    // spring constants (300/22/0.6 on the way in, 220/18 on the way out),
+    // and the same shape of handler — pointerenter lifts, pointermove maps
+    // the cursor's position in the box to rotateX/rotateY, pointerleave
+    // returns to rest. Springs are what give it the "chases the pointer,
+    // overshoots slightly, settles" feel that a CSS transition cannot.
+    //
+    // Two numbers are deliberately not the fan's. The fan tilts 12deg and
+    // scales 1.05, which is right for a 380px card of mostly graphics and
+    // wrong for a 520px panel of text: at 12deg the type on the far edge
+    // visibly smears, and a 5% scale on a panel this size reads as the
+    // whole page lurching. 5deg and 1.008 keep it as depth rather than as
+    // a stunt. --shadow-4 on hover is the elevation ladder's next step up
+    // from the panel's resting --shadow-3, so the lift is lit as well as
+    // moved.
+    //
+    // Mouse-only, like the fan's: on touch there is no hover to speak of,
+    // and a finger dragging across the panel would fire tilts that nothing
+    // asked for. Gated on prefers-reduced-motion too, since this moves a
+    // large surface for decorative reasons only.
+    import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
+
+    const card = document.querySelector('.login-auth-card');
+    const wantsMotion = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    if (card && wantsMotion) {
+      const MAX_TILT_DEG = 5;
+      const SPRING_IN = { type: 'spring', stiffness: 300, damping: 22, mass: 0.6 };
+      const SPRING_OUT = { type: 'spring', stiffness: 220, damping: 18 };
+
+      card.addEventListener('pointerenter', (e) => {
+        if (e.pointerType !== 'mouse') return;
+        card.style.boxShadow = 'var(--shadow-4)';
+        animate(card, { scale: 1.008 }, SPRING_IN);
+      });
+
+      card.addEventListener('pointermove', (e) => {
+        if (e.pointerType !== 'mouse') return;
+        const rect = card.getBoundingClientRect();
+        const px = (e.clientX - rect.left) / rect.width;
+        const py = (e.clientY - rect.top) / rect.height;
+        animate(card, {
+          rotateY: (px - 0.5) * 2 * MAX_TILT_DEG,
+          rotateX: -(py - 0.5) * 2 * MAX_TILT_DEG,
+        }, SPRING_IN);
+      });
+
+      card.addEventListener('pointerleave', (e) => {
+        if (e.pointerType !== 'mouse') return;
+        card.style.boxShadow = 'var(--shadow-3)';
+        animate(card, { rotateX: 0, rotateY: 0, scale: 1 }, SPRING_OUT);
+      });
+    }
+  </script>
+
+</body>
+</html>

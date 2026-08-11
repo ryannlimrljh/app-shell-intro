@@ -4,7 +4,8 @@ A build-free prototype of the Collabrium app shell: an intro sequence, a hero
 card fan, an assistant, and two working spaces — Decision Space and Performance
 Space.
 
-Live: <https://app-shell-intro.vercel.app/pages/landing-v1.html>
+Live: <https://app-shell-intro.vercel.app/> (the login screen, which signs you
+into v2)
 
 ## Run it
 
@@ -12,12 +13,16 @@ Live: <https://app-shell-intro.vercel.app/pages/landing-v1.html>
 python3 -m http.server 8791
 ```
 
-Then <http://localhost:8791/pages/landing-v2.html> for the working version,
-or <http://localhost:8791/pages/landing-v1.html> for the frozen one.
+Then <http://localhost:8791/pages/login-v1.html> to start where a visitor
+starts, <http://localhost:8791/pages/landing-v2.html> for the working version
+on its own, or <http://localhost:8791/pages/landing-v1.html> for the frozen
+one.
 
-`/` redirects to **v1**, so the deployed root keeps showing the version that
-shipped. One line in `vercel.json` moves it to v2 when v2 is ready to be the
-thing people see.
+`/` redirects to **the login screen**, and its Astro ID button goes to **v2**.
+That is the whole route: there is no identity provider behind the button, it
+plays the state a real redirect would put you in and then lands on the app
+shell. Before 11 Aug the root pointed at v1 instead, so if you are looking for
+the frozen version it is now only reachable at its own path.
 
 No build step, no framework, no bundler at serve time. `pages/landing-v1.html`
 is one self-contained file — markup, a `<style>` block and its scripts — linking
@@ -30,6 +35,7 @@ serves `Last-Modified` and browsers hold onto this page.
 
 | Path | What it is |
 |---|---|
+| `pages/login-v1.html` | the login screen, and what `/` serves. Signs into v2 |
 | `pages/landing-v2.html` | **the working version. New implementation goes here.** |
 | `pages/landing-v1.html` | the previous version, frozen. Kept so v2 can be diffed against it |
 | `pages/assets/charts.bundle.js` | committed chart bundle — built, not hand-edited |
@@ -90,7 +96,7 @@ git push origin main
 ```
 
 Vercel builds `origin` (`ryannlimrljh/app-shell-intro`) and serves the repo as
-static files. `vercel.json` redirects `/` to the page; `.vercelignore` keeps
+static files. `vercel.json` redirects `/` to the login screen; `.vercelignore` keeps
 `pages/decision-workspace-v2.html` off the deploy, because it is a pre-port
 snapshot whose copy and numbers now contradict the live page.
 

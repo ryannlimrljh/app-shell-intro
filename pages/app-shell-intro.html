@@ -1268,9 +1268,12 @@
      (layout space -- a getBoundingClientRect height here is a ROTATED bounding
      box and reads ~40px too tall), the six fan cards' own content is
      281 / 319 / 263 / 323 / 342 / 265, so Retention at 342 is the real floor.
-     400 -> 344 keeps a common floor a hair above that: it is what let the row
-     lose 56px, and going below 342 would mean cutting the cards' copy. */
-  .c-card-slide{flex:0 0 340px; width:340px; min-height:344px; scroll-snap-align:start; position:relative;}
+     344 was that floor exactly, a hair above the tallest card. 380 is a chosen
+     height rather than a floor: every card now has ~38px of its own free space,
+     which the margin-top:auto anchors inside them spend on pushing the rec line
+     and the CTA to the bottom edge.
+     Going BELOW 342 is what is not available: that would mean cutting copy. */
+  .c-card-slide{flex:0 0 340px; width:340px; min-height:380px; scroll-snap-align:start; position:relative;}
 
   /* ---- Convex-arc fan layout (per reference: cards splayed like a
      hand of book covers). Each card carries two custom properties —
@@ -1939,14 +1942,15 @@
   .c-app-switcher-item i{flex:none; margin-left:auto; font-size:16px; color:var(--color-obsidian); visibility:hidden;}
   .c-app-switcher-item.is-active i{visibility:visible;}
 
-  /* ── Short desktop. Everything above is sized for a fold of about 752px and
+  /* ── Short desktop. Everything above is sized for a fold of about 788px and
      up, where the greeting, the fan, the quick links and the ask box all sit
-     clear of one another: the base rhythm ends its links at 612 against an
+     clear of one another: the base rhythm ends its links at 648 against an
      ask-box top of (viewport - 126). Below that the box — absolute at
      bottom:24, so always in the fold — starts covering the quick-links line.
-     The cutoff was 799 until the composer's four suggestion pills came out and
-     took 36px off the box (138 -> 102 measured); keeping 799 after that would
-     have cramped every 752-799px laptop for a budget that no longer binds.
+     The cutoff tracks the card height and the composer height, and has moved
+     with both: 799 -> 751 when the composer's four suggestion pills came out
+     and took 36px off the box, then 751 -> 787 when the cards went 344 -> 380
+     and took the same 36px straight back.
      This block buys back those pixels out of whitespace only, never card
      content: the row's floor is the tallest card's own content (342px,
      Retention), so there is nothing to take there without cutting copy.
@@ -1960,7 +1964,7 @@
      Placed at the end of the sheet on purpose: a media query adds no
      specificity, so source order is the only thing that makes these win over
      .c-card-slider (declared ~1100 lines above) and .c-canvas-askbox. */
-  @media (min-width:768px) and (max-height:751px){
+  @media (min-width:768px) and (max-height:787px){
     /* 8 and 8 rather than 28 and 12, so the gaps read 20px and 22px instead of
        40px and 26px. The track padding is NOT touched: it is clip-safety, and
        trading it for whitespace would slice the fan's corners.

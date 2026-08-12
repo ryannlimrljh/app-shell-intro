@@ -2238,7 +2238,15 @@
        greeting at 90, and .c-shell-content contributes its own 16 below this,
        so the band is 90 - 16. It was 88, which left a 22px gap there; the 14px
        difference is what pays for the wider gaps around the pager below. */
-    .c-shell-main{padding-top:74px;}
+    /* --ask-* live here, not on .c-canvas-askbox, because the dock that
+       stacks on top of the box needs the same numbers and the two are
+       siblings. Both heights are measured: 46 is the one-liner (12 padding +
+       a 22px line + 12), 102 the full composer. They only ever set the dock's
+       offset, so drift shows up as a slightly different gap rather than as an
+       overlap. */
+    .c-shell-main{padding-top:74px;
+      --ask-inset:calc(var(--spacing-16) + env(safe-area-inset-bottom, 0px));
+      --ask-h-shut:46px; --ask-h-open:102px;}
     /* 48 -> 16. The band above already separates the canvas from the nav box,
        so .c-shell-content's own --section-gap was a second gap on top of it,
        and the hero's tail was landing under the ask box because of it (both
@@ -2275,8 +2283,7 @@
        clear of the home indicator instead of tucking under it. On the offset
        rather than inside the surface, because the card is inset now and the
        gap belongs outside it. */
-    .c-canvas-askbox{--ask-inset:calc(var(--spacing-16) + env(safe-area-inset-bottom, 0px));
-      left:var(--spacing-16); right:var(--spacing-16); width:auto; max-width:none;
+    .c-canvas-askbox{left:var(--spacing-16); right:var(--spacing-16); width:auto; max-width:none;
       bottom:var(--ask-inset); transform:translateY(16px);}
     .c-canvas-askbox.is-revealed{transform:translateY(0);}
     /* Collapsed keeps the SHRINK and drops the PARKING. Desktop does both at
@@ -2289,6 +2296,27 @@
        the pill radius on the surface and both glow layers, belongs to being
        shrunk rather than to being narrow, so it all comes across untouched. */
     .c-canvas-askbox.is-collapsed{width:auto; bottom:var(--ask-inset); transform:translateY(0);}
+
+    /* ---- Evidence pill: the top of a stack, not a pill dropped mid-page.
+       Measured before this, with the pill showing: dock 590-634 against an ask
+       box at 750-796, so 116px of dead canvas between them, and a right edge
+       at 351 against the box's 359. Both are desktop numbers that do not
+       survive the trip down — bottom:178px was sized for a 620px composer
+       sitting 24px up, and right:--spacing-24 matches a gutter that is 16 here.
+       Anchored to the box now: the same 16px right inset so the two right edges
+       line up, and the box's own offset plus its height plus a 12px gap.
+       Which height applies is read with :has() rather than from JS, because JS
+       would have to measure mid-morph — .floating-ask animates
+       grid-template-rows over 420ms, so offsetHeight straight after the class
+       toggle is still the old pose. The travel is a transform, not `bottom`,
+       so the 56px stays off the layout path.
+       Base is the OPEN pose and :has() moves it to shut, so a browser without
+       :has() parks the pill 56px high rather than on top of the box. */
+    .c-dock{right:var(--spacing-16);
+      bottom:calc(var(--ask-inset) + var(--ask-h-shut) + var(--spacing-12));
+      transform:translateY(calc(var(--ask-h-shut) - var(--ask-h-open)));
+      transition:transform 420ms cubic-bezier(.22,1,.36,1);}  /* mirrors --ask-morph-dur/-ease on .c-canvas-askbox */
+    .c-shell-main:has(.c-canvas-askbox.is-collapsed) .c-dock{transform:none;}
   }
 
   /* The deck's positions carry meaning (which card is front), so they stay —
@@ -2296,6 +2324,9 @@
   @media (prefers-reduced-motion:reduce){
     .c-card-slider-track > .c-card-slide.is-settled{transition:none;}
     .c-stack-pager .c-page-btn{transition:none;}
+    /* The dock's two offsets say which pose the box is in, so they stay; only
+       the travel between them goes. */
+    .c-dock{transition:none;}
     /* The pager still has to arrive — it is opacity:0 until .is-revealed —
        so this drops the travel and the timing, not the reveal itself. */
     nav.c-stack-pager{transition:none; transform:none;}

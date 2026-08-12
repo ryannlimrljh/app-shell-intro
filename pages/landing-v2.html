@@ -2070,11 +2070,13 @@
 
     /* ---- The deck.
        --stack-drop reserves the room the deepest card needs below the front
-       card, so the deck does not sit on top of the dashboard link. Sized off
-       the measured bottom of the deepest pose, not guessed: the deck ends 31px
-       below the front card, so this is that plus a little air. It was 52 while
-       the nav rail was still in flow, which was 21px of nothing. */
-    .c-card-slider{--stack-drop:36px;
+       card. Sized off the measured bottom of the deepest pose, not guessed:
+       the deck's lowest pixel sits 30.1px below the front card, so this is
+       that plus slack. It matters beyond the reservation itself — the track's
+       box bottom is what the pager's margin is measured from, so any overshoot
+       here silently inflates the gap below. It was 52 while the nav rail was
+       still in flow, then 36, both of which made a 16px margin read as 22. */
+    .c-card-slider{--stack-drop:32px;
       /* No longer a scroll container: overflow visible, snap off, and the
          fan's full-bleed margins and leading inset all cancelled. touch-action
          pan-y keeps vertical page scrolling native while horizontal gestures
@@ -2187,6 +2189,10 @@
        No count label and no carets: six numbers plus two carets at the DS's
        own 4px gap wants 284px, and prev/next is already the swipe and the
        arrow keys. */
+    /* 16 off a track whose box now ends level with the deck, so the visible
+       gap is ~18. Tighter than the gap below on purpose: the pager controls
+       the deck, so it belongs to it. Measured before this pass it was the
+       other way round, 21.9 above and 12 below. */
     nav.c-stack-pager{display:flex; justify-content:center; gap:10px; margin-top:var(--spacing-16);}
     .c-stack-pager .c-page-btn{position:relative; -webkit-tap-highlight-color:transparent;
       transition:background var(--duration-base) var(--ease-settle), color var(--duration-base) var(--ease-settle);}
@@ -2218,6 +2224,14 @@
        and the hero's tail was landing under the ask box because of it (both
        the pager and the box measured a top of 686). */
     .c-shell-content{padding-top:var(--spacing-16);}
+    /* 28, against the pager's 18 above it, so the quick links read as their
+       own block rather than as a second row of the pager. The old 12 was not
+       a rhythm choice: it was the largest value that still kept these above
+       the expanded ask box, which is a fight they cannot win at this height
+       (the composer's top is fixed at 686, these are 60px tall so they would
+       have to start by 626, and the deck alone runs to 616). They scroll clear
+       immediately and clear the collapsed composer outright. */
+    .c-canvas-dashlink{margin-top:28px;}
     /* .c-space-tabs is sized against that padding and has to move with it. Its
        sticky top is written as (8 - the padding) so the bar pins 8px into the
        scroll container, and ::before paints the band above the pinned bar.

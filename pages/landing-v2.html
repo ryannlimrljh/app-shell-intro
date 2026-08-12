@@ -2066,14 +2066,10 @@
     .c-canvas-greeting p{font-size:var(--text-body2-size); line-height:22px;}
 
     /* ---- The deck.
-       --stack-grow is per-step scale, not per-step translate: scaling about a
-       top-centre origin grows a card sideways AND downward at once, which is
-       all three rims (left, right, bottom) out of one compositor property. A
-       translate would have given the bottom rim only.
-       --stack-drop reserves the room the deepest card's growth needs below the
-       front card, so the deck does not sit on top of the dashboard link. At
-       .024 per step over 3 visible steps that is ~7.2% of a ~430px card. */
-    .c-card-slider{--stack-grow:.024; --stack-drop:36px;
+       --stack-drop reserves the room the deepest card needs below the front
+       card, so the deck does not sit on top of the dashboard link. Sized off
+       the measured bottom of the deepest pose, not guessed. */
+    .c-card-slider{--stack-drop:52px;
       /* No longer a scroll container: overflow visible, snap off, and the
          fan's full-bleed margins and leading inset all cancelled. touch-action
          pan-y keeps vertical page scrolling native while horizontal gestures
@@ -2083,20 +2079,49 @@
     .c-card-slider-track{display:block; position:relative; width:auto;
       padding:0 0 var(--stack-drop); perspective:none;}
 
-    /* Every card sits at the same origin; --stack-d (0 = front, set from JS)
-       is the only thing that separates them. --arc-* are zeroed because the
-       fan pose is meaningless here AND because enableCardTilt reads them off
-       computed style — if the tilt gate below ever fails open, it bakes an
-       identity transform rather than a fan pose. */
+    /* Every card sits at the same origin; its pose is four custom properties
+       that the depth table below fills in. One transform declaration, so the
+       entrance and the pose can never fight over the property — the reveal
+       only moves --stack-in, and everything else stays put.
+       --arc-* are zeroed because the fan pose is meaningless here AND because
+       enableCardTilt reads them off computed style: if the tilt gate in the
+       script ever fails open, it bakes an identity transform rather than a
+       fan pose.
+       transform-origin is 35% down the card, not the top edge. About the top
+       edge a tilt swings the whole card from a corner and the bottom throws
+       out ~380px * sin(angle), which puts the deepest card outside the shell
+       at any angle you can actually see. At 35% the far corner is 247px from
+       the pivot, so the same visible tilt costs a third less width — and the
+       top edges pick up a little splay of their own, which is in the
+       reference too. */
     .c-card-slider-track > .c-card-slide{
       --arc-y:0px; --arc-rotate:0deg;
-      --stack-scale:calc(1 + var(--stack-d, 0) * var(--stack-grow));
+      --stack-rot:0deg; --stack-x:0px; --stack-y:0px; --stack-sc:1;
+      --stack-in:24px;   /* entrance travel; the reveal below is the only thing that touches it */
       position:absolute; top:0; left:0; width:100%; margin:0; flex:none;
-      transform-origin:50% 0;
-      transform:translateY(24px) scale(var(--stack-scale));
+      transform-origin:50% 35%;
+      transform:translate(var(--stack-x), calc(var(--stack-y) + var(--stack-in)))
+                rotate(var(--stack-rot)) scale(var(--stack-sc));
       z-index:calc(20 - var(--stack-d, 0));}
-    .c-card-slider-track > .c-card-slide.is-revealed{
-      transform:translateY(0) scale(var(--stack-scale));}
+    .c-card-slider-track > .c-card-slide.is-revealed{--stack-in:0px;}
+
+    /* ---- The toss. Four values per depth rather than one formula, because a
+       formula is what made the first pass read as a diagram of a stack: every
+       rim the same width, evenly spaced, perfectly symmetric.
+       Keyed off DEPTH, not off the card. Depth belongs to the slot, so the
+       arrangement holds still while cards cycle through it — a swipe moves the
+       cards, not the deck's shape. Keyed off the card it would reshuffle the
+       whole silhouette on every swipe, which is noise, not randomness.
+       Angles alternate sign so the deck leans both ways instead of shearing
+       one direction, and the x offsets follow the same alternation to lean on
+       it. Small on purpose: the reference splays about 5% of a card's width,
+       which on a 255px card is ~13px. */
+    .c-card-slider-track > .c-card-slide[data-stack-d="1"]{
+      --stack-rot:-3.2deg; --stack-x:-5px; --stack-y:5px;  --stack-sc:1.012;}
+    .c-card-slider-track > .c-card-slide[data-stack-d="2"]{
+      --stack-rot:2.6deg;  --stack-x:6px;  --stack-y:11px; --stack-sc:1.024;}
+    .c-card-slider-track > .c-card-slide[data-stack-d="3"]{
+      --stack-rot:-1.4deg; --stack-x:-7px; --stack-y:18px; --stack-sc:1.034;}
 
     /* The front card is the only one in flow, so it is what gives the track
        its height — which is in turn what the absolute cards scale against.
@@ -2114,6 +2139,13 @@
        stack entirely against the warm canvas. */
     .c-card-slider-track > .c-card-slide:not(.is-stack-front){
       background:var(--color-neutral-2);}
+    /* ...and they show as plain slabs. Only a rim of each is ever visible, and
+       the rotation puts the cards' top-right corners outside the front card —
+       which is exactly where .c-hcard-ribbon sits, so a second orange wedge
+       carrying a fragment of another card's "FOCUS n" appeared next to the
+       real one. visibility rather than display: display:none would collapse
+       the card and take the rim with it. */
+    .c-card-slider-track > .c-card-slide:not(.is-stack-front) > *{visibility:hidden;}
     /* Past the third card back the rims stop being legible and start being
        noise, so the rest wait at the same depth with nothing showing. */
     .c-card-slider-track > .c-card-slide.is-stack-buried{opacity:0; pointer-events:none;}
@@ -2205,7 +2237,10 @@
              line, so Section 2 starts below the fold (see .c-canvas-hero). -->
         <div class="c-canvas-hero">
         <div class="c-canvas-greeting">
-          <h1 id="greetingH1"><span id="greetingText"></span> <span aria-hidden="true">🌻</span>.</h1>
+          <!-- &nbsp;, not a plain space: at the mobile type size "Good morning, Bryan"
+             fills the line almost exactly and an ordinary space let the sunflower
+             wrap onto the second line by itself. -->
+        <h1 id="greetingH1"><span id="greetingText"></span>&nbsp;<span aria-hidden="true">🌻</span>.</h1>
           <p id="greetingSubtitle">Here's what needs your eyes today. I've flagged your top 3.</p>
         </div>
         <div class="c-card-slider" id="cardSlider" tabindex="0" role="region" aria-roledescription="carousel" aria-label="Highlights">
@@ -3579,7 +3614,12 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
         const depth = (j - stackTop + n) % n;
         // Clamped, not raw: everything past STACK_VISIBLE parks at the same
         // depth and is hidden, so the deck never scales a card off the screen.
-        card.style.setProperty('--stack-d', String(Math.min(depth, STACK_VISIBLE)));
+        // Clamped once, published twice: the custom property drives z-index
+        // arithmetic, the attribute is what the pose table selects on (CSS
+        // cannot match against a custom property's value).
+        const shown = String(Math.min(depth, STACK_VISIBLE));
+        card.style.setProperty('--stack-d', shown);
+        card.dataset.stackD = shown;
         card.classList.toggle('is-stack-front', depth === 0);
         card.classList.toggle('is-stack-buried', depth > STACK_VISIBLE);
         // Only the front card is readable, so it is the only one announced.
@@ -3638,6 +3678,7 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
         stackTrack.classList.remove('is-stacked');
         cs.forEach((c) => {
           c.style.removeProperty('--stack-d');
+          delete c.dataset.stackD;
           c.classList.remove('is-stack-front', 'is-stack-buried');
           c.removeAttribute('aria-hidden');
           // Cards that already finished their entrance get their tilt back;

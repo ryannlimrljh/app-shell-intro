@@ -2044,10 +2044,13 @@
     .c-canvas-askbox{bottom:var(--spacing-16);}
   }
 
-  /* Deck dots. Declared outside the media query so the base state is
-     display:none — the query below turns them on, rather than the query
-     having to turn them off everywhere else. */
-  .c-stack-dots{display:none;}
+  /* Deck pager. Declared outside the media query so the base state is
+     display:none — the query below turns it on, rather than the query having
+     to turn it off everywhere else. The type selector is load-bearing:
+     .c-page-controls already declares display:flex at the same specificity,
+     and nav.c-stack-pager beats it without depending on which stylesheet
+     happens to load last. */
+  nav.c-stack-pager{display:none;}
 
   /* ══ Mobile hero ══════════════════════════════════════════════════════
      Everything below 640: the greeting's type, and the fan becoming a deck.
@@ -2137,8 +2140,13 @@
     /* Cards behind read as the deck's grey edges rather than as more white
        cards — only their rims are ever visible, and white-on-white loses the
        stack entirely against the warm canvas. */
+    /* border-color, not just background: .c-hcard-ai (card 6, the dark
+       outlier) sets BOTH to obsidian, so overriding only the fill left it
+       sitting behind the front card as a grey slab with a hard black outline.
+       Back to .c-card's own border. .c-hcard-risk is the only other variant
+       with its own border-color and it is off-fan, so it never gets here. */
     .c-card-slider-track > .c-card-slide:not(.is-stack-front){
-      background:var(--color-neutral-2);}
+      background:var(--color-neutral-2); border-color:var(--color-neutral-3);}
     /* ...and they show as plain slabs. Only a rim of each is ever visible, and
        the rotation puts the cards' top-right corners outside the front card —
        which is exactly where .c-hcard-ribbon sits, so a second orange wedge
@@ -2159,25 +2167,30 @@
                  background 260ms var(--ease-standard);
       cursor:pointer;}
 
-    /* Dots. 44px tall always; the width shrinks from 44 only because six of
-       them at full width want 264px against a 255px column. The hit target is
-       the button, not the 7px pip it draws. */
-    .c-stack-dots{display:flex; justify-content:center; gap:0; margin-top:var(--spacing-12);}
-    .c-stack-dot{flex:0 1 44px; min-width:36px; height:44px; padding:0; border:0;
-      background:none; cursor:pointer; display:flex; align-items:center; justify-content:center;
-      -webkit-tap-highlight-color:transparent;}
-    .c-stack-dot::after{content:''; display:block; width:7px; height:7px;
-      border-radius:var(--radius-pill); background:var(--color-neutral-4);
-      transition:width var(--duration-base) var(--ease-settle), background var(--duration-base) var(--ease-settle);}
-    .c-stack-dot.is-on::after{width:20px; background:var(--color-obsidian);}
-    .c-stack-dot:focus-visible{outline:2px solid var(--color-obsidian); outline-offset:-6px; border-radius:var(--radius-sm);}
+    /* ---- Pager. Everything painted comes from the system's Pagination:
+       .c-page-btn's 32x32 box, its radius, its weight, and .current's obsidian
+       fill are all inherited untouched. Only two things are set here.
+       gap 4 -> 10, because .c-page-btn is 32x32 and that is under the 44px
+       touch minimum. The painted box does not change; the ::before below
+       extends the HIT area to 42x44, and the wider gap is what makes room for
+       it. 6 * 32 + 5 * 10 = 242 inside a 255px column, with 42px between
+       centres so the hit areas tile exactly — no gaps, no overlaps.
+       No count label and no carets: six numbers plus two carets at the DS's
+       own 4px gap wants 284px, and prev/next is already the swipe and the
+       arrow keys. */
+    nav.c-stack-pager{display:flex; justify-content:center; gap:10px; margin-top:var(--spacing-16);}
+    .c-stack-pager .c-page-btn{position:relative; -webkit-tap-highlight-color:transparent;
+      transition:background var(--duration-base) var(--ease-settle), color var(--duration-base) var(--ease-settle);}
+    /* The hit area, not the button. Inset negatives only, so the 32x32 box the
+       DS draws is untouched and nothing here shifts layout. */
+    .c-stack-pager .c-page-btn::before{content:''; position:absolute; left:-5px; right:-5px; top:-6px; bottom:-6px;}
   }
 
   /* The deck's positions carry meaning (which card is front), so they stay —
      only the travel between them goes. */
   @media (prefers-reduced-motion:reduce){
     .c-card-slider-track > .c-card-slide.is-settled{transition:none;}
-    .c-stack-dot::after{transition:none;}
+    .c-stack-pager .c-page-btn{transition:none;}
   }
 </style>
 </head>
@@ -2386,11 +2399,14 @@
             </div>
           </div>
         </div>
-        <!-- Deck affordance, mobile only (display:none above 640). Built from
-             JS so it can never disagree with how many cards are actually on
-             the fan, and it is also the keyboard/screen-reader route to cards
-             2-6 — a swipe is not one. -->
-        <div class="c-stack-dots" id="cardStackDots" role="tablist" aria-label="Highlight cards"></div>
+        <!-- Deck affordance, mobile only (display:none above 640). The system's
+             own Pagination (.c-page-controls + .c-page-btn), minus the count
+             label and the prev/next carets, which do not fit a 255px column —
+             see the CSS. Buttons are built from JS so the row can never
+             disagree with how many cards are actually on the fan, and it is
+             also the keyboard/screen-reader route to cards 2-6, since a swipe
+             is not one. -->
+        <nav class="c-page-controls c-stack-pager" id="cardStackPager" aria-label="Highlight cards"></nav>
         <!-- Every label names the destination it actually lands on, and all
              three are wired (the old "Clean up cards" was href="#" and did
              nothing). "Hero Cards" returns to the fan above, so it
@@ -3602,7 +3618,7 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
     const stackCards = () => Array.from(stackTrack.children)
       .filter((c) => c.classList.contains('c-card-slide') && !c.classList.contains('is-off-fan'));
     let stackTop = 0;
-    let stackDotsBuilt = false;
+    let stackPagerBuilt = false;
 
     function paintStack() {
       const cs = stackCards();
@@ -3625,34 +3641,38 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
         // Only the front card is readable, so it is the only one announced.
         card.setAttribute('aria-hidden', depth === 0 ? 'false' : 'true');
       });
-      const dots = document.getElementById('cardStackDots');
-      if (dots) Array.from(dots.children).forEach((b, j) => {
-        b.classList.toggle('is-on', j === stackTop);
-        b.setAttribute('aria-selected', j === stackTop ? 'true' : 'false');
-        b.tabIndex = j === stackTop ? 0 : -1;   // roving tabindex, one stop for the whole row
+      const pager = document.getElementById('cardStackPager');
+      // .current is Pagination's own state class; aria-current is what actually
+      // announces it. No roving tabindex — pagination is a set of buttons, not
+      // a composite widget, so every one of them stays tabbable.
+      if (pager) Array.from(pager.children).forEach((b, j) => {
+        b.classList.toggle('current', j === stackTop);
+        if (j === stackTop) b.setAttribute('aria-current', 'true');
+        else b.removeAttribute('aria-current');
       });
     }
     function stackStep(dir) { stackTop += dir; paintStack(); }
 
-    function buildStackDots() {
-      if (stackDotsBuilt) return;
-      const dots = document.getElementById('cardStackDots');
-      if (!dots) return;
+    function buildStackPager() {
+      if (stackPagerBuilt) return;
+      const pager = document.getElementById('cardStackPager');
+      if (!pager) return;
       const cs = stackCards();
       if (!cs.length) return;          // nothing to label yet; applyStackMode runs again on change
-      stackDotsBuilt = true;
+      stackPagerBuilt = true;
       cs.forEach((card, j) => {
         const b = document.createElement('button');
         b.type = 'button';
-        b.className = 'c-stack-dot';
-        b.setAttribute('role', 'tab');
-        // Named, not just numbered — "Concentration" tells you where you are
-        // going and a bare "3 of 6" does not.
+        b.className = 'c-page-btn';
+        b.textContent = String(j + 1);
+        // Named as well as numbered: "Concentration" tells you where you are
+        // going and a bare "3" does not. The number leads so the accessible
+        // name starts with the visible label, which is what lets voice control
+        // act on what it can actually read.
         const label = card.querySelector('.c-hcard-label, .c-stat-label');
-        b.setAttribute('aria-label',
-          `${label ? label.textContent.trim() + ', ' : ''}card ${j + 1} of ${cs.length}`);
+        if (label) b.setAttribute('aria-label', `${j + 1}, ${label.textContent.trim()}`);
         b.addEventListener('click', () => { stackTop = j; paintStack(); });
-        dots.appendChild(b);
+        pager.appendChild(b);
       });
     }
 
@@ -3672,7 +3692,7 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
       const cs = stackCards();
       if (STACK_MQ.matches) {
         cs.forEach(releaseCardTransform);
-        buildStackDots();
+        buildStackPager();
         paintStack();
       } else {
         stackTrack.classList.remove('is-stacked');

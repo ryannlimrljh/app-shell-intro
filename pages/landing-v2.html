@@ -2247,49 +2247,37 @@
     .c-sidebar.is-collapsed .c-sidebar-footer{display:none;}
     .c-sidebar.is-collapsed .c-sidebar-header{padding:var(--spacing-8);}
 
-    /* ---- Ask box: a full-width composer bar pinned to the bottom edge.
-       On desktop it is a centred 620px card floating 24px up that narrows to a
-       236px pill beside the Evidence dock. None of that is right on a phone:
-       the pill parks beside a dock with nowhere to sit, and a composer that
-       shrinks itself away is the opposite of what the bottom of a phone screen
-       is for.
-       transform becomes translateY alone, which is how --ask-shift (the dock
-       park) and --ask-push (the Evidence panel shoving the box aside) leave —
-       they are off the transform rather than zeroed somewhere else. The 16px
-       entrance rise stays. */
-    .c-canvas-askbox{left:0; right:0; width:auto; max-width:none; bottom:0;
-      transform:translateY(16px);}
+    /* ---- Ask box: the floating card, moved down onto the nav's own inset.
+       The card shape is untouched — same radius, same shadow, same fill as the
+       desktop draws it. Two things change below 640: it sits 16px in on all
+       four sides, which is the inset .c-sidebar-shell uses, so the two floating
+       things on this screen share one margin; and it never becomes a pill.
+       left/right rather than the base rule's left:50% + translateX(-50%). The
+       geometry is the same at this width (the base resolves to 16 and 359 at
+       375 anyway), but naming both edges is what lets the transform drop to
+       translateY alone — which is how --ask-shift (the pill's dock park) and
+       --ask-push (the Evidence panel shoving the box aside) leave, off the
+       transform rather than zeroed somewhere else. The 16px entrance rise
+       stays.
+       The bottom offset carries env(safe-area-inset-bottom) so the card floats
+       clear of the home indicator instead of tucking under it. On the offset
+       rather than inside the surface, because the card is inset now and the
+       gap belongs outside it. */
+    .c-canvas-askbox{--ask-inset:calc(var(--spacing-16) + env(safe-area-inset-bottom, 0px));
+      left:var(--spacing-16); right:var(--spacing-16); width:auto; max-width:none;
+      bottom:var(--ask-inset); transform:translateY(16px);}
     .c-canvas-askbox.is-revealed{transform:translateY(0);}
     /* Belt and braces. The script stops collapsing below this breakpoint, but
        crossing it mid-scroll can land the class before that guard runs again,
-       and a pill flashing across a composer bar is worse than these rules. */
-    .c-canvas-askbox.is-collapsed{width:auto; bottom:0; transform:translateY(0);}
-    .c-canvas-askbox.is-collapsed .floating-ask{padding:var(--spacing-16); grid-template-rows:auto 1fr;}
+       and a pill flashing across the card is worse than these five rules.
+       The two glow radii restate the component's own calc(--radius-lg + n),
+       which .is-collapsed replaces with --radius-pill. */
+    .c-canvas-askbox.is-collapsed{width:auto; bottom:var(--ask-inset); transform:translateY(0);}
+    .c-canvas-askbox.is-collapsed .floating-ask{border-radius:var(--radius-lg); padding:var(--spacing-16); grid-template-rows:auto 1fr;}
     .c-canvas-askbox.is-collapsed .floating-ask-more{padding-top:var(--spacing-12); opacity:1;}
     .c-canvas-askbox.is-collapsed .floating-ask-mark{opacity:0;}
-
-    /* Flush at the bottom edge, so only the top corners are corners — on the
-       surface and on both glow layers, or the glow keeps a rounded bottom
-       around a square one. The safe-area pad is on .floating-ask and not on
-       the wrapper because .floating-ask is what paints: on the wrapper it
-       would be a transparent strip with the canvas scrolling through it. */
-    .c-canvas-askbox .floating-ask,
-    .c-canvas-askbox.is-collapsed .floating-ask,
-    .c-canvas-askbox .floating-ask-glow-outer,
-    .c-canvas-askbox.is-collapsed .floating-ask-glow-outer,
-    .c-canvas-askbox .floating-ask-glow-inner,
-    .c-canvas-askbox.is-collapsed .floating-ask-glow-inner{
-      border-radius:var(--radius-lg) var(--radius-lg) 0 0;}
-    .c-canvas-askbox .floating-ask{
-      padding-bottom:calc(var(--spacing-16) + env(safe-area-inset-bottom, 0px));}
-    /* The glow layers hang 4px and 1px outside the surface on every side, which
-       is invisible while the box floats 24px up and is 4px of real page scroll
-       once it is flush against the bottom (measured: body scrollHeight 816
-       against a 812 viewport, and 812 again with the box hidden). Only the
-       bottom edge is pulled in — the sides still bleed and are clipped by
-       .c-shell-main's overflow-x, and the top is where the glow reads from. */
-    .c-canvas-askbox .floating-ask-glow-outer,
-    .c-canvas-askbox .floating-ask-glow-inner{bottom:0;}
+    .c-canvas-askbox.is-collapsed .floating-ask-glow-outer{border-radius:calc(var(--radius-lg) + 4px);}
+    .c-canvas-askbox.is-collapsed .floating-ask-glow-inner{border-radius:calc(var(--radius-lg) + 1px);}
   }
 
   /* The deck's positions carry meaning (which card is front), so they stay —

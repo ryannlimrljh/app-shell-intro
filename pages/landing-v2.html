@@ -2279,17 +2279,16 @@
       left:var(--spacing-16); right:var(--spacing-16); width:auto; max-width:none;
       bottom:var(--ask-inset); transform:translateY(16px);}
     .c-canvas-askbox.is-revealed{transform:translateY(0);}
-    /* Belt and braces. The script stops collapsing below this breakpoint, but
-       crossing it mid-scroll can land the class before that guard runs again,
-       and a pill flashing across the card is worse than these five rules.
-       The two glow radii restate the component's own calc(--radius-lg + n),
-       which .is-collapsed replaces with --radius-pill. */
+    /* Collapsed keeps the SHRINK and drops the PARKING. Desktop does both at
+       once past a 240px scroll: the toolbar row folds away leaving one line,
+       and the box narrows 620 -> 236 to sit beside the Evidence dock. Here the
+       row still folds — a ~102px composer becomes a ~46px line — but the box
+       holds its width and its place, so --ask-w and --ask-shift (written by
+       syncAskGeometry from the dock's live rect) are simply never consulted
+       below 640. Everything else the collapsed state brings, the AI mark and
+       the pill radius on the surface and both glow layers, belongs to being
+       shrunk rather than to being narrow, so it all comes across untouched. */
     .c-canvas-askbox.is-collapsed{width:auto; bottom:var(--ask-inset); transform:translateY(0);}
-    .c-canvas-askbox.is-collapsed .floating-ask{border-radius:var(--radius-lg); padding:var(--spacing-16); grid-template-rows:auto 1fr;}
-    .c-canvas-askbox.is-collapsed .floating-ask-more{padding-top:var(--spacing-12); opacity:1;}
-    .c-canvas-askbox.is-collapsed .floating-ask-mark{opacity:0;}
-    .c-canvas-askbox.is-collapsed .floating-ask-glow-outer{border-radius:calc(var(--radius-lg) + 4px);}
-    .c-canvas-askbox.is-collapsed .floating-ask-glow-inner{border-radius:calc(var(--radius-lg) + 1px);}
   }
 
   /* The deck's positions carry meaning (which card is front), so they stay —
@@ -6224,6 +6223,23 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
     const ghost = askBox.querySelector('.floating-ask-ghost');
     const ghostT = askBox.querySelector('.floating-ask-ghost-t');
     const PILL_INNER = ASK_PILL_W - 64;  // 48 left (mark gutter) + 16 right, per .is-collapsed .floating-ask
+    /* Declared here, not beside syncAsk below, so syncMarquee can read it
+       without depending on which of the two initialises first. */
+    const ASK_BAR_MQ = window.matchMedia('(max-width:640px)');
+    /* The window the running line shuttles through, and it is two different
+       numbers because the collapsed box is two different things.
+       Desktop keeps the constant and has to: the box's WIDTH morphs 620 -> 236
+       over 420ms, so measuring during the transition reads whichever frame it
+       happens to be on.
+       Mobile measures and has to: it collapses to a one-liner at the SAME full
+       width, so the reading is stable, and the answer depends on the viewport
+       rather than on any constant. Same 64px of gutters either way (48 left for
+       the mark, 16 right). Against a 375 viewport this is 279 where the
+       constant says 172, which would have overstated the travel by 107px and
+       shuttled a line that very nearly fits. */
+    const marqueeWindow = () => ASK_BAR_MQ.matches
+      ? Math.max(0, askBox.clientWidth - 64)
+      : PILL_INNER;
     const MARQUEE_PX_PER_S = 60;
     const MARQUEE_TRAVEL_FRACTION = 0.64; // the two travel legs of @keyframes ask-marquee; the other 36% is the holds at each end
     function syncMarquee() {
@@ -6231,7 +6247,7 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
       // scrollWidth, not a client rect: the span is inline-block and sized to
       // its own content, so this is the full line width even while the mask is
       // clipping it — and it is immune to a translate that may be mid-flight.
-      const dx = Math.min(0, PILL_INNER - ghostT.scrollWidth);
+      const dx = Math.min(0, marqueeWindow() - ghostT.scrollWidth);
       ghost.style.setProperty('--ask-marquee-dx', Math.round(dx) + 'px');
       const secs = dx ? (2 * Math.abs(dx) / MARQUEE_PX_PER_S) / MARQUEE_TRAVEL_FRACTION : 0;
       ghost.style.setProperty('--ask-marquee-dur', secs.toFixed(1) + 's');
@@ -6323,17 +6339,12 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
        either side of the boundary. */
     const COLLAPSE_AT = 240, EXPAND_AT = 8;
     let collapsed = false;
-    /* Below 640 the box is a full-width bar pinned to the bottom edge (see the
-       media query at the end of <style>) and there is no pill to collapse into.
-       Gated here as well as in CSS so the marquee never starts measuring and
-       animating a running line inside a box that is not a pill. */
-    const ASK_BAR_MQ = window.matchMedia('(max-width:640px)');
+    /* One threshold for both breakpoints. Below 640 the same class produces a
+       full-width one-liner instead of a parked pill — see the media query at
+       the end of <style>, which overrides the width and the offsets and lets
+       everything else through. ASK_BAR_MQ is declared up beside the marquee,
+       which needs it too. */
     const syncAsk = () => {
-      if (ASK_BAR_MQ.matches) {
-        // Clears a pill state carried in from above the breakpoint.
-        if (collapsed) { collapsed = false; askBox.classList.remove('is-collapsed'); applyAskPush(); }
-        return;
-      }
       const y = shellContent.scrollTop;
       const was = collapsed;
       if (!collapsed && y > COLLAPSE_AT) collapsed = true;

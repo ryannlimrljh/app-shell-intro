@@ -2244,7 +2244,7 @@
        a 22px line + 12), 102 the full composer. They only ever set the dock's
        offset, so drift shows up as a slightly different gap rather than as an
        overlap. */
-    .c-shell-main{padding-top:74px;
+    .c-shell-main{--nav-band:74px; padding-top:var(--nav-band);
       --ask-inset:calc(var(--spacing-16) + env(safe-area-inset-bottom, 0px));
       --ask-h-shut:46px; --ask-h-open:102px;}
     /* 48 -> 16. The band above already separates the canvas from the nav box,
@@ -2317,6 +2317,28 @@
       transform:translateY(calc(var(--ask-h-shut) - var(--ask-h-open)));
       transition:transform 420ms cubic-bezier(.22,1,.36,1);}  /* mirrors --ask-morph-dur/-ease on .c-canvas-askbox */
     .c-shell-main:has(.c-canvas-askbox.is-collapsed) .c-dock{transform:none;}
+
+    /* ---- Evidence panel: its closed state IS the pill. transform-origin is
+       100% 100% and the closed transform scales it down to the pill's measured
+       size, so the panel's bottom-right corner has to sit exactly on the
+       pill's. The scale is measured in JS and was fine; the corner is CSS and
+       was still on the dock's pre-move anchors — measured at (351, 634) against
+       a pill at (359, 738), so 8px left and 104px above the thing it grows out
+       of, which is why the unfold came from nowhere.
+       Same two anchors as the dock now, off the same variables, so they cannot
+       drift apart again. Only the SHUT height: the panel opens from the pill,
+       the pill only exists past a 240px scroll, and the box is collapsed there,
+       so the open pose never applies when the corner matters — and following
+       both would mean animating `bottom` under an open panel.
+       width takes the page column rather than min(400, 100% - 48), so the left
+       edge lands on 16 with everything else. top clears the nav box: it was 16,
+       which is the box's own top, so the panel opened underneath it. The band
+       is sized net of .c-shell-content's 16px padding, so the box ends 8px past
+       it and band + 16 leaves 8px of air. */
+    .c-dec-panel{top:calc(var(--nav-band) + var(--spacing-16));
+      right:var(--spacing-16);
+      bottom:calc(var(--ask-inset) + var(--ask-h-shut) + var(--spacing-12));
+      width:calc(100% - var(--spacing-32));}
   }
 
   /* The deck's positions carry meaning (which card is front), so they stay —

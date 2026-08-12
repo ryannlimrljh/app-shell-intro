@@ -2197,7 +2197,19 @@
        have to start by 626, and the deck alone runs to 602, which leaves 24px
        for a 32px-tall pager and two gaps. They scroll clear instead, and they
        clear the collapsed pill outright. */
-    nav.c-stack-pager{display:flex; justify-content:center; gap:10px; margin-top:var(--spacing-32);}
+    /* Held back like everything else on the canvas. It was painted from the
+       first frame, because the buttons are built straight into the DOM by
+       applyStackMode() and the row never opted into the reveal the greeting,
+       the cards, the quick links and the ask box all use — so it sat there
+       fully drawn above a deck that was still blank.
+       750ms puts it between the deck and the quick links in time as well as in
+       space: the front card's entrance starts at 260 and runs 600-820, the
+       quick links are at 900 and the ask box at 1150. Same curve and travel as
+       .c-canvas-dashlink, so the two read as one sequence. */
+    nav.c-stack-pager{display:flex; justify-content:center; gap:10px; margin-top:var(--spacing-32);
+      opacity:0; transform:translateY(16px);
+      transition:opacity 550ms cubic-bezier(.16,1,.3,1), transform 550ms cubic-bezier(.16,1,.3,1);}
+    nav.c-stack-pager.is-revealed{opacity:1; transform:translateY(0); transition-delay:750ms;}
     .c-stack-pager .c-page-btn{position:relative; -webkit-tap-highlight-color:transparent;
       transition:background var(--duration-base) var(--ease-settle), color var(--duration-base) var(--ease-settle);}
     /* The hit area, not the button. Inset negatives only, so the 32x32 box the
@@ -2285,6 +2297,10 @@
   @media (prefers-reduced-motion:reduce){
     .c-card-slider-track > .c-card-slide.is-settled{transition:none;}
     .c-stack-pager .c-page-btn{transition:none;}
+    /* The pager still has to arrive — it is opacity:0 until .is-revealed —
+       so this drops the travel and the timing, not the reveal itself. */
+    nav.c-stack-pager{transition:none; transform:none;}
+    nav.c-stack-pager.is-revealed{transition:none; transform:none; transition-delay:0s;}
   }
 </style>
 </head>
@@ -4730,6 +4746,11 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
       // sequence's last beat, no JS sequencing needed.
       const dashLink = document.getElementById('dashLink');
       if (dashLink) dashLink.classList.add('is-revealed');
+      // Deck pager (mobile only; display:none above 640, where this class
+      // has nothing to do). Its own 750ms transition-delay in CSS lands it
+      // between the deck and the quick links.
+      const stackPager = document.getElementById('cardStackPager');
+      if (stackPager) stackPager.classList.add('is-revealed');
       // Ask box — the beat after the dashlink (its own 1150ms
       // transition-delay in CSS handles the sequencing).
       const askBox = document.getElementById('askBox');

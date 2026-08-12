@@ -386,34 +386,42 @@
     .login-statement h2{font-size:var(--text-display-size-lg); line-height:var(--text-display-lh-lg);}
   }
 
-  /* ── Under 900px the split would give the serif statement a measure it
-       cannot hold, so the brand panel stops being a panel: it becomes a
-       short header strip with the logo and the eyebrow, the statement and
-       the element row come out, and sign-in takes the full width. */
+  /* ── Under 900px the two columns stack: brand above, sign-in below. The
+       quote comes with it. It used to be display:none here — the reasoning
+       was that a serif at display size cannot hold a 375px measure, which is
+       true of the SIZE, not of the quote, and the fix for a size is a size.
+       Stepping the type down to --text-h1 (32/38 against the display
+       token's 40/56) keeps the same three-to-four-line shape it has on
+       desktop, at a measure it can actually hold. */
   @media (max-width:899px){
-    /* grid-template-rows is doing real work here. One column and two auto
-       rows against min-height:100dvh splits the leftover viewport height
-       between them, which stretched the header strip to ~220px and floated
-       the logo in the middle of it. auto/1fr gives the strip its content
-       height and hands the rest to sign-in. */
-    .login{grid-template-columns:1fr; grid-template-rows:auto 1fr; min-height:100dvh;}
-    /* No divider under the strip: the panel below is a floating card now,
-       so the edge is already drawn by its own border. */
-    /* Back to flex from the desktop grid: one child left in the strip, so
-       the two-row arrangement has nothing to arrange. */
-    .login-brand{
-      display:flex; flex-direction:row; align-items:center; gap:var(--spacing-16);
-      padding:var(--spacing-24);
+    /* Two auto rows, not auto/1fr. 1fr made sense when the second row was
+       the only real content; now both rows carry their own, and 1fr would
+       stretch the card to eat whatever the brand block did not use.
+       overflow:visible, because the brand block plus the card can legitimately
+       exceed one screen on a short phone, and .login's overflow:hidden would
+       silently cut the bottom off the card rather than let the page scroll.
+       Nothing is lost by releasing it: the wash clips its own blobs against
+       its own inset:0 box, which is what that rule was protecting. */
+    .login{
+      grid-template-columns:1fr; grid-template-rows:auto auto;
+      min-height:100dvh; overflow:visible;
     }
-    .login-statement{display:none;}
+    /* A column now, not a row: the strip has grown back into a block with
+       the logo above the quote. */
+    .login-brand{
+      display:flex; flex-direction:column; align-items:stretch;
+      gap:var(--spacing-40);
+      padding:var(--spacing-24) var(--spacing-24) var(--spacing-32);
+    }
+    /* The 520px cap is a desktop measure; here the column is already narrower
+       than that and the cap only stops the text using the width it has. */
+    .login-statement{max-width:none;}
+    .login-statement h2{font-size:var(--text-h1-size); line-height:var(--text-h1-lh);}
     /* No max-width and no auto margin here: the card is the full width of
        the viewport less its inset, so both would fight that. */
     .login-auth-card{max-width:none; margin-left:0;}
-    /* The glow moves under the panel and stays visible in the strip and in
-       the canvas around the card, so it is kept rather than switched off. */
-    .login::after{left:50%; bottom:-420px; width:620px; height:620px;}
     /* The card still floats, at the same 16px inset, but its own padding
-       comes down from 48 to 24: at 375px, 48 either side leaves the button
+       comes down from 32 to 24: at 375px, more than that leaves the button
        label under 240px and it starts wrapping. */
     .login-auth{padding:0 var(--spacing-16) var(--spacing-16);}
     .login-auth-card{align-items:flex-start; padding:var(--spacing-32) var(--spacing-24);}
@@ -440,6 +448,19 @@
     .login-sso-mark{width:28px; height:28px;}
     .login-sso-label b{white-space:nowrap;}
     .login-sso-go{display:none;}
+  }
+
+  /* ── 359 and under: the 320px class of phone. Measured at the narrowest
+       width available here, the title had exactly 173px of room and wanted
+       exactly 173. Zero slack, and since it is nowrap by then, a true 320
+       viewport clips the D of "ID" rather than wrapping. Three small
+       reclamations, in the order they cost the design least: the button's own
+       padding, then the gap, then the icon chip. Together they hand the title
+       ~184px at 320, which clears it. */
+  @media (max-width:359px){
+    .login-sso{padding:var(--spacing-12); gap:var(--spacing-8);}
+    .login-sso-mark{width:24px; height:24px;}
+    .login-sso-mark i{font-size:var(--icon-sm);}
   }
 
   /* Reduced motion. The tilt is the only motion on the page that moves a

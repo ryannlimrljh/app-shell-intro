@@ -2071,14 +2071,23 @@
     /* ---- The deck.
        --stack-drop reserves the room the deepest card needs below the front
        card, so the deck does not sit on top of the dashboard link. Sized off
-       the measured bottom of the deepest pose, not guessed. */
-    .c-card-slider{--stack-drop:52px;
+       the measured bottom of the deepest pose, not guessed: the deck ends 31px
+       below the front card, so this is that plus a little air. It was 52 while
+       the nav rail was still in flow, which was 21px of nothing. */
+    .c-card-slider{--stack-drop:36px;
       /* No longer a scroll container: overflow visible, snap off, and the
          fan's full-bleed margins and leading inset all cancelled. touch-action
          pan-y keeps vertical page scrolling native while horizontal gestures
          reach the swipe handler instead of being eaten by a scroll. */
       overflow:visible; scroll-snap-type:none; touch-action:pan-y; cursor:default;
-      margin:var(--spacing-20) 0 0; padding:0; scroll-padding-left:0;}
+      /* 20px of inline padding, so the front card is narrower than the column
+         it sits in and the cards behind have somewhere to splay. The poses are
+         a rotation and a scale, so their reach grows with the card: at a
+         255px card the deepest one reached 94.8-368.2, and at the 343 the
+         column now offers, the same numbers hit the viewport edges. Narrowing
+         the front card is the fix rather than flattening the angles, which
+         would have bought width the hero already has. */
+      margin:var(--spacing-20) 0 0; padding:0 var(--spacing-20); scroll-padding-left:0;}
     .c-card-slider-track{display:block; position:relative; width:auto;
       padding:0 0 var(--stack-drop); perspective:none;}
 
@@ -2184,6 +2193,44 @@
     /* The hit area, not the button. Inset negatives only, so the 32x32 box the
        DS draws is untouched and nothing here shifts layout. */
     .c-stack-pager .c-page-btn::before{content:''; position:absolute; left:-5px; right:-5px; top:-6px; bottom:-6px;}
+
+    /* ---- Main nav: a small box in the top-left corner, not a full-height
+       rail. The rail was costing 88px of a 375px screen (16px margin + 72px
+       rail) and running the whole page height to hold two items.
+       absolute, not fixed: .c-sidebar-shell carries the intro slide's
+       transform, and a transformed element is a containing block for fixed
+       descendants — a fixed box inside it would resolve against the shell
+       rather than the viewport. .c-shell becomes that containing block, which
+       costs nothing: .c-canvas-askbox and .c-dock are absolute against
+       .c-shell-main, which is already relative and nearer. */
+    .c-shell{position:relative;}
+    .c-shell .c-sidebar-shell{position:absolute; top:var(--spacing-16); left:var(--spacing-16); margin:0;}
+    /* Reserved, not overlaid. Floating the box over the canvas would have run
+       into the centred greeting AND into .c-space-tabs, which is sticky and
+       pins near the top of the scroll container. Reserving the band on
+       .c-shell-main puts .c-shell-content — and everything sticky inside it —
+       below the box, so no sticky offset has to be recomputed. 88 = 16 top
+       + the 64px box + 8 of air. Expanding still overlays, because the shell
+       itself is out of flow, so opening the nav never reflows the page. */
+    .c-shell-main{padding-top:88px;}
+    /* 48 -> 16. The band above already separates the canvas from the nav box,
+       so .c-shell-content's own --section-gap was a second gap on top of it,
+       and the hero's tail was landing under the ask box because of it (both
+       the pager and the box measured a top of 686). */
+    .c-shell-content{padding-top:var(--spacing-16);}
+    /* .c-space-tabs is sized against that padding and has to move with it. Its
+       sticky top is written as (8 - the padding) so the bar pins 8px into the
+       scroll container, and ::before paints the band above the pinned bar.
+       Left alone, the bar would pin 32px off and leave an unpainted strip with
+       scrolled content showing through it. */
+    .c-space-tabs{top:calc(var(--spacing-8) - var(--spacing-16));}
+    .c-space-tabs::before{height:calc(var(--spacing-16) + var(--spacing-8));}
+    /* Collapsed is the header alone. The system already drops section labels,
+       dividers and item text at 72px; the items and the footer are what kept
+       it full-height. */
+    .c-sidebar.is-collapsed .c-sidebar-item,
+    .c-sidebar.is-collapsed .c-sidebar-footer{display:none;}
+    .c-sidebar.is-collapsed .c-sidebar-header{padding:var(--spacing-8);}
   }
 
   /* The deck's positions carry meaning (which card is front), so they stay —
@@ -4400,6 +4447,29 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
     const nav = document.getElementById(sidebarToggle.dataset.sidebarToggle);
     setSidebarCollapsed(nav, sidebarToggle, !nav.classList.contains('is-collapsed'));
   });
+
+  /* Below 640 the nav is a box in the corner that opens into an overlay (see
+     the media query at the end of <style>), and an overlay needs a way out
+     that is not one 24px button. Tap-outside and Escape both collapse it,
+     matching what every other popover on this page already does.
+     Gated on the breakpoint: above it the rail is in flow, and collapsing it
+     because someone clicked the page would be fighting them. */
+  const NAV_OVERLAY_MQ = window.matchMedia('(max-width:640px)');
+  function collapseNavOverlay() {
+    if (!NAV_OVERLAY_MQ.matches) return;
+    const nav = document.getElementById('shellSidebarNav');
+    if (!nav || nav.classList.contains('is-collapsed')) return;
+    const toggle = document.querySelector('[data-sidebar-toggle="shellSidebarNav"]');
+    if (toggle) setSidebarCollapsed(nav, toggle, true);
+  }
+  // Registered after the toggle handler above, and the toggle lives inside
+  // .c-sidebar-shell, so its own click is caught by the closest() guard and
+  // never collapses what it just expanded.
+  document.addEventListener('click', (e) => {
+    if (e.target.closest('#shellSidebarShell')) return;
+    collapseNavOverlay();
+  });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') collapseNavOverlay(); });
 
   // SidebarNav — collapsed hover label. Single shared, fixed-position
   // element; mouseover/mouseout (they bubble) rather than

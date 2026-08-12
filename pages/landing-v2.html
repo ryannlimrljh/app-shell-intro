@@ -2070,11 +2070,13 @@
 
     /* ---- The deck.
        --stack-drop reserves the room the deepest card needs below the front
-       card, so the deck does not sit on top of the dashboard link. Sized off
-       the measured bottom of the deepest pose, not guessed: the deck ends 31px
-       below the front card, so this is that plus a little air. It was 52 while
-       the nav rail was still in flow, which was 21px of nothing. */
-    .c-card-slider{--stack-drop:36px;
+       card. Sized off the measured bottom of the deepest pose, not guessed:
+       the deck's lowest pixel sits 30.1px under the front card, so this is
+       that plus slack. It matters beyond the reservation — the track's box
+       bottom is what the pager's margin below is measured from, so any
+       overshoot here silently inflates that gap. It was 52 while the nav rail
+       was still in flow, then 36, and both made a 16px margin read as 22. */
+    .c-card-slider{--stack-drop:32px;
       /* No longer a scroll container: overflow visible, snap off, and the
          fan's full-bleed margins and leading inset all cancelled. touch-action
          pan-y keeps vertical page scrolling native while horizontal gestures
@@ -2187,7 +2189,15 @@
        No count label and no carets: six numbers plus two carets at the DS's
        own 4px gap wants 284px, and prev/next is already the swipe and the
        arrow keys. */
-    nav.c-stack-pager{display:flex; justify-content:center; gap:10px; margin-top:var(--spacing-16);}
+    /* 32 above and 32 below (see .c-canvas-dashlink), which measure 34 and 32
+       from visible pixels once --stack-drop stopped overshooting. Both were
+       tight before, 21.9 and 12, and the 12 was not a spacing decision — it
+       was the largest value that still kept the quick links above the expanded
+       ask box. That is dropped: for the links to clear the composer they would
+       have to start by 626, and the deck alone runs to 602, which leaves 24px
+       for a 32px-tall pager and two gaps. They scroll clear instead, and they
+       clear the collapsed pill outright. */
+    nav.c-stack-pager{display:flex; justify-content:center; gap:10px; margin-top:var(--spacing-32);}
     .c-stack-pager .c-page-btn{position:relative; -webkit-tap-highlight-color:transparent;
       transition:background var(--duration-base) var(--ease-settle), color var(--duration-base) var(--ease-settle);}
     /* The hit area, not the button. Inset negatives only, so the 32x32 box the
@@ -2209,15 +2219,20 @@
        into the centred greeting AND into .c-space-tabs, which is sticky and
        pins near the top of the scroll container. Reserving the band on
        .c-shell-main puts .c-shell-content — and everything sticky inside it —
-       below the box, so no sticky offset has to be recomputed. 88 = 16 top
-       + the 64px box + 8 of air. Expanding still overlays, because the shell
-       itself is out of flow, so opening the nav never reflows the page. */
-    .c-shell-main{padding-top:88px;}
+       below the box, so no sticky offset has to be recomputed. Expanding
+       still overlays, because the shell itself is out of flow, so opening the
+       nav never reflows the page.
+       74 is derived, not round: the nav box ends at 82, 8px of air puts the
+       greeting at 90, and .c-shell-content contributes its own 16 below this,
+       so the band is 90 - 16. It was 88, which left a 22px gap there; the 14px
+       difference is what pays for the wider gaps around the pager below. */
+    .c-shell-main{padding-top:74px;}
     /* 48 -> 16. The band above already separates the canvas from the nav box,
        so .c-shell-content's own --section-gap was a second gap on top of it,
        and the hero's tail was landing under the ask box because of it (both
        the pager and the box measured a top of 686). */
     .c-shell-content{padding-top:var(--spacing-16);}
+    .c-canvas-dashlink{margin-top:var(--spacing-32);}
     /* .c-space-tabs is sized against that padding and has to move with it. Its
        sticky top is written as (8 - the padding) so the bar pins 8px into the
        scroll container, and ::before paints the band above the pinned bar.

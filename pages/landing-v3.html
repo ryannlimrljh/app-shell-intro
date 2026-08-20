@@ -1334,6 +1334,13 @@
   .c-hcard-list-row{display:flex; align-items:center; justify-content:space-between; gap:var(--spacing-12); padding:var(--spacing-8) 0; border-top:1px solid var(--color-neutral-2); font-size:var(--text-body2-size); color:var(--color-neutral-9);}
   .c-hcard-list-row:first-child{border-top:none;}
   .c-hcard-cta{margin-top:auto; display:flex; align-items:center; gap:var(--spacing-4); font-size:var(--text-label2-size); font-weight:700; color:var(--color-neutral-9);}
+  /* The same CTA line as a real link (the hero cards link out to the Collab
+     Sales workspace): drop the UA underline, keep everything else. */
+  a.c-hcard-cta{text-decoration:none;}
+  a.c-hcard-cta:hover{text-decoration:underline; text-underline-offset:3px;}
+  /* Provenance mark on a hero card: quiet, inline with the label, wording per
+     the house scale (derived vs illustrative). */
+  .c-hcard-prov{font-size:var(--text-caption-size); font-weight:700; color:var(--color-neutral-5); text-transform:none; letter-spacing:0;}
   /* Recommendation line — "Collabrium speaking," per the 2026-08-06
      card-recommendations spec: every card completes insight →
      recommendation → CTA. Caption-size Neutral-5, deliberately NOT a
@@ -1967,10 +1974,74 @@
         </div>
         <div class="c-card-slider" id="cardSlider" tabindex="0" role="region" aria-roledescription="carousel" aria-label="Highlights">
           <div class="c-card-slider-track">
-            <!-- ── Leadership cards. These are what the fan renders: data-role decides
-                 membership, and the rep cards below are in the same track but off-fan
-                 (see .c-card-slide.is-off-fan). Children 1-6 on purpose — the fan pose is
-                 nth-child-scoped and only six poses exist. ── -->
+            <!-- ── Hero cards: the fan's six. Emitted values (everything carrying
+                 data-hero) are rewritten live by the board's renderHeroCards() on
+                 every applyFilters pass, so they follow the slice; the static
+                 numbers here are the company slice so the page is right even if
+                 the board script never runs. Cards act through their own buttons
+                 and links, not brief modals — the click delegate skips them. ── -->
+            <div class="c-card c-card-slide c-stat" data-role="hero">
+              <span class="c-stat-label">Gap to target <span class="c-hcard-prov" title="Derived from the board's own model. Follows every slice and filter below.">· derived, live</span></span>
+              <div class="c-stat-value hero" data-hero="gap-v">&minus;RM4.5M</div>
+              <p data-hero="gap-rate">RM180K a day of new business closes it</p>
+              <span class="c-stat-trend down" data-hero="gap-day">Day 6 of 31 &middot; 25 days left</span>
+              <span class="c-hcard-rec" data-hero="gap-rec">This is the number the deal list has to beat.</span>
+              <button class="c-hcard-cta-btn" type="button" data-decision="hero-gap">See where it sits</button>
+            </div>
+            <div class="c-card c-card-slide" data-role="hero">
+              <span class="c-hcard-label">Close this first <span class="c-hcard-prov" title="Derived from the board's own model. Follows every slice and filter below.">· derived, live</span></span>
+              <h4 data-hero="deal-h">Mediacorp &middot; Upfront 2027</h4>
+              <div class="c-hcard-list">
+                <div class="c-hcard-list-row"><span>Worth</span><span class="c-badge c-badge-neutral" data-hero="deal-v">RM1.2M</span></div>
+                <div class="c-hcard-list-row"><span>Owner</span><span class="c-badge c-badge-neutral" data-hero="deal-o">Joy Ahmad</span></div>
+                <div class="c-hcard-list-row"><span>Stage</span><span class="c-badge c-badge-warning" data-hero="deal-s">Open at 80%</span></div>
+              </div>
+              <span class="c-hcard-rec" data-hero="deal-rec">The largest open deal in this slice. Land it and the daily rate drops.</span>
+              <button class="c-hcard-cta-btn" type="button" data-decision="hero-deal">See the deal list</button>
+              <a class="c-hcard-cta" href="https://collab-sales-ui.vercel.app/client-intelligence" target="_blank" rel="noopener">Open the client dossier <i class="ph ph-arrow-up-right"></i></a>
+            </div>
+            <div class="c-card c-card-slide" data-role="hero">
+              <span class="c-hcard-label">Proposals <span class="c-hcard-prov" title="Figures come from the Collab Sales workspace, not this board's data.">· illustrative</span></span>
+              <h4>RM710K awaiting decks</h4>
+              <div class="c-hcard-list">
+                <div class="c-hcard-list-row"><span>Nicorette &middot; RM180K</span><span class="c-badge c-badge-warning">due in 3d</span></div>
+                <div class="c-hcard-list-row"><span>U Mobile &middot; RM210K</span><span class="c-badge c-badge-neutral">due in 6d</span></div>
+                <div class="c-hcard-list-row"><span>Sunsilk &middot; RM320K</span><span class="c-badge c-badge-error">overdue</span></div>
+              </div>
+              <span class="c-hcard-rec">Sunsilk needs revision before it can move. It has sat the longest.</span>
+              <a class="c-hcard-cta" href="https://collab-sales-ui.vercel.app/proposals" target="_blank" rel="noopener">Finish them in Collab Sales <i class="ph ph-arrow-up-right"></i></a>
+            </div>
+            <div class="c-card c-card-slide" data-role="hero">
+              <span class="c-hcard-label">Weakest platform <span class="c-hcard-prov" title="Derived from the board's own model. Follows every slice and filter below.">· derived, live</span></span>
+              <h4 data-hero="plat-h">AA at 12% to target</h4>
+              <p data-hero="plat-p">RM53K a day reaches it, 17 delivery days left</p>
+              <div class="c-hcard-bar" style="--hcard-bar-pct:10%" data-hero="plat-bar"><div class="c-hcard-bar-fill"></div></div>
+              <span class="c-hcard-barlabel" data-hero="plat-lbl">Booked RM102K of RM1.0M</span>
+              <span class="c-hcard-rec" data-hero="plat-rec">Furthest behind with the fewest days left. Demand is the constraint, not stock.</span>
+              <button class="c-hcard-cta-btn" type="button" data-decision="hero-plat" data-platform="AA" data-hero="plat-btn">Slice the board to AA</button>
+            </div>
+            <div class="c-card c-card-slide c-stat" data-role="hero">
+              <span class="c-stat-label">Thinnest month ahead <span class="c-hcard-prov" title="Derived from the board's own model. Follows every slice and filter below.">· derived, live</span></span>
+              <div class="c-stat-value hero" data-hero="mo-v">22%</div>
+              <p data-hero="mo-p">Nov 26 coverage, against a RM28.0M target</p>
+              <span class="c-hcard-rec" data-hero="mo-rec">The least covered month in the window. New pipeline lands here first.</span>
+              <button class="c-hcard-cta-btn" type="button" data-decision="hero-month">Open the forward window</button>
+            </div>
+            <div class="c-card c-card-slide c-hcard-ai" data-role="hero">
+              <span class="c-hcard-label">&#129302; Client intelligence <span class="c-hcard-prov" title="Figures come from the Collab Sales workspace, not this board's data.">· illustrative</span></span>
+              <h4>Toyota dossier is fresh</h4>
+              <div class="c-hcard-tags">
+                <span class="c-tag">3 sell angles ready</span>
+                <span class="c-tag">40 sources read</span>
+                <span class="c-tag">researched yesterday</span>
+              </div>
+              <span class="c-hcard-rec">Yaris Cross has to carry the H2 volume. A B-segment reach package is the opening.</span>
+              <a class="c-hcard-cta" href="https://collab-sales-ui.vercel.app/client-intelligence" target="_blank" rel="noopener">Read it before the call <i class="ph ph-arrow-up-right"></i></a>
+            </div>
+            <!-- ── The original leadership and rep cards. All twelve are off-fan
+                 now (FAN_ROLE is 'hero') and live in the Hero Cards overlay; the
+                 six hero cards above are children 1-6 on purpose — the fan pose
+                 is nth-child-scoped and only six poses exist. ── -->
             <div class="c-card c-card-slide" data-role="leadership" data-modal="plan">
               <span class="c-hcard-ribbon" role="img" aria-label="Focus 1 of 3"><span class="c-hcard-ribbon-band" aria-hidden="true">Focus 1</span></span>
               <span class="c-hcard-label">Plan</span>
@@ -5059,6 +5130,10 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
         const inPlay = cardSlider.contains(card) || (tidyGrid && tidyGrid.contains(card));
         if (card && inPlay && !modalSourceCard) {
           if (e.target.closest('a, button')) return; // real controls inside a card (e.g. the AI card's CTA button) keep their own meaning
+          // hero cards have no brief: they act through their buttons and
+          // links, so a body click should do nothing rather than open an
+          // empty shell
+          if (!card.dataset.modal && !card.classList.contains('c-hcard-pace')) return;
           openCardModal(card);
         }
       });
@@ -5772,7 +5847,7 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
      ignores this — that asymmetry is the whole feature: one track, one copy of
      every card, two audiences. When card configuration lands, this constant is
      the only thing that has to become a setting. */
-  const FAN_ROLE = 'leadership';
+  const FAN_ROLE = 'hero';
   const cards = () => Array.from(document.querySelectorAll('.c-card-slide'));
   /* Applied here rather than hardcoded in the markup so role membership has a
      single owner. Cards with no data-role stay on the fan, so the attribute is
@@ -5997,6 +6072,11 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
     'dec-a3': { target: 'platSec', platform: 'Digital' },    // fund Digital demand
     'dec-a7': { target: 'standSec' },                        // take the company line to the board
     'dec-a6': { target: 'monthSec', view: 'next' },          // diarise the reset, in the forward window
+    // the hero fan's own actions, same machinery
+    'hero-gap':   { target: 'standSec' },                    // the gap, where it sits
+    'hero-deal':  { target: 'dealsSec' },                    // the deal to land now
+    'hero-plat':  { target: 'platSec' },                     // platform comes from the button's data-platform
+    'hero-month': { target: 'monthSec', view: 'next' },      // the thinnest month, in the forward window
   };
   document.querySelectorAll('[data-decision]').forEach((btn) => {
     btn.addEventListener('click', (e) => {
@@ -6007,9 +6087,13 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
         const vb = document.querySelector('[data-view="' + act.view + '"]');
         if (vb) vb.click();
       }
-      if (act.platform) {
+      /* The button may name its own platform (the weakest-platform hero card
+         is re-pointed by the emitter as the data moves); the action's static
+         platform stays as the fallback. */
+      const actPlat = btn.dataset.platform || act.platform;
+      if (actPlat) {
         const sel = document.getElementById('fPlatform');
-        if (sel) { sel.value = act.platform; sel.dispatchEvent(new Event('change', { bubbles: true })); }
+        if (sel) { sel.value = actPlat; sel.dispatchEvent(new Event('change', { bubbles: true })); }
       }
       const el = document.getElementById(act.target) || document.getElementById('salesBoard');
       if (!el) return;

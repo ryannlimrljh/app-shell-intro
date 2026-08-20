@@ -3051,12 +3051,8 @@
    available against the selected range. */
 #salesBoard .cmp{position:relative;}
 /* .c-filter-trigger: 32px, --radius-sm, 1px Neutral-3, 0 --spacing-12, 6px gap. */
-#salesBoard .cmp-btn{display:inline-flex; align-items:center; gap:6px; border:1px solid var(--color-neutral-3);
-  background:var(--surface); border-radius:var(--r-sm); padding:0 var(--spacing-12); font:inherit;
-  font-size:14px; font-weight:600; color:var(--color-neutral-9); cursor:pointer; min-height:32px;
-  white-space:nowrap; transition:background .16s var(--ease), color .16s var(--ease),
-  border-color .16s var(--ease);}
-#salesBoard .cmp-btn:hover{background:var(--sunk); color:var(--ink);}
+/* .c-filter-trigger */
+
 #salesBoard .cmp-btn:focus-visible{outline:2px solid var(--navy); outline-offset:2px;}
 /* A fixed slot for the value. Without it the button grew from "None" to
    "LY + LM" as you picked baselines, the range bar grew with it, and the
@@ -3071,13 +3067,10 @@
 /* Visibility rather than [hidden], so there is something to transition. It
    still leaves the accessibility tree when shut, which display:none did, and
    which opacity alone would not. */
-#salesBoard .cmp-menu{position:absolute; top:calc(100% + 7px); right:0; z-index:60; min-width:268px;
-  background:var(--surface); border:1px solid var(--rule); border-radius:var(--r-lg);
-  box-shadow:var(--shadow-4); padding:6px;
-  transform-origin:top right;
-  transition:opacity .18s var(--ease), transform .18s var(--ease), visibility 0s;}
-#salesBoard .cmp-menu.shut{opacity:0; visibility:hidden; transform:translateY(-6px) scale(.98);
-  transition:opacity .13s ease-in, transform .13s ease-in, visibility 0s linear .13s;}
+/* panel chrome, position and open/close from .c-filter-panel.is-right;
+   268px holds the two-column baseline rows the DS's 240 floor would wrap */
+#salesBoard .cmp-menu{min-width:268px;}
+
 #salesBoard .cmp-opt{display:flex; align-items:flex-start; gap:10px; width:100%; text-align:left;
   background:none; border:0; font:inherit; padding:9px 10px; border-radius:14px;
   cursor:pointer; color:var(--ink); min-height:44px;}
@@ -3378,12 +3371,12 @@
             <div class="switchwrap">
               <span id="lyMark"></span>
               <div class="cmp" id="cmp">
-                <button class="cmp-btn" data-ds="c-filter-trigger" data-ds-state="is-open from aria-expanded" type="button" id="cmpBtn" aria-expanded="false" aria-haspopup="true"
+                <button class="cmp-btn c-filter-trigger" type="button" id="cmpBtn" aria-expanded="false" aria-haspopup="true"
                   title="Add one or more baselines to compare the selected range against.">
                   <span>Compare</span><span class="cmp-v" id="cmpVal">None</span>
                   <i class="cmp-c" aria-hidden="true"></i>
                 </button>
-                <div class="cmp-menu" data-ds="c-filter-panel is-right" data-ds-state="is-open from aria-expanded on trigger" id="cmpMenu" role="group" aria-label="Comparison baselines" hidden></div>
+                <div class="cmp-menu c-filter-panel is-right" id="cmpMenu" role="group" aria-label="Comparison baselines" hidden></div>
               </div>
             </div>
           </div>
@@ -8454,6 +8447,8 @@ document.addEventListener('keydown', function(e){
   function open(on){
     menu.hidden = false;                       // the class carries the state now
     menu.classList.toggle('shut', !on);
+    menu.classList.toggle('is-open', on);      // .c-filter-panel.is-open — the DS side of the same state
+    btn.classList.toggle('is-open', on);       // .c-filter-trigger.is-open
     btn.setAttribute('aria-expanded', on ? 'true' : 'false');
   }
   open(false);

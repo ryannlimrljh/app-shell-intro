@@ -2616,8 +2616,13 @@
      SLICE  — for whom
    Controls with no data behind them are visibly disabled and name the
    field they are waiting on, so the bar doubles as the NeoCRM checklist. */
+/* Not overflow:hidden any more — the slice panels are taller than this bar
+   and were being clipped to it. The clip existed only so the navy scope
+   strip could not square off the card's rounded bottom; the strip's own
+   wrapper carries that now. */
 #salesBoard .filters{border:1px solid var(--rule); background:var(--surface); border-radius:var(--r-lg);
-  box-shadow:var(--shadow-1); margin-top:22px; overflow:hidden;}
+  box-shadow:var(--shadow-1); margin-top:22px;}
+#salesBoard .filters > .collapse{overflow:hidden; border-radius:0 0 var(--r-lg) var(--r-lg);}
 #salesBoard .frow{display:flex; align-items:center; gap:var(--spacing-8); flex-wrap:wrap; padding:11px 16px;
   border-bottom:1px solid var(--rule);}
 #salesBoard .frow:last-child{border-bottom:0;}
@@ -2639,15 +2644,34 @@
 /* Dropdown. The DS component hands its whole box to Input field:
    height 40, --radius-sm, 1px Neutral-3, body2, --spacing-12 of side padding.
    This was a 36px pill at 12px/700. */
-#salesBoard .fsel{border:1px solid var(--color-neutral-3); background:var(--surface); border-radius:var(--r-sm);
-  padding:0 var(--spacing-12); font:inherit; font-size:var(--text-body2-size); font-weight:600; color:var(--color-neutral-9);
-  min-height:32px; cursor:pointer;}
-#salesBoard .fsel:hover{background:var(--color-neutral-2);}
-#salesBoard .fsel:disabled{opacity:.5; cursor:not-allowed; border-style:dashed; color:var(--muted);}
+/* The native select is the state store, not the control: every existing
+   handler still reads and writes it, and the trigger beside it mirrors what
+   it holds. Hidden rather than removed so none of that logic has to move. */
+#salesBoard .fsel{display:none;}
+#salesBoard .fsel-wrap{display:inline-flex; flex:0 0 auto;}
+/* trigger box, states and disabled from .c-filter-trigger; only the label
+   clamp is local, so one long exec name cannot push the row into a wrap */
+#salesBoard .fsel-t{max-width:22ch; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+/* Panel chrome from .c-filter-panel, but fixed rather than absolute and
+   parented to the board: the compact filter row is a masked horizontal
+   scroller, and a mask clips even fixed descendants. The script measures
+   left/top/max-height from the trigger, so the DS offsets stand down. */
+#salesBoard .fsel-panel{position:fixed; top:auto; left:auto; right:auto;
+  padding:var(--spacing-12) var(--spacing-16); max-height:min(48vh, 340px);
+  overflow-y:auto; overscroll-behavior:contain;}
+#salesBoard .fsel-panel .c-filter-panel-title{margin-bottom:var(--spacing-8);}
+/* rows are .c-filter-option; as buttons they need the UA chrome cleared */
+#salesBoard .fsel-opt{width:100%; border:0; background:transparent; font:inherit;
+  text-align:left; color:var(--color-neutral-9);}
+#salesBoard .fsel-opt[aria-selected="true"]{font-weight:700;}
+#salesBoard .fsel-opt .fsel-tick{flex:0 0 14px; color:var(--obsidian); opacity:0; font-size:var(--text-caption-size);}
+#salesBoard .fsel-opt[aria-selected="true"] .fsel-tick{opacity:1;}
+
+
 /* .c-dropdown-field.has-value marks a filled control with the border alone,
    fill left white. This used to invert the whole thing to --ink, which put up
    to four solid black rectangles across the toolbar. */
-#salesBoard .fsel.on{background:var(--surface); color:var(--ink); border-color:var(--obsidian);}
+
 /* the elapsed periods and the forward block are different animals; the rule
    says so without needing a caption */
 #salesBoard .fdiv{width:1px; align-self:stretch; background:var(--rule); margin:0 4px;}
@@ -2920,10 +2944,7 @@
    says IS the bar; it was overriding the base rules back to 34px/12px.
    The 5px top/bottom padding went with the old min-height: a 32px box with
    0 --spacing-12 centres its label on its own. */
-/* only the native select still needs this skin — the chips now carry
-   their own DS classes */
-#salesBoard .controls.compact .fsel{min-height:32px;
-  padding:0 var(--spacing-12); font-size:var(--text-body2-size); font-weight:600;}
+/* .c-filter-trigger already ships 32px at body2/600 — nothing to restate */
 #salesBoard .controls.compact .fscope{padding:var(--spacing-8) var(--spacing-12); font-size:var(--text-body2-size);}
 /* The Segment placeholder stays. It is the running list of what NeoCRM still
    owes this board, and with the bar compact all the time there is no longer a
@@ -2936,7 +2957,7 @@
 
 /* a finger needs more than a cursor does, so the shrink stops earlier */
 @media (pointer:coarse){
-  #salesBoard .controls.compact .fpill, #salesBoard .controls.compact .fsel, #salesBoard .controls.compact .fclear{min-height:44px;}
+  #salesBoard .controls.compact .fpill, #salesBoard .controls.compact .fsel-trigger, #salesBoard .controls.compact .fclear{min-height:44px;}
   #salesBoard .controls.compact .cmp-btn{min-height:44px;}
   /* the scale switch and the seat pills are controls too, and a finger does
      not care that they sit outside the toolbar */
@@ -2974,7 +2995,7 @@
   #salesBoard .controls.compact .rangebar .fpill:disabled{display:none;}
   #salesBoard .controls.compact .switchwrap{margin-left:0;}
   #salesBoard .controls.compact .rangebar, #salesBoard .controls.compact .filters{box-shadow:none;}
-  #salesBoard .controls.compact .fsel{font-size:var(--text-label3-size); padding:4px 10px;}
+  #salesBoard .controls.compact .fsel-trigger{font-size:var(--text-label3-size); padding:4px 10px;}
   
   #salesBoard .controls.compact .fscope{padding:6px 10px; font-size:var(--text-label3-size); white-space:nowrap;
     overflow:hidden; text-overflow:ellipsis; display:block;}
@@ -3208,7 +3229,7 @@
 @media (max-width:860px){
   #salesBoard .flab{width:100%;}
   #salesBoard .frow{padding:10px 14px; gap:8px;}
-  #salesBoard .fpill, #salesBoard .fsel, #salesBoard .fclear{min-height:44px;}
+  #salesBoard .fpill, #salesBoard .fsel-trigger, #salesBoard .fclear{min-height:44px;}
   #salesBoard .fnote{margin-left:0; flex:1 0 100%;}
 }
 
@@ -3390,12 +3411,12 @@
 
             <div class="frow" role="group" aria-label="Slice">
               <span class="flab">Slice</span>
-              <select class="fsel" data-ds="c-field input skin (stays native)" id="fLine" aria-label="Filter by VP line"></select>
-              <select class="fsel" data-ds="c-field input skin (stays native)" id="fHos" aria-label="Filter by Head of Sales"></select>
-              <select class="fsel" data-ds="c-field input skin (stays native)" id="fMgr" aria-label="Filter by sales manager"></select>
-              <select class="fsel" data-ds="c-field input skin (stays native)" id="fPerson" aria-label="Filter by sales exec"></select>
-              <select class="fsel" data-ds="c-field input skin (stays native)" id="fPlatform" aria-label="Filter by platform"></select>
-              <select class="fsel" data-ds="c-field input skin (stays native)" id="fStatus" aria-label="Filter by status"></select>
+              <select class="fsel" id="fLine" aria-label="Filter by VP line"></select>
+              <select class="fsel" id="fHos" aria-label="Filter by Head of Sales"></select>
+              <select class="fsel" id="fMgr" aria-label="Filter by sales manager"></select>
+              <select class="fsel" id="fPerson" aria-label="Filter by sales exec"></select>
+              <select class="fsel" id="fPlatform" aria-label="Filter by platform"></select>
+              <select class="fsel" id="fStatus" aria-label="Filter by status"></select>
               <button class="fclear fade c-btn c-btn-ghost c-btn-sm" type="button" id="fClear">Clear slice</button>
             </div>
 
@@ -8441,6 +8462,119 @@ document.addEventListener('keydown', function(e){
   if(scopeFromEvent(e)) applyFilters();
 });
 
+/* ── Slice dropdowns ──────────────────────────────────────────
+   Each native select keeps holding the state; a .c-filter-trigger and a
+   .c-filter-panel of .c-filter-option rows mirror it and write back by
+   setting .value and dispatching change, so every cascade, lock and
+   filter handler below stays exactly as it was. */
+var syncFsels = function(){};
+(function(){
+  var wraps = [], places = [];
+  var board = document.getElementById('salesBoard');
+  if(!board) return;
+  [].forEach.call(document.querySelectorAll('#salesBoard select.fsel'), function(sel){
+    var wrap = document.createElement('div');
+    wrap.className = 'fsel-wrap';
+    sel.parentNode.insertBefore(wrap, sel);
+    wrap.appendChild(sel);
+
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'fsel-trigger c-filter-trigger';
+    btn.setAttribute('aria-haspopup', 'listbox');
+    btn.setAttribute('aria-expanded', 'false');
+    if(sel.getAttribute('aria-label')) btn.setAttribute('aria-label', sel.getAttribute('aria-label'));
+    btn.innerHTML = '<span class="fsel-t"></span><i class="chev ph ph-caret-down" aria-hidden="true"></i>';
+
+    var panel = document.createElement('div');
+    panel.className = 'fsel-panel c-filter-panel';
+    panel.setAttribute('role', 'listbox');
+    panel.hidden = true;
+
+    wrap.appendChild(btn);
+    // on the board, not in the row: see the panel's CSS note
+    board.appendChild(panel);
+
+    function isOpen(){ return panel.classList.contains('is-open'); }
+    function build(){
+      var first = sel.options[0];
+      var title = first ? first.textContent.split(' \u00b7 ')[0] : '';
+      panel.innerHTML = '<p class="c-filter-panel-title">'+esc(title)+'</p>' +
+        [].map.call(sel.options, function(o){
+          return '<button class="c-filter-option fsel-opt" type="button" role="option" '+
+            'data-v="'+esc(o.value)+'" aria-selected="'+(o.value===sel.value?'true':'false')+'">'+
+            '<span class="fsel-tick" aria-hidden="true">\u2713</span>'+
+            '<span class="label">'+esc(o.textContent)+'</span></button>';
+        }).join('');
+    }
+    function place(){
+      var tr = btn.getBoundingClientRect(),
+          vw = document.documentElement.clientWidth,
+          vh = document.documentElement.clientHeight,
+          w = panel.offsetWidth || 240;
+      // clamped into the viewport rather than guessing an alignment
+      panel.style.left = Math.round(Math.max(8, Math.min(tr.left, vw - w - 8))) + 'px';
+      panel.style.top = Math.round(tr.bottom + 8) + 'px';
+      panel.style.maxHeight = Math.round(Math.max(160, Math.min(340, vh - tr.bottom - 16))) + 'px';
+    }
+    function open(on){
+      if(on && sel.disabled) return;
+      panel.hidden = false;
+      if(on) build();
+      panel.classList.toggle('is-open', on);
+      btn.classList.toggle('is-open', on);
+      btn.setAttribute('aria-expanded', on ? 'true' : 'false');
+      if(on) place();
+    }
+    function sync(){
+      var o = sel.options[sel.selectedIndex];
+      btn.querySelector('.fsel-t').textContent = o ? o.textContent : '';
+      btn.disabled = !!sel.disabled;
+      btn.title = sel.title || '';
+      btn.classList.toggle('active', sel.classList.contains('on'));
+      if(sel.disabled && isOpen()) open(false);
+    }
+
+    btn.addEventListener('click', function(e){
+      e.stopPropagation();
+      var was = isOpen();
+      document.dispatchEvent(new CustomEvent('board:panels-close', {detail: wrap}));
+      open(!was);
+    });
+    panel.addEventListener('click', function(e){
+      e.stopPropagation();
+      var o = e.target.closest('.fsel-opt');
+      if(!o) return;
+      open(false);
+      btn.focus();
+      if(sel.value !== o.dataset.v){
+        sel.value = o.dataset.v;
+        sel.dispatchEvent(new Event('change', {bubbles: true}));
+      }
+    });
+    document.addEventListener('board:panels-close', function(e){
+      if(e.detail !== wrap && isOpen()) open(false);
+    });
+    document.addEventListener('click', function(){ if(isOpen()) open(false); });
+    document.addEventListener('keydown', function(e){
+      if(e.key === 'Escape' && isOpen()){ open(false); btn.focus(); }
+    });
+
+    wraps.push(sync);
+    places.push(function(e){ if(isOpen() && e.target !== panel) place(); });
+    sync();
+  });
+  // fixed coordinates go stale the moment anything moves, and the toolbar
+  // is sticky over a scrolling shell: follow rather than close, so a stray
+  // touch-scroll on the way to a tap cannot dismiss the panel
+  function reflow(e){ places.forEach(function(f){ f(e); }); }
+  document.addEventListener('scroll', reflow, true);
+  window.addEventListener('resize', reflow);
+  // the cascade, the lock and applyFilters all write the selects directly,
+  // so the triggers re-read them at the end of every pass
+  syncFsels = function(){ wraps.forEach(function(f){ f(); }); };
+})();
+
 // the comparison picker
 (function(){
   var btn = document.getElementById('cmpBtn'), menu = document.getElementById('cmpMenu'),
@@ -8457,7 +8591,14 @@ document.addEventListener('keydown', function(e){
   open(false);
   btn.addEventListener('click', function(e){
     e.stopPropagation();
-    open(!isOpen());
+    var was = isOpen();
+    document.dispatchEvent(new CustomEvent('board:panels-close', {detail: wrap}));
+    open(!was);
+  });
+  // one panel at a time across the whole bar: the slice dropdowns broadcast
+  // the same event when they open
+  document.addEventListener('board:panels-close', function(e){
+    if(e.detail !== wrap && isOpen()) open(false);
   });
   menu.addEventListener('click', function(e){
     e.stopPropagation();
@@ -8500,6 +8641,7 @@ function applyFilters(){
   renderCascade();
   renderCrumbs();
   applyLock();
+  syncFsels();
 
   /* Some blocks have no meaning below a level, and a degenerate version of
      them reads as a broken page rather than an honest one. IP concentration

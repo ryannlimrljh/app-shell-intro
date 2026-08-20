@@ -6007,18 +6007,22 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
   const askBox = document.getElementById('askBox');
   if (askBox) {
     const askInputEl = askBox.querySelector('input');
-    /* 380, up from 236. The history is 260 -> 200 -> 236, all of it tuned
-       against a pill parked beside the Evidence dock where width it did not
-       need read as distance from the dock. Nothing parks beside anything now —
-       the pill collapses centred where it stands — so the constraint that
-       argued the number down is gone, and the width buys back the thing it was
-       costing: 316px of window for a ~330px sentence, against 172 before. */
-    const ASK_PILL_W = 380;
+    /* 460, up from 380 and 236 before that. The old history (260 -> 200 -> 236)
+       was all tuned against a pill parked beside the Evidence dock, where width
+       it did not need read as distance from the dock. Nothing parks beside
+       anything now — the pill collapses centred where it stands — so that
+       constraint is gone and the number is free to answer readability instead.
+       396px of window against a 343px sentence is the point where the longest
+       line in the rotation fits outright and nothing has to travel.
+       74% of the expanded 620: about as wide as this can go before the
+       collapsed state stops reading as a collapse. */
+    const ASK_PILL_W = 460;
     const ASK_GAP = 8;   // explicit: the dock's gap token no longer has a layout job there, so reading it back would couple to nothing
 
-    /* The running line, collapsed. 380px of pill less 48px of left padding (the
-       AI mark's gutter) and 16px of right leaves 316px against a ~330px
-       sentence, so most lines now sit still and only the longest creep.
+    /* The running line, collapsed. 460px of pill less 48px of left padding (the
+       AI mark's gutter) and 16px of right leaves 396px, which clears the 343px
+       longest line — so on desktop the marquee is now a no-op and the code
+       below stays for the mobile one-liner, where the window is the viewport.
        Distance comes from the text's own
        width and the duration from the distance, so the speed is constant
        whatever sentence is showing and a line that already fits parks on a
@@ -6031,14 +6035,14 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
     const ASK_BAR_MQ = window.matchMedia('(max-width:640px)');
     /* The window the running line shuttles through, and it is two different
        numbers because the collapsed box is two different things.
-       Desktop keeps the constant and has to: the box's WIDTH morphs 620 -> 380
+       Desktop keeps the constant and has to: the box's WIDTH morphs 620 -> 460
        over 420ms, so measuring during the transition reads whichever frame it
        happens to be on.
        Mobile measures and has to: it collapses to a one-liner at the SAME full
        width, so the reading is stable, and the answer depends on the viewport
        rather than on any constant. Same 64px of gutters either way (48 left for
        the mark, 16 right). Against a 375 viewport this is 279 where the
-       constant says 316, so the constant would now understate the travel and
+       constant says 396, so the constant would now understate the travel and
        park a line that does not fit. */
     const marqueeWindow = () => ASK_BAR_MQ.matches
       ? Math.max(0, askBox.clientWidth - 64)

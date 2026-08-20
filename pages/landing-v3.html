@@ -2293,10 +2293,29 @@
   clip:rect(0 0 0 0); clip-path:inset(50%); white-space:nowrap; border:0;}
 
 /* chips: .c-chip + .c-chip-filter */
-/* View switch is .c-tabs/.c-tab now (underline tabs, active = obsidian inset
-   bar) — the black-framed two-up block was a component the system never had.
-   The compact .v-t / .v-s span rules below still choose which label shows. */
-#salesBoard .views{margin:var(--spacing-24) 0 0;}
+/* View switch: a custom two-up block, not .c-tabs. Each half is a labelled
+   panel — eyebrow, title and a line saying what the view is for — which is a
+   different thing from a tab strip, and the DS has no component for it. The
+   active half fills obsidian and reverses its type out. State is read from
+   aria-pressed directly, so there is no second class to keep in step.
+   The compact .v-t / .v-s span rules further down choose which label shows. */
+#salesBoard .views{display:grid; grid-template-columns:repeat(2,1fr); margin:var(--spacing-24) 0 0;
+  border:2px solid var(--ink); border-radius:var(--r-sm); overflow:hidden;}
+#salesBoard .views button{appearance:none; border:0; background:var(--surface); text-align:left;
+  padding:14px 18px; cursor:pointer; font:inherit; color:var(--ink);
+  border-right:2px solid var(--ink); transition:background var(--ease) .18s;}
+#salesBoard .views button:last-child{border-right:0;}
+#salesBoard .views button:hover{background:var(--sunk);}
+#salesBoard .views button:focus-visible{outline:3px solid var(--navy); outline-offset:-3px;}
+#salesBoard .views button[aria-pressed="true"]{background:var(--ink);}
+#salesBoard .views button[aria-pressed="true"] .v-t, #salesBoard .views button[aria-pressed="true"] .v-s{color:var(--canvas);}
+#salesBoard .views button[aria-pressed="true"] .v-k, #salesBoard .views button[aria-pressed="true"] .v-d{color:var(--canvas); opacity:.78;}
+#salesBoard .views .v-k{display:block; font-size:var(--text-label3-size); font-weight:700; letter-spacing:var(--tracking-eyebrow);
+  text-transform:uppercase; color:var(--faint);}
+#salesBoard .views .v-t{display:block; font-size:var(--text-body1-size); font-weight:800; margin-top:3px; text-wrap:balance;}
+#salesBoard .views .v-d{display:block; font-size:var(--text-caption-size); color:var(--muted); margin-top:2px;}
+/* the panel keeps its own 14/18 padding — the bar condenses around it */
+#salesBoard .controls.compact .views button:last-child{border-right:0;}
 
 
 #salesBoard .chip:focus-visible{outline:2px solid var(--navy); outline-offset:2px;}
@@ -2925,8 +2944,8 @@
    first time you meet it and are noise every time after */
 #salesBoard .controls.compact .views{margin-top:0;}
 
-#salesBoard .controls.compact .views .v-k, #salesBoard .controls.compact .views .v-d{display:none;}
-#salesBoard .controls.compact .views .v-t{font-size:var(--text-body2-size); margin-top:0;}
+/* .v-k and .v-d now hide only on phones — see the 760px block */
+/* title stays body1/800: the panel is not a tab label */
 
 #salesBoard .controls.compact .ctl-bars{display:flex; flex-wrap:wrap; gap:8px; margin-top:8px;
   align-items:stretch;}
@@ -2970,7 +2989,8 @@
    Range is MTD-only in this cut and the last-year switch is a decision you
    make once, so both stand down at this width. */
 @media (max-width:760px){
-  #salesBoard .controls.compact .views .v-t{font-size:var(--text-label3-size); line-height:1.25;}
+    #salesBoard .controls.compact .views .v-k, #salesBoard .controls.compact .views .v-d{display:none;}
+#salesBoard .controls.compact .views .v-t{font-size:var(--text-label3-size); line-height:1.25;}
   
   #salesBoard .controls.compact .ctl-bars{gap:6px; margin-top:6px; flex-direction:column;
     align-items:stretch;}
@@ -3363,14 +3383,14 @@
           <!-- ══ Controls: sticky, and condensing once you scroll past ══ -->
           <div class="controls compact" id="controls">
 
-          <nav class="views c-tabs" role="group" aria-label="View">
-            <button class="c-tab active" type="button" data-view="now" aria-pressed="true" id="v2Btn">
+          <nav class="views" role="group" aria-label="View">
+            <button type="button" data-view="now" aria-pressed="true" id="v2Btn">
               <span class="v-k">View 01</span>
               <span class="v-t">To date</span>
               <span class="v-s" aria-hidden="true">To date</span>
               <span class="v-d" id="v2Sub">August, month to date · what can still land in 25 days</span>
             </button>
-            <button class="c-tab" type="button" data-view="next" aria-pressed="false"
+            <button type="button" data-view="next" aria-pressed="false"
               title="View 02 · Where the gap is forming while there is still runway">
               <span class="v-k">View 02</span>
               <span class="v-t">September to December, projection</span>
@@ -8380,9 +8400,7 @@ var vswapTimer = null;
     if(state.hz === b.dataset.view) return;
     state.hz = b.dataset.view;
     [].forEach.call(document.querySelectorAll('[data-view]'), function(o){
-      o.setAttribute('aria-pressed', String(o===b));
-      o.classList.toggle('active', o===b);   // .c-tab.active — the DS visual for the ARIA state
-    });
+      o.setAttribute('aria-pressed', String(o===b)); });
     applyFilters();
     // restart the entrance: removing and re-adding in one tick would be
     // coalesced away, so the class comes off, layout is read, and it goes on
@@ -8780,9 +8798,7 @@ function readHash(){
      retired along with writeHash; see the note there. */
   var h = '';
   [].forEach.call(document.querySelectorAll('[data-view]'), function(o){
-    o.setAttribute('aria-pressed', String(o.dataset.view===state.hz));
-    o.classList.toggle('active', o.dataset.view===state.hz);
-  });
+    o.setAttribute('aria-pressed', String(o.dataset.view===state.hz)); });
   if(!h) return;
   h.split('&').forEach(function(pair){
     var kv = pair.split('='), k = kv[0], v = decodeURIComponent(kv[1]||'');
@@ -8797,9 +8813,7 @@ function readHash(){
   });
   normalise();
   [].forEach.call(document.querySelectorAll('[data-view]'), function(o){
-    o.setAttribute('aria-pressed', String(o.dataset.view===state.hz));
-    o.classList.toggle('active', o.dataset.view===state.hz);
-  });
+    o.setAttribute('aria-pressed', String(o.dataset.view===state.hz)); });
 }
 
 /* The control bar used to grow back to a taller form at the top of the page

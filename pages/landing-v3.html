@@ -2209,7 +2209,7 @@
 #salesBoard{
   margin:0; background:var(--canvas); color:var(--ink);
   font-family:'Mulish',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
-  font-weight:500; font-size:16px; line-height:1.5;
+  font-weight:500; font-size:var(--text-body1-size); line-height:1.5;
   -webkit-font-smoothing:antialiased;
   font-variant-numeric:tabular-nums; font-feature-settings:'tnum' 1;
 }
@@ -2225,20 +2225,20 @@
 #salesBoard{max-width:none; margin:0; padding:0 0 var(--spacing-24);}
 #salesBoard h1, #salesBoard h2, #salesBoard h3, #salesBoard h4{font-weight:800; letter-spacing:0; margin:0;}
 #salesBoard .num{font-variant-numeric:tabular-nums;}
-#salesBoard .eyebrow{font-size:11px; font-weight:700; letter-spacing:var(--tracking-eyebrow); text-transform:uppercase; color:var(--faint);}
+#salesBoard .eyebrow{font-size:var(--text-label3-size); font-weight:700; letter-spacing:var(--tracking-eyebrow); text-transform:uppercase; color:var(--faint);}
 
 /* ── Masthead ─────────────────────────────────────────────── */
 #salesBoard .mast{display:flex; gap:28px; align-items:flex-end; flex-wrap:wrap;
   padding-bottom:20px; border-bottom:2px solid var(--ink);}
 #salesBoard .mast .lede{flex:1 1 420px; min-width:0;}
-#salesBoard .mast h1{font-size:32px; line-height:1.12; margin:6px 0 0;}
-#salesBoard .mast .dek{margin:10px 0 0; font-size:16px; color:var(--muted); max-width:62ch;}
+#salesBoard .mast h1{font-size:var(--text-h1-size); line-height:1.12; margin:6px 0 0;}
+#salesBoard .mast .dek{margin:10px 0 0; font-size:var(--text-body1-size); color:var(--muted); max-width:62ch;}
 #salesBoard .mast .kicker{color:var(--orange);}
-#salesBoard .stamp{font-size:11px; color:var(--faint); line-height:1.85; text-align:right;
+#salesBoard .stamp{font-size:var(--text-label3-size); color:var(--faint); line-height:1.85; text-align:right;
   border-left:1px solid var(--rule); padding-left:20px;}
 #salesBoard .stamp b{color:var(--muted); font-weight:800;}
 #salesBoard .themebtn{border:1px solid var(--rule); background:var(--surface); color:var(--muted);
-  border-radius:var(--r-pill); font:inherit; font-size:12px; font-weight:700;
+  border-radius:var(--r-pill); font:inherit; font-size:var(--text-caption-size); font-weight:700;
   padding:6px 14px; cursor:pointer; margin-top:8px;}
 #salesBoard .themebtn:hover{background:var(--sunk);}
 
@@ -2251,10 +2251,10 @@
 #salesBoard .horizon button:last-child{border-right:0;}
 #salesBoard .horizon button:hover{background:var(--sunk);}
 #salesBoard .horizon button:focus-visible{outline:3px solid var(--navy); outline-offset:-3px;}
-#salesBoard .horizon .h-k{display:block; font-size:11px; font-weight:700; letter-spacing:var(--tracking-eyebrow);
+#salesBoard .horizon .h-k{display:block; font-size:var(--text-label3-size); font-weight:700; letter-spacing:var(--tracking-eyebrow);
   text-transform:uppercase; color:var(--faint);}
-#salesBoard .horizon .h-t{display:block; font-size:16px; font-weight:800; margin-top:3px;}
-#salesBoard .horizon .h-d{display:block; font-size:12px; color:var(--muted); margin-top:2px;}
+#salesBoard .horizon .h-t{display:block; font-size:var(--text-body1-size); font-weight:800; margin-top:3px;}
+#salesBoard .horizon .h-d{display:block; font-size:var(--text-caption-size); color:var(--muted); margin-top:2px;}
 #salesBoard .horizon button[aria-pressed="true"]{background:var(--ink);}
 #salesBoard .horizon button[aria-pressed="true"] .h-t{color:var(--canvas);}
 #salesBoard .horizon button[aria-pressed="true"] .h-k, #salesBoard .horizon button[aria-pressed="true"] .h-d{color:var(--canvas); opacity:.78;}
@@ -2265,8 +2265,8 @@
 #salesBoard section{margin-top:38px;}
 #salesBoard .sechead{display:flex; align-items:baseline; gap:14px; flex-wrap:wrap;
   padding-bottom:10px; margin-bottom:16px; border-bottom:1px solid var(--rule);}
-#salesBoard .sechead h2{font-size:20px;}
-#salesBoard .sechead .note{font-size:12px; color:var(--faint); flex:1 1 260px;}
+#salesBoard .sechead h2{font-size:var(--text-h4-size);}
+#salesBoard .sechead .note{font-size:var(--text-caption-size); color:var(--faint); flex:1 1 260px;}
 #salesBoard .sechead .tools{display:flex; gap:6px; flex-wrap:wrap; margin-left:auto;}
 #salesBoard .tools{display:flex; gap:6px; flex-wrap:wrap; align-items:center;}
 #salesBoard .chipset{display:flex; gap:6px;}
@@ -2313,7 +2313,7 @@
    RM26.5M must not break across lines in a narrow column */
 #salesBoard .kpi .k-v{white-space:nowrap;}
 /* the caption sub-line under the value — a slot .c-stat does not have */
-#salesBoard .kpi .k-s{font-size:12px; color:var(--muted); font-weight:600;}
+#salesBoard .kpi .k-s{font-size:var(--text-caption-size); color:var(--muted); font-weight:600;}
 #salesBoard .kpi.lead{background:var(--ink);}
 #salesBoard .kpi.lead .k-l{color:var(--canvas); opacity:.7;}
 #salesBoard .kpi.lead .k-v, #salesBoard .kpi.lead .k-s{color:var(--canvas);}
@@ -2331,9 +2331,9 @@
 #salesBoard .attn-short{position:absolute; top:0; height:34px; border:1.5px dashed var(--red);
   border-left:0; border-radius:0 8px 8px 0; opacity:.75;}
 #salesBoard .attn-tick{position:absolute; top:-7px; bottom:-7px; width:2px; background:var(--ink);}
-#salesBoard .attn-tick span{position:absolute; top:-17px; right:0; font-size:11px; font-weight:800;
+#salesBoard .attn-tick span{position:absolute; top:-17px; right:0; font-size:var(--text-label3-size); font-weight:800;
   white-space:nowrap; color:var(--ink);}
-#salesBoard .attn-legend{display:flex; gap:18px; flex-wrap:wrap; margin-top:12px; font-size:12px; color:var(--muted);}
+#salesBoard .attn-legend{display:flex; gap:18px; flex-wrap:wrap; margin-top:12px; font-size:var(--text-caption-size); color:var(--muted);}
 #salesBoard .sw{display:inline-block; width:11px; height:11px; border-radius:3px; margin-right:6px;
   vertical-align:-1px;}
 
@@ -2341,9 +2341,9 @@
 #salesBoard .plats{display:grid; grid-template-columns:repeat(4,1fr); gap:12px;}
 #salesBoard .plat{background:var(--surface); border:1px solid var(--rule); border-radius:var(--r-lg);
   padding:var(--spacing-16); box-shadow:var(--shadow-1);}
-#salesBoard .plat h3{font-size:16px; display:flex; align-items:center; gap:8px;}
-#salesBoard .plat .pv{font-size:24px; font-weight:800; margin-top:8px;}
-#salesBoard .plat .pr{display:flex; justify-content:space-between; font-size:12px; color:var(--muted);
+#salesBoard .plat h3{font-size:var(--text-body1-size); display:flex; align-items:center; gap:8px;}
+#salesBoard .plat .pv{font-size:var(--text-h3-size-lg); font-weight:800; margin-top:8px;}
+#salesBoard .plat .pr{display:flex; justify-content:space-between; font-size:var(--text-caption-size); color:var(--muted);
   margin-top:5px; gap:10px;}
 #salesBoard .plat .pr b{font-weight:800; color:var(--ink);}
 #salesBoard .minibar{height:8px; background:var(--sunk); border-radius:4px; margin-top:10px; position:relative;
@@ -2371,7 +2371,7 @@
    these data rows do not honour */
 #salesBoard .c-table tbody tr{cursor:default;}
 #salesBoard .lb-head{height:40px; background:none; border-bottom:1px solid var(--rule);
-  font-size:11px; font-weight:700; letter-spacing:var(--tracking-eyebrow); text-transform:uppercase; color:var(--faint);}
+  font-size:var(--text-label3-size); font-weight:700; letter-spacing:var(--tracking-eyebrow); text-transform:uppercase; color:var(--faint);}
 #salesBoard .lb-head .s{background:none; border:0; font:inherit; color:inherit; cursor:pointer;
   padding:0; text-align:right; letter-spacing:0;}
 #salesBoard .lb-head .s:hover{color:var(--ink);}
@@ -2393,11 +2393,11 @@
 #salesBoard .lb-row{min-height:64px; border-bottom:1px solid var(--rule); transition:background .14s var(--ease);}
 #salesBoard #lbRows > .lb-slot:last-child .lb-row{border-bottom:0;}
 #salesBoard .lb-row:hover{background:var(--sunk);}
-#salesBoard .lb-rank{font-size:12px; font-weight:800; color:var(--faint);}
-#salesBoard .lb-name{font-size:16px; font-weight:800; min-width:0;}
-#salesBoard .lb-name .sub{display:block; font-size:11px; font-weight:600; color:var(--faint); margin-top:1px;}
-#salesBoard .r{text-align:right; font-size:14px; font-weight:800; white-space:nowrap;}
-#salesBoard .r .u{display:block; font-size:11px; font-weight:600; color:var(--faint); margin-top:1px;}
+#salesBoard .lb-rank{font-size:var(--text-caption-size); font-weight:800; color:var(--faint);}
+#salesBoard .lb-name{font-size:var(--text-body1-size); font-weight:800; min-width:0;}
+#salesBoard .lb-name .sub{display:block; font-size:var(--text-label3-size); font-weight:600; color:var(--faint); margin-top:1px;}
+#salesBoard .r{text-align:right; font-size:var(--text-body2-size); font-weight:800; white-space:nowrap;}
+#salesBoard .r .u{display:block; font-size:var(--text-label3-size); font-weight:600; color:var(--faint); margin-top:1px;}
 #salesBoard .neg{color:var(--red-ink);} #salesBoard .pos{color:var(--green-ink);}
 #salesBoard .nd{color:var(--faint); font-weight:700;}
 
@@ -2410,7 +2410,7 @@
 #salesBoard .bul-o{position:absolute; top:6px; height:14px; border:1.5px dashed var(--navy); border-left:0;
   border-radius:0 5px 5px 0; opacity:.62;}
 #salesBoard .bul-t{position:absolute; top:1px; height:24px; width:2px; background:var(--ink);}
-#salesBoard .bul-t::after{content:attr(data-l); position:absolute; top:-2px; left:5px; font-size:11px;
+#salesBoard .bul-t::after{content:attr(data-l); position:absolute; top:-2px; left:5px; font-size:var(--text-label3-size);
   font-weight:800; color:var(--muted); white-space:nowrap;}
 #salesBoard .bul-t.flip::after{left:auto; right:5px;}
 /* the opportunity runs past the rail: a solid cap says the bar is cut, not ended */
@@ -2441,7 +2441,7 @@
 #salesBoard .pill.c-badge-warning .dot{border-radius:1px; transform:rotate(45deg);}
 #salesBoard .pill.c-badge-error .dot{border-radius:1px;}
 
-#salesBoard .lb-foot{padding:12px 18px; background:var(--sunk); font-size:12px; color:var(--muted);
+#salesBoard .lb-foot{padding:12px 18px; background:var(--sunk); font-size:var(--text-caption-size); color:var(--muted);
   border-top:1px solid var(--rule); display:flex; gap:18px; flex-wrap:wrap;}
 
 /* ── Generic data table ───────────────────────────────────── */
@@ -2470,7 +2470,7 @@
 #salesBoard .deals th.n, #salesBoard .deals td.n{padding-right:38px;}
 #salesBoard .deals th:last-child, #salesBoard .deals td:last-child{padding-left:4px; width:1%; white-space:nowrap;}
 #salesBoard tbody tr.total td{background:var(--sunk); font-weight:800; border-top:2px solid var(--ink);}
-#salesBoard .adv{font-weight:800;} #salesBoard .camp{color:var(--muted); font-size:12px; display:block; margin-top:1px;}
+#salesBoard .adv{font-weight:800;} #salesBoard .camp{color:var(--muted); font-size:var(--text-caption-size); display:block; margin-top:1px;}
 /* .c-tag: caption at weight 700, a fixed 24px height and 10px of side
    padding, inline-flex so the height applies. Water tint. */
 /* box and tint from .c-tag c-tag-water; text drops to the ink variant —
@@ -2488,7 +2488,7 @@
 #salesBoard tbody tr.dn .lb-note.edit{background:var(--surface);}
 /* flags a quirk that exists in the source export, not in this page */
 #salesBoard .src{display:inline-block; margin-left:8px; padding:1px 7px; border-radius:var(--r-pill);
-  font-size:11px; font-weight:700; letter-spacing:var(--tracking-eyebrow); text-transform:uppercase;
+  font-size:var(--text-label3-size); font-weight:700; letter-spacing:var(--tracking-eyebrow); text-transform:uppercase;
   background:var(--amber-bg); color:var(--amber-ink); cursor:help; white-space:nowrap;}
 
 #salesBoard .fill.empty{border-style:dashed;}
@@ -2501,36 +2501,36 @@
    series in its stack must keep the same colours as the four month cards
    beside it. */
 #salesBoard .mo.sum{border:2px solid var(--ink); box-shadow:var(--shadow-2);}
-#salesBoard .mo.sum h3{font-size:16px;}
+#salesBoard .mo.sum h3{font-size:var(--text-body1-size);}
 #salesBoard .mo.sum .mo-cov{color:var(--ink);}
-#salesBoard .mo h3{font-size:16px;}
-#salesBoard .mo-cov{font-size:32px; font-weight:800; line-height:1.1; margin-top:8px;}
-#salesBoard .mo-cov small{font-size:12px; font-weight:700; color:var(--faint); display:block; letter-spacing:var(--tracking-eyebrow);
+#salesBoard .mo h3{font-size:var(--text-body1-size);}
+#salesBoard .mo-cov{font-size:var(--text-h1-size); font-weight:800; line-height:1.1; margin-top:8px;}
+#salesBoard .mo-cov small{font-size:var(--text-caption-size); font-weight:700; color:var(--faint); display:block; letter-spacing:var(--tracking-eyebrow);
   text-transform:uppercase; margin-top:2px;}
 #salesBoard .stack{height:100px; background:var(--sunk); border-radius:8px; margin-top:12px;
   position:relative; display:flex; flex-direction:column-reverse;}
 #salesBoard .stack i{display:block; background:var(--obsidian); border-radius:0 0 8px 8px;}
 #salesBoard .stack u{display:block; background:var(--navy); box-shadow:0 -2px 0 0 var(--sunk);}
 #salesBoard .stack b{position:absolute; left:-4px; right:-4px; height:2px; background:var(--ink);}
-#salesBoard .stack b::after{content:attr(data-l); position:absolute; right:0; top:-14px; font-size:11px;
+#salesBoard .stack b::after{content:attr(data-l); position:absolute; right:0; top:-14px; font-size:var(--text-label3-size);
   font-weight:800; color:var(--ink);}
-#salesBoard .mo-r{display:flex; justify-content:space-between; font-size:12px; color:var(--muted); margin-top:8px; gap:8px;}
+#salesBoard .mo-r{display:flex; justify-content:space-between; font-size:var(--text-caption-size); color:var(--muted); margin-top:8px; gap:8px;}
 #salesBoard .mo-r b{color:var(--ink); font-weight:800;}
 
 /* ── Heatmap ──────────────────────────────────────────────── */
 #salesBoard .hm{background:var(--surface); border:1px solid var(--rule); border-radius:var(--r-lg);
   box-shadow:var(--shadow-1); padding:var(--spacing-16); overflow-x:auto;}
-#salesBoard .hm table{min-width:520px; font-size:13px;}
+#salesBoard .hm table{min-width:520px; font-size:var(--text-label2-size);}
 #salesBoard .hm thead th{background:transparent; position:static;}
 #salesBoard .hm tbody td{border-bottom:0; padding:3px;}
 #salesBoard .hm tbody tr:hover{background:transparent;}
-#salesBoard .hm th.rowh{text-align:left; font-size:13px; font-weight:800; color:var(--ink);
+#salesBoard .hm th.rowh{text-align:left; font-size:var(--text-label2-size); font-weight:800; color:var(--ink);
   text-transform:none; letter-spacing:0; background:transparent; white-space:nowrap;
   padding-right:14px; position:static; border-bottom:0;}
-#salesBoard .cell{border-radius:8px; text-align:center; font-size:13px; font-weight:800; padding:11px 6px;
+#salesBoard .cell{border-radius:8px; text-align:center; font-size:var(--text-label2-size); font-weight:800; padding:11px 6px;
   min-width:64px; transition:transform .12s var(--ease);}
 #salesBoard .cell:hover{transform:scale(1.06);}
-#salesBoard .hm-legend{display:flex; align-items:center; gap:8px; margin-top:14px; font-size:11px; color:var(--muted);
+#salesBoard .hm-legend{display:flex; align-items:center; gap:8px; margin-top:14px; font-size:var(--text-label3-size); color:var(--muted);
   flex-wrap:wrap;}
 #salesBoard .hm-legend .ramp{display:flex; border-radius:4px; overflow:hidden;}
 #salesBoard .hm-legend .ramp i{width:26px; height:12px; display:block;}
@@ -2552,18 +2552,18 @@
 #salesBoard .ipgrid .panel > div[id$="Bars"]{flex:1 1 auto; min-height:0;}
 #salesBoard .panel{background:var(--surface); border:1px solid var(--rule); border-radius:var(--r-lg);
   box-shadow:var(--shadow-1); padding:var(--spacing-16);}
-#salesBoard .panel h3{font-size:16px;}
+#salesBoard .panel h3{font-size:var(--text-body1-size);}
 #salesBoard .panel .panelhd{display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; margin-bottom:4px;}
-#salesBoard .panel .pnote{font-size:12px; color:var(--faint); margin:2px 0 14px;}
+#salesBoard .panel .pnote{font-size:var(--text-caption-size); color:var(--faint); margin:2px 0 14px;}
 #salesBoard .hbar{display:grid; grid-template-columns:118px 1fr 66px 42px; gap:10px; align-items:center;
-  padding:6px 0; font-size:13px;}
+  padding:6px 0; font-size:var(--text-label2-size);}
 #salesBoard .hbar .hn{font-weight:800; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
 #salesBoard .hbar .ht{height:16px; background:var(--sunk); border-radius:5px; position:relative;}
 #salesBoard .hbar .ht i{position:absolute; left:0; top:0; height:16px; border-radius:5px; background:var(--navy);}
 #salesBoard .hbar .ht u{position:absolute; top:0; height:16px; background:var(--seq-3); border-radius:0 5px 5px 0;
   box-shadow:-2px 0 0 0 var(--sunk);}
 #salesBoard .hbar .hv{text-align:right; font-weight:800;}
-#salesBoard .hbar .hd{text-align:right; font-size:11px; color:var(--faint); font-weight:700;}
+#salesBoard .hbar .hd{text-align:right; font-size:var(--text-label3-size); color:var(--faint); font-weight:700;}
 
 
 /* ── Footnotes ────────────────────────────────────────────── */
@@ -2571,9 +2571,9 @@
   display:grid; grid-template-columns:repeat(3,1fr); gap:24px;}
 /* Weight stated rather than inherited: without it this picks up 800 from the
    shared h2/h3/h4 heading rule, and at 11px uppercase it is an eyebrow. */
-#salesBoard .notes h3{font-size:11px; font-weight:700; letter-spacing:var(--tracking-eyebrow); text-transform:uppercase; color:var(--orange);
+#salesBoard .notes h3{font-size:var(--text-label3-size); font-weight:700; letter-spacing:var(--tracking-eyebrow); text-transform:uppercase; color:var(--orange);
   margin-bottom:8px;}
-#salesBoard .notes p{margin:0 0 10px; font-size:12px; line-height:1.65; color:var(--muted);}
+#salesBoard .notes p{margin:0 0 10px; font-size:var(--text-caption-size); line-height:1.65; color:var(--muted);}
 #salesBoard .notes b{color:var(--ink); font-weight:800;}
 
 #salesBoard .tt{position:relative; border-bottom:1px dotted var(--faint); cursor:help;}
@@ -2618,7 +2618,7 @@
 #salesBoard .frow{display:flex; align-items:center; gap:var(--spacing-8); flex-wrap:wrap; padding:11px 16px;
   border-bottom:1px solid var(--rule);}
 #salesBoard .frow:last-child{border-bottom:0;}
-#salesBoard .flab{font-size:11px; font-weight:700; letter-spacing:var(--tracking-eyebrow); text-transform:uppercase;
+#salesBoard .flab{font-size:var(--text-label3-size); font-weight:700; letter-spacing:var(--tracking-eyebrow); text-transform:uppercase;
   color:var(--faint); width:58px; flex:none;}
 /* .c-chip-filter: a 32px pill at label2, Neutral-1 inside a Neutral-3
    border. The pointer:coarse rule further down still lifts this to 44px on a
@@ -2637,7 +2637,7 @@
    height 40, --radius-sm, 1px Neutral-3, body2, --spacing-12 of side padding.
    This was a 36px pill at 12px/700. */
 #salesBoard .fsel{border:1px solid var(--color-neutral-3); background:var(--surface); border-radius:var(--r-sm);
-  padding:0 var(--spacing-12); font:inherit; font-size:14px; font-weight:600; color:var(--color-neutral-9);
+  padding:0 var(--spacing-12); font:inherit; font-size:var(--text-body2-size); font-weight:600; color:var(--color-neutral-9);
   min-height:32px; cursor:pointer;}
 #salesBoard .fsel:hover{background:var(--color-neutral-2);}
 #salesBoard .fsel:disabled{opacity:.5; cursor:not-allowed; border-style:dashed; color:var(--muted);}
@@ -2648,7 +2648,7 @@
 /* the elapsed periods and the forward block are different animals; the rule
    says so without needing a caption */
 #salesBoard .fdiv{width:1px; align-self:stretch; background:var(--rule); margin:0 4px;}
-#salesBoard .fnote{font-size:11px; color:var(--faint); margin-left:auto;}
+#salesBoard .fnote{font-size:var(--text-label3-size); color:var(--faint); margin-left:auto;}
 /* Ghost button in the filter bar: label2 at 700, --radius-sm. */
 /* .c-btn c-btn-ghost c-btn-sm — including its Neutral-9 text; the navy tint was local */
 
@@ -2656,7 +2656,7 @@
    it became separate items with a 10px gap between them, so every line read
    "Mandy Seah ." */
 #salesBoard .fscope{padding:9px 16px; background:var(--navy-ink, var(--navy)); border-top:1px solid var(--rule);
-  font-size:12px; font-weight:700; display:block; line-height:1.5;}
+  font-size:var(--text-caption-size); font-weight:700; display:block; line-height:1.5;}
 #salesBoard .fscope{background:var(--navy-bg); color:var(--navy-ink);}
 /* a class that sets display beats the browser's [hidden] rule, so say it here */
 #salesBoard [hidden]{display:none !important;}
@@ -2670,32 +2670,32 @@
   box-shadow:var(--shadow-1); padding:var(--spacing-16);}
 #salesBoard .pod-hd{display:flex; align-items:baseline; gap:8px; flex-wrap:wrap;
   padding-bottom:9px; margin-bottom:9px; border-bottom:1px solid var(--rule);}
-#salesBoard .pod-hd h3{font-size:16px;}
-#salesBoard .g{font-size:11px; font-weight:800; letter-spacing:0; color:var(--faint);
+#salesBoard .pod-hd h3{font-size:var(--text-body1-size);}
+#salesBoard .g{font-size:var(--text-label3-size); font-weight:800; letter-spacing:0; color:var(--faint);
   border:1px solid var(--rule); border-radius:4px; padding:1px 5px;}
-#salesBoard .pod-seg{font-size:11px; font-weight:700; letter-spacing:var(--tracking-eyebrow); text-transform:uppercase;
+#salesBoard .pod-seg{font-size:var(--text-label3-size); font-weight:700; letter-spacing:var(--tracking-eyebrow); text-transform:uppercase;
   color:var(--navy-ink); background:var(--navy-bg); border-radius:var(--r-pill); padding:2px 8px;}
 #salesBoard .pod ul{list-style:none; margin:0; padding:0;}
-#salesBoard .pod li{display:flex; align-items:baseline; gap:8px; padding:6px 0; font-size:14px;
+#salesBoard .pod li{display:flex; align-items:baseline; gap:8px; padding:6px 0; font-size:var(--text-body2-size);
   color:var(--muted); border-bottom:1px solid var(--rule);}
 #salesBoard .pod li:last-child{border-bottom:0;}
 #salesBoard .pod li b{color:var(--ink); font-weight:700;}
 #salesBoard .pod li.vac, #salesBoard .pod li.vac b{color:var(--amber-ink); font-style:italic;}
-#salesBoard .pod .note{font-size:11px; color:var(--faint);}
+#salesBoard .pod .note{font-size:var(--text-label3-size); color:var(--faint);}
 #salesBoard .sup{margin-top:11px; padding-top:9px; border-top:1px dashed var(--rule);
-  font-size:11px; color:var(--faint);}
-#salesBoard .sup b{font-size:11px; font-weight:700; letter-spacing:var(--tracking-eyebrow); text-transform:uppercase;
+  font-size:var(--text-label3-size); color:var(--faint);}
+#salesBoard .sup b{font-size:var(--text-label3-size); font-weight:700; letter-spacing:var(--tracking-eyebrow); text-transform:uppercase;
   color:var(--faint); margin-right:7px;}
 #salesBoard .peers{display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:10px;}
 #salesBoard .peer{background:var(--surface); border:1px solid var(--rule); border-radius:var(--r-lg);
   box-shadow:var(--shadow-1); padding:var(--spacing-16);}
 #salesBoard .peer.me{border-color:var(--navy); box-shadow:0 0 0 1px var(--navy), var(--shadow-1);}
-#salesBoard .peer h3{font-size:14px; margin-bottom:2px;}
-#salesBoard .peer .rank{display:block; font-size:11px; font-weight:700; letter-spacing:var(--tracking-eyebrow);
+#salesBoard .peer h3{font-size:var(--text-body2-size); margin-bottom:2px;}
+#salesBoard .peer .rank{display:block; font-size:var(--text-label3-size); font-weight:700; letter-spacing:var(--tracking-eyebrow);
   text-transform:uppercase; color:var(--navy-ink); margin-top:2px;}
-#salesBoard .peer .pl{font-size:11px; color:var(--faint); margin-bottom:8px;}
-#salesBoard .peer .pv{font-size:20px; font-weight:800;}
-#salesBoard .peer .ps{font-size:11px; color:var(--faint); margin-top:2px;}
+#salesBoard .peer .pl{font-size:var(--text-label3-size); color:var(--faint); margin-bottom:8px;}
+#salesBoard .peer .pv{font-size:var(--text-h4-size); font-weight:800;}
+#salesBoard .peer .ps{font-size:var(--text-label3-size); color:var(--faint); margin-top:2px;}
 #salesBoard .peer .mb{position:relative; height:6px; background:var(--sunk); border-radius:3px; margin-top:9px;}
 #salesBoard .peer .mb i{position:absolute; left:0; top:0; bottom:0; background:var(--obsidian);
   border-radius:3px;}
@@ -2755,7 +2755,7 @@
 /* removed: .seatdrop announced sections that were simply not there */
 #salesBoard .seatdrop-gone{margin:0 0 14px; padding:9px 14px; background:var(--sunk);
   border-left:3px solid var(--rule); border-radius:0 10px 10px 0;
-  font-size:12px; color:var(--muted); line-height:1.6; max-width:78ch;}
+  font-size:var(--text-caption-size); color:var(--muted); line-height:1.6; max-width:78ch;}
 #salesBoard .seatdrop-gone b{color:var(--ink); font-weight:800;}
 
 /* Locked mode has no control of its own, so the state label carries it. */
@@ -2778,15 +2778,15 @@
   #salesBoard .crumbrow .tools{width:100%; justify-content:flex-end;}
 }
 #salesBoard .crumbs{display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin-bottom:12px;
-  font-size:12px;}
+  font-size:var(--text-caption-size);}
 #salesBoard .crumb{border:1px solid var(--rule); background:var(--surface); border-radius:var(--r-pill);
-  padding:5px 13px; font:inherit; font-size:12px; font-weight:700; color:var(--muted);
+  padding:5px 13px; font:inherit; font-size:var(--text-caption-size); font-weight:700; color:var(--muted);
   cursor:pointer; min-height:32px;}
 #salesBoard .crumb:hover{background:var(--sunk); color:var(--ink);}
 #salesBoard .crumb.here{background:var(--ink); border-color:var(--ink); color:var(--canvas);
   cursor:default;}
 #salesBoard .crumb-sep{color:var(--faint); font-weight:800;}
-#salesBoard .crumb-lvl{font-size:11px; font-weight:700; letter-spacing:var(--tracking-eyebrow); text-transform:uppercase;
+#salesBoard .crumb-lvl{font-size:var(--text-label3-size); font-weight:700; letter-spacing:var(--tracking-eyebrow); text-transform:uppercase;
   color:var(--faint); margin-left:4px;}
 
 /* ── Notes against a number ────────────────────────────────────
@@ -2795,7 +2795,7 @@
    note lives against the row rather than in a comments panel somewhere else,
    so it arrives with the number instead of having to be looked up. */
 #salesBoard .nt{flex:none; margin-left:8px; border:1px solid transparent; background:none;
-  border-radius:var(--r-pill); padding:2px 8px; font:inherit; font-size:11px;
+  border-radius:var(--r-pill); padding:2px 8px; font:inherit; font-size:var(--text-label3-size);
   font-weight:700; letter-spacing:var(--tracking-eyebrow); text-transform:uppercase; color:var(--faint);
   cursor:pointer; opacity:.55; transition:opacity .14s var(--ease), color .14s var(--ease);}
 #salesBoard .lb-row:hover .nt, #salesBoard .nt:focus-visible{opacity:1;}
@@ -2803,11 +2803,11 @@
 #salesBoard .nt.has{opacity:1; color:var(--navy-ink); background:var(--navy-bg);
   border-color:color-mix(in srgb, var(--navy-ink) 22%, transparent);}
 #salesBoard .lb-note{padding:10px 16px 12px 52px; background:var(--navy-bg);
-  border-bottom:1px solid var(--rule); font-size:12px; line-height:1.55;
+  border-bottom:1px solid var(--rule); font-size:var(--text-caption-size); line-height:1.55;
   color:var(--navy-ink);}
 #salesBoard .lb-note .note-t{font-weight:700;}
 #salesBoard .lb-note .note-m{display:flex; align-items:center; gap:5px; flex-wrap:wrap;
-  margin-top:6px; font-size:11px; font-weight:700;
+  margin-top:6px; font-size:var(--text-label3-size); font-weight:700;
   color:color-mix(in srgb, var(--navy-ink) 62%, transparent);}
 #salesBoard .lb-note .note-m b{color:var(--navy-ink); font-weight:800;}
 #salesBoard .lb-note .note-m .anon{font-style:italic; opacity:.8;}
@@ -2820,22 +2820,22 @@
    held to the 4.5:1 bar rather than the large-text one. This pair clears it
    in both themes, 7.5:1 light and 9.9:1 dark. */
 #salesBoard .ava{display:inline-grid; place-items:center; width:20px; height:20px; flex:none;
-  border-radius:50%; background:var(--navy-ink); color:var(--canvas); font-size:11px;
+  border-radius:50%; background:var(--navy-ink); color:var(--canvas); font-size:var(--text-label3-size);
   font-weight:800; letter-spacing:0; font-style:normal;}
 /* Read-only, because it is a fact about the session rather than a field. */
 #salesBoard .note-who{display:flex; align-items:center; gap:7px; margin-top:10px; flex-wrap:wrap;
-  font-size:12px; color:var(--ink); cursor:help;}
-#salesBoard .note-who-l{font-size:11px; font-weight:700; letter-spacing:var(--tracking-eyebrow);
+  font-size:var(--text-caption-size); color:var(--ink); cursor:help;}
+#salesBoard .note-who-l{font-size:var(--text-label3-size); font-weight:700; letter-spacing:var(--tracking-eyebrow);
   text-transform:uppercase; color:var(--faint);}
 #salesBoard .note-who b{font-weight:800;}
-#salesBoard .note-who-n{font-size:11px; font-weight:700; color:var(--faint);}
-#salesBoard .lb-note .note-m button{background:none; border:0; font:inherit; font-size:11px;
+#salesBoard .note-who-n{font-size:var(--text-label3-size); font-weight:700; color:var(--faint);}
+#salesBoard .lb-note .note-m button{background:none; border:0; font:inherit; font-size:var(--text-label3-size);
   font-weight:800; color:var(--navy-ink); cursor:pointer; padding:0 2px;
   text-decoration:underline; text-underline-offset:2px;}
 #salesBoard .lb-note.edit{background:var(--surface); padding-bottom:14px;}
-#salesBoard .lb-note label{display:block; font-size:11px; font-weight:700; letter-spacing:var(--tracking-eyebrow);
+#salesBoard .lb-note label{display:block; font-size:var(--text-label3-size); font-weight:700; letter-spacing:var(--tracking-eyebrow);
   text-transform:uppercase; color:var(--faint); margin-bottom:6px;}
-#salesBoard .lb-note textarea{width:100%; box-sizing:border-box; font:inherit; font-size:13px;
+#salesBoard .lb-note textarea{width:100%; box-sizing:border-box; font:inherit; font-size:var(--text-label2-size);
   line-height:1.5; color:var(--ink); background:var(--canvas);
   border:1px solid var(--rule); border-radius:10px; padding:9px 11px; resize:vertical;
   min-height:62px;}
@@ -2844,7 +2844,7 @@
 #salesBoard .note-act .chip.go{background:var(--navy); border-color:var(--navy); color:#fff;}
 #salesBoard .note-act .chip.del{color:var(--red-ink);
   border-color:color-mix(in srgb, var(--red-ink) 30%, transparent);}
-#salesBoard .note-hint{font-size:11px; color:var(--faint); margin-left:auto;}
+#salesBoard .note-hint{font-size:var(--text-label3-size); color:var(--faint); margin-left:auto;}
 @media (max-width:860px){
   #salesBoard .lb-note{padding-left:16px;}
   #salesBoard .note-hint{margin-left:0; flex:1 0 100%;}
@@ -2899,7 +2899,7 @@
 #salesBoard .controls.compact .views{margin-top:0;}
 
 #salesBoard .controls.compact .views .v-k, #salesBoard .controls.compact .views .v-d{display:none;}
-#salesBoard .controls.compact .views .v-t{font-size:14px; margin-top:0;}
+#salesBoard .controls.compact .views .v-t{font-size:var(--text-body2-size); margin-top:0;}
 
 #salesBoard .controls.compact .ctl-bars{display:flex; flex-wrap:wrap; gap:8px; margin-top:8px;
   align-items:stretch;}
@@ -2920,13 +2920,13 @@
 /* only the native select still needs this skin — the chips now carry
    their own DS classes */
 #salesBoard .controls.compact .fsel{min-height:32px;
-  padding:0 var(--spacing-12); font-size:14px; font-weight:600;}
-#salesBoard .controls.compact .fscope{padding:var(--spacing-8) var(--spacing-12); font-size:14px;}
+  padding:0 var(--spacing-12); font-size:var(--text-body2-size); font-weight:600;}
+#salesBoard .controls.compact .fscope{padding:var(--spacing-8) var(--spacing-12); font-size:var(--text-body2-size);}
 /* The Segment placeholder stays. It is the running list of what NeoCRM still
    owes this board, and with the bar compact all the time there is no longer a
    resting state for it to reappear in. It is allowed to wrap; the two boxes
    stretch to match each other, so a wrap costs symmetry, not alignment. */
-#salesBoard .controls.compact .sw-l{font-size:12px;}
+#salesBoard .controls.compact .sw-l{font-size:var(--text-caption-size);}
 #salesBoard .controls.compact .sw-t{width:38px; height:21px;}
 #salesBoard .controls.compact .sw-t i{width:15px; height:15px;}
 #salesBoard .controls.compact .sw-t[aria-checked="true"] i{transform:translateX(17px);}
@@ -2946,7 +2946,7 @@
    Range is MTD-only in this cut and the last-year switch is a decision you
    make once, so both stand down at this width. */
 @media (max-width:760px){
-  #salesBoard .controls.compact .views .v-t{font-size:11px; line-height:1.25;}
+  #salesBoard .controls.compact .views .v-t{font-size:var(--text-label3-size); line-height:1.25;}
   
   #salesBoard .controls.compact .ctl-bars{gap:6px; margin-top:6px; flex-direction:column;
     align-items:stretch;}
@@ -2971,9 +2971,9 @@
   #salesBoard .controls.compact .rangebar .fpill:disabled{display:none;}
   #salesBoard .controls.compact .switchwrap{margin-left:0;}
   #salesBoard .controls.compact .rangebar, #salesBoard .controls.compact .filters{box-shadow:none;}
-  #salesBoard .controls.compact .fsel{font-size:11px; padding:4px 10px;}
+  #salesBoard .controls.compact .fsel{font-size:var(--text-label3-size); padding:4px 10px;}
   
-  #salesBoard .controls.compact .fscope{padding:6px 10px; font-size:11px; white-space:nowrap;
+  #salesBoard .controls.compact .fscope{padding:6px 10px; font-size:var(--text-label3-size); white-space:nowrap;
     overflow:hidden; text-overflow:ellipsis; display:block;}
   /* Stacked cards are right when each carries three lines of explanation.
      Once the label is two words the pair is a tab strip again, and stacking
@@ -2982,7 +2982,7 @@
   
   
   #salesBoard .controls.compact .views .v-t{display:none;}
-  #salesBoard .controls.compact .views .v-s{display:block; font-size:12px; font-weight:800;}
+  #salesBoard .controls.compact .views .v-s{display:block; font-size:var(--text-caption-size); font-weight:800;}
   #salesBoard .controls{padding:6px 0 7px;}
   #salesBoard .controls.compact{padding:6px 0 7px;}
 }
@@ -3078,14 +3078,14 @@
 #salesBoard .cmp-opt:focus-visible{outline:2px solid var(--navy); outline-offset:-2px;}
 #salesBoard .cmp-opt:disabled{cursor:not-allowed; opacity:.55;}
 #salesBoard .cmp-box{width:16px; height:16px; border:1.5px solid var(--rule); border-radius:4px; flex:none;
-  margin-top:1px; display:grid; place-items:center; font-size:11px; font-weight:800;
+  margin-top:1px; display:grid; place-items:center; font-size:var(--text-label3-size); font-weight:800;
   color:transparent; line-height:1;}
 #salesBoard .cmp-opt[aria-checked="true"] .cmp-box{background:var(--navy); border-color:var(--navy);
   color:var(--canvas);}
-#salesBoard .cmp-t{font-size:12px; font-weight:800; display:block;}
-#salesBoard .cmp-b{font-size:11px; color:var(--faint); display:block; margin-top:2px; line-height:1.45;
+#salesBoard .cmp-t{font-size:var(--text-caption-size); font-weight:800; display:block;}
+#salesBoard .cmp-b{font-size:var(--text-label3-size); color:var(--faint); display:block; margin-top:2px; line-height:1.45;
   white-space:normal;}
-#salesBoard .cmp-key{font-size:11px; font-weight:800; letter-spacing:0; color:var(--faint);
+#salesBoard .cmp-key{font-size:var(--text-label3-size); font-weight:800; letter-spacing:0; color:var(--faint);
   margin-left:auto; padding-left:10px; flex:none;}
 
 /* one line style per baseline, so two of them on the same rail stay apart */
@@ -3097,7 +3097,7 @@
    is a mode that layers over whichever range is picked, so it is a switch
    and it sits apart from them, at the far end of the bar. */
 #salesBoard .switchwrap{display:flex; align-items:center; gap:10px; margin-left:auto;}
-#salesBoard .sw-l{font-size:12px; font-weight:700; color:var(--muted); white-space:nowrap;}
+#salesBoard .sw-l{font-size:var(--text-caption-size); font-weight:700; color:var(--muted); white-space:nowrap;}
 #salesBoard .sw-t{position:relative; width:42px; height:23px; flex:none; padding:0; cursor:pointer;
   border:1px solid var(--rule); border-radius:12px; background:var(--sunk);
   transition:background .2s var(--ease), border-color .2s var(--ease);}
@@ -3123,7 +3123,7 @@
    somebody puts them side by side and concludes one is broken. */
 #salesBoard .basis{margin-top:14px; padding:10px 14px; border-left:3px solid var(--rule);
   background:var(--sunk); border-radius:0 10px 10px 0;
-  font-size:12px; color:var(--muted); line-height:1.6; max-width:70ch;}
+  font-size:var(--text-caption-size); color:var(--muted); line-height:1.6; max-width:70ch;}
 #salesBoard .basis b{color:var(--ink); font-weight:800;}
 
 /* ── Pace ──────────────────────────────────────────────────────
@@ -3135,17 +3135,17 @@
   overflow:hidden;}
 #salesBoard .pace > div{flex:1 1 210px; padding:13px 16px; border-right:1px solid var(--rule); min-width:0;}
 #salesBoard .pace > div:last-child{border-right:0;}
-#salesBoard .p-l{font-size:11px; font-weight:700; letter-spacing:var(--tracking-eyebrow); text-transform:uppercase;
+#salesBoard .p-l{font-size:var(--text-label3-size); font-weight:700; letter-spacing:var(--tracking-eyebrow); text-transform:uppercase;
   color:var(--faint); margin-bottom:6px;}
-#salesBoard .p-v{font-size:20px; font-weight:800; letter-spacing:0;}
-#salesBoard .p-v small{font-size:12px; font-weight:700; color:var(--muted); margin-left:4px;}
-#salesBoard .p-s{font-size:11px; color:var(--faint); margin-top:4px; line-height:1.5;}
+#salesBoard .p-v{font-size:var(--text-h4-size); font-weight:800; letter-spacing:0;}
+#salesBoard .p-v small{font-size:var(--text-caption-size); font-weight:700; color:var(--muted); margin-left:4px;}
+#salesBoard .p-s{font-size:var(--text-label3-size); color:var(--faint); margin-top:4px; line-height:1.5;}
 #salesBoard .p-track{height:6px; border-radius:3px; background:var(--sunk); margin-top:10px;
   position:relative; overflow:visible;}
 #salesBoard .p-track i{position:absolute; left:0; top:0; bottom:0; background:var(--faint);
   border-radius:3px; opacity:.55;}
 #salesBoard .p-track u{position:absolute; top:-3px; bottom:-3px; width:2px; background:var(--navy);}
-#salesBoard .p-key{display:flex; gap:12px; margin-top:7px; font-size:11px; color:var(--faint);
+#salesBoard .p-key{display:flex; gap:12px; margin-top:7px; font-size:var(--text-label3-size); color:var(--faint);
   flex-wrap:wrap;}
 #salesBoard .p-key b{font-weight:800; color:var(--muted);}
 
@@ -3157,9 +3157,9 @@
   pointer-events:none;}
 #salesBoard .minibar .ly-t{top:-3px; height:14px;}
 #salesBoard .attn-ly{position:absolute; top:-4px; height:42px; border-left:2px dotted var(--faint);}
-#salesBoard .attn-ly span{position:absolute; top:-13px; left:5px; font-size:11px; font-weight:800;
+#salesBoard .attn-ly span{position:absolute; top:-13px; left:5px; font-size:var(--text-label3-size); font-weight:800;
   color:var(--faint); white-space:nowrap;}
-#salesBoard .ly-d{display:block; font-size:11px; font-weight:800; margin-top:5px;}
+#salesBoard .ly-d{display:block; font-size:var(--text-label3-size); font-weight:800; margin-top:5px;}
 #salesBoard .ly-d.up{color:var(--green-ink);}
 #salesBoard .ly-d.down{color:var(--red-ink);}
 /* a placeholder awaiting a lookup, and a tile that cannot be filled
@@ -3177,7 +3177,7 @@
 #salesBoard .plat.clickable:hover{box-shadow:0 0 0 1px var(--navy), var(--shadow-1);}
 #salesBoard .plat[aria-pressed="true"]{box-shadow:0 0 0 2px var(--navy), var(--shadow-1);}
 #salesBoard .plat.clickable:focus-visible{outline:2px solid var(--navy); outline-offset:2px;}
-#salesBoard .p-rate{font-size:11px; color:var(--faint); margin-top:7px; padding-top:7px;
+#salesBoard .p-rate{font-size:var(--text-label3-size); color:var(--faint); margin-top:7px; padding-top:7px;
   border-top:1px solid var(--rule);}
 #salesBoard .p-rate b{color:var(--muted); font-weight:800;}
 
@@ -3187,11 +3187,11 @@
    totals, invented split. That is a deliberate design-stage choice and it
    is marked, but marked softly — the whole point is to see the composed
    view, not a page of warnings. One faint word, dotted, tooltip on hover. */
-#salesBoard .hint{font-size:11px; font-weight:700; letter-spacing:var(--tracking-eyebrow); text-transform:uppercase;
+#salesBoard .hint{font-size:var(--text-label3-size); font-weight:700; letter-spacing:var(--tracking-eyebrow); text-transform:uppercase;
   color:var(--faint); border-bottom:1px dotted currentColor; cursor:help;
   vertical-align:middle; white-space:nowrap;}
 
-#salesBoard .noresult{padding:22px 18px; font-size:13px; color:var(--muted); line-height:1.6;}
+#salesBoard .noresult{padding:22px 18px; font-size:var(--text-label2-size); color:var(--muted); line-height:1.6;}
 #salesBoard .noresult b{color:var(--ink); display:block; margin-bottom:3px;}
 #salesBoard .clickable{cursor:pointer;}
 #salesBoard .lb-row .lb-name.clickable:hover, #salesBoard .hm th.rowh.clickable:hover{color:var(--navy-ink);
@@ -3243,7 +3243,7 @@
      to --spacing-16 here), which left every board section inset 16px from the
      greeting; the 72px foot doubled .c-shell-content's reserved space. */
   #salesBoard{padding:0 0 var(--spacing-16);}
-  #salesBoard .mast h1{font-size:26px;}
+  #salesBoard .mast h1{font-size:var(--text-h2-size);}
   #salesBoard .stamp{border-left:0; padding-left:0; text-align:left;}
   #salesBoard .horizon{grid-template-columns:1fr;}
   #salesBoard .horizon button{border-right:0; border-bottom:2px solid var(--ink);}
@@ -3258,7 +3258,7 @@
   #salesBoard .lb-name{flex:1 1 auto; order:1;}
   #salesBoard .lb-row .st{order:2; margin-left:auto;}
   #salesBoard .bul{order:3; flex:1 0 100%; height:30px; margin:4px 0 2px;}
-  #salesBoard .lb-row .r{order:4; text-align:left; font-size:14px;}
+  #salesBoard .lb-row .r{order:4; text-align:left; font-size:var(--text-body2-size);}
   #salesBoard .lb-row .r .u{margin-top:0;}
   #salesBoard .lb-row .c-ly{display:block;}
 }
@@ -3281,7 +3281,7 @@
   #salesBoard .views, #salesBoard .rangebar, #salesBoard .frow, #salesBoard .themebtn, #salesBoard .tools, #salesBoard .nt, #salesBoard .lb-head .s::after{display:none !important;}
   #salesBoard .filters{border:0 !important; box-shadow:none !important; margin:0 0 10px !important;}
   #salesBoard .collapse{grid-template-rows:minmax(0,1fr) !important; opacity:1 !important;}
-  #salesBoard .fscope{border:1px solid #ddd !important; border-radius:8px;}
+  #salesBoard .fscope{border:1px solid var(--color-neutral-3) !important; border-radius:8px;}
   #salesBoard{padding:0 !important; max-width:none !important;}
   #salesBoard .lb, #salesBoard .attn, #salesBoard .kpi, #salesBoard .mo, #salesBoard .peer, #salesBoard .pod, #salesBoard .notes > div{break-inside:avoid; page-break-inside:avoid;}
   #salesBoard .lb-slot{overflow:visible !important;}

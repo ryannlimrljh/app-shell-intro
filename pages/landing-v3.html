@@ -5891,6 +5891,13 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
   }
 
   window.showCards = openCards;
+  /* "Hero Cards" opens this overlay rather than jumping to the fan. The link
+     keeps its in-page href, so it still lands somewhere sensible if the
+     script never runs; the handler takes over when it does. */
+  const cardLink = document.querySelector('#dashLink a[href="#cardSlider"]');
+  if (cardLink) {
+    cardLink.addEventListener('click', (e) => { e.preventDefault(); openCards(cardLink); });
+  }
   if (backdrop) backdrop.addEventListener('click', closeCards);
   /* Click anywhere that is not a card to go back. The panel is inset:0 and sits
      over the backdrop, so the backdrop's own handler above almost never gets

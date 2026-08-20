@@ -1990,10 +1990,10 @@
             </div>
             <div class="c-card c-card-slide" data-role="hero">
               <span class="c-hcard-label">Close this first <span class="c-hcard-prov" title="Derived from the board's own model. Follows every slice and filter below.">· derived, live</span></span>
-              <h4 data-hero="deal-h">Mediacorp &middot; Upfront 2027</h4>
+              <h4 data-hero="deal-h">ZETRIX AI BERHAD &middot; EPL 2026/27 Sponsorship</h4>
               <div class="c-hcard-list">
                 <div class="c-hcard-list-row"><span>Worth</span><span class="c-badge c-badge-neutral" data-hero="deal-v">RM1.2M</span></div>
-                <div class="c-hcard-list-row"><span>Owner</span><span class="c-badge c-badge-neutral" data-hero="deal-o">Joy Ahmad</span></div>
+                <div class="c-hcard-list-row"><span>Owner</span><span class="c-badge c-badge-neutral" data-hero="deal-o">Siok Chin</span></div>
                 <div class="c-hcard-list-row"><span>Stage</span><span class="c-badge c-badge-warning" data-hero="deal-s">Open at 80%</span></div>
               </div>
               <span class="c-hcard-rec" data-hero="deal-rec">The largest open deal in this slice. Land it and the daily rate drops.</span>
@@ -8399,12 +8399,11 @@ function renderHeatmap(){
 }
 
 /* ── Deals ────────────────────────────────────────────────── */
-function renderDeals(){
-  var isNow = state.hz==='now';
+/* The deal filter, factored out of renderDeals so the hero cards can ask
+   what is open in this slice without re-stating the rules. */
+function dealData(isNow){
   var all = isNow ? DEALS_NOW : DEALS_NEXT;
-  // forward rows carry no platform, and no row anywhere carries a pod
-  var modelled = (!isNow && !!state.platform) || !!state.mgr;
-  var rows = all.map(function(d,i){ return {d:d, i:i}; }).filter(function(x){
+  return all.map(function(d,i){ return {d:d, i:i}; }).filter(function(x){
     if(state.hos ? x.d.o !== state.hos
                  : (state.line && (teamOf(x.d.o)||{}).vp !== state.line)) return false;
     if(state.mgr){ var seat = dealSeat(x.d, x.i); if(!seat || !inRoot(seat)) return false; }
@@ -8415,6 +8414,88 @@ function renderDeals(){
     }
     return true;
   });
+}
+
+/* ── Hero cards ────────────────────────────────────────────────
+   The landing's fan is fed from this same model: four of the six hero
+   cards carry derived numbers, and this re-answers them on every
+   applyFilters pass, so a card can never disagree with the board below
+   it. The two illustrative cards (proposals, client intelligence) are
+   static by design — their figures live in the Collab Sales workspace,
+   and their provenance marks say so. */
+function renderHeroCards(){
+  var slot = function(k){ return document.querySelector('[data-hero="'+k+'"]'); };
+  if(!slot('gap-v')) return;   // board embedded without the landing's fan
+  var put = function(k, txt){ var el = slot(k); if(el) el.textContent = txt; };
+
+  // the gap, priced per day
+  var M = sliceModel('now'), W = windowFor(state.platform);
+  var left = Math.max(1, W.total - W.gone);
+  var gap = M.t - M.f;
+  put('gap-v', rmSigned(M.f - M.t));
+  var trend = slot('gap-day');
+  if(trend){
+    trend.textContent = 'Day '+W.gone+' of '+W.total+' \u00b7 '+left+' days left';
+    trend.classList.toggle('down', gap > 0);
+    trend.classList.toggle('up', gap <= 0);
+  }
+  if(gap > 0){
+    put('gap-rate', rm(gap/left)+' a day of new business closes it');
+    put('gap-rec', 'This is the number the deal list has to beat.');
+  } else {
+    put('gap-rate', 'Forecast is at or above target on this slice');
+    put('gap-rec', 'Nothing more is required to reach it here.');
+  }
+
+  // the deal to land now
+  var deals = dealData(true).slice().sort(function(a,b){ return b.d.v - a.d.v; });
+  var top = deals[0];
+  if(top){
+    put('deal-h', top.d.a+' \u00b7 '+top.d.c);
+    put('deal-v', rm(top.d.v));
+    put('deal-o', top.d.o);
+    put('deal-s', 'Open at 80%');
+    put('deal-rec', 'The largest of '+deals.length+' open deal'+(deals.length===1?'':'s')+
+      ' in this slice. Land it and the daily rate drops.');
+  } else {
+    put('deal-h', 'No open deals in this slice');
+    put('deal-v', 'n/d'); put('deal-o', 'n/d'); put('deal-s', 'n/d');
+    put('deal-rec', 'The export carries only the largest deals in the company, and none of them sits here.');
+  }
+
+  // the weakest platform
+  var plats = platData().rows.slice().sort(function(a,b){ return a.pct - b.pct; });
+  var Pl = plats[0];
+  if(Pl){
+    var PW = windowFor(Pl.n), pleft = Math.max(1, PW.total - PW.gone);
+    var need = Math.max(0, Pl.t - Pl.b) / pleft;
+    put('plat-h', Pl.n+' at '+Pl.pct+'% to target');
+    put('plat-p', rm(need)+' a day reaches it, '+pleft+' delivery days left');
+    put('plat-lbl', 'Booked '+rm(Pl.b)+' of '+rm(Pl.t));
+    var pb = slot('plat-bar');
+    if(pb) pb.style.setProperty('--hcard-bar-pct', Math.min(100, Math.max(2, pcOf(Pl.b, Pl.t)))+'%');
+    var btn = slot('plat-btn');
+    if(btn){
+      btn.dataset.platform = Pl.n;
+      btn.textContent = state.platform === Pl.n ? 'On the board below' : 'Slice the board to '+Pl.n;
+    }
+  }
+
+  // the thinnest month ahead
+  var mos = monthData().rows.slice().sort(function(a,b){ return a.cov - b.cov; });
+  var mo = mos[0];
+  if(mo){
+    put('mo-v', mo.cov+'%');
+    put('mo-p', mo.m+' coverage, against a '+rm(mo.t)+' target');
+  }
+}
+
+function renderDeals(){
+  var isNow = state.hz==='now';
+  var all = isNow ? DEALS_NOW : DEALS_NEXT;
+  // forward rows carry no platform, and no row anywhere carries a pod
+  var modelled = (!isNow && !!state.platform) || !!state.mgr;
+  var rows = dealData(isNow);
   var sc = document.getElementById('scDeals');
   if(sc) sc.innerHTML = hintTag(modelled);
   // the column only exists where the rows are already a modelled split
@@ -8981,6 +9062,7 @@ function applyFilters(){
 
   renderPace(); renderKpis(); renderPlats(); renderLeaderboard(); renderMonths();
   renderDeals(); renderHeatmap(); renderIp(); renderTeam(); renderPeers();
+  renderHeroCards();
   writeHash();
 }
 

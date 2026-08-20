@@ -7769,20 +7769,22 @@ var KPIS_COMPANY = document.getElementById('kpisNow').innerHTML;
 var KPIS_NEXT    = KPI_NEXT_EL.innerHTML;
 function kpiCards(M, labels, sub1, sub3, pfx){
   var gap = M.f - M.t;
-  return '<div class="kpi"><div class="k-l">'+labels[0]+'</div>'+
-      '<div class="k-v num"'+num(M.t,'rm','k'+pfx+'0')+'>'+rm(M.t)+'</div>'+
+  // the same classes the static rows carry: the card chrome lives in
+  // .c-stat now, so a bare .kpi here renders as naked text
+  return '<div class="kpi c-stat"><div class="k-l c-stat-label">'+labels[0]+'</div>'+
+      '<div class="k-v c-stat-value num"'+num(M.t,'rm','k'+pfx+'0')+'>'+rm(M.t)+'</div>'+
       '<div class="k-s">'+sub1+'</div></div>'+
-    '<div class="kpi lead"><div class="k-l">'+labels[1]+'</div>'+
-      '<div class="k-v num"'+num(M.b,'rm','k'+pfx+'1')+'>'+rm(M.b)+'</div>'+
+    '<div class="kpi lead c-stat is-lead"><div class="k-l c-stat-label">'+labels[1]+'</div>'+
+      '<div class="k-v c-stat-value num"'+num(M.b,'rm','k'+pfx+'1')+'>'+rm(M.b)+'</div>'+
       '<div class="k-s">'+ofT(M.b, M.t)+'</div></div>'+
-    '<div class="kpi"><div class="k-l">'+labels[2]+'</div>'+
-      '<div class="k-v num"'+num(M.p,'rm','k'+pfx+'2')+'>'+rm(M.p)+'</div>'+
+    '<div class="kpi c-stat"><div class="k-l c-stat-label">'+labels[2]+'</div>'+
+      '<div class="k-v c-stat-value num"'+num(M.p,'rm','k'+pfx+'2')+'>'+rm(M.p)+'</div>'+
       '<div class="k-s">'+sub3+'</div></div>'+
-    '<div class="kpi"><div class="k-l">'+labels[3]+'</div>'+
-      '<div class="k-v num"'+num(M.f,'rm','k'+pfx+'3')+'>'+rm(M.f)+'</div>'+
+    '<div class="kpi c-stat"><div class="k-l c-stat-label">'+labels[3]+'</div>'+
+      '<div class="k-v c-stat-value num"'+num(M.f,'rm','k'+pfx+'3')+'>'+rm(M.f)+'</div>'+
       '<div class="k-s">'+ofT(M.f, M.t)+'</div></div>'+
-    '<div class="kpi'+(gap<0?' warn':'')+'"><div class="k-l">Gap to target</div>'+
-      '<div class="k-v num"'+num(gap,'rms','k'+pfx+'4')+'>'+rmSigned(gap)+'</div>'+
+    '<div class="kpi'+(gap<0?' warn':'')+' c-stat"><div class="k-l c-stat-label">Gap to target</div>'+
+      '<div class="k-v c-stat-value num"'+num(gap,'rms','k'+pfx+'4')+'>'+rmSigned(gap)+'</div>'+
       '<div class="k-s">'+(gap<0?'behind':'ahead')+'</div></div>';
 }
 function renderKpis(){

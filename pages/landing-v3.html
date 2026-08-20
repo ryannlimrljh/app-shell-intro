@@ -3473,7 +3473,7 @@
           </div><!-- /controls -->
 
           <!-- ══ Company line ══════════════════════════════════════ -->
-          <section>
+          <section id="standSec">
             <div class="sechead">
               <h2 data-only="now">Where we stand, August month to date</h2>
               <span id="kpiScope"></span>
@@ -3512,7 +3512,7 @@
           </section>
 
           <!-- ══ Platform strip (now) ══════════════════════════════ -->
-          <section data-only="now">
+          <section data-only="now" id="platSec">
             <div class="sechead">
               <h2>By platform</h2>
               <span id="scPlats"></span>
@@ -3649,7 +3649,7 @@
           </section>
 
           <!-- ══ Deals ═════════════════════════════════════════════ -->
-          <section>
+          <section id="dealsSec">
             <div class="sechead">
               <h2 data-only="now">Deals that can still land in August</h2>
               <span id="scDeals"></span>
@@ -3978,6 +3978,7 @@
           <div class="c-cbrief-row"><span>Plan</span><span>RM 240.0M</span></div>
         </div>
         <div class="c-cbrief-acts">
+          <button class="c-btn c-btn-md c-btn-primary c-cbrief-act" type="button" data-decision="dec-a1">Name the eight deals</button>
           <button class="c-btn c-btn-md c-btn-secondary c-cbrief-act" type="button" data-panel="dFan"><i class="ph ph-chart-line" aria-hidden="true"></i>See the evidence</button>
         </div>
         <p class="c-cbrief-src">Evidence: Cumulative revenue against plan</p>
@@ -3998,6 +3999,7 @@
           <div class="c-cbrief-row"><span>Gross profit</span><span>RM 17.7M</span></div>
         </div>
         <div class="c-cbrief-acts">
+          <button class="c-btn c-btn-md c-btn-primary c-cbrief-act" type="button" data-decision="dec-a2">Name an executive sponsor</button>
           <button class="c-btn c-btn-md c-btn-secondary c-cbrief-act" type="button" data-panel="dConc"><i class="ph ph-chart-line" aria-hidden="true"></i>See the evidence</button>
         </div>
         <p class="c-cbrief-src">Evidence: Cumulative share by advertiser rank</p>
@@ -4018,6 +4020,7 @@
           <div class="c-cbrief-row"><span>Digital</span><span>75% of target</span></div>
         </div>
         <div class="c-cbrief-acts">
+          <button class="c-btn c-btn-md c-btn-primary c-cbrief-act" type="button" data-decision="dec-a3">Fund Digital demand</button>
           <button class="c-btn c-btn-md c-btn-secondary c-cbrief-act" type="button" data-panel="dFill"><i class="ph ph-chart-line" aria-hidden="true"></i>See the evidence</button>
         </div>
         <p class="c-cbrief-src">Evidence: Sold against what we had to sell</p>
@@ -4038,6 +4041,7 @@
           <div class="c-cbrief-row"><span>Revenue gone elsewhere</span><span>RM 4.3M</span></div>
         </div>
         <div class="c-cbrief-acts">
+          <button class="c-btn c-btn-md c-btn-primary c-cbrief-act" type="button" data-decision="dec-a7">Take it to the board</button>
           <button class="c-btn c-btn-md c-btn-secondary c-cbrief-act" type="button" data-panel="dShare"><i class="ph ph-chart-line" aria-hidden="true"></i>See the evidence</button>
         </div>
         <p class="c-cbrief-src">Evidence: Indexed growth against the market</p>
@@ -4078,6 +4082,7 @@
           <div class="c-cbrief-row"><span>Cash at risk</span><span>RM 12.4M</span></div>
         </div>
         <div class="c-cbrief-acts">
+          <button class="c-btn c-btn-md c-btn-primary c-cbrief-act" type="button" data-decision="dec-a6">Diarise the reset</button>
           <button class="c-btn c-btn-md c-btn-secondary c-cbrief-act" type="button" data-panel="dChurn"><i class="ph ph-chart-line" aria-hidden="true"></i>See the evidence</button>
         </div>
         <p class="c-cbrief-src">Evidence: Why RM 4.4M walked</p>
@@ -5935,6 +5940,47 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
      those panels wholesale, so they all resolve to the board itself — it is
      the evidence the briefs are citing. The card modal is closed on the way,
      or the scroll would land behind its scrim. */
+  /* The primary action on a brief used to open a decision card in Decision
+     Space. The board replaced that space, so each action lands on the part of
+     the board that answers it — and sets the board's own state first where
+     that answer sits behind a view or a filter, so the action arrives at the
+     slice it names instead of the section's default. */
+  const BRIEF_ACTIONS = {
+    'dec-a1': { target: 'dealsSec' },                        // name the eight deals
+    'dec-a2': { target: 'ipSec' },                           // sponsor for the concentrated IP
+    'dec-a3': { target: 'platSec', platform: 'Digital' },    // fund Digital demand
+    'dec-a7': { target: 'standSec' },                        // take the company line to the board
+    'dec-a6': { target: 'monthSec', view: 'next' },          // diarise the reset, in the forward window
+  };
+  document.querySelectorAll('[data-decision]').forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (typeof window.closeCardModal === 'function') window.closeCardModal();
+      const act = BRIEF_ACTIONS[btn.dataset.decision] || {};
+      if (act.view) {
+        const vb = document.querySelector('[data-view="' + act.view + '"]');
+        if (vb) vb.click();
+      }
+      if (act.platform) {
+        const sel = document.getElementById('fPlatform');
+        if (sel) { sel.value = act.platform; sel.dispatchEvent(new Event('change', { bubbles: true })); }
+      }
+      const el = document.getElementById(act.target) || document.getElementById('salesBoard');
+      if (!el) return;
+      /* Reserve the shelf rather than scrolling the heading under it. Its
+         height is read now: expanded here (the reader is at the top, on the
+         cards) over-reserves by the 50px it gives back on the way down, which
+         lands as air above the heading — the safe direction to be wrong. */
+      const sc = document.querySelector('.c-shell-content');
+      const shelf = document.getElementById('controls');
+      if (!sc) { el.scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }
+      const reserve = (shelf ? shelf.getBoundingClientRect().height : 0) + 16;
+      const top = sc.scrollTop + el.getBoundingClientRect().top
+                - sc.getBoundingClientRect().top - reserve;
+      sc.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
+    });
+  });
+
   document.querySelectorAll('[data-panel]').forEach((btn) => {
     btn.addEventListener('click', (e) => {
       e.stopPropagation();

@@ -4439,7 +4439,14 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
         // name starts with the visible label, which is what lets voice control
         // act on what it can actually read.
         const label = card.querySelector('.c-hcard-label, .c-stat-label');
-        if (label) b.setAttribute('aria-label', `${j + 1}, ${label.textContent.trim()}`);
+        if (label) {
+          // the provenance mark is inside the label's textContent but is not
+          // part of its name — strip it so voice control hears "Gap to
+          // target", not "Gap to target, derived, live"
+          const named = label.cloneNode(true);
+          named.querySelectorAll('.c-hcard-prov').forEach((p) => p.remove());
+          b.setAttribute('aria-label', `${j + 1}, ${named.textContent.trim()}`);
+        }
         b.addEventListener('click', () => { stackTop = j; paintStack(); });
         pager.appendChild(b);
       });
@@ -6005,6 +6012,10 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
   }
 
   window.showCards = openCards;
+  /* Exported for the hero cards' action buttons: they travel into the grid
+     with their cards, and an action taken there must dismiss the overlay or
+     the board moves invisibly behind the scrim. */
+  window.closeCards = closeCards;
   /* "Hero Cards" opens this overlay rather than jumping to the fan. The link
      keeps its in-page href, so it still lands somewhere sensible if the
      script never runs; the handler takes over when it does. */
@@ -6069,19 +6080,23 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
   const BRIEF_ACTIONS = {
     'dec-a1': { target: 'dealsSec' },                        // name the eight deals
     'dec-a2': { target: 'ipSec' },                           // sponsor for the concentrated IP
-    'dec-a3': { target: 'platSec', platform: 'Digital' },    // fund Digital demand
+    'dec-a3': { target: 'platSec', platform: 'Digital', view: 'now' },  // fund Digital demand — platSec is now-only
     'dec-a7': { target: 'standSec' },                        // take the company line to the board
     'dec-a6': { target: 'monthSec', view: 'next' },          // diarise the reset, in the forward window
     // the hero fan's own actions, same machinery
     'hero-gap':   { target: 'standSec' },                    // the gap, where it sits
     'hero-deal':  { target: 'dealsSec' },                    // the deal to land now
-    'hero-plat':  { target: 'platSec' },                     // platform comes from the button's data-platform
+    'hero-plat':  { target: 'platSec', view: 'now' },        // platSec only exists in the now view; platform comes from the button's data-platform
     'hero-month': { target: 'monthSec', view: 'next' },      // the thinnest month, in the forward window
   };
   document.querySelectorAll('[data-decision]').forEach((btn) => {
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
       if (typeof window.closeCardModal === 'function') window.closeCardModal();
+      // this button can be reached from inside the tidy overlay (hero cards
+      // travel there; briefs open from grid cards too) — the board is about
+      // to move, so the overlay has to get out of the way
+      if (typeof window.closeCards === 'function') window.closeCards();
       const act = BRIEF_ACTIONS[btn.dataset.decision] || {};
       if (act.view) {
         const vb = document.querySelector('[data-view="' + act.view + '"]');
@@ -6115,6 +6130,10 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
       if (typeof window.closeCardModal === 'function') window.closeCardModal();
+      // this button can be reached from inside the tidy overlay (hero cards
+      // travel there; briefs open from grid cards too) — the board is about
+      // to move, so the overlay has to get out of the way
+      if (typeof window.closeCards === 'function') window.closeCards();
       const board = document.getElementById('salesBoard');
       if (board) board.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
@@ -6545,16 +6564,18 @@ function activeSlices(){
   return ['platform','hos','status'].filter(function(k){ return state[k]; });
 }
 
-// the set of Heads of Sales a live slice allows
-function allowedHos(){
-  var rows = state.hz==='now' ? HOS_NOW : HOS_NEXT;
+// the set of Heads of Sales a live slice allows. hz is optional and
+// defaults to the current view; dealData passes its own horizon so an
+// August deal is never filtered by a September status.
+function allowedHos(hz){
+  var rows = (hz || state.hz)==='now' ? HOS_NOW : HOS_NEXT;
   return rows.filter(function(r){
     if(state.hos && r.n !== state.hos) return false;
     if(state.status && r.s !== state.status) return false;
     return true;
   }).map(function(r){ return r.n; });
 }
-function hosAllowed(name){ return allowedHos().indexOf(name) > -1; }
+function hosAllowed(name, hz){ return allowedHos(hz).indexOf(name) > -1; }
 
 /* ── Modelled scoping ──────────────────────────────────────────
    The 7 August cut never crosses Head of Sales with platform, and carries
@@ -8407,7 +8428,7 @@ function dealData(isNow){
     if(state.hos ? x.d.o !== state.hos
                  : (state.line && (teamOf(x.d.o)||{}).vp !== state.line)) return false;
     if(state.mgr){ var seat = dealSeat(x.d, x.i); if(!seat || !inRoot(seat)) return false; }
-    if(state.status && !hosAllowed(x.d.o)) return false;
+    if(state.status && !hosAllowed(x.d.o, isNow ? 'now' : 'next')) return false;
     if(state.platform){
       var plat = isNow ? x.d.x : dealPlat(x.d, x.i);
       if(plat !== state.platform) return false;

@@ -2325,11 +2325,7 @@
 #salesBoard .views .v-k, #salesBoard .views .v-d{overflow:hidden; max-height:2.4em;
   transition:max-height var(--ease) .3s, opacity var(--ease) .2s, margin-top var(--ease) .3s;}
 #salesBoard .views .v-t{transition:font-size var(--ease) .3s;}
-/* Ranged left at rest (three lines, read as a card), centred once it is a
-   single label (read as a tab). text-align cannot transition, so this snaps —
-   it snaps on the same frame the other two lines start collapsing, which is
-   where a jump is least visible. */
-#salesBoard .controls.stuck .views button{padding-block:9px; text-align:center;}
+#salesBoard .controls.stuck .views button{padding-block:9px;}
 #salesBoard .controls.stuck .views .v-k,
 #salesBoard .controls.stuck .views .v-d{max-height:0; opacity:0; margin-top:0;}
 #salesBoard .controls.stuck .views .v-t{font-size:var(--text-body2-size);}
@@ -3021,9 +3017,6 @@
 @media (max-width:760px){
     #salesBoard .controls.compact .views .v-k, #salesBoard .controls.compact .views .v-d{display:none;}
 #salesBoard .controls.compact .views .v-t{font-size:var(--text-label3-size); line-height:1.25;}
-  /* Already a one-liner at every scroll position at this width, so it takes
-     the centred treatment .stuck gives it on desktop without waiting to stick. */
-  #salesBoard .controls.compact .views button{text-align:center;}
   
   #salesBoard .controls.compact .ctl-bars{gap:6px; margin-top:6px; flex-direction:column;
     align-items:stretch;}

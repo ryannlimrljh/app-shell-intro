@@ -2600,7 +2600,10 @@
 
 /* ── Range: each view's own zoom, in one shared position ────── */
 /* .c-filterbar's own gap is --spacing-8; this was 10. */
-#salesBoard .rangebar{display:flex; align-items:center; gap:var(--spacing-8); flex-wrap:wrap; margin-top:14px;
+/* flex-start, not centre: the bar stretches to the taller two-row filter
+   block beside it, and centring floated its single row of pills between
+   that block's rows instead of level with the first one. */
+#salesBoard .rangebar{display:flex; align-items:flex-start; gap:var(--spacing-8); flex-wrap:wrap; margin-top:14px;
   padding:var(--spacing-16); background:var(--surface); border:1px solid var(--rule);
   border-radius:var(--r-lg); box-shadow:var(--shadow-1);}
 

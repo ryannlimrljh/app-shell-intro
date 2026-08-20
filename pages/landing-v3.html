@@ -2292,11 +2292,9 @@
 #salesBoard .sr{position:absolute; width:1px; height:1px; margin:-1px; padding:0; overflow:hidden;
   clip:rect(0 0 0 0); clip-path:inset(50%); white-space:nowrap; border:0;}
 
-#salesBoard .chip{border:1px solid var(--rule); background:var(--surface); border-radius:var(--r-pill);
-  padding:5px 13px; font:inherit; font-size:12px; font-weight:700; color:var(--muted);
-  cursor:pointer; white-space:nowrap;}
-#salesBoard .chip:hover{background:var(--sunk); color:var(--ink);}
-#salesBoard .chip[aria-pressed="true"]{background:var(--ink); border-color:var(--ink); color:var(--canvas);}
+/* chips: .c-chip + .c-chip-filter */
+
+
 #salesBoard .chip:focus-visible{outline:2px solid var(--navy); outline-offset:2px;}
 
 /* ── Stat tiles ───────────────────────────────────────────── */
@@ -2627,13 +2625,14 @@
    touch device, which outranks the DS's 32. */
 /* .c-filter-trigger: 32px, --radius-sm, 1px Neutral-3. Rectangle, not pill —
    .c-chip is the pill, and these are triggers rather than chips. */
-#salesBoard .fpill{border:1px solid var(--color-neutral-3); background:var(--surface); border-radius:var(--r-sm);
-  padding:0 var(--spacing-12); font:inherit; font-size:14px; font-weight:600; color:var(--color-neutral-9);
-  cursor:pointer; white-space:nowrap; min-height:32px;
-  transition:background var(--ease) .14s, color var(--ease) .14s, border-color var(--ease) .14s;}
-#salesBoard .fpill:hover:not(:disabled){background:var(--color-neutral-2); color:var(--ink);}
-#salesBoard .fpill[aria-pressed="true"]{background:var(--obsidian); border-color:var(--obsidian); color:var(--color-neutral-1);}
-#salesBoard .fpill:disabled{opacity:.5; cursor:not-allowed; border-style:dashed;}
+/* geometry, type and states from .c-chip + .c-chip-filter. Only the
+   disabled treatment is local: DS .is-disabled sets pointer-events:none,
+   which would kill the title tooltips explaining WHY QTD/YTD/Custom are
+   unavailable — so the same opacity lands off the attribute instead. */
+#salesBoard .fpill:disabled{opacity:.4; cursor:not-allowed; border-style:solid;}
+
+
+
 /* Dropdown. The DS component hands its whole box to Input field:
    height 40, --radius-sm, 1px Neutral-3, body2, --spacing-12 of side padding.
    This was a 36px pill at 12px/700. */
@@ -2918,7 +2917,9 @@
    says IS the bar; it was overriding the base rules back to 34px/12px.
    The 5px top/bottom padding went with the old min-height: a 32px box with
    0 --spacing-12 centres its label on its own. */
-#salesBoard .controls.compact .fpill, #salesBoard .controls.compact .fsel{min-height:32px;
+/* only the native select still needs this skin — the chips now carry
+   their own DS classes */
+#salesBoard .controls.compact .fsel{min-height:32px;
   padding:0 var(--spacing-12); font-size:14px; font-weight:600;}
 #salesBoard .controls.compact .fscope{padding:var(--spacing-8) var(--spacing-12); font-size:14px;}
 /* The Segment placeholder stays. It is the running list of what NeoCRM still
@@ -3367,13 +3368,13 @@
           <!-- ══ Range, per view ═══════════════════════════════════ -->
           <div class="rangebar" data-only="now" role="group" aria-label="Range">
             <span class="flab">Range</span>
-            <button class="fpill" data-ds="c-chip c-chip-filter" data-ds-state="is-active from aria-pressed" type="button" data-range="mtd" aria-pressed="true"
+            <button class="fpill c-chip c-chip-filter is-active" type="button" data-range="mtd" aria-pressed="true"
               title="August 2026, month to date. Booked covers 1 to 6 August; the forecast adds weighted pipeline.">MTD</button>
-            <button class="fpill" data-ds="c-chip c-chip-filter" data-ds-note=":disabled bridge, not is-disabled (keeps tooltips)" type="button" disabled
+            <button class="fpill c-chip c-chip-filter" type="button" disabled
               title="Quarter to date, 1 July to today. Needs July and September actuals; the 6 Aug cut carries August and the forward block only.">QTD</button>
-            <button class="fpill" data-ds="c-chip c-chip-filter" data-ds-note=":disabled bridge, not is-disabled (keeps tooltips)" type="button" disabled
+            <button class="fpill c-chip c-chip-filter" type="button" disabled
               title="Year to date, 1 January to today. Needs January to August actuals.">YTD</button>
-            <button class="fpill" data-ds="c-chip c-chip-filter" data-ds-note=":disabled bridge, not is-disabled (keeps tooltips)" type="button" disabled
+            <button class="fpill c-chip c-chip-filter" type="button" disabled
               title="Needs deal-level campaign run dates from NeoCRM.">Custom range</button>
             <div class="switchwrap">
               <span id="lyMark"></span>
@@ -3471,8 +3472,8 @@
               <div class="crumbs" id="crumbs"></div>
               <div class="tools">
                 <span role="group" aria-label="Leaderboard scale" class="chipset">
-                  <button class="chip" data-ds="c-chip c-chip-filter" data-ds-state="is-active from aria-pressed" data-scale="pct" aria-pressed="true" type="button">% of own target</button>
-                  <button class="chip" data-ds="c-chip c-chip-filter" data-ds-state="is-active from aria-pressed" data-scale="rm" aria-pressed="false" type="button">RM, comparable</button>
+                  <button class="chip c-chip c-chip-filter is-active" data-scale="pct" aria-pressed="true" type="button">% of own target</button>
+                  <button class="chip c-chip c-chip-filter" data-scale="rm" aria-pressed="false" type="button">RM, comparable</button>
                 </span>
                 <span class="chip-div" aria-hidden="true"></span>
                 <span role="group" aria-label="Take this view away" class="chipset">
@@ -7541,9 +7542,9 @@ function noteInner(id, name, when, hint){
       '</div>';
     })()+
     '<div class="note-act">'+
-      '<button class="chip go" type="button" data-note-save="'+esc(id)+'">Save</button>'+
-      '<button class="chip" type="button" data-note-cancel="1">Cancel</button>'+
-      (n ? '<button class="chip del" type="button" data-note-del="'+esc(id)+'">Delete</button>' : '')+
+      '<button class="chip go c-chip c-chip-filter" type="button" data-note-save="'+esc(id)+'">Save</button>'+
+      '<button class="chip c-chip c-chip-filter" type="button" data-note-cancel="1">Cancel</button>'+
+      (n ? '<button class="chip del c-chip c-chip-filter" type="button" data-note-del="'+esc(id)+'">Delete</button>' : '')+
       '<span class="note-hint">Kept in this browser until there is somewhere shared '+
       'to put it.</span>'+
     '</div></div>';
@@ -8041,7 +8042,9 @@ function renderLeaderboard(){
   b.addEventListener('click', function(){
     state.scale=b.dataset.scale;
     [].forEach.call(document.querySelectorAll('[data-scale]'), function(o){
-      o.setAttribute('aria-pressed', String(o===b)); });
+      o.setAttribute('aria-pressed', String(o===b));
+      o.classList.toggle('is-active', o===b);   // .c-chip-filter.is-active
+    });
     renderLeaderboard();
   });
 });

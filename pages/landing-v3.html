@@ -2192,13 +2192,17 @@
   --navy-bg:var(--color-water-bg);  --red-bg:#FFE9EB;
 
   /* Sequential ramp for the heatmap: one hue, light to dark, monotonic in
-     lightness. Per the DS's chart guidance a sequential scale runs from the
-     owning element's -bg tint to its full-strength colour — this metric is
-     Water-owned, so the ends are --color-water-bg (#E8F1FD) and --color-navy
-     (#1473E6) and the five middle steps interpolate between them. The two
-     darkest sit past --color-navy so the top of the scale still separates. */
-  --seq-0:#F5F9FE; --seq-1:var(--color-water-bg); --seq-2:#C2DCFA;
-  --seq-3:#8FBEF3; --seq-4:#4E9AEC; --seq-5:var(--color-navy); --seq-6:#0E56B4;
+     lightness, same construction the DS's chart guidance prescribes (a bg
+     tint up to the full-strength colour). Rebuilt on the data-viz Purple
+     when the bars dropped Navy: per-cent-to-target is progress data, not
+     Water-owned, so the ramp derives from #9F56FF like the rest of the
+     board's non-department series. One deviation from the old construction,
+     for contrast: white on full-strength #9F56FF is 4.05:1, an AA failure
+     where navy scraped through, so BOTH white-text steps sit past the brand
+     purple — s5 #7E3BE0 (5.9:1) and s6 #5E28B0 (8.7:1). Ink on s4 #A876EF
+     is 5.9:1. The s0-s4 ink / s5-s6 white per-step rule is unchanged. */
+  --seq-0:#F8F5FE; --seq-1:#EFE7FD; --seq-2:#DFCCFB;
+  --seq-3:#C5A5F7; --seq-4:#A876EF; --seq-5:#7E3BE0; --seq-6:#5E28B0;
 
   /* No local --shadow-N: they would shadow the DS ladder of the same name
      for everything inside the board. Elevation comes from tokens.css. */
@@ -2368,18 +2372,20 @@
   padding:var(--spacing-16); box-shadow:var(--shadow-1); margin-top:12px;}
 /* c-progress language: Neutral-3 track, pill radius, Obsidian for the
    committed value, Purple (the DS data-viz reserve) for the weighted
-   pipeline, contiguous segments with no seam, on the DS Default 8px
-   track — the same size as every other bar on the board. The target
-   tick and the dashed shortfall are improvised extensions the DS does not
-   define: a 2px Neutral-9 marker crossing the track, and a dashed outline
+   pipeline, contiguous segments with no seam. The 32px height is a
+   deliberate departure — the DS caps tracks at 16px, but this is the
+   board's one hero rail and it keeps its presence by the user's call;
+   every other bar sits on the Default 8px. The target tick and the
+   dashed shortfall are improvised extensions the DS does not define:
+   a 2px Neutral-9 marker crossing the track, and a dashed outline
    in the DS error red for the distance still to close. */
-#salesBoard .attn-bar{position:relative; height:8px; background:var(--bar-track); border-radius:var(--radius-pill); overflow:visible;}
-#salesBoard .attn-seg{position:absolute; top:0; height:8px;}
+#salesBoard .attn-bar{position:relative; height:32px; background:var(--bar-track); border-radius:var(--radius-pill); overflow:visible;}
+#salesBoard .attn-seg{position:absolute; top:0; height:32px;}
 #salesBoard .attn-seg.b{left:0; background:var(--obsidian); border-radius:var(--radius-pill) 0 0 var(--radius-pill);}
 #salesBoard .attn-seg.p{background:var(--purple); border-radius:0 var(--radius-pill) var(--radius-pill) 0;}
-#salesBoard .attn-short{position:absolute; top:0; height:8px; border:1.5px dashed var(--red);
+#salesBoard .attn-short{position:absolute; top:0; height:32px; border:1.5px dashed var(--red);
   border-left:0; border-radius:0 var(--radius-pill) var(--radius-pill) 0; opacity:.75;}
-#salesBoard .attn-tick{position:absolute; top:-5px; bottom:-5px; width:2px; background:var(--ink);}
+#salesBoard .attn-tick{position:absolute; top:-6px; bottom:-6px; width:2px; background:var(--ink);}
 #salesBoard .attn-tick span{position:absolute; top:-17px; right:0; font-size:var(--text-label3-size); font-weight:800;
   white-space:nowrap; color:var(--ink);}
 #salesBoard .attn-legend{display:flex; gap:18px; flex-wrap:wrap; margin-top:12px; font-size:var(--text-caption-size); color:var(--muted);}
@@ -3254,7 +3260,7 @@
 #salesBoard .ly-t{position:absolute; top:1px; height:24px; border-left:2px dotted var(--faint);
   pointer-events:none;}
 #salesBoard .minibar .ly-t{top:-3px; height:14px;}
-#salesBoard .attn-ly{position:absolute; top:-6px; height:20px; border-left:2px dotted var(--faint);}
+#salesBoard .attn-ly{position:absolute; top:-4px; height:40px; border-left:2px dotted var(--faint);}
 #salesBoard .attn-ly span{position:absolute; top:-13px; left:5px; font-size:var(--text-label3-size); font-weight:800;
   color:var(--faint); white-space:nowrap;}
 #salesBoard .ly-d{display:block; font-size:var(--text-label3-size); font-weight:800; margin-top:5px;}

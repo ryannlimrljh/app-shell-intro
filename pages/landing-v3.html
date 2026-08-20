@@ -2355,10 +2355,9 @@
 
 /* .c-badge, warning variant: weight 700, no tracking, no uppercase, the DS's
    own padding and tint. Text keeps --amber-ink; see the note at the top. */
-#salesBoard .flag{display:inline-flex; align-items:center; gap:var(--spacing-4); font-size:11px; font-weight:700;
-  letter-spacing:0; padding:2px var(--spacing-8); border-radius:var(--r-pill);
-  background:rgba(255,164,37,.14); color:var(--amber-ink); white-space:nowrap;
-  border:1px solid rgba(255,164,37,.38); cursor:help;}
+/* box and tint from .c-badge c-badge-warning (its Neutral-9 text passes AA
+   as shipped); only the tooltip cursor is the board's */
+#salesBoard .flag{cursor:help; white-space:nowrap;}
 
 /* ── Leaderboard ──────────────────────────────────────────── */
 #salesBoard .lb{background:var(--surface); border:1px solid var(--rule); border-radius:var(--r-lg);
@@ -2416,11 +2415,17 @@
 
 /* .c-badge: 4px gap, 2px/spacing-8 padding, label3 at weight 700, no
    tracking. The 1px transparent border was already right. */
-#salesBoard .pill{display:inline-flex; align-items:center; gap:var(--spacing-4); padding:2px var(--spacing-8); border-radius:var(--r-pill);
-  font-size:11px; font-weight:700; letter-spacing:0; white-space:nowrap; border:1px solid transparent;}
-#salesBoard .pill.green{background:rgba(0,194,110,.12); color:var(--green-ink); border-color:rgba(0,194,110,.32);}
-#salesBoard .pill.amber{background:rgba(255,164,37,.14); color:var(--amber-ink); border-color:rgba(255,164,37,.38);}
-#salesBoard .pill.red{background:rgba(253,51,67,.10); color:var(--red-ink); border-color:rgba(253,51,67,.30);}
+/* box, type and tints from .c-badge + its variants. Two text colours are
+   deliberately NOT the DS's: c-badge-success/-error put full-strength green
+   and red on their own tints — 2.3:1 and 3.7:1, both AA failures at 11px.
+   The -ink pairs measure 5.9:1 and 5.4:1 on the same tints. Warning already
+   ships Neutral-9 and needs nothing. */
+#salesBoard .pill{white-space:nowrap;}
+#salesBoard .pill.c-badge-success{color:var(--green-ink);}
+#salesBoard .pill.c-badge-error{color:var(--red-ink);}
+
+
+
 /* the Status heading is right-aligned like every other numeric column, so
    the pill under it has to be too, or the column reads as two columns */
 #salesBoard .lb-head .s[data-sort="status"], #salesBoard .lb-row .st{text-align:right;}
@@ -2429,9 +2434,9 @@
 #salesBoard .deals td.quiet{color:var(--red-ink);}
 #salesBoard .deals td.quiet .camp{color:var(--red-ink); opacity:.8;}
 #salesBoard .pill .dot{width:7px; height:7px; border-radius:50%; background:currentColor; flex:none;}
-#salesBoard .pill.green .dot{border-radius:50%;}
-#salesBoard .pill.amber .dot{border-radius:1px; transform:rotate(45deg);}
-#salesBoard .pill.red .dot{border-radius:1px;}
+#salesBoard .pill.c-badge-success .dot{border-radius:50%;}
+#salesBoard .pill.c-badge-warning .dot{border-radius:1px; transform:rotate(45deg);}
+#salesBoard .pill.c-badge-error .dot{border-radius:1px;}
 
 #salesBoard .lb-foot{padding:12px 18px; background:var(--sunk); font-size:12px; color:var(--muted);
   border-top:1px solid var(--rule); display:flex; gap:18px; flex-wrap:wrap;}
@@ -7836,7 +7841,7 @@ function renderPlats(){
     return '<div class="plat clickable" data-scope-plat="'+esc(p.n)+'" role="button" tabindex="0" '+
       'aria-pressed="'+(state.platform===p.n)+'" '+
       'title="Scope the whole board to '+esc(p.n)+'">'+
-      '<h3>'+esc(p.n)+ (p.caveat ? ' <span class="flag" data-ds="c-badge c-badge-warning" title="Digital and AA close on the 23rd. The August figure covers 24 July to 23 August and holds 14 of 31 delivery days at this cut, so it is not comparable with TV and Radio.">14 of 31 days</span>' : '') +'</h3>'+
+      '<h3>'+esc(p.n)+ (p.caveat ? ' <span class="flag c-badge c-badge-warning" title="Digital and AA close on the 23rd. The August figure covers 24 July to 23 August and holds 14 of 31 delivery days at this cut, so it is not comparable with TV and Radio.">14 of 31 days</span>' : '') +'</h3>'+
       '<div class="pv num"><span'+num(p.f,'rm','plat:'+p.n+':f')+'>'+rm(p.f)+'</span> '+
         '<span style="font-size:13px;font-weight:700;color:var(--muted)">forecast</span></div>'+
       '<div class="minibar">'+
@@ -7847,7 +7852,7 @@ function renderPlats(){
       '</div>'+
       '<div class="pr"><span>Booked <b class="num"'+num(p.b,'rm','plat:'+p.n+':b')+'>'+rm(p.b)+'</b></span>'+
         '<span>Target <b class="num"'+num(p.t,'rm','plat:'+p.n+':t')+'>'+rm(p.t)+'</b></span></div>'+
-      '<div class="pr"><span class="pill '+st+'" data-ds="c-badge c-badge-{success|warning|error} by tone" title="'+esc(statusWhy(p.pct, p.ly))+'">'+
+      '<div class="pr"><span class="pill c-badge '+({green:'c-badge-success',amber:'c-badge-warning',red:'c-badge-error'})[st]+'" title="'+esc(statusWhy(p.pct, p.ly))+'">'+
         '<i class="dot"></i>'+
         '<span'+num(p.pct,'pct','plat:'+p.n+':p')+'>'+p.pct+'%</span>&nbsp;to target</span>'+
         '<span class="p-ly">vs LY <b class="num '+(p.ly<0?'neg':'pos')+'">'+pctTxt(p.ly)+'</b></span></div>'+
@@ -7959,7 +7964,7 @@ function renderLeaderboard(){
       '<span class="r num c-ly '+(r.ly===null?'nd':(r.ly<0?'neg':'pos'))+'">'+
         (r.ly===null ? 'n/d' : '<span'+num(r.ly,'pcts',K+':ly')+'>'+pctTxt(r.ly)+'</span>')+
         '<span class="u">gross</span></span>'+
-      '<span class="st"><span class="pill '+r.s+'" data-ds="c-badge c-badge-{success|warning|error} by tone" title="'+esc(statusWhy(r.pct, r.ly))+'">'+
+      '<span class="st"><span class="pill c-badge '+({green:'c-badge-success',amber:'c-badge-warning',red:'c-badge-error'})[r.s]+'" title="'+esc(statusWhy(r.pct, r.ly))+'">'+
         '<i class="dot"></i>'+
         (r.s==='green'?'Green':r.s==='amber'?'Amber':'Red')+'</span></span>'+
       '</div></div>' + noteBlock(r);

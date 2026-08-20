@@ -2459,9 +2459,9 @@
 #salesBoard .adv{font-weight:800;} #salesBoard .camp{color:var(--muted); font-size:12px; display:block; margin-top:1px;}
 /* .c-tag: caption at weight 700, a fixed 24px height and 10px of side
    padding, inline-flex so the height applies. Water tint. */
-#salesBoard .tag{display:inline-flex; align-items:center; gap:var(--spacing-4); height:24px;
-  padding:0 10px; border-radius:var(--r-pill); font-size:12px;
-  font-weight:700; background:var(--navy-bg); color:var(--navy-ink); white-space:nowrap;}
+/* box and tint from .c-tag c-tag-water; text drops to the ink variant —
+   full navy on the water tint is 3.9:1, under AA for caption-size text */
+#salesBoard .tag{color:var(--navy-ink);}
 #salesBoard .tag.ghost{background:transparent; color:var(--faint); border:1px dashed var(--rule);}
 /* A note on a deal, in the row it belongs to. Same store and same editor as
    the leaderboard, keyed on advertiser and campaign rather than on the row's
@@ -3604,13 +3604,13 @@
             </div>
             <div class="ipgrid">
               <div class="panel">
-                <div class="panelhd"><h3>Fandom</h3><span class="tag" data-ds="c-tag c-tag-water" id="fandomTag">RM3.0M weighted · 79 deals</span></div>
+                <div class="panelhd"><h3>Fandom</h3><span class="tag c-tag c-tag-water" id="fandomTag">RM3.0M weighted · 79 deals</span></div>
                 <p class="pnote">By Head of Sales. Dark segment is July, lighter segment is September to December; the
                   remainder of the full window sits outside both.</p>
                 <div id="fandomBars"></div>
               </div>
               <div class="panel">
-                <div class="panelhd"><h3>All tagged IPs</h3><span class="tag ghost" data-ds="c-tag">full window</span></div>
+                <div class="panelhd"><h3>All tagged IPs</h3><span class="tag ghost c-tag">full window</span></div>
                 <div class="conc" id="concBar"></div>
                 <p class="pnote">Weighted value, deal count, and the Head of Sales carrying the most of it.
                   Booked attribution still waits on the billing extracts carrying the same tag.</p>
@@ -8187,7 +8187,7 @@ function renderDeals(){
         (d.trunc?'<span class="src" title="The advertiser or campaign name is cut off at this length in the source export, not here.">truncated in source</span>':'')+
         (d.dup?'<span class="src" title="The source export carries this campaign twice, at the same value. Both rows are shown rather than one being dropped.">duplicate row in source</span>':'')+
         '</span>'+noteBtn(nid, d.a)+'</td>'+
-      '<td>'+(d.ip?'<span class="tag" data-ds="c-tag c-tag-water">'+esc(d.ip)+'</span> ':'<span class="tag ghost" data-ds="c-tag">untagged</span> ')+
+      '<td>'+(d.ip?'<span class="tag c-tag c-tag-water">'+esc(d.ip)+'</span> ':'<span class="tag ghost c-tag">untagged</span> ')+
         '<span class="camp" style="display:inline;margin-left:4px">'+esc(d.x)+'</span></td>'+
       '<td class="n num">'+rm(d.v)+'</td>'+
       (deep ? (function(){

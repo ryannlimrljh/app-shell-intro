@@ -2367,6 +2367,9 @@
   gap:10px; padding:0 16px;}
 /* .c-table-embedded's header carries no fill. This is a div grid rather than
    a <thead>, so the thead th rule does not reach it, but it is the same role. */
+/* not selectable rows: the DS table's pointer cursor would promise a click
+   these data rows do not honour */
+#salesBoard .c-table tbody tr{cursor:default;}
 #salesBoard .lb-head{height:40px; background:none; border-bottom:1px solid var(--rule);
   font-size:11px; font-weight:700; letter-spacing:var(--tracking-eyebrow); text-transform:uppercase; color:var(--faint);}
 #salesBoard .lb-head .s{background:none; border:0; font:inherit; color:inherit; cursor:pointer;
@@ -2444,15 +2447,21 @@
 /* ── Generic data table ───────────────────────────────────── */
 #salesBoard .tbl-wrap{overflow-x:auto; background:var(--surface); border:1px solid var(--rule);
   border-radius:var(--r-lg); box-shadow:var(--shadow-1);}
-#salesBoard table{border-collapse:collapse; width:100%; min-width:760px; font-size:14px;}
+/* collapse/width/type from .c-table; the floor keeps every board table
+   scrollable inside its card wrapper rather than crushed at phone widths */
+#salesBoard table{min-width:760px;}
 /* .c-table-embedded thead th: no fill, label3 at weight 700 carrying
    label3's own .04em, Neutral-5. Padding is .c-table's --spacing-12. */
-#salesBoard thead th{background:none; text-align:left; padding:var(--spacing-12); font-size:11px;
-  font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:var(--muted);
-  border-bottom:1px solid var(--rule); white-space:nowrap; position:sticky; top:0; z-index:1;}
-#salesBoard tbody td{padding:11px 14px; border-bottom:1px solid var(--rule); vertical-align:middle;}
+/* typography from .c-table th. Sticky is the board's own: its tables live
+   inside scrolling card wrappers, so headers pin — which needs an opaque fill
+   or rows ghost through on the way past. */
+#salesBoard thead th{position:sticky; top:0; z-index:1; background:var(--surface);
+  padding:var(--spacing-12) var(--spacing-8); border-bottom:1px solid var(--color-neutral-3);
+  white-space:nowrap; text-align:left;}
+/* cell type, padding and rules from .c-table td */
+#salesBoard tbody td{vertical-align:middle;}
 #salesBoard tbody tr:last-child td{border-bottom:0;}
-#salesBoard tbody tr:hover{background:var(--sunk);}
+
 #salesBoard td.n, /* Alignment only. The weight it used to restate here put this one column's
    header back to 800 after the header rule had already set label3's 700. */
 #salesBoard th.n{text-align:right; white-space:nowrap;}
@@ -3544,7 +3553,7 @@
             <div class="months" id="months"></div>
 
             <div class="tbl-wrap" style="margin-top:14px">
-              <table data-ds="c-table">
+              <table class="c-table">
                 <thead><tr><th>Stage of open pipeline</th><th class="n">Sep 26</th><th class="n">Oct 26</th><th class="n">Nov 26</th><th class="n">Dec 26</th><th class="n">Sep to Dec</th></tr></thead>
                 <tbody id="stageRows"></tbody>
               </table>
@@ -3590,7 +3599,7 @@
               <span class="note" data-only="next">Open deals at 50 and 80 per cent landing Sep–Dec, ranked by total campaign value. The 102 qualifying deals hold RM5.5M inside the window out of RM6.8M total, which is why this does not tie to the tables above.</span>
             </div>
             <div class="tbl-wrap">
-              <table class="deals" data-ds="c-table">
+              <table class="deals c-table">
                 <thead><tr>
                   <th>Advertiser and campaign</th><th data-only="now">IP · platform</th><th data-only="next">IP · runs</th>
                   <th class="n">Campaign value</th><th class="c-age" hidden>Last touch</th><th>Owner</th>
@@ -8130,7 +8139,7 @@ function renderHeatmap(){
     return Math.max.apply(null, [a].concat(r.slice(1))); }, 0);
   document.getElementById('heatmap').innerHTML =
     (D.rows.length
-      ? '<table data-ds="c-table"><thead>'+head+'</thead><tbody>'+body+'</tbody></table>'
+      ? '<table class="c-table"><thead>'+head+'</thead><tbody>'+body+'</tbody></table>'
       : '<p class="noresult"><b>No book matches this slice.</b>Clear the slice to see all nine.</p>')+
     '<div class="hm-legend"><span>Per cent to target</span>'+
       '<span class="ramp">'+[0,1,2,3,4,5,6].map(function(i){

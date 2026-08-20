@@ -1410,8 +1410,9 @@
      used elsewhere on this page for the sidebar account avatar)
      rather than reinventing that recipe — only the overlapping-stack
      treatment (ring border, negative margin) is new/page-local. The
-     progress bar has no equivalent yet in collabrium-dls, so it's
-     page-local, same as the gauge/sparkline above. */
+     progress bar follows c-progress's Compact recipe (4px, Neutral-3
+     track, Obsidian fill) in page-local markup, same as the
+     gauge/sparkline above. */
   .c-hcard-team{align-items:center; text-align:center;}
   /* Trophy above the "#2" hero figure. Centred by the card's own
      align-items:center, and spaced by the card's shared 12px gap, so it
@@ -1430,7 +1431,7 @@
   .c-hcard-avatars{display:flex;} /* block spacing comes from the card's shared 12px gap, like every other block */
   .c-hcard-avatar{width:28px; height:28px; border:2px solid var(--color-neutral-1); margin-left:-8px;}
   .c-hcard-avatar:first-child{margin-left:0;}
-  .c-hcard-bar{width:100%; height:6px; margin-top:auto; border-radius:var(--radius-pill); background:var(--color-neutral-2); overflow:hidden;}
+  .c-hcard-bar{width:100%; height:4px; margin-top:auto; border-radius:var(--radius-pill); background:var(--color-neutral-3); overflow:hidden;}
   /* Percentage is per card via --hcard-bar-pct; 72% stays the fallback so the
      team card that predates the variable is unchanged. */
   .c-hcard-bar-fill{width:var(--hcard-bar-pct, 72%); height:100%; background:var(--color-obsidian);}
@@ -2176,6 +2177,11 @@
      tier, so it lands on Neutral-5 alongside --muted and gains 3.3:1 -> 7.0:1
      on white while it is there. --rail is gone; nothing referenced it. */
   --rule:var(--color-neutral-3); --sunk:var(--color-neutral-2); --faint:var(--color-neutral-5);
+  /* DS Progress Bar (c-progress) palette: the Neutral-3 track, the
+     Purple/Turquoise data-viz reserve for non-department stacked segments,
+     and the Neutral-4 overflow grey for segments past that reserve. */
+  --bar-track:var(--color-neutral-3); --bar-overflow:var(--color-neutral-4);
+  --purple:var(--color-purple); --turquoise:var(--color-turquoise);
 
   /* saturated hues re-valued for use as TEXT (>=4.5:1 on surface) */
   --green-ink:#00734D; --amber-ink:#8A5A00; --red-ink:#C4101F; --navy-ink:#0B4FA8;
@@ -2360,13 +2366,20 @@
 /* attainment rail under the KPI row */
 #salesBoard .attn{background:var(--surface); border:1px solid var(--rule); border-radius:var(--r-lg);
   padding:var(--spacing-16); box-shadow:var(--shadow-1); margin-top:12px;}
-#salesBoard .attn-bar{position:relative; height:34px; background:var(--sunk); border-radius:8px; overflow:visible;}
+/* c-progress language: Neutral-3 track, pill radius, Obsidian for the
+   committed value, Purple (the DS data-viz reserve) for the weighted
+   pipeline, contiguous segments with no seam. The 34px height is a
+   deliberate departure — the DS caps tracks at 16px, but this is the
+   board's one hero rail and it keeps its presence by choice. The target
+   tick and the dashed shortfall are improvised extensions the DS does not
+   define: a 2px Neutral-9 marker crossing the track, and a dashed outline
+   in the DS error red for the distance still to close. */
+#salesBoard .attn-bar{position:relative; height:34px; background:var(--bar-track); border-radius:var(--radius-pill); overflow:visible;}
 #salesBoard .attn-seg{position:absolute; top:0; height:34px;}
-#salesBoard .attn-seg.b{left:0; background:var(--obsidian); border-radius:8px 0 0 8px;}
-#salesBoard .attn-seg.p{background:var(--navy); border-radius:0 8px 8px 0;
-  box-shadow:-2px 0 0 0 var(--sunk);}
+#salesBoard .attn-seg.b{left:0; background:var(--obsidian); border-radius:var(--radius-pill) 0 0 var(--radius-pill);}
+#salesBoard .attn-seg.p{background:var(--purple); border-radius:0 var(--radius-pill) var(--radius-pill) 0;}
 #salesBoard .attn-short{position:absolute; top:0; height:34px; border:1.5px dashed var(--red);
-  border-left:0; border-radius:0 8px 8px 0; opacity:.75;}
+  border-left:0; border-radius:0 var(--radius-pill) var(--radius-pill) 0; opacity:.75;}
 #salesBoard .attn-tick{position:absolute; top:-7px; bottom:-7px; width:2px; background:var(--ink);}
 #salesBoard .attn-tick span{position:absolute; top:-17px; right:0; font-size:var(--text-label3-size); font-weight:800;
   white-space:nowrap; color:var(--ink);}
@@ -2383,11 +2396,13 @@
 #salesBoard .plat .pr{display:flex; justify-content:space-between; font-size:var(--text-caption-size); color:var(--muted);
   margin-top:5px; gap:10px;}
 #salesBoard .plat .pr b{font-weight:800; color:var(--ink);}
-#salesBoard .minibar{height:8px; background:var(--sunk); border-radius:4px; margin-top:10px; position:relative;
+/* c-progress Default size (8px): Neutral-3 track, pill radius, Obsidian
+   booked + Purple pipeline, contiguous. The ink tick is the improvised
+   target marker. */
+#salesBoard .minibar{height:8px; background:var(--bar-track); border-radius:var(--radius-pill); margin-top:10px; position:relative;
   overflow:visible;}
-#salesBoard .minibar i{position:absolute; left:0; top:0; height:8px; border-radius:4px; background:var(--obsidian);}
-#salesBoard .minibar u{position:absolute; top:0; height:8px; background:var(--navy); border-radius:0 4px 4px 0;
-  box-shadow:-2px 0 0 0 var(--sunk);}
+#salesBoard .minibar i{position:absolute; left:0; top:0; height:8px; border-radius:var(--radius-pill) 0 0 var(--radius-pill); background:var(--obsidian);}
+#salesBoard .minibar u{position:absolute; top:0; height:8px; background:var(--purple); border-radius:0 var(--radius-pill) var(--radius-pill) 0;}
 #salesBoard .minibar b{position:absolute; top:-4px; bottom:-4px; width:2px; background:var(--ink);}
 
 /* .c-badge, warning variant: weight 700, no tracking, no uppercase, the DS's
@@ -2440,18 +2455,20 @@
 
 /* bullet chart cell */
 #salesBoard .bul{position:relative; height:26px;}
-#salesBoard .bul-rail{position:absolute; inset:6px 0; background:var(--sunk); border-radius:5px;}
-#salesBoard .bul-b{position:absolute; top:6px; height:14px; background:var(--obsidian); border-radius:5px 0 0 5px;}
-#salesBoard .bul-f{position:absolute; top:6px; height:14px; background:var(--navy); border-radius:0 5px 5px 0;
-  box-shadow:-2px 0 0 0 var(--sunk);}
-#salesBoard .bul-o{position:absolute; top:6px; height:14px; border:1.5px dashed var(--navy); border-left:0;
-  border-radius:0 5px 5px 0; opacity:.62;}
+/* Bullet rows on the same c-progress anatomy: Neutral-3 rail, pill
+   radius, Obsidian booked + Purple pipeline, contiguous. The dashed open
+   segment and the target tick are the improvised extensions. */
+#salesBoard .bul-rail{position:absolute; inset:6px 0; background:var(--bar-track); border-radius:var(--radius-pill);}
+#salesBoard .bul-b{position:absolute; top:6px; height:14px; background:var(--obsidian); border-radius:var(--radius-pill) 0 0 var(--radius-pill);}
+#salesBoard .bul-f{position:absolute; top:6px; height:14px; background:var(--purple); border-radius:0 var(--radius-pill) var(--radius-pill) 0;}
+#salesBoard .bul-o{position:absolute; top:6px; height:14px; border:1.5px dashed var(--purple); border-left:0;
+  border-radius:0 var(--radius-pill) var(--radius-pill) 0; opacity:.62;}
 #salesBoard .bul-t{position:absolute; top:1px; height:24px; width:2px; background:var(--ink);}
 #salesBoard .bul-t::after{content:attr(data-l); position:absolute; top:-2px; left:5px; font-size:var(--text-label3-size);
   font-weight:800; color:var(--muted); white-space:nowrap;}
 #salesBoard .bul-t.flip::after{left:auto; right:5px;}
 /* the opportunity runs past the rail: a solid cap says the bar is cut, not ended */
-#salesBoard .bul-o.clipped{border-right:3px solid var(--navy); border-radius:0; opacity:.8;}
+#salesBoard .bul-o.clipped{border-right:3px solid var(--purple); border-radius:0; opacity:.8;}
 
 /* .c-badge: 4px gap, 2px/spacing-8 padding, label3 at weight 700, no
    tracking. The 1px transparent border was already right. */
@@ -2544,10 +2561,14 @@
 #salesBoard .mo-cov{font-size:var(--text-h1-size); font-weight:800; line-height:1.1; margin-top:8px;}
 #salesBoard .mo-cov small{font-size:var(--text-caption-size); font-weight:700; color:var(--faint); display:block; letter-spacing:var(--tracking-eyebrow);
   text-transform:uppercase; margin-top:2px;}
-#salesBoard .stack{height:100px; background:var(--sunk); border-radius:8px; margin-top:12px;
+/* Vertical columns adopt the c-progress palette, track and motion but
+   not its horizontal anatomy — a column chart is not a progress bar, and
+   the pill radius would turn a 100px column into a lozenge, so the 8px
+   corner stays. Contracted Obsidian, planned pipeline Purple, contiguous. */
+#salesBoard .stack{height:100px; background:var(--bar-track); border-radius:8px; margin-top:12px;
   position:relative; display:flex; flex-direction:column-reverse;}
 #salesBoard .stack i{display:block; background:var(--obsidian); border-radius:0 0 8px 8px;}
-#salesBoard .stack u{display:block; background:var(--navy); box-shadow:0 -2px 0 0 var(--sunk);}
+#salesBoard .stack u{display:block; background:var(--purple);}
 #salesBoard .stack b{position:absolute; left:-4px; right:-4px; height:2px; background:var(--ink);}
 #salesBoard .stack b::after{content:attr(data-l); position:absolute; right:0; top:-14px; font-size:var(--text-label3-size);
   font-weight:800; color:var(--ink);}
@@ -2595,10 +2616,14 @@
 #salesBoard .hbar{display:grid; grid-template-columns:118px 1fr 66px 42px; gap:10px; align-items:center;
   padding:6px 0; font-size:var(--text-label2-size);}
 #salesBoard .hbar .hn{font-weight:800; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
-#salesBoard .hbar .ht{height:16px; background:var(--sunk); border-radius:5px; position:relative;}
-#salesBoard .hbar .ht i{position:absolute; left:0; top:0; height:16px; border-radius:5px; background:var(--navy);}
-#salesBoard .hbar .ht u{position:absolute; top:0; height:16px; background:var(--seq-3); border-radius:0 5px 5px 0;
-  box-shadow:-2px 0 0 0 var(--sunk);}
+/* c-progress Large size (16px). Fandom rows are a general two-segment
+   breakdown (July vs Sep–Dec), which the DS maps to the Purple/Turquoise
+   data-viz reserve. The IP rows reuse the same anatomy as a single
+   determinate bar, so they take the Obsidian default instead. */
+#salesBoard .hbar .ht{height:16px; background:var(--bar-track); border-radius:var(--radius-pill); position:relative;}
+#salesBoard .hbar .ht i{position:absolute; left:0; top:0; height:16px; border-radius:var(--radius-pill) 0 0 var(--radius-pill); background:var(--purple);}
+#salesBoard .hbar .ht u{position:absolute; top:0; height:16px; background:var(--turquoise); border-radius:0 var(--radius-pill) var(--radius-pill) 0;}
+#salesBoard #ipBars .ht i{border-radius:var(--radius-pill); background:var(--obsidian);}
 #salesBoard .hbar .hv{text-align:right; font-weight:800;}
 #salesBoard .hbar .hd{text-align:right; font-size:var(--text-label3-size); color:var(--faint); font-weight:700;}
 
@@ -2928,9 +2953,9 @@
    painted at their final position on the first frame, and the bar grows up
    to meet a line that was already there. */
 #salesBoard .bul-b, #salesBoard .bul-f, #salesBoard .bul-o, #salesBoard .attn-seg, #salesBoard .minibar i, #salesBoard .minibar u, #salesBoard .ht i, #salesBoard .ht u, #salesBoard .conc i{
-  transition:width .52s var(--ease), left .52s var(--ease);
+  transition:width var(--duration-base) var(--ease), left var(--duration-base) var(--ease);
 }
-#salesBoard .stack i, #salesBoard .stack u{transition:height .52s var(--ease);}
+#salesBoard .stack i, #salesBoard .stack u{transition:height var(--duration-base) var(--ease);}
 #salesBoard .cell{transition:background-color .4s var(--ease);}
 @media (prefers-reduced-motion: reduce){
   #salesBoard .bul-b, #salesBoard .bul-f, #salesBoard .bul-o, #salesBoard .attn-seg, #salesBoard .minibar i, #salesBoard .minibar u, #salesBoard .ht i, #salesBoard .ht u, #salesBoard .conc i, #salesBoard .stack i, #salesBoard .stack u, #salesBoard .cell{transition:none !important;}
@@ -3210,11 +3235,15 @@
 #salesBoard .p-v{font-size:var(--text-h4-size); font-weight:800; letter-spacing:0;}
 #salesBoard .p-v small{font-size:var(--text-caption-size); font-weight:700; color:var(--muted); margin-left:4px;}
 #salesBoard .p-s{font-size:var(--text-label3-size); color:var(--faint); margin-top:4px; line-height:1.5;}
-#salesBoard .p-track{height:6px; border-radius:3px; background:var(--sunk); margin-top:10px;
+/* c-progress Default size (8px), single determinate: Obsidian is the
+   committed value — the days already gone. The tick is the improvised
+   reference marker (2px Neutral-9), here marking where booked stands
+   against time; the key underneath names both readings. */
+#salesBoard .p-track{height:8px; border-radius:var(--radius-pill); background:var(--bar-track); margin-top:10px;
   position:relative; overflow:visible;}
-#salesBoard .p-track i{position:absolute; left:0; top:0; bottom:0; background:var(--faint);
-  border-radius:3px; opacity:.55;}
-#salesBoard .p-track u{position:absolute; top:-3px; bottom:-3px; width:2px; background:var(--navy);}
+#salesBoard .p-track i{position:absolute; left:0; top:0; bottom:0; background:var(--obsidian);
+  border-radius:var(--radius-pill);}
+#salesBoard .p-track u{position:absolute; top:-3px; bottom:-3px; width:2px; background:var(--ink);}
 #salesBoard .p-key{display:flex; gap:12px; margin-top:7px; font-size:var(--text-label3-size); color:var(--faint);
   flex-wrap:wrap;}
 #salesBoard .p-key b{font-weight:800; color:var(--muted);}
@@ -3287,9 +3316,14 @@
 
 
 /* ── IP concentration ────────────────────────────────────────── */
-#salesBoard .conc{display:flex; height:14px; border-radius:5px; overflow:hidden; margin:4px 0 10px;}
-#salesBoard .conc i{display:block; box-shadow:2px 0 0 0 var(--surface);}
-#salesBoard .conc i:last-child{box-shadow:none;}
+/* c-progress stacked, general breakdown: Purple for the largest,
+   Turquoise for the second, Neutral-4 overflow for everything past the
+   reserve — the DS's own "don't add more brand colours" rule, and it draws
+   the story the note below tells: the top two against the tail. Contiguous
+   with no seams; the wrapper's own pill radius + overflow:hidden give the
+   outer edges their rounding. Large size, 16px. */
+#salesBoard .conc{display:flex; height:16px; border-radius:var(--radius-pill); overflow:hidden; margin:4px 0 10px;}
+#salesBoard .conc i{display:block;}
 
 @media (max-width:1180px){
 }
@@ -3504,7 +3538,7 @@
               <div class="attn-bar" id="attnBar"></div>
               <div class="attn-legend">
                 <span><i class="sw" style="background:var(--obsidian)"></i>Booked RM14.0M</span>
-                <span><i class="sw" style="background:var(--navy)"></i>Weighted pipeline RM8.0M</span>
+                <span><i class="sw" style="background:var(--purple)"></i>Weighted pipeline RM8.0M</span>
                 <span><i class="sw" style="background:var(--ink);width:2px;border-radius:0"></i>Target RM26.5M</span>
                 <span style="color:var(--red-ink);font-weight:800">Shortfall RM4.5M</span>
               </div>
@@ -3583,8 +3617,8 @@
               <div id="lbRows"></div>
               <div class="lb-foot">
                 <span><i class="sw" style="background:var(--obsidian)"></i><span id="footBooked">Booked</span></span>
-                <span><i class="sw" style="background:var(--navy)"></i>Weighted pipeline added</span>
-                <span><i class="sw" style="border:1.5px dashed var(--navy);background:transparent"></i>80%+ opportunity, not yet in forecast</span>
+                <span><i class="sw" style="background:var(--purple)"></i>Weighted pipeline added</span>
+                <span><i class="sw" style="border:1.5px dashed var(--purple);background:transparent"></i>80%+ opportunity, not yet in forecast</span>
                 <span><i class="sw" style="background:var(--ink);width:2px;border-radius:0"></i>Target</span>
                 <span id="footLy" hidden></span>
               </div>
@@ -7853,7 +7887,7 @@ function renderAttn(M, modelled){
   var lg = document.querySelector('.attn-legend');
   if(lg) lg.innerHTML =
     '<span><i class="sw" style="background:var(--obsidian)"></i>Booked '+rm(M.b)+'</span>'+
-    '<span><i class="sw" style="background:var(--navy)"></i>Weighted pipeline '+rm(M.f-M.b)+'</span>'+
+    '<span><i class="sw" style="background:var(--purple)"></i>Weighted pipeline '+rm(M.f-M.b)+'</span>'+
     '<span><i class="sw" style="background:var(--ink);width:2px;border-radius:0"></i>Target '+rm(M.t)+'</span>'+
     (gap>0 ? '<span style="color:var(--red-ink);font-weight:800">Shortfall '+rm(gap)+'</span>' : '')+
     CM.map(function(x){
@@ -8381,8 +8415,8 @@ function renderIp(){
         '<span class="hv num">'+rm(fTot.full)+'</span><span class="hd num">'+fTot.d+'</span></div>'
     : '<p class="noresult"><b>No fandom book in this slice.</b>Clear the slice to see all nine.</p>') +
   '<div class="attn-legend" style="margin-top:10px">'+
-    '<span><i class="sw" style="background:var(--navy)"></i>July</span>'+
-    '<span><i class="sw" style="background:var(--seq-3)"></i>Sep to Dec</span>'+
+    '<span><i class="sw" style="background:var(--purple)"></i>July</span>'+
+    '<span><i class="sw" style="background:var(--turquoise)"></i>Sep to Dec</span>'+
     '<span style="color:var(--faint)">Right-hand column is deal count</span></div>';
 
   var ft = document.getElementById('fandomTag');
@@ -8431,11 +8465,13 @@ function renderConcentration(list, modelled){
   }
   var total = ips.reduce(function(a,i){ return a+i.v; }, 0);
   var deals = ips.reduce(function(a,i){ return a+i.d; }, 0);
-  var steps = ['--seq-6','--seq-5','--seq-4','--seq-3','--seq-2','--seq-1','--seq-1','--seq-0','--seq-0'];
+  /* DS general-breakdown reserve: Purple, then Turquoise, then the
+     Neutral-4 overflow colour for every further segment. */
+  var steps = ['--purple','--turquoise'];
 
   var cb = document.getElementById('concBar');
   cb.innerHTML = ips.map(function(ip,i){
-    return '<i style="width:0; background:var('+steps[i % steps.length]+')"'+
+    return '<i style="width:0; background:var('+(steps[i] || '--bar-overflow')+')"'+
       bar((ip.v/total*100).toFixed(2)+'%')+' '+
       'title="'+esc(ip.n)+' · '+rm(ip.v)+' · '+Math.round(ip.v/total*100)+'% of tagged pipeline"></i>';
   }).join('');

@@ -2263,8 +2263,9 @@
 
 /* ── Section furniture ────────────────────────────────────── */
 #salesBoard section{margin-top:38px;}
+/* no rule under section titles — the type and the space carry the break */
 #salesBoard .sechead{display:flex; align-items:baseline; gap:14px; flex-wrap:wrap;
-  padding-bottom:10px; margin-bottom:16px; border-bottom:1px solid var(--rule);}
+  padding-bottom:10px; margin-bottom:16px;}
 #salesBoard .sechead h2{font-size:var(--text-h4-size);}
 #salesBoard .sechead .note{font-size:var(--text-caption-size); color:var(--faint); flex:1 1 260px;}
 #salesBoard .sechead .tools{display:flex; gap:6px; flex-wrap:wrap; margin-left:auto;}
@@ -2303,7 +2304,8 @@
   border:2px solid var(--ink); border-radius:var(--r-sm); overflow:hidden;}
 #salesBoard .views button{appearance:none; border:0; background:var(--surface); text-align:left;
   padding:14px 18px; cursor:pointer; font:inherit; color:var(--ink);
-  border-right:2px solid var(--ink); transition:background var(--ease) .18s;}
+  border-right:2px solid var(--ink);
+  transition:background var(--ease) .18s, padding var(--ease) .3s;}
 #salesBoard .views button:last-child{border-right:0;}
 #salesBoard .views button:hover{background:var(--sunk);}
 #salesBoard .views button:focus-visible{outline:3px solid var(--navy); outline-offset:-3px;}
@@ -2315,6 +2317,22 @@
 #salesBoard .views .v-t{display:block; font-size:var(--text-body1-size); font-weight:800; margin-top:3px; text-wrap:balance;}
 #salesBoard .views .v-d{display:block; font-size:var(--text-caption-size); color:var(--muted); margin-top:2px;}
 /* the panel keeps its own 14/18 padding — the bar condenses around it */
+/* Condensing shelf: at rest the panel reads as three lines; once the bar
+   touches the top it collapses to the title alone and gives the page back
+   about 50px. The height change is animated on the two lines that leave —
+   the panel itself never needs a measured height — and .stuck is set by the
+   observer at the end of the board script. */
+#salesBoard .views .v-k, #salesBoard .views .v-d{overflow:hidden; max-height:2.4em;
+  transition:max-height var(--ease) .3s, opacity var(--ease) .2s, margin-top var(--ease) .3s;}
+#salesBoard .views .v-t{transition:font-size var(--ease) .3s;}
+#salesBoard .controls.stuck .views button{padding-block:9px;}
+#salesBoard .controls.stuck .views .v-k,
+#salesBoard .controls.stuck .views .v-d{max-height:0; opacity:0; margin-top:0;}
+#salesBoard .controls.stuck .views .v-t{font-size:var(--text-body2-size);}
+@media (prefers-reduced-motion:reduce){
+  #salesBoard .views button, #salesBoard .views .v-k,
+  #salesBoard .views .v-d, #salesBoard .views .v-t{transition:none;}
+}
 #salesBoard .controls.compact .views button:last-child{border-right:0;}
 
 
@@ -3573,8 +3591,7 @@
             </div>
 
             <p class="dek" style="font-size:12.5px;color:var(--faint);margin-top:10px" data-only="now" id="lbFoot">
-              Joanne Tan covers North, South, KK and KCH as one book. Joy Ahmad covers Joy Ahmad and Joy Ahmad EC.
-              A further <b style="color:var(--ink)">RM138K booked is unattributed</b>, sitting with Ham, Sabah Closed,
+              <b style="color:var(--ink)">RM138K booked is unattributed</b>, sitting with Ham, Sabah Closed,
               Yip Siew Ling and rows with no lead. That is the “Not on the book list” row: it is there so the nine
               books plus the leftover add up to the company rather than falling short of it.
             </p>
@@ -8601,6 +8618,33 @@ var syncFsels = function(){};
   // the cascade, the lock and applyFilters all write the selects directly,
   // so the triggers re-read them at the end of every pass
   syncFsels = function(){ wraps.forEach(function(f){ f(); }); };
+})();
+
+/* The shelf condenses once it reaches the top. Where "the top" is has to be
+   measured rather than assumed: a sticky offset resolves against the
+   scrollport's content box, so this bar's top:-40px comes to rest 8px down,
+   under the shell's 48px of padding. The two numbers are read from live
+   styles and refreshed on resize, so the breakpoint that changes the offset
+   needs no second copy of them here. */
+(function(){
+  var ctl = document.getElementById('controls');
+  var scroller = document.querySelector('.c-shell-content');
+  if(!ctl || !scroller) return;
+  var restOffset = 0;
+  function recalc(){
+    restOffset = (parseFloat(getComputedStyle(scroller).paddingTop) || 0)
+               + (parseFloat(getComputedStyle(ctl).top) || 0);
+    measure();
+  }
+  // two rect reads on an element the browser has just laid out for this very
+  // scroll — cheap enough to run inline, and a frame earlier than a rAF hop
+  function measure(){
+    var restAt = scroller.getBoundingClientRect().top + restOffset;
+    ctl.classList.toggle('stuck', ctl.getBoundingClientRect().top <= restAt + 1);
+  }
+  scroller.addEventListener('scroll', measure, {passive: true});
+  window.addEventListener('resize', recalc);
+  recalc();
 })();
 
 // the comparison picker

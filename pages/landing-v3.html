@@ -2368,19 +2368,18 @@
   padding:var(--spacing-16); box-shadow:var(--shadow-1); margin-top:12px;}
 /* c-progress language: Neutral-3 track, pill radius, Obsidian for the
    committed value, Purple (the DS data-viz reserve) for the weighted
-   pipeline, contiguous segments with no seam. The 34px height is a
-   deliberate departure — the DS caps tracks at 16px, but this is the
-   board's one hero rail and it keeps its presence by choice. The target
+   pipeline, contiguous segments with no seam, on the DS Default 8px
+   track — the same size as every other bar on the board. The target
    tick and the dashed shortfall are improvised extensions the DS does not
    define: a 2px Neutral-9 marker crossing the track, and a dashed outline
    in the DS error red for the distance still to close. */
-#salesBoard .attn-bar{position:relative; height:34px; background:var(--bar-track); border-radius:var(--radius-pill); overflow:visible;}
-#salesBoard .attn-seg{position:absolute; top:0; height:34px;}
+#salesBoard .attn-bar{position:relative; height:8px; background:var(--bar-track); border-radius:var(--radius-pill); overflow:visible;}
+#salesBoard .attn-seg{position:absolute; top:0; height:8px;}
 #salesBoard .attn-seg.b{left:0; background:var(--obsidian); border-radius:var(--radius-pill) 0 0 var(--radius-pill);}
 #salesBoard .attn-seg.p{background:var(--purple); border-radius:0 var(--radius-pill) var(--radius-pill) 0;}
-#salesBoard .attn-short{position:absolute; top:0; height:34px; border:1.5px dashed var(--red);
+#salesBoard .attn-short{position:absolute; top:0; height:8px; border:1.5px dashed var(--red);
   border-left:0; border-radius:0 var(--radius-pill) var(--radius-pill) 0; opacity:.75;}
-#salesBoard .attn-tick{position:absolute; top:-7px; bottom:-7px; width:2px; background:var(--ink);}
+#salesBoard .attn-tick{position:absolute; top:-5px; bottom:-5px; width:2px; background:var(--ink);}
 #salesBoard .attn-tick span{position:absolute; top:-17px; right:0; font-size:var(--text-label3-size); font-weight:800;
   white-space:nowrap; color:var(--ink);}
 #salesBoard .attn-legend{display:flex; gap:18px; flex-wrap:wrap; margin-top:12px; font-size:var(--text-caption-size); color:var(--muted);}
@@ -2458,12 +2457,12 @@
 /* Bullet rows on the same c-progress anatomy: Neutral-3 rail, pill
    radius, Obsidian booked + Purple pipeline, contiguous. The dashed open
    segment and the target tick are the improvised extensions. */
-#salesBoard .bul-rail{position:absolute; inset:6px 0; background:var(--bar-track); border-radius:var(--radius-pill);}
-#salesBoard .bul-b{position:absolute; top:6px; height:14px; background:var(--obsidian); border-radius:var(--radius-pill) 0 0 var(--radius-pill);}
-#salesBoard .bul-f{position:absolute; top:6px; height:14px; background:var(--purple); border-radius:0 var(--radius-pill) var(--radius-pill) 0;}
-#salesBoard .bul-o{position:absolute; top:6px; height:14px; border:1.5px dashed var(--purple); border-left:0;
+#salesBoard .bul-rail{position:absolute; inset:9px 0; background:var(--bar-track); border-radius:var(--radius-pill);}
+#salesBoard .bul-b{position:absolute; top:9px; height:8px; background:var(--obsidian); border-radius:var(--radius-pill) 0 0 var(--radius-pill);}
+#salesBoard .bul-f{position:absolute; top:9px; height:8px; background:var(--purple); border-radius:0 var(--radius-pill) var(--radius-pill) 0;}
+#salesBoard .bul-o{position:absolute; top:9px; height:8px; border:1.5px dashed var(--purple); border-left:0;
   border-radius:0 var(--radius-pill) var(--radius-pill) 0; opacity:.62;}
-#salesBoard .bul-t{position:absolute; top:1px; height:24px; width:2px; background:var(--ink);}
+#salesBoard .bul-t{position:absolute; top:4px; height:18px; width:2px; background:var(--ink);}
 #salesBoard .bul-t::after{content:attr(data-l); position:absolute; top:-2px; left:5px; font-size:var(--text-label3-size);
   font-weight:800; color:var(--muted); white-space:nowrap;}
 #salesBoard .bul-t.flip::after{left:auto; right:5px;}
@@ -2614,15 +2613,15 @@
 #salesBoard .panel .panelhd{display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; margin-bottom:4px;}
 #salesBoard .panel .pnote{font-size:var(--text-caption-size); color:var(--faint); margin:2px 0 14px;}
 #salesBoard .hbar{display:grid; grid-template-columns:118px 1fr 66px 42px; gap:10px; align-items:center;
-  padding:6px 0; font-size:var(--text-label2-size);}
+  padding:12px 0; font-size:var(--text-label2-size);}
 #salesBoard .hbar .hn{font-weight:800; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
-/* c-progress Large size (16px). Fandom rows are a general two-segment
+/* c-progress Default size (8px). Fandom rows are a general two-segment
    breakdown (July vs Sep–Dec), which the DS maps to the Purple/Turquoise
    data-viz reserve. The IP rows reuse the same anatomy as a single
    determinate bar, so they take the Obsidian default instead. */
-#salesBoard .hbar .ht{height:16px; background:var(--bar-track); border-radius:var(--radius-pill); position:relative;}
-#salesBoard .hbar .ht i{position:absolute; left:0; top:0; height:16px; border-radius:var(--radius-pill) 0 0 var(--radius-pill); background:var(--purple);}
-#salesBoard .hbar .ht u{position:absolute; top:0; height:16px; background:var(--turquoise); border-radius:0 var(--radius-pill) var(--radius-pill) 0;}
+#salesBoard .hbar .ht{height:8px; background:var(--bar-track); border-radius:var(--radius-pill); position:relative;}
+#salesBoard .hbar .ht i{position:absolute; left:0; top:0; height:8px; border-radius:var(--radius-pill) 0 0 var(--radius-pill); background:var(--purple);}
+#salesBoard .hbar .ht u{position:absolute; top:0; height:8px; background:var(--turquoise); border-radius:0 var(--radius-pill) var(--radius-pill) 0;}
 #salesBoard #ipBars .ht i{border-radius:var(--radius-pill); background:var(--obsidian);}
 #salesBoard .hbar .hv{text-align:right; font-weight:800;}
 #salesBoard .hbar .hd{text-align:right; font-size:var(--text-label3-size); color:var(--faint); font-weight:700;}
@@ -3255,7 +3254,7 @@
 #salesBoard .ly-t{position:absolute; top:1px; height:24px; border-left:2px dotted var(--faint);
   pointer-events:none;}
 #salesBoard .minibar .ly-t{top:-3px; height:14px;}
-#salesBoard .attn-ly{position:absolute; top:-4px; height:42px; border-left:2px dotted var(--faint);}
+#salesBoard .attn-ly{position:absolute; top:-6px; height:20px; border-left:2px dotted var(--faint);}
 #salesBoard .attn-ly span{position:absolute; top:-13px; left:5px; font-size:var(--text-label3-size); font-weight:800;
   color:var(--faint); white-space:nowrap;}
 #salesBoard .ly-d{display:block; font-size:var(--text-label3-size); font-weight:800; margin-top:5px;}
@@ -3321,8 +3320,8 @@
    reserve — the DS's own "don't add more brand colours" rule, and it draws
    the story the note below tells: the top two against the tail. Contiguous
    with no seams; the wrapper's own pill radius + overflow:hidden give the
-   outer edges their rounding. Large size, 16px. */
-#salesBoard .conc{display:flex; height:16px; border-radius:var(--radius-pill); overflow:hidden; margin:4px 0 10px;}
+   outer edges their rounding. Default size, 8px. */
+#salesBoard .conc{display:flex; height:8px; border-radius:var(--radius-pill); overflow:hidden; margin:4px 0 10px;}
 #salesBoard .conc i{display:block;}
 
 @media (max-width:1180px){

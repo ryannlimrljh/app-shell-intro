@@ -2293,6 +2293,10 @@
   clip:rect(0 0 0 0); clip-path:inset(50%); white-space:nowrap; border:0;}
 
 /* chips: .c-chip + .c-chip-filter */
+/* View switch is .c-tabs/.c-tab now (underline tabs, active = obsidian inset
+   bar) — the black-framed two-up block was a component the system never had.
+   The compact .v-t / .v-s span rules below still choose which label shows. */
+#salesBoard .views{margin:var(--spacing-24) 0 0;}
 
 
 #salesBoard .chip:focus-visible{outline:2px solid var(--navy); outline-offset:2px;}
@@ -2578,25 +2582,21 @@
    Three questions, not three filters: what already closed, where the
    month stands, what is coming. Each owns its own controls, which is
    why the filter bar below is now purely about slicing. */
-#salesBoard .views{display:grid; grid-template-columns:repeat(2,1fr); margin:24px 0 0;
-  border:2px solid var(--ink); border-radius:var(--r-sm); overflow:hidden;}
-#salesBoard .views button{appearance:none; border:0; background:var(--surface); text-align:left;
-  padding:14px 18px; cursor:pointer; font:inherit; color:var(--ink);
-  border-right:2px solid var(--ink); transition:background var(--ease) .18s;}
-#salesBoard .views button:last-child{border-right:0;}
-#salesBoard .views button:hover{background:var(--sunk);}
-#salesBoard .views button:focus-visible{outline:3px solid var(--navy); outline-offset:-3px;}
-#salesBoard .views .v-k{display:block; font-size:11px; font-weight:700; letter-spacing:var(--tracking-eyebrow);
-  text-transform:uppercase; color:var(--faint);}
-#salesBoard .views .v-t{display:block; font-size:16px; font-weight:800; margin-top:3px; text-wrap:balance;}
-#salesBoard .views .v-d{display:block; font-size:12px; color:var(--muted); margin-top:2px;}
+
+
+
+
+
+
+
+
 /* A phone-width tab strip is two words wide. The full title wrapped to three
    lines and set the height of the whole grid row, so it has a short twin that
    only appears where the long one will not fit. */
 #salesBoard .views .v-s{display:none;}
-#salesBoard .views button[aria-pressed="true"]{background:var(--ink);}
-#salesBoard .views button[aria-pressed="true"] .v-t, #salesBoard .views button[aria-pressed="true"] .v-s{color:var(--canvas);}
-#salesBoard .views button[aria-pressed="true"] .v-k, #salesBoard .views button[aria-pressed="true"] .v-d{color:var(--canvas); opacity:.78;}
+
+
+
 
 /* ── Range: each view's own zoom, in one shared position ────── */
 /* .c-filterbar's own gap is --spacing-8; this was 10. */
@@ -2897,7 +2897,7 @@
 /* the view cards become a tab strip: the descriptions teach the control the
    first time you meet it and are noise every time after */
 #salesBoard .controls.compact .views{margin-top:0;}
-#salesBoard .controls.compact .views button{padding:9px 16px;}
+
 #salesBoard .controls.compact .views .v-k, #salesBoard .controls.compact .views .v-d{display:none;}
 #salesBoard .controls.compact .views .v-t{font-size:14px; margin-top:0;}
 
@@ -2947,7 +2947,7 @@
    make once, so both stand down at this width. */
 @media (max-width:760px){
   #salesBoard .controls.compact .views .v-t{font-size:11px; line-height:1.25;}
-  #salesBoard .controls.compact .views button{padding:8px 7px;}
+  
   #salesBoard .controls.compact .ctl-bars{gap:6px; margin-top:6px; flex-direction:column;
     align-items:stretch;}
   #salesBoard .controls.compact .ctl-bars .rangebar, #salesBoard .controls.compact .ctl-bars .filters{flex:0 0 auto; width:100%;}
@@ -2979,9 +2979,8 @@
      Once the label is two words the pair is a tab strip again, and stacking
      costs a whole row of screen for nothing. */
   #salesBoard .controls.compact .views{grid-template-columns:repeat(2,1fr);}
-  #salesBoard .controls.compact .views button{border-bottom:0; border-right:2px solid var(--ink);
-    text-align:center;}
-  #salesBoard .controls.compact .views button:last-child{border-right:0;}
+  
+  
   #salesBoard .controls.compact .views .v-t{display:none;}
   #salesBoard .controls.compact .views .v-s{display:block; font-size:12px; font-weight:800;}
   #salesBoard .controls{padding:6px 0 7px;}
@@ -3206,9 +3205,9 @@
   text-decoration:underline; text-underline-offset:3px;}
 
 @media (max-width:1080px){
-  #salesBoard .views{grid-template-columns:1fr;}
-  #salesBoard .views button{border-right:0; border-bottom:2px solid var(--ink);}
-  #salesBoard .views button:last-child{border-bottom:0;}
+  
+  
+  
 }
 @media (max-width:860px){
   #salesBoard .flab{width:100%;}
@@ -3347,14 +3346,14 @@
           <!-- ══ Controls: sticky, and condensing once you scroll past ══ -->
           <div class="controls compact" id="controls">
 
-          <nav class="views" data-ds="c-tabs" role="group" aria-label="View">
-            <button data-ds="c-tab" data-ds-state="active from aria-pressed" type="button" data-view="now" aria-pressed="true" id="v2Btn">
+          <nav class="views c-tabs" role="group" aria-label="View">
+            <button class="c-tab active" type="button" data-view="now" aria-pressed="true" id="v2Btn">
               <span class="v-k">View 01</span>
               <span class="v-t">To date</span>
               <span class="v-s" aria-hidden="true">To date</span>
               <span class="v-d" id="v2Sub">August, month to date · what can still land in 25 days</span>
             </button>
-            <button data-ds="c-tab" data-ds-state="active from aria-pressed" type="button" data-view="next" aria-pressed="false"
+            <button class="c-tab" type="button" data-view="next" aria-pressed="false"
               title="View 02 · Where the gap is forming while there is still runway">
               <span class="v-k">View 02</span>
               <span class="v-t">September to December, projection</span>
@@ -8362,7 +8361,9 @@ var vswapTimer = null;
     if(state.hz === b.dataset.view) return;
     state.hz = b.dataset.view;
     [].forEach.call(document.querySelectorAll('[data-view]'), function(o){
-      o.setAttribute('aria-pressed', String(o===b)); });
+      o.setAttribute('aria-pressed', String(o===b));
+      o.classList.toggle('active', o===b);   // .c-tab.active — the DS visual for the ARIA state
+    });
     applyFilters();
     // restart the entrance: removing and re-adding in one tick would be
     // coalesced away, so the class comes off, layout is read, and it goes on
@@ -8637,7 +8638,9 @@ function readHash(){
      retired along with writeHash; see the note there. */
   var h = '';
   [].forEach.call(document.querySelectorAll('[data-view]'), function(o){
-    o.setAttribute('aria-pressed', String(o.dataset.view===state.hz)); });
+    o.setAttribute('aria-pressed', String(o.dataset.view===state.hz));
+    o.classList.toggle('active', o.dataset.view===state.hz);
+  });
   if(!h) return;
   h.split('&').forEach(function(pair){
     var kv = pair.split('='), k = kv[0], v = decodeURIComponent(kv[1]||'');
@@ -8652,7 +8655,9 @@ function readHash(){
   });
   normalise();
   [].forEach.call(document.querySelectorAll('[data-view]'), function(o){
-    o.setAttribute('aria-pressed', String(o.dataset.view===state.hz)); });
+    o.setAttribute('aria-pressed', String(o.dataset.view===state.hz));
+    o.classList.toggle('active', o.dataset.view===state.hz);
+  });
 }
 
 /* The control bar used to grow back to a taller form at the top of the page

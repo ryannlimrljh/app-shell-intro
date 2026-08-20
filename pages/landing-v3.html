@@ -2300,16 +2300,18 @@
 #salesBoard .chip:focus-visible{outline:2px solid var(--navy); outline-offset:2px;}
 
 /* ── Stat tiles ───────────────────────────────────────────── */
-#salesBoard .kpis{display:grid; grid-template-columns:repeat(5,1fr); gap:12px;}
+/* grid from .c-stats (auto-fit minmax(180px,1fr) — the 5/3/2-column ladder falls out of it) */
 /* .c-stat: Neutral-1 on a 1px border at --radius-lg with shadow-1 and
    --spacing-16 of padding. */
-#salesBoard .kpi{background:var(--surface); border-radius:var(--r-lg); padding:var(--spacing-16);
-  box-shadow:var(--shadow-1); border:1px solid var(--rule); min-width:0;}
+/* card chrome from .c-stat; min-width:0 stays as the grid-blowout guard */
+#salesBoard .kpi{min-width:0;}
 /* .c-stat-label: caption at weight 700, --tracking-eyebrow, Neutral-5. */
-#salesBoard .kpi .k-l{font-size:12px; font-weight:700; letter-spacing:var(--tracking-eyebrow); text-transform:uppercase;
-  color:var(--muted);}
-#salesBoard .kpi .k-v{font-size:32px; font-weight:800; line-height:1.15; margin-top:6px; white-space:nowrap;}
-#salesBoard .kpi .k-s{font-size:12px; color:var(--muted); margin-top:3px; font-weight:600;}
+/* label typography from .c-stat-label */
+/* size and weight from .c-stat-value (h1, 800); nowrap is the board's own —
+   RM26.5M must not break across lines in a narrow column */
+#salesBoard .kpi .k-v{white-space:nowrap;}
+/* the caption sub-line under the value — a slot .c-stat does not have */
+#salesBoard .kpi .k-s{font-size:12px; color:var(--muted); font-weight:600;}
 #salesBoard .kpi.lead{background:var(--ink);}
 #salesBoard .kpi.lead .k-l{color:var(--canvas); opacity:.7;}
 #salesBoard .kpi.lead .k-v, #salesBoard .kpi.lead .k-s{color:var(--canvas);}
@@ -3234,7 +3236,7 @@
 
 /* ── Responsive ───────────────────────────────────────────── */
 @media (max-width:1180px){
-  #salesBoard .kpis{grid-template-columns:repeat(3,1fr);}
+  
   #salesBoard .months{grid-template-columns:repeat(3,1fr);}
   #salesBoard .ipgrid{grid-template-columns:1fr;}
   #salesBoard .notes{grid-template-columns:1fr 1fr;}
@@ -3253,7 +3255,7 @@
   #salesBoard .horizon{grid-template-columns:1fr;}
   #salesBoard .horizon button{border-right:0; border-bottom:2px solid var(--ink);}
   #salesBoard .horizon button:last-child{border-bottom:0;}
-  #salesBoard .kpis{grid-template-columns:repeat(2,1fr);}
+  
   #salesBoard .plats, #salesBoard .months{grid-template-columns:1fr 1fr;}
   #salesBoard .notes{grid-template-columns:1fr;}
   /* leaderboard collapses to stacked cards */
@@ -3417,20 +3419,20 @@
               <span class="note" data-only="next">Coverage is contracted plus unweighted planned pipeline over target. Forecast weights that pipeline by win rate.</span>
             </div>
 
-            <div class="kpis" data-ds="c-stats" data-only="now" id="kpisNow">
-              <div class="kpi" data-ds="c-stat"><div class="k-l" data-ds="c-stat-label">Target</div><div class="k-v num" data-ds="c-stat-value" data-n="26.5" data-f="rm" data-k="know0">RM26.5M</div><div class="k-s">August</div></div>
-              <div class="kpi lead" data-ds="c-stat" data-ds-note="keeps local is-lead inversion"><div class="k-l" data-ds="c-stat-label">Booked to 6 Aug</div><div class="k-v num" data-ds="c-stat-value" data-n="14.0" data-f="rm" data-k="know1">RM14.0M</div><div class="k-s">53% of target</div></div>
-              <div class="kpi" data-ds="c-stat"><div class="k-l" data-ds="c-stat-label">Open pipeline</div><div class="k-v num" data-ds="c-stat-value" data-n="8.0" data-f="rm" data-k="know2">RM8.0M</div><div class="k-s">weighted, net</div></div>
-              <div class="kpi" data-ds="c-stat"><div class="k-l" data-ds="c-stat-label">Forecast</div><div class="k-v num" data-ds="c-stat-value" data-n="22.0" data-f="rm" data-k="know3">RM22.0M</div><div class="k-s">83% of target</div></div>
-              <div class="kpi warn" data-ds="c-stat"><div class="k-l" data-ds="c-stat-label">Gap to target</div><div class="k-v num" data-ds="c-stat-value" data-n="-4.5" data-f="rms" data-k="know4">−RM4.5M</div><div class="k-s">behind</div></div>
+            <div class="kpis c-stats" data-only="now" id="kpisNow">
+              <div class="kpi c-stat"><div class="k-l c-stat-label">Target</div><div class="k-v c-stat-value num" data-n="26.5" data-f="rm" data-k="know0">RM26.5M</div><div class="k-s">August</div></div>
+              <div class="kpi lead c-stat is-lead"><div class="k-l c-stat-label">Booked to 6 Aug</div><div class="k-v c-stat-value num" data-n="14.0" data-f="rm" data-k="know1">RM14.0M</div><div class="k-s">53% of target</div></div>
+              <div class="kpi c-stat"><div class="k-l c-stat-label">Open pipeline</div><div class="k-v c-stat-value num" data-n="8.0" data-f="rm" data-k="know2">RM8.0M</div><div class="k-s">weighted, net</div></div>
+              <div class="kpi c-stat"><div class="k-l c-stat-label">Forecast</div><div class="k-v c-stat-value num" data-n="22.0" data-f="rm" data-k="know3">RM22.0M</div><div class="k-s">83% of target</div></div>
+              <div class="kpi warn c-stat"><div class="k-l c-stat-label">Gap to target</div><div class="k-v c-stat-value num" data-n="-4.5" data-f="rms" data-k="know4">−RM4.5M</div><div class="k-s">behind</div></div>
             </div>
 
-            <div class="kpis" data-ds="c-stats" data-only="next">
-              <div class="kpi" data-ds="c-stat"><div class="k-l" data-ds="c-stat-label">Target, Sep–Dec</div><div class="k-v num" data-ds="c-stat-value" data-n="110.2" data-f="rm" data-k="knext0">RM110.2M</div><div class="k-s">four months</div></div>
-              <div class="kpi lead" data-ds="c-stat" data-ds-note="keeps local is-lead inversion"><div class="k-l" data-ds="c-stat-label">Contracted</div><div class="k-v num" data-ds="c-stat-value" data-n="17.4" data-f="rm" data-k="knext1">RM17.4M</div><div class="k-s">TV and Radio only</div></div>
-              <div class="kpi" data-ds="c-stat"><div class="k-l" data-ds="c-stat-label">Planned pipeline</div><div class="k-v num" data-ds="c-stat-value" data-n="21.1" data-f="rm" data-k="knext2">RM21.1M</div><div class="k-s">unweighted</div></div>
-              <div class="kpi" data-ds="c-stat"><div class="k-l" data-ds="c-stat-label">Forecast</div><div class="k-v num" data-ds="c-stat-value" data-n="26.9" data-f="rm" data-k="knext3">RM26.9M</div><div class="k-s">24% of target</div></div>
-              <div class="kpi warn" data-ds="c-stat"><div class="k-l" data-ds="c-stat-label">Gap to target</div><div class="k-v num" data-ds="c-stat-value" data-n="-83.3" data-f="rms" data-k="knext4">−RM83.3M</div><div class="k-s">target less forecast · <span class="tt" title="The deck states the RM110.2M target and the RM26.9M forecast but never subtracts them. Every other figure on this page is transcribed.">derived</span></div></div>
+            <div class="kpis c-stats" data-only="next">
+              <div class="kpi c-stat"><div class="k-l c-stat-label">Target, Sep–Dec</div><div class="k-v c-stat-value num" data-n="110.2" data-f="rm" data-k="knext0">RM110.2M</div><div class="k-s">four months</div></div>
+              <div class="kpi lead c-stat is-lead"><div class="k-l c-stat-label">Contracted</div><div class="k-v c-stat-value num" data-n="17.4" data-f="rm" data-k="knext1">RM17.4M</div><div class="k-s">TV and Radio only</div></div>
+              <div class="kpi c-stat"><div class="k-l c-stat-label">Planned pipeline</div><div class="k-v c-stat-value num" data-n="21.1" data-f="rm" data-k="knext2">RM21.1M</div><div class="k-s">unweighted</div></div>
+              <div class="kpi c-stat"><div class="k-l c-stat-label">Forecast</div><div class="k-v c-stat-value num" data-n="26.9" data-f="rm" data-k="knext3">RM26.9M</div><div class="k-s">24% of target</div></div>
+              <div class="kpi warn c-stat"><div class="k-l c-stat-label">Gap to target</div><div class="k-v c-stat-value num" data-n="-83.3" data-f="rms" data-k="knext4">−RM83.3M</div><div class="k-s">target less forecast · <span class="tt" title="The deck states the RM110.2M target and the RM26.9M forecast but never subtracts them. Every other figure on this page is transcribed.">derived</span></div></div>
             </div>
 
             <div class="pace" data-only="now" id="pace"></div>

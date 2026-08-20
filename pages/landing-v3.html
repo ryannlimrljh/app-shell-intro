@@ -2325,7 +2325,11 @@
 #salesBoard .views .v-k, #salesBoard .views .v-d{overflow:hidden; max-height:2.4em;
   transition:max-height var(--ease) .3s, opacity var(--ease) .2s, margin-top var(--ease) .3s;}
 #salesBoard .views .v-t{transition:font-size var(--ease) .3s;}
-#salesBoard .controls.stuck .views button{padding-block:9px;}
+/* Ranged left at rest (three lines, read as a card), centred once it is a
+   single label (read as a tab). text-align cannot transition, so this snaps —
+   it snaps on the same frame the other two lines start collapsing, which is
+   where a jump is least visible. */
+#salesBoard .controls.stuck .views button{padding-block:9px; text-align:center;}
 #salesBoard .controls.stuck .views .v-k,
 #salesBoard .controls.stuck .views .v-d{max-height:0; opacity:0; margin-top:0;}
 #salesBoard .controls.stuck .views .v-t{font-size:var(--text-body2-size);}
@@ -3017,6 +3021,9 @@
 @media (max-width:760px){
     #salesBoard .controls.compact .views .v-k, #salesBoard .controls.compact .views .v-d{display:none;}
 #salesBoard .controls.compact .views .v-t{font-size:var(--text-label3-size); line-height:1.25;}
+  /* Already a one-liner at every scroll position at this width, so it takes
+     the centred treatment .stuck gives it on desktop without waiting to stick. */
+  #salesBoard .controls.compact .views button{text-align:center;}
   
   #salesBoard .controls.compact .ctl-bars{gap:6px; margin-top:6px; flex-direction:column;
     align-items:stretch;}
@@ -6000,17 +6007,19 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
   const askBox = document.getElementById('askBox');
   if (askBox) {
     const askInputEl = askBox.querySelector('input');
-    /* 236. It was 260, then 200 — a 260px pill holding a short label left ~60px
-       of dead space inside its own right end, which is what read as "too far
-       apart". The 36px back on top of 200 pays for the AI mark and its gap:
-       without it the running line's window would have dropped 168 -> 136 and
-       the marquee would travel further and longer to show the same sentence. */
-    const ASK_PILL_W = 236;
+    /* 380, up from 236. The history is 260 -> 200 -> 236, all of it tuned
+       against a pill parked beside the Evidence dock where width it did not
+       need read as distance from the dock. Nothing parks beside anything now —
+       the pill collapses centred where it stands — so the constraint that
+       argued the number down is gone, and the width buys back the thing it was
+       costing: 316px of window for a ~330px sentence, against 172 before. */
+    const ASK_PILL_W = 380;
     const ASK_GAP = 8;   // explicit: the dock's gap token no longer has a layout job there, so reading it back would couple to nothing
 
-    /* The running line, collapsed. 236px of pill less 48px of left padding (the
-       AI mark's gutter) and 16px of right leaves 172px against a ~330px
-       sentence, so the line has to travel for the whole thing to be readable. Distance comes from the text's own
+    /* The running line, collapsed. 380px of pill less 48px of left padding (the
+       AI mark's gutter) and 16px of right leaves 316px against a ~330px
+       sentence, so most lines now sit still and only the longest creep.
+       Distance comes from the text's own
        width and the duration from the distance, so the speed is constant
        whatever sentence is showing and a line that already fits parks on a
        no-op instead of jittering. */
@@ -6022,15 +6031,15 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
     const ASK_BAR_MQ = window.matchMedia('(max-width:640px)');
     /* The window the running line shuttles through, and it is two different
        numbers because the collapsed box is two different things.
-       Desktop keeps the constant and has to: the box's WIDTH morphs 620 -> 236
+       Desktop keeps the constant and has to: the box's WIDTH morphs 620 -> 380
        over 420ms, so measuring during the transition reads whichever frame it
        happens to be on.
        Mobile measures and has to: it collapses to a one-liner at the SAME full
        width, so the reading is stable, and the answer depends on the viewport
        rather than on any constant. Same 64px of gutters either way (48 left for
        the mark, 16 right). Against a 375 viewport this is 279 where the
-       constant says 172, which would have overstated the travel by 107px and
-       shuttled a line that very nearly fits. */
+       constant says 316, so the constant would now understate the travel and
+       park a line that does not fit. */
     const marqueeWindow = () => ASK_BAR_MQ.matches
       ? Math.max(0, askBox.clientWidth - 64)
       : PILL_INNER;

@@ -2277,12 +2277,8 @@
    the tooltip carrying what actually happens, because "copy" on a dashboard
    could plausibly mean half a dozen things. */
 /* .c-icon-btn: 32x32 at --radius-sm, transparent, no border. */
-#salesBoard .icb{display:inline-grid; place-items:center; width:32px; height:32px; flex:none;
-  border:none; background:transparent; border-radius:var(--r-sm);
-  color:var(--muted); cursor:pointer; padding:0;
-  transition:background .14s var(--ease), color .14s var(--ease),
-             border-color .14s var(--ease);}
-#salesBoard .icb:hover{background:var(--sunk); color:var(--ink);}
+/* .c-icon-btn */
+
 #salesBoard .icb:focus-visible{outline:2px solid var(--navy); outline-offset:2px;}
 #salesBoard .icb svg{display:block;}
 #salesBoard .icb .i-done{display:none;}
@@ -2653,9 +2649,8 @@
 #salesBoard .fdiv{width:1px; align-self:stretch; background:var(--rule); margin:0 4px;}
 #salesBoard .fnote{font-size:11px; color:var(--faint); margin-left:auto;}
 /* Ghost button in the filter bar: label2 at 700, --radius-sm. */
-#salesBoard .fclear{border:0; background:transparent; color:var(--navy-ink); font:inherit; font-size:14px;
-  font-weight:600; cursor:pointer; padding:0 var(--spacing-12); border-radius:var(--r-sm); min-height:32px;}
-#salesBoard .fclear:hover{background:var(--navy-bg);}
+/* .c-btn c-btn-ghost c-btn-sm — including its Neutral-9 text; the navy tint was local */
+
 /* Block, not flex. As a flex row the bold scope name and the full stop after
    it became separate items with a 10px gap between them, so every line read
    "Mandy Seah ." */
@@ -2921,7 +2916,7 @@
    says IS the bar; it was overriding the base rules back to 34px/12px.
    The 5px top/bottom padding went with the old min-height: a 32px box with
    0 --spacing-12 centres its label on its own. */
-#salesBoard .controls.compact .fpill, #salesBoard .controls.compact .fsel, #salesBoard .controls.compact .fclear{min-height:32px;
+#salesBoard .controls.compact .fpill, #salesBoard .controls.compact .fsel{min-height:32px;
   padding:0 var(--spacing-12); font-size:14px; font-weight:600;}
 #salesBoard .controls.compact .fscope{padding:var(--spacing-8) var(--spacing-12); font-size:14px;}
 /* The Segment placeholder stays. It is the running list of what NeoCRM still
@@ -2974,7 +2969,7 @@
   #salesBoard .controls.compact .switchwrap{margin-left:0;}
   #salesBoard .controls.compact .rangebar, #salesBoard .controls.compact .filters{box-shadow:none;}
   #salesBoard .controls.compact .fsel{font-size:11px; padding:4px 10px;}
-  #salesBoard .controls.compact .fclear{font-size:12px; padding:4px 10px;}
+  
   #salesBoard .controls.compact .fscope{padding:6px 10px; font-size:11px; white-space:nowrap;
     overflow:hidden; text-overflow:ellipsis; display:block;}
   /* Stacked cards are right when each carries three lines of explanation.
@@ -3403,7 +3398,7 @@
               <select class="fsel" data-ds="c-field input skin (stays native)" id="fPerson" aria-label="Filter by sales exec"></select>
               <select class="fsel" data-ds="c-field input skin (stays native)" id="fPlatform" aria-label="Filter by platform"></select>
               <select class="fsel" data-ds="c-field input skin (stays native)" id="fStatus" aria-label="Filter by status"></select>
-              <button class="fclear fade" data-ds="c-btn c-btn-ghost c-btn-sm" type="button" id="fClear">Clear slice</button>
+              <button class="fclear fade c-btn c-btn-ghost c-btn-sm" type="button" id="fClear">Clear slice</button>
             </div>
 
             <div class="collapse" id="fScope"><div class="fscope" id="fScopeIn"></div></div>
@@ -3479,7 +3474,7 @@
                 </span>
                 <span class="chip-div" aria-hidden="true"></span>
                 <span role="group" aria-label="Take this view away" class="chipset">
-                  <button class="icb" data-ds="c-icon-btn" id="copyBtn" type="button" aria-label="Copy the table"
+                  <button class="icb c-icon-btn" id="copyBtn" type="button" aria-label="Copy the table"
                     title="Copy the table as it stands, tab separated, ready to paste into a sheet or a deck.">
                     <svg class="i-copy" viewBox="0 0 16 16" width="15" height="15" fill="none"
                          stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
@@ -3493,7 +3488,7 @@
                       <path d="M2.75 8.5 6.25 12 13.25 4.5"/>
                     </svg>
                   </button>
-                  <button class="icb" data-ds="c-icon-btn" id="printBtn" type="button" aria-label="Print or save as PDF"
+                  <button class="icb c-icon-btn" id="printBtn" type="button" aria-label="Print or save as PDF"
                     title="Print or save as PDF. Controls drop out and every panel prints as it is on screen.">
                     <svg viewBox="0 0 16 16" width="15" height="15" fill="none" stroke="currentColor"
                          stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"

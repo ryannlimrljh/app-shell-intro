@@ -3081,12 +3081,17 @@
    sticky: element fill, pin glyph tucked in the corner, per-row tilt. */
 #salesBoard .ncell{display:flex; align-items:center; justify-content:flex-end; gap:8px; min-width:0;}
 #salesBoard .ncell.inline{display:inline-flex; margin-top:6px; vertical-align:middle; justify-content:flex-start;}
-#salesBoard .nadd{width:28px; height:28px; flex:none; display:inline-grid; place-items:center;
-  border:1px solid var(--rule); border-radius:8px; background:var(--surface); color:var(--muted);
-  font-size:14px; cursor:pointer; position:relative;
-  transition:background .14s var(--ease), color .14s var(--ease);}
-#salesBoard .nadd::after{content:''; position:absolute; inset:-8px;}   /* 44px hit area */
-#salesBoard .nadd:hover{background:var(--sunk); color:var(--ink);}
+/* The [+] is the DS icon button (.c-icon-btn: 32px, transparent,
+   radius-sm, Neutral-2 hover) rather than a bespoke bordered square, with
+   the glyph at the dropdown carets' 14px and Neutral-5. Only the hit area
+   and the focus ring are page-local — the DS class defines neither. */
+#salesBoard .nadd{flex:none; color:var(--muted); font-size:14px; position:relative;}
+#salesBoard .nadd::after{content:''; position:absolute; inset:-6px;}   /* 44px hit area */
+#salesBoard .nadd:hover{color:var(--ink);}
+/* one visible form per note: while its panel is out, the pin stands down.
+   visibility, not display — the rect survives for the close swing to land
+   on, and the cell does not reflow under the panel. */
+#salesBoard .npin.np-hidden{visibility:hidden;}
 /* the pinned sticky: element fill, the pin glyph sitting in its top-left
    corner in the element's dark ink, and a per-row tilt so the column
    reads organically rather than as a rank of chips */
@@ -8038,7 +8043,7 @@ function noteCell(id, name){
       'aria-label="Read the note on '+esc(name)+'" aria-haspopup="dialog">'+
       '<i class="ph-fill ph-push-pin" aria-hidden="true"></i></button>'
     : '')+
-    '<button class="nadd" type="button" data-note-add="'+esc(id)+'" data-name="'+esc(name)+'" '+
+    '<button class="nadd c-icon-btn" type="button" data-note-add="'+esc(id)+'" data-name="'+esc(name)+'" '+
     'title="'+(n ? 'Edit the note on ' : 'Add a note on ')+esc(name)+'" '+
     'aria-label="'+(n ? 'Edit the note on ' : 'Add a note on ')+esc(name)+'" '+
     'aria-haspopup="dialog" aria-expanded="false">'+
@@ -8143,6 +8148,12 @@ function openNotePanel(id, name, mode){
   pane.innerHTML = notePanelHTML();
   positionNotePanel(pane);
   var a = npAnchor(); if(a) a.setAttribute('aria-expanded', 'true');
+  // one visible form per note: any pin hidden by a previous open returns,
+  // then this note's pin stands down while its panel is out
+  [].forEach.call(document.querySelectorAll('.npin.np-hidden'), function(p){
+    p.classList.remove('np-hidden'); });
+  var ownPin = document.querySelector('[data-note-read="'+NP.id.replace(/"/g, '\\"')+'"]');
+  if(ownPin) ownPin.classList.add('np-hidden');
   if(!morph && !REDUCED && !document.hidden && a){
     setNoteSwingVars(pane, a);
     pane.classList.add('is-opening');         // swings out of the [+]
@@ -8152,6 +8163,9 @@ function openNotePanel(id, name, mode){
   else { pane.setAttribute('tabindex', '-1'); pane.focus(); }
 }
 function closeNotePanel(refocus){
+  // the pin returns as the panel folds back onto it
+  [].forEach.call(document.querySelectorAll('.npin.np-hidden'), function(p){
+    p.classList.remove('np-hidden'); });
   var pane = document.getElementById('notePanel');
   var a = npAnchor();
   if(a) a.setAttribute('aria-expanded', 'false');

@@ -160,10 +160,19 @@ export default async function handler(req, res) {
 
     if (req.method === 'DELETE') {
       const id = clean((req.query && req.query.id) || '', 64);
+      const who = clean((req.query && req.query.author) || '', 80);
       if (!id) return res.status(400).json({ error: 'id is required' });
-      // read the key first, so the reply can carry what is left on that row
-      const hit = await sql`SELECT board_key FROM notes WHERE id = ${id}`;
+      // read the key AND the author first: the reply carries what is left on
+      // that row, and only the creator is allowed to empty it
+      const hit = await sql`SELECT board_key, author FROM notes WHERE id = ${id}`;
       if (!hit.length) return res.status(200).json({ configured: true, key: null, notes: [] });
+      /* Only the creator may delete. Not the last editor — editing keeps the
+         original byline, so `author` stays the owner. The UI hides the bin
+         for everybody else; this is what makes the rule real. */
+      if (hit[0].author !== who) {
+        return res.status(403).json({ error: 'only the author may delete this note',
+                                      author: hit[0].author });
+      }
       const key = hit[0].board_key;
       await sql`DELETE FROM notes WHERE id = ${id}`;
       const rows = await sql`SELECT ${sql.unsafe(SHAPE)} FROM notes

@@ -8151,6 +8151,9 @@ function noteSet(id, idx, text){
   var was = idx >= 0 ? list[idx] : null;
   var rid = was ? was.i : null;                // the stable id the shared store addresses
   var fresh = false;
+  // only the creator may delete: the bin is hidden for everyone else, and
+  // this is what stops anything that bypasses the button
+  if(!v && was && was.a && was.a !== who) return;
   if(!v){
     if(idx >= 0) list.splice(idx, 1);          // an emptied note is a deletion
   } else if(was && was.a && was.a !== who){
@@ -8169,7 +8172,7 @@ function noteSet(id, idx, text){
   /* The local write already happened, so the pin appears before the round
      trip lands. The server's answer re-syncs the row after it. */
   if(NOTES_REMOTE){
-    if(!v){ if(rid) noteRemoteDelete(rid); }
+    if(!v){ if(rid) noteRemoteDelete(rid, who); }
     else noteRemotePut(k, v, who, fresh ? null : rid, fresh ? rid : null);
   }
 }
@@ -8245,8 +8248,10 @@ function noteRemoteResolve(key, rid, on, who){
   }).then(function(r){ return r.json(); })
     .then(function(j){ if(j && j.notes) adoptRow(j.key, j.notes); }, function(){});
 }
-function noteRemoteDelete(rid){
-  return fetch('/api/notes?id=' + encodeURIComponent(rid), {method:'DELETE'})
+function noteRemoteDelete(rid, who){
+  // the server checks this against the row's author and 403s on a mismatch
+  return fetch('/api/notes?id=' + encodeURIComponent(rid) +
+               '&author=' + encodeURIComponent(who || ''), {method:'DELETE'})
     .then(function(r){ return r.json(); })
     .then(function(j){ if(j && j.notes !== undefined) adoptRow(j.key, j.notes); },
           function(){});
@@ -8386,6 +8391,10 @@ function notePanelHTML(){
   var list = notesOf(NP.id);
   var n = NP.noteIdx >= 0 ? list[NP.noteIdx] : null;
   var who = sessionUser(), keeps = n && n.a && n.a !== who;
+  /* Only the creator may delete. Not the last editor: editing somebody
+     else's note keeps their byline and records you separately, so `a`
+     stays the owner and an edit never hands over the right to destroy. */
+  var mine = !n || !n.a || n.a === who;
   var when = whenWord(), top, body, act;
   if(NP.mode === 'tidy'){
     // the stack, laid out straight: tidy is the point, so the cards drop
@@ -8420,7 +8429,7 @@ function notePanelHTML(){
       (n.e ? ' \u00b7 edited by <b>'+esc(n.e)+'</b>, '+esc(n.ed) : '')+'</div>'+
       (n.r ? '<div class="np-res"><i class="ph-fill ph-check-circle" aria-hidden="true"></i>'+
         'Resolved by <b>'+esc(n.r)+'</b>'+(n.rd ? ' \u00b7 '+esc(n.rd) : '')+'</div>' : '');
-    act = '<button class="np-del c-icon-btn" type="button" data-note-del="'+esc(NP.id)+'" aria-label="Delete this note" title="Delete this note"><i class="ph ph-trash" aria-hidden="true"></i></button>'+
+    act = (mine ? '<button class="np-del c-icon-btn" type="button" data-note-del="'+esc(NP.id)+'" aria-label="Delete this note" title="Delete this note"><i class="ph ph-trash" aria-hidden="true"></i></button>' : '')+
       (n.r
         ? '<button class="chip np-cancel c-chip c-chip-filter" type="button" data-note-reopen="1">Reopen</button>'
         : '<button class="chip np-cancel c-chip c-chip-filter" type="button" data-note-resolve="1">Resolve</button>')+
@@ -8438,7 +8447,7 @@ function notePanelHTML(){
         : 'Why is this number what it is, and what happens next?')+'">'+
       esc(n ? n.t : '')+'</textarea>';
     // Delete leads and hangs left; Cancel and Save range right, as drawn
-    act = (n ? '<button class="np-del c-icon-btn" type="button" data-note-del="'+esc(NP.id)+'" aria-label="Delete this note" title="Delete this note"><i class="ph ph-trash" aria-hidden="true"></i></button>' : '')+
+    act = (n && mine ? '<button class="np-del c-icon-btn" type="button" data-note-del="'+esc(NP.id)+'" aria-label="Delete this note" title="Delete this note"><i class="ph ph-trash" aria-hidden="true"></i></button>' : '')+
       '<button class="chip np-cancel c-chip c-chip-filter" type="button" data-note-cancel="1">Cancel</button>'+
       '<button class="chip go c-chip c-chip-filter" type="button" data-note-save="'+esc(NP.id)+'">Save</button>';
   }

@@ -3278,8 +3278,13 @@
 #salesBoard .np-act .chip.go{background:var(--obsidian); border-color:var(--obsidian); color:#fff;}
 #salesBoard .np-act .np-cancel{background:var(--color-neutral-1); border-color:var(--color-neutral-1);
   color:var(--color-neutral-5);}
-#salesBoard .np-act .chip.del{background:transparent; color:var(--np-fg);
-  border:1px solid color-mix(in srgb, var(--np-fg) 55%, transparent); margin-right:auto;}
+/* Delete is the DS bin (ph-trash, Regular — the DS's named delete glyph,
+   never Tier 2) on the same .c-icon-btn as the [+]. It keeps the row's
+   left seat. fg rather than destructive red: red on the saturated Fire
+   and Wood grounds is near-invisible, and the bin shape says it. */
+#salesBoard .np-del{margin-right:auto; color:var(--np-fg); font-size:16px;}
+#salesBoard .np-del:hover{background:color-mix(in srgb, var(--np-fg) 16%, transparent);}
+#salesBoard .np-del:focus-visible{outline:2px solid var(--np-fg); outline-offset:2px;}
 @media (prefers-reduced-motion: reduce){
   #salesBoard .npanel.is-opening, #salesBoard .npanel.is-closing{animation:none;}
   #salesBoard .npin{transition:none;}
@@ -8415,7 +8420,7 @@ function notePanelHTML(){
       (n.e ? ' \u00b7 edited by <b>'+esc(n.e)+'</b>, '+esc(n.ed) : '')+'</div>'+
       (n.r ? '<div class="np-res"><i class="ph-fill ph-check-circle" aria-hidden="true"></i>'+
         'Resolved by <b>'+esc(n.r)+'</b>'+(n.rd ? ' \u00b7 '+esc(n.rd) : '')+'</div>' : '');
-    act = '<button class="chip del c-chip c-chip-filter" type="button" data-note-del="'+esc(NP.id)+'">Delete</button>'+
+    act = '<button class="np-del c-icon-btn" type="button" data-note-del="'+esc(NP.id)+'" aria-label="Delete this note" title="Delete this note"><i class="ph ph-trash" aria-hidden="true"></i></button>'+
       (n.r
         ? '<button class="chip np-cancel c-chip c-chip-filter" type="button" data-note-reopen="1">Reopen</button>'
         : '<button class="chip np-cancel c-chip c-chip-filter" type="button" data-note-resolve="1">Resolve</button>')+
@@ -8433,7 +8438,7 @@ function notePanelHTML(){
         : 'Why is this number what it is, and what happens next?')+'">'+
       esc(n ? n.t : '')+'</textarea>';
     // Delete leads and hangs left; Cancel and Save range right, as drawn
-    act = (n ? '<button class="chip del c-chip c-chip-filter" type="button" data-note-del="'+esc(NP.id)+'">Delete</button>' : '')+
+    act = (n ? '<button class="np-del c-icon-btn" type="button" data-note-del="'+esc(NP.id)+'" aria-label="Delete this note" title="Delete this note"><i class="ph ph-trash" aria-hidden="true"></i></button>' : '')+
       '<button class="chip np-cancel c-chip c-chip-filter" type="button" data-note-cancel="1">Cancel</button>'+
       '<button class="chip go c-chip c-chip-filter" type="button" data-note-save="'+esc(NP.id)+'">Save</button>';
   }

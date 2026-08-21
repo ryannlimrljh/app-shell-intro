@@ -2541,7 +2541,7 @@
 #salesBoard .lb-head, #salesBoard .lb-row{display:grid; align-items:center;
   /* The bar gave up width (2.6fr -> 1.9fr) to make room for the Add Note
      column on the right, by the user's call. */
-  grid-template-columns:26px minmax(126px,1.1fr) minmax(190px,1.9fr) 66px 92px 88px 62px 86px 96px;
+  grid-template-columns:26px minmax(126px,1.1fr) minmax(190px,1.9fr) 66px 92px 88px 62px 86px 120px;
   gap:10px; padding:0 16px;}
 /* .c-table-embedded's header carries no fill. This is a div grid rather than
    a <thead>, so the thead th rule does not reach it, but it is the same role. */
@@ -2683,7 +2683,7 @@
 /* fixed pixels against the others' percentages: table-layout:fixed
    assigns these 96px first and scales the percentage columns into the
    remainder, keeping their ratios — same column the leaderboard carries */
-#salesBoard .deals th.ncol{width:96px; text-align:right;}
+#salesBoard .deals th.ncol{width:120px; text-align:right;}
 #salesBoard tbody tr.total td{background:var(--sunk); font-weight:800; border-top:2px solid var(--ink);}
 #salesBoard .adv{font-weight:800;} #salesBoard .camp{color:var(--muted); font-size:var(--text-caption-size); display:block; margin-top:1px;}
 /* .c-tag: caption at weight 700, a fixed 24px height and 10px of side
@@ -3091,6 +3091,8 @@
 #salesBoard .nadd{flex:none; color:var(--muted); font-size:14px; position:relative;}
 #salesBoard .nadd::after{content:''; position:absolute; inset:-6px;}   /* 44px hit area */
 #salesBoard .nadd:hover{color:var(--ink);}
+#salesBoard .nadd:disabled{opacity:.35; cursor:default; pointer-events:none;}
+#salesBoard .np-act .chip:disabled{opacity:.45; cursor:default; pointer-events:none;}
 /* one visible form per note: while its panel is out, the pin stands down.
    visibility, not display — the rect survives for the close swing to land
    on, and the cell does not reflow under the panel. */
@@ -3387,7 +3389,7 @@
    picker, so hiding a column it could never bring back would just lose it. */
 #salesBoard[data-ly="off"] .lb-head .c-ly, #salesBoard[data-ly="off"] .lb-row .c-ly, #salesBoard[data-ly="off"] .p-ly{display:none;}
 #salesBoard[data-ly="off"] .lb-head, #salesBoard[data-ly="off"] .lb-row{
-  grid-template-columns:26px minmax(126px,1.1fr) minmax(190px,1.9fr) 66px 92px 88px 86px 96px;}
+  grid-template-columns:26px minmax(126px,1.1fr) minmax(190px,1.9fr) 66px 92px 88px 86px 120px;}
 
 /* ── Reveal ────────────────────────────────────────────────────
    0fr to 1fr on a grid row animates to the content's own height without
@@ -3635,7 +3637,7 @@
   #salesBoard .months{grid-template-columns:repeat(3,1fr);}
   #salesBoard .ipgrid{grid-template-columns:1fr;}
   #salesBoard .notes{grid-template-columns:1fr 1fr;}
-  #salesBoard .lb-head, #salesBoard .lb-row{grid-template-columns:24px minmax(110px,1fr) minmax(150px,1.7fr) 58px 84px 78px 56px 84px;}
+  #salesBoard .lb-head, #salesBoard .lb-row{grid-template-columns:24px minmax(110px,1fr) minmax(150px,1.7fr) 58px 84px 78px 56px 104px;}
   #salesBoard .lb-head .c-ly, #salesBoard .lb-row .c-ly{display:none;}
 }
 @media (max-width:860px){
@@ -8084,6 +8086,7 @@ function noteSet(id, idx, text){
   } else if(was){
     list[idx] = {t:v, d:today(), a:who, c:was.c};
   } else {
+    if(list.length >= NOTE_CAP) return;       // the buttons disable at the cap; this backstops them
     // only a genuinely new note advances the colour cycle
     list.push({t:v, d:today(), a:who, c:nextNoteEl()});
   }
@@ -8115,8 +8118,9 @@ function miniRot(id, j){
   for(var i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0;
   return [-7, 6, -4][j % 3] + (Math.abs(h) % 5) - 2;
 }
+var NOTE_CAP = 4;
 function noteCell(id, name){
-  var ns = notesOf(id), pins = '';
+  var ns = notesOf(id), pins = '', full = ns.length >= NOTE_CAP;
   if(ns.length === 1){
     pins = '<button class="npin el-'+ns[0].c+'" type="button" '+
       'data-note-read="'+esc(id)+'" data-name="'+esc(name)+'" '+
@@ -8130,17 +8134,19 @@ function noteCell(id, name){
       'data-name="'+esc(name)+'" title="'+ns.length+' notes" '+
       'aria-label="'+ns.length+' notes on '+esc(name)+', open the stack" '+
       'aria-haspopup="dialog" aria-expanded="false">'+
-      ns.slice(-3).map(function(nn, j){
+      ns.slice(0, 4).map(function(nn, j){
         return '<span class="npin-mini el-'+nn.c+'" style="--mini-rot:'+miniRot(id, j)+'deg; '+
-          '--mini-dy:'+([2, -2, 1][j])+'px" aria-hidden="true">'+
+          '--mini-dy:'+([2, -2, 1, -1][j])+'px" aria-hidden="true">'+
           '<i class="ph-fill ph-push-pin"></i></span>';
       }).join('')+
-      (ns.length > 3 ? '<span class="npin-count" aria-hidden="true">'+ns.length+'</span>' : '')+
+      (ns.length > 4 ? '<span class="npin-count" aria-hidden="true">'+ns.length+'</span>' : '')+
       '</button>';
   }
   return pins +
     '<button class="nadd c-icon-btn" type="button" data-note-add="'+esc(id)+'" data-name="'+esc(name)+'" '+
-    'title="Add a note on '+esc(name)+'" aria-label="Add a note on '+esc(name)+'" '+
+    (full ? 'disabled aria-disabled="true" title="Four notes is the cap on a row" '+
+            'aria-label="Four notes is the cap on '+esc(name)+'" '
+          : 'title="Add a note on '+esc(name)+'" aria-label="Add a note on '+esc(name)+'" ')+
     'aria-haspopup="dialog" aria-expanded="false">'+
     '<i class="ph ph-plus" aria-hidden="true"></i></button>';
 }
@@ -8180,8 +8186,11 @@ function notePanelHTML(){
           '</button>';
       }).join('')+
       '</div>';
-    act = '<button class="chip go c-chip c-chip-filter" type="button" '+
-      'data-note-add="'+esc(NP.id)+'" data-name="'+esc(NP.name)+'">Add a note</button>';
+    act = list.length >= NOTE_CAP
+      ? '<button class="chip go c-chip c-chip-filter" type="button" disabled '+
+        'aria-disabled="true" title="Four notes is the cap on a row">Add a note</button>'
+      : '<button class="chip go c-chip c-chip-filter" type="button" '+
+        'data-note-add="'+esc(NP.id)+'" data-name="'+esc(NP.name)+'">Add a note</button>';
   } else if(NP.mode === 'read' && n){
     top = '<span class="np-eyebrow">Note by</span>'+
       '<i class="ava" aria-hidden="true">'+esc(initials(n.a || '?'))+'</i>'+

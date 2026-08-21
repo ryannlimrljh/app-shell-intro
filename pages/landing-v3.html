@@ -3098,11 +3098,12 @@
 /* the pinned sticky: element fill, the pin glyph sitting in its top-left
    corner in the element's dark ink, and a per-row tilt so the column
    reads organically rather than as a rank of chips */
-#salesBoard .npin{width:40px; height:46px; flex:none; border:0; border-radius:10px;
+#salesBoard .npin{width:40px; height:46px; flex:none; display:inline-grid; place-items:center;
+  border:0; border-radius:10px;
   background:var(--np-hue); color:var(--np-ink); cursor:pointer; position:relative;
   box-shadow:var(--shadow-2); transform:rotate(var(--pin-rot, -4deg));
   transition:transform .18s var(--ease), box-shadow .18s var(--ease);}
-#salesBoard .npin i{position:absolute; top:4px; left:5px; font-size:14px;}
+#salesBoard .npin i{font-size:14px;}
 #salesBoard .npin::after{content:''; position:absolute; inset:-4px;}
 #salesBoard .npin:hover, #salesBoard .npin:focus-visible{transform:rotate(0deg) scale(1.05); box-shadow:var(--shadow-3);}
 #salesBoard .nadd:focus-visible, #salesBoard .npin:focus-visible{outline:2px solid var(--navy); outline-offset:2px;}

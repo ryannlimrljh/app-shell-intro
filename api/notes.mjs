@@ -39,6 +39,7 @@ const MAX_KEY = 200;
    server is the single authority on it, and deleting a note never
    repaints the ones around it, because seq values do not shift. */
 const SHAPE = `id, board_key, body, author, created_at, edited_by, edited_at,
+               resolved_by, resolved_at,
                ((seq - 1) % 5)::int AS colour`;
 
 const row = (r) => ({
@@ -49,6 +50,8 @@ const row = (r) => ({
   ts: r.created_at,
   e: r.edited_by || undefined,
   ets: r.edited_at || undefined,
+  r: r.resolved_by || undefined,
+  rts: r.resolved_at || undefined,
 });
 
 /* Bootstrapped once per warm lambda rather than per request: the DDL is
@@ -69,6 +72,10 @@ function client() {
         edited_at  TIMESTAMPTZ
       )`
       .then(() => sql`CREATE INDEX IF NOT EXISTS notes_board_key_idx ON notes (board_key)`)
+      // the live table predates the resolve feature; these are no-ops after
+      // the first call and the migration for a table created without them
+      .then(() => sql`ALTER TABLE notes ADD COLUMN IF NOT EXISTS resolved_by TEXT`)
+      .then(() => sql`ALTER TABLE notes ADD COLUMN IF NOT EXISTS resolved_at TIMESTAMPTZ`)
       .catch((e) => { bootstrapped = null; throw e; });   // let a cold-start failure retry
   }
   return { sql, ready: bootstrapped };
@@ -101,6 +108,25 @@ export default async function handler(req, res) {
       const text = clean(b.text, MAX_LEN);
       const who = clean(b.author, 80) || 'Unsigned';
       const key = clean(b.key, MAX_KEY);
+
+      /* Resolve / reopen: its own small write, no text involved. The
+         resolver is whoever the page says is signed in — same trust
+         model as authorship, and the same place a real login plugs in. */
+      if (b.id && b.resolve !== undefined) {
+        const id = clean(b.id, 64);
+        const hit = await sql`SELECT board_key FROM notes WHERE id = ${id}`;
+        if (!hit.length) return res.status(404).json({ error: 'no such note' });
+        if (b.resolve) {
+          await sql`UPDATE notes SET resolved_by = ${who}, resolved_at = now() WHERE id = ${id}`;
+        } else {
+          await sql`UPDATE notes SET resolved_by = NULL, resolved_at = NULL WHERE id = ${id}`;
+        }
+        const bkey = hit[0].board_key;
+        const rows = await sql`SELECT ${sql.unsafe(SHAPE)} FROM notes
+                               WHERE board_key = ${bkey} ORDER BY seq`;
+        return res.status(200).json({ configured: true, key: bkey, notes: rows.map(row) });
+      }
+
       if (!key) return res.status(400).json({ error: 'key is required' });
       if (!text) return res.status(400).json({ error: 'text is required' });
 

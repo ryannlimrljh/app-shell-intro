@@ -3171,6 +3171,38 @@
   font-size:var(--text-label3-size); font-weight:700; opacity:.85;}
 #salesBoard .np-card-m i{font-size:11px;}
 
+/* resolved: the pin becomes a check at reduced weight, the text strikes.
+   State never rides on colour alone — the glyph changes and the copy says
+   who resolved it. */
+#salesBoard .npin.is-resolved, #salesBoard .npin-mini.is-resolved{opacity:.55; box-shadow:none;}
+#salesBoard .np-card.is-resolved{opacity:.62;}
+#salesBoard .np-card.is-resolved .np-card-t{text-decoration:line-through;}
+#salesBoard .np-res{display:flex; align-items:center; gap:6px; margin-top:8px;
+  font-size:var(--text-label3-size); font-weight:800; color:var(--np-fg);}
+#salesBoard .np-res i{font-size:13px;}
+
+/* the hover peek: a quiet neutral card, never interactive, tucked on the
+   board's z-ladder under the sticky controls like the panel */
+#salesBoard .npeek{position:fixed; z-index:3; pointer-events:none; opacity:0;
+  background:var(--surface); border:1px solid var(--rule); border-radius:12px;
+  box-shadow:var(--shadow-3); padding:8px; display:flex; flex-direction:column; gap:6px;
+  transition:opacity .15s var(--ease);}
+#salesBoard .npeek.on{opacity:1;}
+#salesBoard .npk-row{display:flex; gap:8px; align-items:flex-start; min-width:0;}
+#salesBoard .npk-sw{width:22px; height:26px; flex:none; border-radius:6px; display:inline-grid;
+  place-items:center; background:var(--np-hue); color:var(--np-ink); font-size:11px;}
+#salesBoard .npk-body{min-width:0;}
+#salesBoard .npk-t{display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;
+  overflow:hidden; font-size:var(--text-caption-size); font-weight:600; color:var(--ink);
+  line-height:1.4; overflow-wrap:break-word;}
+#salesBoard .npk-m{display:block; font-size:var(--text-label3-size); font-weight:700;
+  color:var(--faint); margin-top:1px;}
+#salesBoard .npk-row.is-resolved .npk-t{color:var(--muted); text-decoration:line-through;}
+#salesBoard .npk-row.is-resolved .npk-sw{opacity:.55;}
+@media (prefers-reduced-motion: reduce){
+  #salesBoard .npeek{transition:none;}
+}
+
 /* ── The panel, and the hero modal's swing at note scale ──────
    The same parameterized FLIP the card modal uses: translate+scale from
    the anchor's rect about a top-left origin, with the mid-flight rotateY
@@ -7925,6 +7957,14 @@ document.addEventListener('click', function(e){
     openNotePanel(nEdit.dataset.noteEdit, NP.name, 'edit', NP.noteIdx);
     return;
   }
+  var nRes = e.target.closest('[data-note-resolve],[data-note-reopen]');
+  if(nRes){
+    e.stopPropagation();
+    noteResolve(NP.id, NP.noteIdx, nRes.hasAttribute('data-note-resolve'));
+    redrawNotes();
+    openNotePanel(NP.id, NP.name, 'read', NP.noteIdx);   // morph: shows the new state
+    return;
+  }
   var nSave = e.target.closest('[data-note-save]');
   if(nSave){
     e.stopPropagation();
@@ -8109,9 +8149,10 @@ function noteSet(id, idx, text){
   if(!v){
     if(idx >= 0) list.splice(idx, 1);          // an emptied note is a deletion
   } else if(was && was.a && was.a !== who){
-    list[idx] = {i:rid, t:v, d:was.d, a:was.a, e:who, ed:today(), c:was.c};
+    // an edit never silently reopens a resolved note
+    list[idx] = {i:rid, t:v, d:was.d, a:was.a, e:who, ed:today(), c:was.c, r:was.r, rd:was.rd};
   } else if(was){
-    list[idx] = {i:rid, t:v, d:today(), a:who, c:was.c};
+    list[idx] = {i:rid, t:v, d:today(), a:who, c:was.c, r:was.r, rd:was.rd};
   } else {
     if(list.length >= NOTE_CAP) return;       // the buttons disable at the cap; this backstops them
     // only a genuinely new note advances the colour cycle
@@ -8143,6 +8184,7 @@ function noteFmt(ts){
 function shapeRemote(n){
   var o = {i:n.i, t:n.t, a:n.a, c:n.c, d:noteFmt(n.ts)};
   if(n.e){ o.e = n.e; o.ed = noteFmt(n.ets); }
+  if(n.r){ o.r = n.r; o.rd = noteFmt(n.rts); }
   return o;
 }
 /* One row, replaced with what the server holds — the reply to every write. */
@@ -8177,6 +8219,26 @@ function noteRemotePut(key, text, who, id, newId){
     if(x.body && x.body.notes) adoptRow(x.body.key, x.body.notes);
     else if(x.status === 409) noteRefresh();
   }, function(){});                         // offline: the local write stands
+}
+/* Resolving is its own small write: the resolver is sessionUser(), the
+   same source that signs notes — the seat lock, else the signed-in
+   account row — so a real login flows straight through here. */
+function noteResolve(id, idx, on){
+  var k = noteKeyOf(id), list = notesOf(id).slice(), n = list[idx];
+  if(!n) return;
+  var who = sessionUser();
+  if(on){ n.r = who; n.rd = today(); }
+  else { delete n.r; delete n.rd; }
+  NOTES[k] = list;
+  saveLocal();
+  if(NOTES_REMOTE && n.i) noteRemoteResolve(k, n.i, on, who);
+}
+function noteRemoteResolve(key, rid, on, who){
+  return fetch('/api/notes', {
+    method:'PUT', headers:{'content-type':'application/json'},
+    body: JSON.stringify({key:key, id:rid, resolve:on, author:who})
+  }).then(function(r){ return r.json(); })
+    .then(function(j){ if(j && j.notes) adoptRow(j.key, j.notes); }, function(){});
 }
 function noteRemoteDelete(rid){
   return fetch('/api/notes?id=' + encodeURIComponent(rid), {method:'DELETE'})
@@ -8269,22 +8331,26 @@ var NOTE_CAP = 4;
 function noteCell(id, name){
   var ns = notesOf(id), pins = '', full = ns.length >= NOTE_CAP;
   if(ns.length === 1){
-    pins = '<button class="npin el-'+ns[0].c+'" type="button" '+
+    // no title attribute: the hover peek shows the text, and a native
+    // tooltip on top of it would say everything twice
+    pins = '<button class="npin el-'+ns[0].c+(ns[0].r ? ' is-resolved' : '')+'" type="button" '+
       'data-note-read="'+esc(id)+'" data-name="'+esc(name)+'" '+
-      'style="--pin-rot:'+pinRot(id)+'deg" title="'+esc(ns[0].t)+'" '+
-      'aria-label="Read the note on '+esc(name)+'" aria-haspopup="dialog">'+
-      '<i class="ph-fill ph-push-pin" aria-hidden="true"></i></button>';
+      'style="--pin-rot:'+pinRot(id)+'deg" '+
+      'aria-label="Read the '+(ns[0].r ? 'resolved ' : '')+'note on '+esc(name)+'" aria-haspopup="dialog">'+
+      '<i class="ph-fill '+(ns[0].r ? 'ph-check' : 'ph-push-pin')+'" aria-hidden="true"></i></button>';
   } else if(ns.length > 1){
     // several notes stack organically — the hero cards' mobile stack at
     // pin scale. One button; toggling it opens the tidy view.
+    var done = ns.filter(function(nn){ return nn.r; }).length;
     pins = '<button class="npin-stack" type="button" data-note-stack="'+esc(id)+'" '+
-      'data-name="'+esc(name)+'" title="'+ns.length+' notes" '+
-      'aria-label="'+ns.length+' notes on '+esc(name)+', open the stack" '+
+      'data-name="'+esc(name)+'" '+
+      'aria-label="'+ns.length+' notes on '+esc(name)+
+      (done ? ', '+done+' resolved' : '')+', open the stack" '+
       'aria-haspopup="dialog" aria-expanded="false">'+
       ns.slice(0, 4).map(function(nn, j){
-        return '<span class="npin-mini el-'+nn.c+'" style="--mini-rot:'+miniRot(id, j)+'deg; '+
+        return '<span class="npin-mini el-'+nn.c+(nn.r ? ' is-resolved' : '')+'" style="--mini-rot:'+miniRot(id, j)+'deg; '+
           '--mini-dy:'+([2, -2, 1, -1][j])+'px" aria-hidden="true">'+
-          '<i class="ph-fill ph-push-pin"></i></span>';
+          '<i class="ph-fill '+(nn.r ? 'ph-check' : 'ph-push-pin')+'"></i></span>';
       }).join('')+
       (ns.length > 4 ? '<span class="npin-count" aria-hidden="true">'+ns.length+'</span>' : '')+
       '</button>';
@@ -8324,12 +8390,12 @@ function notePanelHTML(){
       '<span class="np-title">'+esc(NP.name)+'</span>'+
       '<div class="np-grid" role="list">'+
       list.map(function(nn, k){
-        return '<button type="button" class="np-card el-'+nn.c+'" role="listitem" '+
-          'data-note-idx="'+k+'" aria-label="Note by '+esc(nn.a || 'Unsigned')+', '+
+        return '<button type="button" class="np-card el-'+nn.c+(nn.r ? ' is-resolved' : '')+'" role="listitem" '+
+          'data-note-idx="'+k+'" aria-label="'+(nn.r ? 'Resolved note' : 'Note')+' by '+esc(nn.a || 'Unsigned')+', '+
           esc(nn.d)+'. Open it">'+
           '<span class="np-card-t">'+esc(nn.t)+'</span>'+
-          '<span class="np-card-m"><i class="ph-fill ph-push-pin" aria-hidden="true"></i>'+
-          esc(nn.a || 'Unsigned')+' \u00b7 '+esc(nn.d)+'</span>'+
+          '<span class="np-card-m"><i class="ph-fill '+(nn.r ? 'ph-check-circle' : 'ph-push-pin')+'" aria-hidden="true"></i>'+
+          (nn.r ? 'Resolved \u00b7 '+esc(nn.r) : esc(nn.a || 'Unsigned')+' \u00b7 '+esc(nn.d))+'</span>'+
           '</button>';
       }).join('')+
       '</div>';
@@ -8346,8 +8412,13 @@ function notePanelHTML(){
       '<span class="np-title">'+esc(NP.name)+'</span>'+
       '<p class="np-text">'+esc(n.t)+'</p>'+
       '<div class="np-by">'+esc(n.d)+
-      (n.e ? ' \u00b7 edited by <b>'+esc(n.e)+'</b>, '+esc(n.ed) : '')+'</div>';
+      (n.e ? ' \u00b7 edited by <b>'+esc(n.e)+'</b>, '+esc(n.ed) : '')+'</div>'+
+      (n.r ? '<div class="np-res"><i class="ph-fill ph-check-circle" aria-hidden="true"></i>'+
+        'Resolved by <b>'+esc(n.r)+'</b>'+(n.rd ? ' \u00b7 '+esc(n.rd) : '')+'</div>' : '');
     act = '<button class="chip del c-chip c-chip-filter" type="button" data-note-del="'+esc(NP.id)+'">Delete</button>'+
+      (n.r
+        ? '<button class="chip np-cancel c-chip c-chip-filter" type="button" data-note-reopen="1">Reopen</button>'
+        : '<button class="chip np-cancel c-chip c-chip-filter" type="button" data-note-resolve="1">Resolve</button>')+
       '<button class="chip go c-chip c-chip-filter" type="button" data-note-edit="'+esc(NP.id)+'">Edit</button>';
   } else {
     top = '<span class="np-eyebrow">'+(keeps ? 'Editing as' : 'Signing in as')+'</span>'+
@@ -8403,6 +8474,7 @@ function setNoteSwingVars(pane, a){
   pane.style.setProperty('--nsw-dir', (from.left + from.width/2) < window.innerWidth/2 ? '1' : '-1');
 }
 function openNotePanel(id, name, mode, idx){
+  hideNotePeek();                              // the panel replaces the glance
   NP.id = id; NP.name = name; NP.mode = mode;
   NP.noteIdx = (typeof idx === 'number') ? idx : -1;
   var pane = document.getElementById('notePanel');
@@ -8458,9 +8530,71 @@ function closeNotePanel(refocus){
   }
   if(refocus && a) a.focus();
 }
+/* ── The hover peek ────────────────────────────────────────────
+   A glance at a row's notes without opening anything: hover or focus a
+   pin or a stack and every note on the row shows as a swatch and two
+   clamped lines, author and date under, resolver when resolved. It is
+   pointer-events:none and aria-hidden — the pins keep their labels and
+   the panel stays the real reading surface. */
+function notePeekHTML(id){
+  return notesOf(id).map(function(nn){
+    return '<div class="npk-row'+(nn.r ? ' is-resolved' : '')+'">'+
+      '<span class="npk-sw el-'+nn.c+'"><i class="ph-fill '+(nn.r ? 'ph-check' : 'ph-push-pin')+'"></i></span>'+
+      '<span class="npk-body"><span class="npk-t">'+esc(nn.t)+'</span>'+
+      '<span class="npk-m">'+esc(nn.a || 'Unsigned')+' \u00b7 '+esc(nn.d)+
+      (nn.r ? ' \u00b7 resolved by '+esc(nn.r) : '')+'</span></span>'+
+      '</div>';
+  }).join('');
+}
+function showNotePeek(btn, id){
+  if(!notesOf(id).length) return;
+  var pk = document.getElementById('notePeek');
+  if(!pk){
+    pk = document.createElement('div');
+    pk.id = 'notePeek';
+    pk.setAttribute('aria-hidden', 'true');
+    document.getElementById('salesBoard').appendChild(pk);
+  }
+  pk.className = 'npeek';
+  pk.innerHTML = notePeekHTML(id);
+  var r = btn.getBoundingClientRect();
+  var w = Math.min(280, window.innerWidth - 24);
+  pk.style.width = w + 'px';
+  pk.style.left = Math.min(Math.max(12, r.right - w), window.innerWidth - w - 12) + 'px';
+  pk.style.top = '0px';                        // measure first, then place
+  var h = pk.offsetHeight;
+  var top = r.top - h - 8;
+  if(top < 12) top = Math.min(r.bottom + 8, window.innerHeight - h - 12);
+  pk.style.top = top + 'px';
+  pk.classList.add('on');
+}
+function hideNotePeek(){
+  var pk = document.getElementById('notePeek');
+  if(pk) pk.classList.remove('on');
+}
+document.addEventListener('mouseover', function(e){
+  var b = e.target.closest('[data-note-read],[data-note-stack]');
+  if(b && !b.classList.contains('np-hidden'))
+    showNotePeek(b, b.dataset.noteRead || b.dataset.noteStack);
+});
+document.addEventListener('mouseout', function(e){
+  if(e.target.closest('[data-note-read],[data-note-stack]')) hideNotePeek();
+});
+// keyboard users get the same glance the pointer does
+document.addEventListener('focusin', function(e){
+  var b = e.target.closest('[data-note-read],[data-note-stack]');
+  if(b && !b.classList.contains('np-hidden'))
+    showNotePeek(b, b.dataset.noteRead || b.dataset.noteStack);
+});
+document.addEventListener('focusout', function(e){
+  if(e.target.closest('[data-note-read],[data-note-stack]')) hideNotePeek();
+});
+
 /* The panel is fixed, so the page scrolling under it must carry it along.
-   capture:true catches the shell's inner scrollport, not just the window. */
+   capture:true catches the shell's inner scrollport, not just the window.
+   The peek just hides: a tooltip that chases the scroll is noise. */
 window.addEventListener('scroll', function(){
+  hideNotePeek();
   var p = document.getElementById('notePanel');
   if(p && NP.id) positionNotePanel(p);
 }, true);

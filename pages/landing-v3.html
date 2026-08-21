@@ -2249,10 +2249,17 @@
      on white while it is there. --rail is gone; nothing referenced it. */
   --rule:var(--color-neutral-3); --sunk:var(--color-neutral-2); --faint:var(--color-neutral-5);
   /* DS Progress Bar (c-progress) palette: the Neutral-3 track, the
-     Purple/Turquoise data-viz reserve for non-department stacked segments,
-     and the Neutral-4 overflow grey for segments past that reserve. */
+     data-viz reserve for non-department stacked segments, and the
+     Neutral-4 overflow grey for segments past that reserve.
+     The reserve's first colour is Navy Blue by the user's call, replacing
+     the Purple that held the slot: every pipeline segment on the board is
+     now #1473E6 and the swatch legends follow. Navy is Water's department
+     colour, so the DS reads it as "Water-owned data" rather than as
+     progress — that trade is deliberate, not an oversight. There is no
+     --blue alias because --navy above already names this token; a second
+     name for one colour is how a palette starts drifting. */
   --bar-track:var(--color-neutral-3); --bar-overflow:var(--color-neutral-4);
-  --purple:var(--color-purple); --turquoise:var(--color-turquoise);
+  --turquoise:var(--color-turquoise);
 
   /* saturated hues re-valued for use as TEXT (>=4.5:1 on surface) */
   --green-ink:#00734D; --amber-ink:#8A5A00; --red-ink:#C4101F; --navy-ink:#0B4FA8;
@@ -2263,17 +2270,17 @@
   --navy-bg:var(--color-water-bg);  --red-bg:#FFE9EB;
 
   /* Sequential ramp for the heatmap: one hue, light to dark, monotonic in
-     lightness, same construction the DS's chart guidance prescribes (a bg
-     tint up to the full-strength colour). Rebuilt on the data-viz Purple
-     when the bars dropped Navy: per-cent-to-target is progress data, not
-     Water-owned, so the ramp derives from #9F56FF like the rest of the
-     board's non-department series. One deviation from the old construction,
-     for contrast: white on full-strength #9F56FF is 4.05:1, an AA failure
-     where navy scraped through, so BOTH white-text steps sit past the brand
-     purple — s5 #7E3BE0 (5.9:1) and s6 #5E28B0 (8.7:1). Ink on s4 #A876EF
-     is 5.9:1. The s0-s4 ink / s5-s6 white per-step rule is unchanged. */
-  --seq-0:#F8F5FE; --seq-1:#EFE7FD; --seq-2:#DFCCFB;
-  --seq-3:#C5A5F7; --seq-4:#A876EF; --seq-5:#7E3BE0; --seq-6:#5E28B0;
+     lightness, the construction the DS's chart guidance prescribes for a
+     single-metric intensity scale (an elemental -bg tint up to the
+     full-strength colour). It follows the bars back to blue, which returns
+     it to the literal example the DS gives: --color-water-bg through
+     --color-navy. Contrast holds the s0-s4 ink / s5-s6 white per-step
+     rule — white on the brand navy #1473E6 is 4.54:1 and on s6 #0E56B4
+     considerably more; ink on s4 #4E9AEC is 6.9:1. The purple ramp needed
+     both of its white steps darkened past the brand hue to clear AA, and
+     that deviation retires with it. */
+  --seq-0:#F5F9FE; --seq-1:var(--color-water-bg); --seq-2:#C2DCFA;
+  --seq-3:#8FBEF3; --seq-4:#4E9AEC; --seq-5:var(--color-navy); --seq-6:#0E56B4;
 
   /* No local --shadow-N: they would shadow the DS ladder of the same name
      for everything inside the board. Elevation comes from tokens.css. */
@@ -2442,7 +2449,7 @@
 #salesBoard .attn{background:var(--surface); border:1px solid var(--rule); border-radius:var(--r-lg);
   padding:var(--spacing-16); box-shadow:var(--shadow-1); margin-top:12px;}
 /* c-progress language: Neutral-3 track, pill radius, Obsidian for the
-   committed value, Purple (the DS data-viz reserve) for the weighted
+   committed value, Navy Blue (the data-viz reserve) for the weighted
    pipeline, contiguous segments with no seam. The 32px height is a
    deliberate departure — the DS caps tracks at 16px, but this is the
    board's one hero rail and it keeps its presence by the user's call;
@@ -2453,7 +2460,7 @@
 #salesBoard .attn-bar{position:relative; height:32px; background:var(--bar-track); border-radius:var(--radius-pill); overflow:visible;}
 #salesBoard .attn-seg{position:absolute; top:0; height:32px;}
 #salesBoard .attn-seg.b{left:0; background:var(--obsidian); border-radius:var(--radius-pill) 0 0 var(--radius-pill);}
-#salesBoard .attn-seg.p{background:var(--purple); border-radius:0 var(--radius-pill) var(--radius-pill) 0;}
+#salesBoard .attn-seg.p{background:var(--navy); border-radius:0 var(--radius-pill) var(--radius-pill) 0;}
 #salesBoard .attn-short{position:absolute; top:0; height:32px; border:1.5px dashed var(--red);
   border-left:0; border-radius:0 var(--radius-pill) var(--radius-pill) 0; opacity:.75;}
 #salesBoard .attn-tick{position:absolute; top:-6px; bottom:-6px; width:2px; background:var(--ink);}
@@ -2473,12 +2480,12 @@
   margin-top:5px; gap:10px;}
 #salesBoard .plat .pr b{font-weight:800; color:var(--ink);}
 /* c-progress Default size (8px): Neutral-3 track, pill radius, Obsidian
-   booked + Purple pipeline, contiguous. The ink tick is the improvised
+   booked + Navy pipeline, contiguous. The ink tick is the improvised
    target marker. */
 #salesBoard .minibar{height:8px; background:var(--bar-track); border-radius:var(--radius-pill); margin-top:10px; position:relative;
   overflow:visible;}
 #salesBoard .minibar i{position:absolute; left:0; top:0; height:8px; border-radius:var(--radius-pill) 0 0 var(--radius-pill); background:var(--obsidian);}
-#salesBoard .minibar u{position:absolute; top:0; height:8px; background:var(--purple); border-radius:0 var(--radius-pill) var(--radius-pill) 0;}
+#salesBoard .minibar u{position:absolute; top:0; height:8px; background:var(--navy); border-radius:0 var(--radius-pill) var(--radius-pill) 0;}
 #salesBoard .minibar b{position:absolute; top:-4px; bottom:-4px; width:2px; background:var(--ink);}
 
 /* .c-badge, warning variant: weight 700, no tracking, no uppercase, the DS's
@@ -2532,19 +2539,19 @@
 /* bullet chart cell */
 #salesBoard .bul{position:relative; height:26px;}
 /* Bullet rows on the same c-progress anatomy: Neutral-3 rail, pill
-   radius, Obsidian booked + Purple pipeline, contiguous. The dashed open
+   radius, Obsidian booked + Navy pipeline, contiguous. The dashed open
    segment and the target tick are the improvised extensions. */
 #salesBoard .bul-rail{position:absolute; inset:9px 0; background:var(--bar-track); border-radius:var(--radius-pill);}
 #salesBoard .bul-b{position:absolute; top:9px; height:8px; background:var(--obsidian); border-radius:var(--radius-pill) 0 0 var(--radius-pill);}
-#salesBoard .bul-f{position:absolute; top:9px; height:8px; background:var(--purple); border-radius:0 var(--radius-pill) var(--radius-pill) 0;}
-#salesBoard .bul-o{position:absolute; top:9px; height:8px; border:1.5px dashed var(--purple); border-left:0;
+#salesBoard .bul-f{position:absolute; top:9px; height:8px; background:var(--navy); border-radius:0 var(--radius-pill) var(--radius-pill) 0;}
+#salesBoard .bul-o{position:absolute; top:9px; height:8px; border:1.5px dashed var(--navy); border-left:0;
   border-radius:0 var(--radius-pill) var(--radius-pill) 0; opacity:.62;}
 #salesBoard .bul-t{position:absolute; top:4px; height:18px; width:2px; background:var(--ink);}
 #salesBoard .bul-t::after{content:attr(data-l); position:absolute; top:-2px; left:5px; font-size:var(--text-label3-size);
   font-weight:800; color:var(--muted); white-space:nowrap;}
 #salesBoard .bul-t.flip::after{left:auto; right:5px;}
 /* the opportunity runs past the rail: a solid cap says the bar is cut, not ended */
-#salesBoard .bul-o.clipped{border-right:3px solid var(--purple); border-radius:0; opacity:.8;}
+#salesBoard .bul-o.clipped{border-right:3px solid var(--navy); border-radius:0; opacity:.8;}
 
 /* .c-badge: 4px gap, 2px/spacing-8 padding, label3 at weight 700, no
    tracking. The 1px transparent border was already right. */
@@ -2640,11 +2647,11 @@
 /* Vertical columns adopt the c-progress palette, track and motion but
    not its horizontal anatomy — a column chart is not a progress bar, and
    the pill radius would turn a 100px column into a lozenge, so the 8px
-   corner stays. Contracted Obsidian, planned pipeline Purple, contiguous. */
+   corner stays. Contracted Obsidian, planned pipeline Navy, contiguous. */
 #salesBoard .stack{height:100px; background:var(--bar-track); border-radius:8px; margin-top:12px;
   position:relative; display:flex; flex-direction:column-reverse;}
 #salesBoard .stack i{display:block; background:var(--obsidian); border-radius:0 0 8px 8px;}
-#salesBoard .stack u{display:block; background:var(--purple);}
+#salesBoard .stack u{display:block; background:var(--navy);}
 #salesBoard .stack b{position:absolute; left:-4px; right:-4px; height:2px; background:var(--ink);}
 #salesBoard .stack b::after{content:attr(data-l); position:absolute; right:0; top:-14px; font-size:var(--text-label3-size);
   font-weight:800; color:var(--ink);}
@@ -2693,11 +2700,11 @@
   padding:12px 0; font-size:var(--text-label2-size);}
 #salesBoard .hbar .hn{font-weight:800; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
 /* c-progress Default size (8px). Fandom rows are a general two-segment
-   breakdown (July vs Sep–Dec), which the DS maps to the Purple/Turquoise
-   data-viz reserve. The IP rows reuse the same anatomy as a single
+   breakdown (July vs Sep–Dec), which takes the two-colour data-viz
+   reserve, Navy then Turquoise. The IP rows reuse the same anatomy as a single
    determinate bar, so they take the Obsidian default instead. */
 #salesBoard .hbar .ht{height:8px; background:var(--bar-track); border-radius:var(--radius-pill); position:relative;}
-#salesBoard .hbar .ht i{position:absolute; left:0; top:0; height:8px; border-radius:var(--radius-pill) 0 0 var(--radius-pill); background:var(--purple);}
+#salesBoard .hbar .ht i{position:absolute; left:0; top:0; height:8px; border-radius:var(--radius-pill) 0 0 var(--radius-pill); background:var(--navy);}
 #salesBoard .hbar .ht u{position:absolute; top:0; height:8px; background:var(--turquoise); border-radius:0 var(--radius-pill) var(--radius-pill) 0;}
 #salesBoard #ipBars .ht i{border-radius:var(--radius-pill); background:var(--obsidian);}
 #salesBoard .hbar .hv{text-align:right; font-weight:800;}
@@ -3392,7 +3399,7 @@
 
 
 /* ── IP concentration ────────────────────────────────────────── */
-/* c-progress stacked, general breakdown: Purple for the largest,
+/* c-progress stacked, general breakdown: Navy for the largest,
    Turquoise for the second, Neutral-4 overflow for everything past the
    reserve — the DS's own "don't add more brand colours" rule, and it draws
    the story the note below tells: the top two against the tail. Contiguous
@@ -3614,7 +3621,7 @@
               <div class="attn-bar" id="attnBar"></div>
               <div class="attn-legend">
                 <span><i class="sw" style="background:var(--obsidian)"></i>Booked RM14.0M</span>
-                <span><i class="sw" style="background:var(--purple)"></i>Weighted pipeline RM8.0M</span>
+                <span><i class="sw" style="background:var(--navy)"></i>Weighted pipeline RM8.0M</span>
                 <span><i class="sw" style="background:var(--ink);width:2px;border-radius:0"></i>Target RM26.5M</span>
                 <span style="color:var(--red-ink);font-weight:800">Shortfall RM4.5M</span>
               </div>
@@ -3693,8 +3700,8 @@
               <div id="lbRows"></div>
               <div class="lb-foot">
                 <span><i class="sw" style="background:var(--obsidian)"></i><span id="footBooked">Booked</span></span>
-                <span><i class="sw" style="background:var(--purple)"></i>Weighted pipeline added</span>
-                <span><i class="sw" style="border:1.5px dashed var(--purple);background:transparent"></i>80%+ opportunity, not yet in forecast</span>
+                <span><i class="sw" style="background:var(--navy)"></i>Weighted pipeline added</span>
+                <span><i class="sw" style="border:1.5px dashed var(--navy);background:transparent"></i>80%+ opportunity, not yet in forecast</span>
                 <span><i class="sw" style="background:var(--ink);width:2px;border-radius:0"></i>Target</span>
                 <span id="footLy" hidden></span>
               </div>
@@ -7997,7 +8004,7 @@ function renderAttn(M, modelled){
   var lg = document.querySelector('.attn-legend');
   if(lg) lg.innerHTML =
     '<span><i class="sw" style="background:var(--obsidian)"></i>Booked '+rm(M.b)+'</span>'+
-    '<span><i class="sw" style="background:var(--purple)"></i>Weighted pipeline '+rm(M.f-M.b)+'</span>'+
+    '<span><i class="sw" style="background:var(--navy)"></i>Weighted pipeline '+rm(M.f-M.b)+'</span>'+
     '<span><i class="sw" style="background:var(--ink);width:2px;border-radius:0"></i>Target '+rm(M.t)+'</span>'+
     (gap>0 ? '<span style="color:var(--red-ink);font-weight:800">Shortfall '+rm(gap)+'</span>' : '')+
     CM.map(function(x){
@@ -8606,7 +8613,7 @@ function renderIp(){
         '<span class="hv num">'+rm(fTot.full)+'</span><span class="hd num">'+fTot.d+'</span></div>'
     : '<p class="noresult"><b>No fandom book in this slice.</b>Clear the slice to see all nine.</p>') +
   '<div class="attn-legend" style="margin-top:10px">'+
-    '<span><i class="sw" style="background:var(--purple)"></i>July</span>'+
+    '<span><i class="sw" style="background:var(--navy)"></i>July</span>'+
     '<span><i class="sw" style="background:var(--turquoise)"></i>Sep to Dec</span>'+
     '<span style="color:var(--faint)">Right-hand column is deal count</span></div>';
 
@@ -8656,9 +8663,12 @@ function renderConcentration(list, modelled){
   }
   var total = ips.reduce(function(a,i){ return a+i.v; }, 0);
   var deals = ips.reduce(function(a,i){ return a+i.d; }, 0);
-  /* DS general-breakdown reserve: Purple, then Turquoise, then the
-     Neutral-4 overflow colour for every further segment. */
-  var steps = ['--purple','--turquoise'];
+  /* DS general-breakdown reserve: Navy, then Turquoise, then the
+     Neutral-4 overflow colour for every further segment. Navy #1473E6 and
+     Turquoise #00D9D9 sit at 0.18 and 0.55 relative luminance, so the
+     seamless boundary between segment 1 and 2 survives greyscale and
+     red-green colour blindness; the pair the purple carried was closer. */
+  var steps = ['--navy','--turquoise'];
 
   var cb = document.getElementById('concBar');
   cb.innerHTML = ips.map(function(ip,i){

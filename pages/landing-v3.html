@@ -1933,7 +1933,6 @@
         </div>
         <div class="c-sidebar-section">Overview</div>
         <button class="c-sidebar-item active" type="button"><i class="ph-fill ph-house"></i><span class="label">Dashboard</span><span class="c-sidebar-hover-text">Dashboard</span></button>
-        <button class="c-sidebar-item" type="button"><i class="ph-fill ph-chart-bar"></i><span class="label">Reports</span><span class="c-sidebar-hover-text">Reports</span></button>
         <div class="c-sidebar-footer">
           <button class="c-sidebar-account" type="button" id="accountMenuTrigger" aria-haspopup="menu" aria-expanded="false" aria-controls="accountMenu">
             <span class="c-search-input-avatar">BW</span>
@@ -2456,7 +2455,7 @@
 /* attainment rail under the KPI row */
 #salesBoard .attn{background:var(--surface); border:1px solid var(--rule); border-radius:var(--r-lg);
   padding:var(--spacing-16); box-shadow:var(--shadow-1); margin-top:12px;}
-/* c-progress language: Neutral-3 track, pill radius, Obsidian for the
+/* c-progress language: Neutral-2 track, --radius-md, Obsidian for the
    committed value, Navy Blue (the data-viz reserve) for the weighted
    pipeline, contiguous segments with no seam. The 32px height is a
    deliberate departure — the DS caps tracks at 16px, but this is the
@@ -2464,13 +2463,20 @@
    every other bar sits on the Default 8px. The target tick and the
    dashed shortfall are improvised extensions the DS does not define:
    a 2px Neutral-9 marker crossing the track, and a dashed outline
-   in the DS error red for the distance still to close. */
-#salesBoard .attn-bar{position:relative; height:32px; background:var(--bar-track); border-radius:var(--radius-pill); overflow:visible;}
+   in the DS error red for the distance still to close.
+   The radius is --radius-md by the user's call, on the track and on all
+   three segment shapes so they stay one family. At this height it renders
+   exactly as the pill did: CSS scales overlapping radii by the smallest
+   side/sum ratio, so 999px on a 32px-tall box already resolved to 16px,
+   which is --radius-md's value. Naming it says what the shape is instead
+   of leaving it to the clamp — and it means a future height change moves
+   the corner honestly rather than silently unrounding. */
+#salesBoard .attn-bar{position:relative; height:32px; background:var(--bar-track); border-radius:var(--radius-md); overflow:visible;}
 #salesBoard .attn-seg{position:absolute; top:0; height:32px;}
-#salesBoard .attn-seg.b{left:0; background:var(--obsidian); border-radius:var(--radius-pill) 0 0 var(--radius-pill);}
-#salesBoard .attn-seg.p{background:var(--navy); border-radius:0 var(--radius-pill) var(--radius-pill) 0;}
+#salesBoard .attn-seg.b{left:0; background:var(--obsidian); border-radius:var(--radius-md) 0 0 var(--radius-md);}
+#salesBoard .attn-seg.p{background:var(--navy); border-radius:0 var(--radius-md) var(--radius-md) 0;}
 #salesBoard .attn-short{position:absolute; top:0; height:32px; border:1.5px dashed var(--red);
-  border-left:0; border-radius:0 var(--radius-pill) var(--radius-pill) 0; opacity:.75;}
+  border-left:0; border-radius:0 var(--radius-md) var(--radius-md) 0; opacity:.75;}
 #salesBoard .attn-tick{position:absolute; top:-6px; bottom:-6px; width:2px; background:var(--ink);}
 #salesBoard .attn-tick span{position:absolute; top:-17px; right:0; font-size:var(--text-label3-size); font-weight:800;
   white-space:nowrap; color:var(--ink);}
@@ -2484,8 +2490,11 @@
   padding:var(--spacing-16); box-shadow:var(--shadow-1);}
 #salesBoard .plat h3{font-size:var(--text-body1-size); display:flex; align-items:center; gap:8px;}
 #salesBoard .plat .pv{font-size:var(--text-h3-size-lg); font-weight:800; margin-top:8px;}
+/* The bar, the Booked/Target pair and the status pills were stepped 5px
+   apart, which read as one block rather than three readings. spacing-8
+   separates them without loosening the card. */
 #salesBoard .plat .pr{display:flex; justify-content:space-between; font-size:var(--text-caption-size); color:var(--muted);
-  margin-top:5px; gap:10px;}
+  margin-top:var(--spacing-8); gap:10px;}
 #salesBoard .plat .pr b{font-weight:800; color:var(--ink);}
 /* c-progress Default size (8px): Neutral-3 track, pill radius, Obsidian
    booked + Navy pipeline, contiguous. The ink tick is the improvised
@@ -2613,7 +2622,25 @@
 /* value is right-aligned and owner left-aligned, so they collide at the seam
    without a gutter between them */
 #salesBoard .deals th.n, #salesBoard .deals td.n{padding-right:38px;}
-#salesBoard .deals th:last-child, #salesBoard .deals td:last-child{padding-left:4px; width:1%; white-space:nowrap;}
+#salesBoard .deals th:last-child, #salesBoard .deals td:last-child{padding-left:4px; white-space:nowrap;}
+/* Widths were left to auto layout, which read the content and handed the
+   advertiser column 45% of the table while width:1% above shrink-wrapped
+   Owner to 88px — campaign value and owner ended up jammed together at
+   the right edge with a void of dead space beside the advertiser. Fixed
+   layout instead, and IP, campaign value and owner share one width so the
+   three read as an even set. The advertiser column keeps the larger share
+   because it alone stacks two lines, the name over the campaign; at 34%
+   nothing in the current export overflows its box.
+   The percentages oversum in the five-column manager view, where Last
+   touch appears. That is what fixed layout wants: it scales every column
+   down by the same factor, so the three stay equal to each other there
+   too. Both IP headers are covered because only one is ever displayed. */
+#salesBoard .deals{table-layout:fixed;}
+#salesBoard .deals th:nth-child(1){width:34%;}
+#salesBoard .deals th:nth-child(2), #salesBoard .deals th:nth-child(3){width:22%;}
+#salesBoard .deals th.n{width:22%;}
+#salesBoard .deals th.c-age{width:14%;}
+#salesBoard .deals th:last-child{width:22%;}
 #salesBoard tbody tr.total td{background:var(--sunk); font-weight:800; border-top:2px solid var(--ink);}
 #salesBoard .adv{font-weight:800;} #salesBoard .camp{color:var(--muted); font-size:var(--text-caption-size); display:block; margin-top:1px;}
 /* .c-tag: caption at weight 700, a fixed 24px height and 10px of side
@@ -3367,7 +3394,10 @@
 #salesBoard .plat.clickable:hover{box-shadow:0 0 0 1px var(--navy), var(--shadow-1);}
 #salesBoard .plat[aria-pressed="true"]{box-shadow:0 0 0 2px var(--navy), var(--shadow-1);}
 #salesBoard .plat.clickable:focus-visible{outline:2px solid var(--navy); outline-offset:2px;}
-#salesBoard .p-rate{font-size:var(--text-label3-size); color:var(--faint); margin-top:7px; padding-top:7px;
+/* The rate line is the card's footnote, so its rule wants a clear gap on
+   both sides rather than the 7px that had the pills sitting on it. */
+#salesBoard .p-rate{font-size:var(--text-label3-size); color:var(--faint);
+  margin-top:var(--spacing-12); padding-top:var(--spacing-12);
   border-top:1px solid var(--rule);}
 #salesBoard .p-rate b{color:var(--muted); font-weight:800;}
 

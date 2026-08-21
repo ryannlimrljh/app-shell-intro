@@ -2500,7 +2500,8 @@
 #salesBoard .attn-seg.b{left:0; background:var(--obsidian); border-radius:8px 0 0 8px;}
 #salesBoard .attn-seg.p{background:var(--navy); border-radius:0 8px 8px 0;}
 #salesBoard .attn-short{position:absolute; top:0; height:32px; border:1.5px dashed var(--red);
-  border-left:0; border-radius:0 8px 8px 0; opacity:.75;}
+  border-left:0; border-radius:0 8px 8px 0;
+  --ghost-op:.75; opacity:var(--ghost-op); animation:ghost-breathe 3.4s ease-in-out infinite;}
 #salesBoard .attn-tick{position:absolute; top:-6px; bottom:-6px; width:2px; background:var(--ink);}
 #salesBoard .attn-tick span{position:absolute; top:-17px; right:0; font-size:var(--text-label3-size); font-weight:800;
   white-space:nowrap; color:var(--ink);}
@@ -2588,7 +2589,21 @@
 #salesBoard .bul-b{position:absolute; top:9px; height:8px; background:var(--obsidian); border-radius:var(--radius-pill) 0 0 var(--radius-pill);}
 #salesBoard .bul-f{position:absolute; top:9px; height:8px; background:var(--navy); border-radius:0 var(--radius-pill) var(--radius-pill) 0;}
 #salesBoard .bul-o{position:absolute; top:9px; height:8px; border:1.5px dashed var(--navy); border-left:0;
-  border-radius:0 var(--radius-pill) var(--radius-pill) 0; opacity:.62;}
+  border-radius:0 var(--radius-pill) var(--radius-pill) 0;
+  --ghost-op:.62; opacity:var(--ghost-op); animation:ghost-breathe 3.4s ease-in-out infinite;}
+/* Both dashed shapes mean "not real yet", so both breathe. The keyframes
+   scale each element's OWN resting opacity rather than naming a value, so
+   .clipped's heavier .8 and the rail's .75 keep their relative weights.
+   Negative delays put the rows in three phases: ten outlines pulsing in
+   lockstep would read as a fault, and starting mid-cycle means no row
+   waits for its first breath. Under prefers-reduced-motion the board's
+   blanket rule drops the animation and these fall back to --ghost-op. */
+@keyframes ghost-breathe{
+  0%, 100%{opacity:calc(var(--ghost-op) * .72);}
+  50%{opacity:var(--ghost-op);}
+}
+#salesBoard #lbRows > .lb-slot:nth-child(3n+2) .bul-o{animation-delay:-1.13s;}
+#salesBoard #lbRows > .lb-slot:nth-child(3n) .bul-o{animation-delay:-2.26s;}
 #salesBoard .bul-t{position:absolute; top:4px; height:18px; width:2px; background:var(--ink);}
 /* The label sits above the bar, not beside it. At top:-2px it rendered at
    y=2 in a 26px cell whose rail spans y=9-17, so the word lay across the
@@ -2602,7 +2617,7 @@
   font-weight:800; color:var(--muted); white-space:nowrap;}
 #salesBoard .bul-t.flip::after{left:auto; right:5px;}
 /* the opportunity runs past the rail: a solid cap says the bar is cut, not ended */
-#salesBoard .bul-o.clipped{border-right:3px solid var(--navy); border-radius:0; opacity:.8;}
+#salesBoard .bul-o.clipped{border-right:3px solid var(--navy); border-radius:0; --ghost-op:.8;}
 
 /* .c-badge: 4px gap, 2px/spacing-8 padding, label3 at weight 700, no
    tracking. The 1px transparent border was already right. */

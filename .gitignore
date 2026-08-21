@@ -6,3 +6,5 @@ node_modules/
 
 # Local dev-server config, machine-specific.
 .claude/
+.vercel
+.env*

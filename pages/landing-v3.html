@@ -2656,12 +2656,12 @@
 /* value is right-aligned and owner left-aligned, so they collide at the seam
    without a gutter between them */
 #salesBoard .deals th.n, #salesBoard .deals td.n{padding-right:38px;}
-/* Owner is the last column, and at 4px its names sat against the left
-   edge of a 248px cell with ~180px of dead space before the table's right
-   rule. The padding moves the block right without ranging it right: names
-   stay aligned to each other, which is what makes a name column
-   scannable, and they land with roughly even air on both sides. */
-#salesBoard .deals th:last-child, #salesBoard .deals td:last-child{padding-left:64px; white-space:nowrap;}
+/* Owner sits between the value figures and the note column now, so the
+   64px push that used to fill the dead space against the table's right
+   rule retires — the note column owns that edge — leaving a plain gutter
+   off the right-aligned values. By class, not :last-child: Add Note is
+   the last column and would silently inherit these otherwise. */
+#salesBoard .deals th.own, #salesBoard .deals td.own{padding-left:24px; white-space:nowrap;}
 /* Widths were left to auto layout, which read the content and handed the
    advertiser column 45% of the table while width:1% above shrink-wrapped
    Owner to 88px — campaign value and owner ended up jammed together at
@@ -2679,7 +2679,11 @@
 #salesBoard .deals th:nth-child(2), #salesBoard .deals th:nth-child(3){width:22%;}
 #salesBoard .deals th.n{width:22%;}
 #salesBoard .deals th.c-age{width:14%;}
-#salesBoard .deals th:last-child{width:22%;}
+#salesBoard .deals th.own{width:22%;}
+/* fixed pixels against the others' percentages: table-layout:fixed
+   assigns these 96px first and scales the percentage columns into the
+   remainder, keeping their ratios — same column the leaderboard carries */
+#salesBoard .deals th.ncol{width:96px; text-align:right;}
 #salesBoard tbody tr.total td{background:var(--sunk); font-weight:800; border-top:2px solid var(--ink);}
 #salesBoard .adv{font-weight:800;} #salesBoard .camp{color:var(--muted); font-size:var(--text-caption-size); display:block; margin-top:1px;}
 /* .c-tag: caption at weight 700, a fixed 24px height and 10px of side
@@ -3080,7 +3084,6 @@
    text on the same saturated fill. The pinned card is the mock's
    sticky: element fill, pin glyph tucked in the corner, per-row tilt. */
 #salesBoard .ncell{display:flex; align-items:center; justify-content:flex-end; gap:8px; min-width:0;}
-#salesBoard .ncell.inline{display:inline-flex; margin-top:6px; vertical-align:middle; justify-content:flex-start;}
 /* The [+] is the DS icon button (.c-icon-btn: 32px, transparent,
    radius-sm, Neutral-2 hover) rather than a bespoke bordered square, with
    the glyph at the dropdown carets' 14px and Neutral-5. Only the hit area
@@ -3957,7 +3960,7 @@
               <table class="deals c-table">
                 <thead><tr>
                   <th>Advertiser and campaign</th><th data-only="now">IP · platform</th><th data-only="next">IP · runs</th>
-                  <th class="n">Campaign value</th><th class="c-age" hidden>Last touch</th><th>Owner</th>
+                  <th class="n">Campaign value</th><th class="c-age" hidden>Last touch</th><th class="own">Owner</th><th class="ncol">Add Note</th>
                 </tr></thead>
                 <tbody id="dealRows"></tbody>
               </table>
@@ -8889,7 +8892,7 @@ function renderDeals(){
   var deep = !!state.mgr;
   if(!rows.length){
     document.getElementById('dealRows').innerHTML =
-      '<tr><td colspan="'+(deep?5:4)+'" class="noresult">'+
+      '<tr><td colspan="'+(deep?6:5)+'" class="noresult">'+
       (deep
         ? '<b>Nothing of yours is on this list.</b>'+
           'The export carries only the '+all.length+' largest deals in the company, so most '+
@@ -8908,7 +8911,7 @@ function renderDeals(){
       '<td><span class="adv">'+esc(d.a)+'</span><span class="camp">'+esc(d.c)+
         (d.trunc?'<span class="src" title="The advertiser or campaign name is cut off at this length in the source export, not here.">truncated in source</span>':'')+
         (d.dup?'<span class="src" title="The source export carries this campaign twice, at the same value. Both rows are shown rather than one being dropped.">duplicate row in source</span>':'')+
-        '</span><span class="ncell inline">'+noteCell(nid, d.a)+'</span></td>'+
+        '</span></td>'+
       '<td>'+(d.ip?'<span class="tag c-tag c-tag-water">'+esc(d.ip)+'</span> ':'<span class="tag ghost c-tag">untagged</span> ')+
         '<span class="camp" style="display:inline;margin-left:4px">'+esc(d.x)+'</span></td>'+
       '<td class="n num">'+rm(d.v)+'</td>'+
@@ -8918,11 +8921,12 @@ function renderDeals(){
           (quiet ? '<b>'+age+' days</b><span class="camp">gone quiet</span>'
                  : age+' days<span class="camp">since last touch</span>')+'</td>';
       })() : '')+
-      '<td>'+(state.mgr
+      '<td class="own">'+(state.mgr
         ? (function(){ var q=dealSeat(d,i); var who=q?q.split('|')[3]:null;
             return who ? esc(who)+'<span class="camp">'+esc(d.o)+'\u2019s book</span>'
                        : esc(d.o); })()
         : esc(d.o))+'</td>'+
+      '<td class="ncol"><span class="ncell">'+noteCell(nid, d.a)+'</span></td>'+
       '</tr>';
   }).join('');
 }

@@ -3117,6 +3117,43 @@
 #salesBoard .el-3{--np-hue:var(--navy);   --np-ink:#0B4FA8; --np-fg:#fff;}
 #salesBoard .el-4{--np-hue:var(--amber);  --np-ink:#8A5A00; --np-fg:var(--color-obsidian);}
 
+/* several notes on one row stack organically — the hero cards' mobile
+   stack at pin scale. One button; each mini carries its own note's
+   colour, tilt and a little vertical jitter, hover squares them up. */
+#salesBoard .npin-stack{display:inline-flex; align-items:center; border:0; background:none;
+  padding:0; cursor:pointer; position:relative; flex:none;}
+#salesBoard .npin-stack::after{content:''; position:absolute; inset:-6px;}
+#salesBoard .npin-mini{width:30px; height:36px; border-radius:8px; display:inline-grid; place-items:center;
+  background:var(--np-hue); color:var(--np-ink); box-shadow:var(--shadow-1);
+  transform:rotate(var(--mini-rot, -4deg)) translateY(var(--mini-dy, 0px));
+  transition:transform .18s var(--ease);}
+#salesBoard .npin-mini i{font-size:11px;}
+#salesBoard .npin-mini + .npin-mini{margin-left:-14px;}
+#salesBoard .npin-count{margin-left:4px; font-size:var(--text-label3-size); font-weight:800; color:var(--muted);}
+#salesBoard .npin-stack:hover .npin-mini, #salesBoard .npin-stack:focus-visible .npin-mini{
+  transform:rotate(0deg) translateY(0);}
+#salesBoard .npin-stack:focus-visible{outline:2px solid var(--navy); outline-offset:2px;}
+#salesBoard .npin-stack.np-hidden{visibility:hidden;}
+
+/* the tidy view: the stack toggled open. Neutral card chrome — the notes
+   themselves carry the colour — same hairline framing as the coloured
+   panels, on the board's rule grey. */
+#salesBoard .npanel.tidy{--np-fg:var(--ink); background:var(--surface);
+  border:1px solid var(--rule); color:var(--ink);}
+#salesBoard .npanel.tidy .np-top, #salesBoard .npanel.tidy .np-act{border-color:var(--rule);}
+#salesBoard .np-grid{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:2px;}
+#salesBoard .np-card{text-align:left; border:0; border-radius:12px; padding:10px 11px;
+  background:var(--np-hue); color:var(--np-fg); cursor:pointer;
+  display:flex; flex-direction:column; gap:8px; min-height:92px; font:inherit;
+  box-shadow:var(--shadow-1); transition:box-shadow .14s var(--ease), transform .14s var(--ease);}
+#salesBoard .np-card:hover{box-shadow:var(--shadow-2); transform:translateY(-1px);}
+#salesBoard .np-card:focus-visible{outline:2px solid var(--navy); outline-offset:2px;}
+#salesBoard .np-card-t{font-size:var(--text-caption-size); font-weight:600; line-height:1.45;
+  display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden;}
+#salesBoard .np-card-m{margin-top:auto; display:flex; align-items:center; gap:5px;
+  font-size:var(--text-label3-size); font-weight:700; opacity:.85;}
+#salesBoard .np-card-m i{font-size:11px;}
+
 /* ── The panel, and the hero modal's swing at note scale ──────
    The same parameterized FLIP the card modal uses: translate+scale from
    the anchor's rect about a top-left origin, with the mid-flight rotateY
@@ -7833,33 +7870,49 @@ document.addEventListener('click', function(e){
   // any click outside the open panel and its own triggers folds it away —
   // and deliberately does not return, so the click still does its job
   if(NP.id && !e.target.closest('#notePanel') &&
-     !e.target.closest('[data-note-add],[data-note-read]')) closeNotePanel(false);
+     !e.target.closest('[data-note-add],[data-note-read],[data-note-stack]')) closeNotePanel(false);
   var nAdd = e.target.closest('[data-note-add]');
   if(nAdd){
     e.stopPropagation();
-    if(NP.id === nAdd.dataset.noteAdd && NP.mode === 'edit'){ closeNotePanel(true); return; }
-    openNotePanel(nAdd.dataset.noteAdd, nAdd.dataset.name, 'edit');
+    if(NP.id === nAdd.dataset.noteAdd && NP.mode === 'edit' && NP.noteIdx === -1){
+      closeNotePanel(true); return;
+    }
+    openNotePanel(nAdd.dataset.noteAdd, nAdd.dataset.name, 'edit', -1);
+    return;
+  }
+  var nStack = e.target.closest('[data-note-stack]');
+  if(nStack){
+    e.stopPropagation();
+    if(NP.id === nStack.dataset.noteStack && NP.mode === 'tidy'){ closeNotePanel(true); return; }
+    openNotePanel(nStack.dataset.noteStack, nStack.dataset.name, 'tidy');
     return;
   }
   var nRead = e.target.closest('[data-note-read]');
   if(nRead){
     e.stopPropagation();
     if(NP.id === nRead.dataset.noteRead && NP.mode === 'read'){ closeNotePanel(true); return; }
-    openNotePanel(nRead.dataset.noteRead, nRead.dataset.name, 'read');
+    openNotePanel(nRead.dataset.noteRead, nRead.dataset.name, 'read', 0);
+    return;
+  }
+  var nIdx = e.target.closest('[data-note-idx]');
+  if(nIdx){
+    e.stopPropagation();
+    // a card in the tidy grid morphs to that note's read panel
+    openNotePanel(NP.id, NP.name, 'read', +nIdx.dataset.noteIdx);
     return;
   }
   var nEdit = e.target.closest('[data-note-edit]');
   if(nEdit){
     e.stopPropagation();
     // read morphs to edit in place: same panel, no fold in between
-    openNotePanel(nEdit.dataset.noteEdit, NP.name, 'edit');
+    openNotePanel(nEdit.dataset.noteEdit, NP.name, 'edit', NP.noteIdx);
     return;
   }
   var nSave = e.target.closest('[data-note-save]');
   if(nSave){
     e.stopPropagation();
     var box2 = document.getElementById('noteBox');
-    noteSet(nSave.dataset.noteSave, box2 ? box2.value : '');
+    noteSet(nSave.dataset.noteSave, NP.noteIdx, box2 ? box2.value : '');
     // redraw first so the panel folds back toward the freshly-pinned card
     redrawNotes();
     closeNotePanel(true);
@@ -7868,9 +7921,12 @@ document.addEventListener('click', function(e){
   var nDel = e.target.closest('[data-note-del]');
   if(nDel){
     e.stopPropagation();
-    noteSet(nDel.dataset.noteDel, '');
+    var did = nDel.dataset.noteDel, dname = NP.name;
+    noteSet(did, NP.noteIdx, '');
     redrawNotes();
-    closeNotePanel(false);
+    // back to the tidy view while notes remain; away entirely when none do
+    if(notesOf(did).length){ openNotePanel(did, dname, 'tidy'); }
+    else closeNotePanel(false);
     return;
   }
   if(e.target.closest('[data-note-cancel]')){
@@ -7985,7 +8041,12 @@ var NOTE_SEQ = (function(){
   var s = typeof NOTES.__seq === 'number' ? NOTES.__seq : 0, dirty = false;
   Object.keys(NOTES).forEach(function(k){
     if(k === '__seq' || !NOTES[k] || typeof NOTES[k] !== 'object') return;
-    if(typeof NOTES[k].c !== 'number'){ NOTES[k].c = s % 5; s++; dirty = true; }
+    // rows hold LISTS of notes now; single-note values from before are
+    // wrapped once, here, so nothing written earlier is lost
+    if(!Array.isArray(NOTES[k])){ NOTES[k] = [NOTES[k]]; dirty = true; }
+    NOTES[k].forEach(function(n){
+      if(n && typeof n.c !== 'number'){ n.c = s % 5; s++; dirty = true; }
+    });
   });
   if(dirty){
     NOTES.__seq = s;
@@ -8004,20 +8065,29 @@ function today(){
   return d.getDate() + ' ' + MONTHS_SHORT[d.getMonth()];
 }
 function noteKeyOf(id){ return state.hz + '|' + id; }
-function noteOf(id){ return NOTES[noteKeyOf(id)] || null; }
+function notesOf(id){
+  var v = NOTES[noteKeyOf(id)];
+  if(!v) return [];
+  return Array.isArray(v) ? v : [v];
+}
 /* Editing somebody else's note does not make it yours. The byline stays with
    whoever wrote it and the change is recorded beside it, which is the
    distinction a Monday review actually cares about. */
-function noteSet(id, text){
-  var k = noteKeyOf(id), v = (text || '').trim(), was = NOTES[k], who = sessionUser();
-  // an edit keeps its colour; only a genuinely new note advances the cycle
-  var c = (was && typeof was.c === 'number') ? was.c : nextNoteEl();
-  if(!v){ delete NOTES[k]; }
-  else if(was && was.a && was.a !== who){
-    NOTES[k] = {t:v, d:was.d, a:was.a, e:who, ed:today(), c:c};
+function noteSet(id, idx, text){
+  var k = noteKeyOf(id), v = (text || '').trim(), who = sessionUser();
+  var list = notesOf(id).slice();
+  var was = idx >= 0 ? list[idx] : null;
+  if(!v){
+    if(idx >= 0) list.splice(idx, 1);          // an emptied note is a deletion
+  } else if(was && was.a && was.a !== who){
+    list[idx] = {t:v, d:was.d, a:was.a, e:who, ed:today(), c:was.c};
+  } else if(was){
+    list[idx] = {t:v, d:today(), a:who, c:was.c};
   } else {
-    NOTES[k] = {t:v, d:today(), a:who, c:c};
+    // only a genuinely new note advances the colour cycle
+    list.push({t:v, d:today(), a:who, c:nextNoteEl()});
   }
+  if(list.length) NOTES[k] = list; else delete NOTES[k];
   try{ localStorage.setItem(NOTE_KEY, JSON.stringify(NOTES)); }catch(e){}
 }
 /* A deal's note is keyed on what the deal is, not on where it sits. Row order
@@ -8038,18 +8108,39 @@ function pinRot(id){
    is saved, and the [+] that folds the editor out. The card is a saturated
    element-colour fill — a fill, not a text surface, so the DS is happy —
    and the note text rides its title so a hover reads it without opening. */
+/* Per-index tilt for a stacked mini: alternating base directions with a
+   hash jitter, so two stacks never sit identically. */
+function miniRot(id, j){
+  var s = id + '#' + j, h = 0;
+  for(var i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0;
+  return [-7, 6, -4][j % 3] + (Math.abs(h) % 5) - 2;
+}
 function noteCell(id, name){
-  var n = noteOf(id);
-  return (n
-    ? '<button class="npin el-'+(typeof n.c === 'number' ? n.c : 0)+'" type="button" '+
+  var ns = notesOf(id), pins = '';
+  if(ns.length === 1){
+    pins = '<button class="npin el-'+ns[0].c+'" type="button" '+
       'data-note-read="'+esc(id)+'" data-name="'+esc(name)+'" '+
-      'style="--pin-rot:'+pinRot(id)+'deg" title="'+esc(n.t)+'" '+
+      'style="--pin-rot:'+pinRot(id)+'deg" title="'+esc(ns[0].t)+'" '+
       'aria-label="Read the note on '+esc(name)+'" aria-haspopup="dialog">'+
-      '<i class="ph-fill ph-push-pin" aria-hidden="true"></i></button>'
-    : '')+
+      '<i class="ph-fill ph-push-pin" aria-hidden="true"></i></button>';
+  } else if(ns.length > 1){
+    // several notes stack organically — the hero cards' mobile stack at
+    // pin scale. One button; toggling it opens the tidy view.
+    pins = '<button class="npin-stack" type="button" data-note-stack="'+esc(id)+'" '+
+      'data-name="'+esc(name)+'" title="'+ns.length+' notes" '+
+      'aria-label="'+ns.length+' notes on '+esc(name)+', open the stack" '+
+      'aria-haspopup="dialog" aria-expanded="false">'+
+      ns.slice(-3).map(function(nn, j){
+        return '<span class="npin-mini el-'+nn.c+'" style="--mini-rot:'+miniRot(id, j)+'deg; '+
+          '--mini-dy:'+([2, -2, 1][j])+'px" aria-hidden="true">'+
+          '<i class="ph-fill ph-push-pin"></i></span>';
+      }).join('')+
+      (ns.length > 3 ? '<span class="npin-count" aria-hidden="true">'+ns.length+'</span>' : '')+
+      '</button>';
+  }
+  return pins +
     '<button class="nadd c-icon-btn" type="button" data-note-add="'+esc(id)+'" data-name="'+esc(name)+'" '+
-    'title="'+(n ? 'Edit the note on ' : 'Add a note on ')+esc(name)+'" '+
-    'aria-label="'+(n ? 'Edit the note on ' : 'Add a note on ')+esc(name)+'" '+
+    'title="Add a note on '+esc(name)+'" aria-label="Add a note on '+esc(name)+'" '+
     'aria-haspopup="dialog" aria-expanded="false">'+
     '<i class="ph ph-plus" aria-hidden="true"></i></button>';
 }
@@ -8062,15 +8153,36 @@ function noteCell(id, name){
    closing shrinks back toward where the pin sits. Living outside the row
    DOM means opening a note no longer re-renders the board at all — only
    Save and Delete redraw, and only so the pin appears or goes. */
-var NP = {id:null, name:null, mode:null};
+var NP = {id:null, name:null, mode:null, noteIdx:-1};
 function npAnchor(){
   if(!NP.id) return null;
   return document.querySelector('[data-note-add="'+NP.id.replace(/"/g, '\\"')+'"]');
 }
 function notePanelHTML(){
-  var n = noteOf(NP.id), who = sessionUser(), keeps = n && n.a && n.a !== who;
+  var list = notesOf(NP.id);
+  var n = NP.noteIdx >= 0 ? list[NP.noteIdx] : null;
+  var who = sessionUser(), keeps = n && n.a && n.a !== who;
   var when = whenWord(), top, body, act;
-  if(NP.mode === 'read' && n){
+  if(NP.mode === 'tidy'){
+    // the stack, laid out straight: tidy is the point, so the cards drop
+    // their tilt here and take a plain two-up grid
+    top = '<span class="np-eyebrow">Pinned notes</span>';
+    body = '<span class="np-kick">Notes \u00b7 '+esc(when)+'</span>'+
+      '<span class="np-title">'+esc(NP.name)+'</span>'+
+      '<div class="np-grid" role="list">'+
+      list.map(function(nn, k){
+        return '<button type="button" class="np-card el-'+nn.c+'" role="listitem" '+
+          'data-note-idx="'+k+'" aria-label="Note by '+esc(nn.a || 'Unsigned')+', '+
+          esc(nn.d)+'. Open it">'+
+          '<span class="np-card-t">'+esc(nn.t)+'</span>'+
+          '<span class="np-card-m"><i class="ph-fill ph-push-pin" aria-hidden="true"></i>'+
+          esc(nn.a || 'Unsigned')+' \u00b7 '+esc(nn.d)+'</span>'+
+          '</button>';
+      }).join('')+
+      '</div>';
+    act = '<button class="chip go c-chip c-chip-filter" type="button" '+
+      'data-note-add="'+esc(NP.id)+'" data-name="'+esc(NP.name)+'">Add a note</button>';
+  } else if(NP.mode === 'read' && n){
     top = '<span class="np-eyebrow">Note by</span>'+
       '<i class="ava" aria-hidden="true">'+esc(initials(n.a || '?'))+'</i>'+
       '<b>'+esc(n.a || 'Unsigned')+'</b>';
@@ -8134,8 +8246,9 @@ function setNoteSwingVars(pane, a){
   pane.style.setProperty('--nsw-sy', (from.height / to.height).toFixed(4));
   pane.style.setProperty('--nsw-dir', (from.left + from.width/2) < window.innerWidth/2 ? '1' : '-1');
 }
-function openNotePanel(id, name, mode){
+function openNotePanel(id, name, mode, idx){
   NP.id = id; NP.name = name; NP.mode = mode;
+  NP.noteIdx = (typeof idx === 'number') ? idx : -1;
   var pane = document.getElementById('notePanel');
   if(!pane){
     pane = document.createElement('div');
@@ -8143,20 +8256,25 @@ function openNotePanel(id, name, mode){
     pane.setAttribute('role', 'dialog');
     document.getElementById('salesBoard').appendChild(pane);
   }
-  var morph = NP.wasOpen === id;              // read -> edit: no re-swing
+  var morph = NP.wasOpen === id;              // read -> edit -> tidy: no re-swing
   NP.wasOpen = id;
-  var n = noteOf(id);
-  // a fresh note previews the colour the cycle will hand it on save
-  pane.className = 'npanel el-'+((n && typeof n.c === 'number') ? n.c : NOTE_SEQ % 5);
-  pane.setAttribute('aria-label', 'Note on '+name);
+  var list = notesOf(id);
+  var n = NP.noteIdx >= 0 ? list[NP.noteIdx] : null;
+  // tidy is neutral chrome; otherwise the note's colour, or a preview of
+  // the colour the cycle will hand a fresh note on save
+  pane.className = mode === 'tidy' ? 'npanel tidy'
+    : 'npanel el-'+(n ? n.c : NOTE_SEQ % 5);
+  pane.setAttribute('aria-label', mode === 'tidy'
+    ? list.length+' notes on '+name : 'Note on '+name);
   pane.innerHTML = notePanelHTML();
   positionNotePanel(pane);
   var a = npAnchor(); if(a) a.setAttribute('aria-expanded', 'true');
-  // one visible form per note: any pin hidden by a previous open returns,
-  // then this note's pin stands down while its panel is out
-  [].forEach.call(document.querySelectorAll('.npin.np-hidden'), function(p){
+  // one visible form per note: any pin or stack hidden by a previous open
+  // returns, then this row's own stands down while its panel is out
+  [].forEach.call(document.querySelectorAll('.npin.np-hidden, .npin-stack.np-hidden'), function(p){
     p.classList.remove('np-hidden'); });
-  var ownPin = document.querySelector('[data-note-read="'+NP.id.replace(/"/g, '\\"')+'"]');
+  var q = NP.id.replace(/"/g, '\\"');
+  var ownPin = document.querySelector('[data-note-read="'+q+'"], [data-note-stack="'+q+'"]');
   if(ownPin) ownPin.classList.add('np-hidden');
   if(!morph && !REDUCED && !document.hidden && a){
     setNoteSwingVars(pane, a);
@@ -8167,8 +8285,8 @@ function openNotePanel(id, name, mode){
   else { pane.setAttribute('tabindex', '-1'); pane.focus(); }
 }
 function closeNotePanel(refocus){
-  // the pin returns as the panel folds back onto it
-  [].forEach.call(document.querySelectorAll('.npin.np-hidden'), function(p){
+  // the pin or stack returns as the panel folds back onto it
+  [].forEach.call(document.querySelectorAll('.npin.np-hidden, .npin-stack.np-hidden'), function(p){
     p.classList.remove('np-hidden'); });
   var pane = document.getElementById('notePanel');
   var a = npAnchor();

@@ -1459,6 +1459,21 @@
   .c-hcard-ai .c-hcard-label{color:var(--color-amber);}
   .c-hcard-ai h4{color:var(--color-neutral-1);}
   .c-hcard-ai .c-tag{background:rgba(255,255,255,.12); color:var(--color-neutral-1);}
+  /* The three classes above are not the only ones this card uses. Client
+     intelligence is the only .c-hcard-ai that also carries .c-hcard-rec,
+     .c-hcard-cta and .c-hcard-prov, and without these they kept their
+     light-card colours on the obsidian: measured on the real fill, the
+     provenance mark and the recommendation line were 2.05:1 and the CTA
+     1.42:1, which is near-black on near-black. Each value below is the
+     dark-ground counterpart of what the class does on a light card, so
+     the hierarchy is unchanged and only the ground is: the CTA stays the
+     loudest (14.1:1), the recommendation one step quieter (9.9:1), the
+     provenance mark quieter again (7.5:1). The older .c-hcard-ai cards
+     never needed these; they end in .c-hcard-cta-btn, which paints its
+     own white on orange. */
+  .c-hcard-ai .c-hcard-cta{color:var(--color-neutral-1);}
+  .c-hcard-ai .c-hcard-rec{color:var(--color-neutral-3);}
+  .c-hcard-ai .c-hcard-prov{color:var(--color-neutral-4);}
   .c-hcard-tags{display:flex; flex-wrap:wrap; gap:var(--spacing-8);}
   .c-hcard-cta-btn{margin-top:auto; align-self:flex-start; border:none; border-radius:var(--radius-sm); background:var(--color-orange); color:var(--color-neutral-1); font-family:var(--font-primary); font-size:var(--text-label2-size); font-weight:700; padding:var(--spacing-8) var(--spacing-12); cursor:pointer; transition:opacity var(--duration-fast) var(--ease-standard);}
   .c-hcard-cta-btn:hover{opacity:.88;}
@@ -2632,7 +2647,12 @@
 /* value is right-aligned and owner left-aligned, so they collide at the seam
    without a gutter between them */
 #salesBoard .deals th.n, #salesBoard .deals td.n{padding-right:38px;}
-#salesBoard .deals th:last-child, #salesBoard .deals td:last-child{padding-left:4px; white-space:nowrap;}
+/* Owner is the last column, and at 4px its names sat against the left
+   edge of a 248px cell with ~180px of dead space before the table's right
+   rule. The padding moves the block right without ranging it right: names
+   stay aligned to each other, which is what makes a name column
+   scannable, and they land with roughly even air on both sides. */
+#salesBoard .deals th:last-child, #salesBoard .deals td:last-child{padding-left:64px; white-space:nowrap;}
 /* Widths were left to auto layout, which read the content and handed the
    advertiser column 45% of the table while width:1% above shrink-wrapped
    Owner to 88px — campaign value and owner ended up jammed together at

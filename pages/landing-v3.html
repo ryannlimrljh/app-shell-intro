@@ -2539,7 +2539,9 @@
 #salesBoard .lb{background:var(--surface); border:1px solid var(--rule); border-radius:var(--r-lg);
   box-shadow:var(--shadow-1); overflow:hidden;}
 #salesBoard .lb-head, #salesBoard .lb-row{display:grid; align-items:center;
-  grid-template-columns:26px minmax(126px,1.1fr) minmax(240px,2.6fr) 66px 92px 88px 62px 86px;
+  /* The bar gave up width (2.6fr -> 1.9fr) to make room for the Add Note
+     column on the right, by the user's call. */
+  grid-template-columns:26px minmax(126px,1.1fr) minmax(190px,1.9fr) 66px 92px 88px 62px 86px 96px;
   gap:10px; padding:0 16px;}
 /* .c-table-embedded's header carries no fill. This is a div grid rather than
    a <thead>, so the thead th rule does not reach it, but it is the same role. */
@@ -2689,12 +2691,7 @@
 /* A note on a deal, in the row it belongs to. Same store and same editor as
    the leaderboard, keyed on advertiser and campaign rather than on the row's
    position, so it survives next week's export being ordered differently. */
-#salesBoard .deals tr:hover .nt, #salesBoard .deals .nt:focus-visible{opacity:1;}
-#salesBoard .deals .nt{margin-left:0; margin-top:4px;}
-#salesBoard tbody tr.dn td{padding:0; border-bottom:1px solid var(--rule); background:var(--navy-bg);}
-#salesBoard tbody tr.dn:hover{background:transparent;}
-#salesBoard tbody tr.dn .lb-note{padding:10px 14px 12px; border-bottom:0;}
-#salesBoard tbody tr.dn .lb-note.edit{background:var(--surface);}
+/* the deal rows share .ncell with the leaderboard; inline under the name */
 /* flags a quirk that exists in the source export, not in this page */
 #salesBoard .src{display:inline-block; margin-left:8px; padding:1px 7px; border-radius:var(--r-pill);
   font-size:var(--text-label3-size); font-weight:700; letter-spacing:var(--tracking-eyebrow); text-transform:uppercase;
@@ -3071,60 +3068,88 @@
    with one line from the person who owns it starts a decision instead. The
    note lives against the row rather than in a comments panel somewhere else,
    so it arrives with the number instead of having to be looked up. */
-#salesBoard .nt{flex:none; margin-left:8px; border:1px solid transparent; background:none;
-  border-radius:var(--r-pill); padding:2px 8px; font:inherit; font-size:var(--text-label3-size);
-  font-weight:700; letter-spacing:var(--tracking-eyebrow); text-transform:uppercase; color:var(--faint);
-  cursor:pointer; opacity:.55; transition:opacity .14s var(--ease), color .14s var(--ease);}
-#salesBoard .lb-row:hover .nt, #salesBoard .nt:focus-visible{opacity:1;}
-#salesBoard .nt:hover{color:var(--navy-ink); background:var(--navy-bg);}
-#salesBoard .nt.has{opacity:1; color:var(--navy-ink); background:var(--navy-bg);
-  border-color:color-mix(in srgb, var(--navy-ink) 22%, transparent);}
-#salesBoard .lb-note{padding:10px 16px 12px 52px; background:var(--navy-bg);
-  border-bottom:1px solid var(--rule); font-size:var(--text-caption-size); line-height:1.55;
-  color:var(--navy-ink);}
-#salesBoard .lb-note .note-t{font-weight:700;}
-#salesBoard .lb-note .note-m{display:flex; align-items:center; gap:5px; flex-wrap:wrap;
-  margin-top:6px; font-size:var(--text-label3-size); font-weight:700;
-  color:color-mix(in srgb, var(--navy-ink) 62%, transparent);}
-#salesBoard .lb-note .note-m b{color:var(--navy-ink); font-weight:800;}
-#salesBoard .lb-note .note-m .anon{font-style:italic; opacity:.8;}
-/* one flex item, or the row's 5px gap lands between the name and the comma */
-#salesBoard .lb-note .note-m .edby{white-space:nowrap;}
+/* ── Notes: the pin, the plus, and the fold-out panel ─────────
+   A saved note's only trace on its row is a small pinned card in the
+   element colour the note was assigned at creation (Fire, Wood, Earth,
+   Water, Gold, cycling in that order — the DS department sequence). The
+   card is a saturated fill carrying only an icon, which is the one use
+   the DS permits saturated hues; every text surface below sits on the
+   element's -bg tint instead, with a dark per-element ink. The two inks
+   the token set lacks (Fire, Wood) are derived here and measured against
+   their tints: #AF3A10 is 5.4:1 on #FFEEE9, #B12A47 is 5.9:1 on #FFF2F4.
+   Each panel ink doubles as the Save fill, where white on it clears 4.5
+   for all five elements. */
+#salesBoard .ncell{display:flex; align-items:center; justify-content:flex-end; gap:8px; min-width:0;}
+#salesBoard .ncell.inline{display:inline-flex; margin-top:6px; vertical-align:middle; justify-content:flex-start;}
+#salesBoard .nadd{width:28px; height:28px; flex:none; display:inline-grid; place-items:center;
+  border:1px solid var(--rule); border-radius:8px; background:var(--surface); color:var(--muted);
+  font-size:14px; cursor:pointer; position:relative;
+  transition:background .14s var(--ease), color .14s var(--ease);}
+#salesBoard .nadd::after{content:''; position:absolute; inset:-8px;}   /* 44px hit area */
+#salesBoard .nadd:hover{background:var(--sunk); color:var(--ink);}
+/* the pinned card: element fill, icon glyph, and a per-row tilt so the
+   column reads organically rather than as a rank of chips */
+#salesBoard .npin{width:30px; height:30px; flex:none; display:inline-grid; place-items:center;
+  border:0; border-radius:8px; background:var(--np-hue); color:var(--np-glyph); font-size:15px;
+  cursor:pointer; position:relative; box-shadow:var(--shadow-1);
+  transform:rotate(var(--pin-rot, -4deg));
+  transition:transform .18s var(--ease), box-shadow .18s var(--ease);}
+#salesBoard .npin::after{content:''; position:absolute; inset:-7px;}
+#salesBoard .npin:hover, #salesBoard .npin:focus-visible{transform:rotate(0deg) scale(1.06); box-shadow:var(--shadow-2);}
+#salesBoard .nadd:focus-visible, #salesBoard .npin:focus-visible{outline:2px solid var(--navy); outline-offset:2px;}
+#salesBoard .lb-head .s-note{text-align:right;}
+
+/* the element sequence: hue for fills, -bg/-bg-strong tints for surfaces,
+   ink for text on those tints, glyph for the icon on the saturated fill
+   (ink everywhere it clears 3:1; Water alone needs white) */
+#salesBoard .el-0{--np-hue:var(--orange); --np-bg:var(--color-fire-bg);  --np-strong:var(--color-fire-bg-strong);  --np-ink:#AF3A10; --np-glyph:#0A0A0A;}
+#salesBoard .el-1{--np-hue:var(--salmon); --np-bg:var(--color-wood-bg);  --np-strong:var(--color-wood-bg-strong);  --np-ink:#B12A47; --np-glyph:#0A0A0A;}
+#salesBoard .el-2{--np-hue:var(--green);  --np-bg:var(--color-earth-bg); --np-strong:var(--color-earth-bg-strong); --np-ink:var(--green-ink); --np-glyph:#0A0A0A;}
+#salesBoard .el-3{--np-hue:var(--navy);   --np-bg:var(--color-water-bg); --np-strong:var(--color-water-bg-strong); --np-ink:var(--navy-ink); --np-glyph:#fff;}
+#salesBoard .el-4{--np-hue:var(--amber);  --np-bg:var(--color-gold-bg);  --np-strong:var(--color-gold-bg-strong);  --np-ink:var(--amber-ink); --np-glyph:#0A0A0A;}
+
+/* the panel folds out of the [+] on the hero modal's curve; the JS points
+   transform-origin at the anchor, so closing shrinks back onto the pin */
+#salesBoard .npanel{position:fixed; z-index:60; width:min(340px, calc(100vw - 24px));
+  background:var(--np-bg); border:2px solid var(--np-hue); border-radius:var(--r-md);
+  box-shadow:var(--shadow-3); opacity:0; transform:scale(.25);
+  transition:transform .32s cubic-bezier(.16,1,.3,1), opacity .22s var(--ease);}
+#salesBoard .npanel.in{opacity:1; transform:scale(1);}
+#salesBoard .np-top{display:flex; align-items:center; gap:8px; padding:10px 14px;
+  background:var(--np-strong);
+  border-radius:calc(var(--r-md) - 2px) calc(var(--r-md) - 2px) 0 0;
+  border-bottom:1px solid color-mix(in srgb, var(--np-hue) 30%, transparent);}
+#salesBoard .np-eyebrow{font-size:var(--text-label3-size); font-weight:700;
+  letter-spacing:var(--tracking-eyebrow); text-transform:uppercase; color:var(--np-ink);}
+#salesBoard .np-top .ava{background:var(--np-ink);}
+#salesBoard .np-top b{font-weight:800; color:var(--ink); font-size:var(--text-caption-size);}
+#salesBoard .np-keeps{font-size:var(--text-label3-size); font-weight:700; color:var(--np-ink); margin-left:auto; text-align:right;}
+#salesBoard .np-body{padding:12px 14px 0;}
+#salesBoard .np-l{display:block; font-size:var(--text-label3-size); font-weight:700;
+  letter-spacing:var(--tracking-eyebrow); text-transform:uppercase; color:var(--np-ink); margin-bottom:7px;}
+#salesBoard .npanel textarea{width:100%; box-sizing:border-box; font:inherit; font-size:var(--text-label2-size);
+  line-height:1.5; color:var(--ink); background:var(--surface);
+  border:1px solid color-mix(in srgb, var(--np-hue) 40%, transparent); border-radius:10px;
+  padding:9px 11px; resize:vertical; min-height:84px;}
+#salesBoard .npanel textarea:focus-visible{outline:2px solid var(--np-hue); outline-offset:1px;}
+#salesBoard .np-text{margin:0; font-size:var(--text-body2-size); line-height:1.55; color:var(--ink);
+  font-weight:600; white-space:pre-wrap; overflow-wrap:break-word;}
+#salesBoard .np-by{display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin-top:10px;
+  font-size:var(--text-label3-size); font-weight:700; color:var(--np-ink);}
+#salesBoard .np-by b{font-weight:800; color:var(--ink);}
+#salesBoard .np-act{display:flex; gap:6px; align-items:center; padding:12px 14px 14px; flex-wrap:wrap;}
+#salesBoard .np-act .chip.go{background:var(--np-ink); border-color:var(--np-ink); color:#fff;}
+#salesBoard .np-act .chip.del{color:var(--red-ink);
+  border-color:color-mix(in srgb, var(--red-ink) 30%, transparent);}
+#salesBoard .np-hint{font-size:var(--text-label3-size); color:var(--faint); margin-left:auto; text-align:right;}
 /* initials rather than a photo: there is no directory to pull one from, and a
-   two-letter chip is enough to tell three people's notes apart at a glance */
-/* --navy-ink on --canvas rather than white on --navy: white on the mid blue
-   is 2.85:1 once the page flips to dark, and this chip is 9px bold, so it is
-   held to the 4.5:1 bar rather than the large-text one. This pair clears it
-   in both themes, 7.5:1 light and 9.9:1 dark. */
+   two-letter chip is enough to tell three people's notes apart at a glance.
+   Ink-on-tint pairing, never white on a saturated hue. */
 #salesBoard .ava{display:inline-grid; place-items:center; width:20px; height:20px; flex:none;
   border-radius:50%; background:var(--navy-ink); color:var(--canvas); font-size:var(--text-label3-size);
   font-weight:800; letter-spacing:0; font-style:normal;}
-/* Read-only, because it is a fact about the session rather than a field. */
-#salesBoard .note-who{display:flex; align-items:center; gap:7px; margin-top:10px; flex-wrap:wrap;
-  font-size:var(--text-caption-size); color:var(--ink); cursor:help;}
-#salesBoard .note-who-l{font-size:var(--text-label3-size); font-weight:700; letter-spacing:var(--tracking-eyebrow);
-  text-transform:uppercase; color:var(--faint);}
-#salesBoard .note-who b{font-weight:800;}
-#salesBoard .note-who-n{font-size:var(--text-label3-size); font-weight:700; color:var(--faint);}
-#salesBoard .lb-note .note-m button{background:none; border:0; font:inherit; font-size:var(--text-label3-size);
-  font-weight:800; color:var(--navy-ink); cursor:pointer; padding:0 2px;
-  text-decoration:underline; text-underline-offset:2px;}
-#salesBoard .lb-note.edit{background:var(--surface); padding-bottom:14px;}
-#salesBoard .lb-note label{display:block; font-size:var(--text-label3-size); font-weight:700; letter-spacing:var(--tracking-eyebrow);
-  text-transform:uppercase; color:var(--faint); margin-bottom:6px;}
-#salesBoard .lb-note textarea{width:100%; box-sizing:border-box; font:inherit; font-size:var(--text-label2-size);
-  line-height:1.5; color:var(--ink); background:var(--canvas);
-  border:1px solid var(--rule); border-radius:10px; padding:9px 11px; resize:vertical;
-  min-height:62px;}
-#salesBoard .lb-note textarea:focus-visible{outline:2px solid var(--navy); outline-offset:1px;}
-#salesBoard .note-act{display:flex; gap:6px; align-items:center; flex-wrap:wrap; margin-top:8px;}
-#salesBoard .note-act .chip.go{background:var(--navy); border-color:var(--navy); color:#fff;}
-#salesBoard .note-act .chip.del{color:var(--red-ink);
-  border-color:color-mix(in srgb, var(--red-ink) 30%, transparent);}
-#salesBoard .note-hint{font-size:var(--text-label3-size); color:var(--faint); margin-left:auto;}
-@media (max-width:860px){
-  #salesBoard .lb-note{padding-left:16px;}
-  #salesBoard .note-hint{margin-left:0; flex:1 0 100%;}
+@media (prefers-reduced-motion: reduce){
+  #salesBoard .npanel, #salesBoard .npin{transition:none;}
 }
 
 /* ── Motion ────────────────────────────────────────────────────
@@ -3278,7 +3303,7 @@
    picker, so hiding a column it could never bring back would just lose it. */
 #salesBoard[data-ly="off"] .lb-head .c-ly, #salesBoard[data-ly="off"] .lb-row .c-ly, #salesBoard[data-ly="off"] .p-ly{display:none;}
 #salesBoard[data-ly="off"] .lb-head, #salesBoard[data-ly="off"] .lb-row{
-  grid-template-columns:26px minmax(126px,1.1fr) minmax(240px,2.6fr) 66px 92px 88px 86px;}
+  grid-template-columns:26px minmax(126px,1.1fr) minmax(190px,1.9fr) 66px 92px 88px 86px 96px;}
 
 /* ── Reveal ────────────────────────────────────────────────────
    0fr to 1fr on a grid row animates to the content's own height without
@@ -3526,7 +3551,7 @@
   #salesBoard .months{grid-template-columns:repeat(3,1fr);}
   #salesBoard .ipgrid{grid-template-columns:1fr;}
   #salesBoard .notes{grid-template-columns:1fr 1fr;}
-  #salesBoard .lb-head, #salesBoard .lb-row{grid-template-columns:24px minmax(110px,1fr) minmax(180px,2fr) 58px 84px 78px 56px;}
+  #salesBoard .lb-head, #salesBoard .lb-row{grid-template-columns:24px minmax(110px,1fr) minmax(150px,1.7fr) 58px 84px 78px 56px 84px;}
   #salesBoard .lb-head .c-ly, #salesBoard .lb-row .c-ly{display:none;}
 }
 @media (max-width:860px){
@@ -3550,6 +3575,10 @@
   #salesBoard .lb-rank{display:none;}
   #salesBoard .lb-name{flex:1 1 auto; order:1;}
   #salesBoard .lb-row .st{order:2; margin-left:auto;}
+  /* last in the wrap order with an auto margin, so the pin and the plus
+     sit at the right end of the row's final line — beside the status when
+     the name is short, under it when the name wraps the line */
+  #salesBoard .lb-row .ncell{order:5; margin-left:auto;}
   #salesBoard .bul{order:3; flex:1 0 100%; height:30px; margin:4px 0 2px;}
   #salesBoard .lb-row .r{order:4; text-align:left; font-size:var(--text-body2-size);}
   #salesBoard .lb-row .r .u{margin-top:0;}
@@ -3571,7 +3600,7 @@
   #salesBoard{background:#fff !important;}
   #salesBoard *{-webkit-print-color-adjust:exact !important; print-color-adjust:exact !important;}
   #salesBoard .controls{position:static !important; padding:0 !important; margin-inline:0 !important; box-shadow:none !important;}
-  #salesBoard .views, #salesBoard .rangebar, #salesBoard .frow, #salesBoard .themebtn, #salesBoard .tools, #salesBoard .nt, #salesBoard .lb-head .s::after{display:none !important;}
+  #salesBoard .views, #salesBoard .rangebar, #salesBoard .frow, #salesBoard .themebtn, #salesBoard .tools, #salesBoard .nadd, #salesBoard .npanel, #salesBoard .lb-head .s::after{display:none !important;}
   #salesBoard .filters{border:0 !important; box-shadow:none !important; margin:0 0 10px !important;}
   #salesBoard .collapse{grid-template-rows:minmax(0,1fr) !important; opacity:1 !important;}
   #salesBoard .fscope{border:1px solid var(--color-neutral-3) !important; border-radius:8px;}
@@ -3802,6 +3831,7 @@
                 <button class="s" type="button" data-sort="opp">80%+ opp</button>
                 <button class="s c-ly" type="button" data-sort="ly">vs LY</button>
                 <button class="s" type="button" data-sort="status">Status</button>
+                <span class="s-note">Add Note</span>
               </div>
               <div id="lbRows"></div>
               <div class="lb-foot">
@@ -6674,7 +6704,7 @@ function pcOf(v, t){ return t ? Math.round(v/t*100) : 0; }
 var app = document.getElementById('salesBoard');
 var state = { hz:'now', scale:'pct', sort:'gap', dir:1,
               platform:'', hos:'', status:'', range:'mtd', cmp:[],
-              line:'', mgr:'', person:'', open:{}, lock:0, noteOpen:null };
+              line:'', mgr:'', person:'', open:{}, lock:0 };
 
 var SLICE_LABEL = {platform:'platform', hos:'Head of Sales', status:'status'};
 
@@ -7750,16 +7780,32 @@ function redrawNotes(){
   renderDeals();
   NO_MOTION = false;
 }
-/* Notes are handled before the twisty and the seat, because the button sits
-   inside the name cell and both of those would otherwise swallow the click. */
+/* Notes are handled before the twisty and the seat, so a click on the pin
+   or the plus never falls through to the row behaviours around them. */
 document.addEventListener('click', function(e){
-  var nOpen = e.target.closest('[data-note]');
-  if(nOpen){
+  // any click outside the open panel and its own triggers folds it away —
+  // and deliberately does not return, so the click still does its job
+  if(NP.id && !e.target.closest('#notePanel') &&
+     !e.target.closest('[data-note-add],[data-note-read]')) closeNotePanel(false);
+  var nAdd = e.target.closest('[data-note-add]');
+  if(nAdd){
     e.stopPropagation();
-    state.noteOpen = (state.noteOpen === nOpen.dataset.note) ? null : nOpen.dataset.note;
-    redrawNotes();
-    var box = document.getElementById('noteBox');
-    if(box){ box.focus(); box.setSelectionRange(box.value.length, box.value.length); }
+    if(NP.id === nAdd.dataset.noteAdd && NP.mode === 'edit'){ closeNotePanel(true); return; }
+    openNotePanel(nAdd.dataset.noteAdd, nAdd.dataset.name, 'edit');
+    return;
+  }
+  var nRead = e.target.closest('[data-note-read]');
+  if(nRead){
+    e.stopPropagation();
+    if(NP.id === nRead.dataset.noteRead && NP.mode === 'read'){ closeNotePanel(true); return; }
+    openNotePanel(nRead.dataset.noteRead, nRead.dataset.name, 'read');
+    return;
+  }
+  var nEdit = e.target.closest('[data-note-edit]');
+  if(nEdit){
+    e.stopPropagation();
+    // read morphs to edit in place: same panel, no fold in between
+    openNotePanel(nEdit.dataset.noteEdit, NP.name, 'edit');
     return;
   }
   var nSave = e.target.closest('[data-note-save]');
@@ -7767,19 +7813,22 @@ document.addEventListener('click', function(e){
     e.stopPropagation();
     var box2 = document.getElementById('noteBox');
     noteSet(nSave.dataset.noteSave, box2 ? box2.value : '');
-    state.noteOpen = null; redrawNotes();
+    // redraw first so the panel folds back toward the freshly-pinned card
+    redrawNotes();
+    closeNotePanel(true);
     return;
   }
   var nDel = e.target.closest('[data-note-del]');
   if(nDel){
     e.stopPropagation();
     noteSet(nDel.dataset.noteDel, '');
-    state.noteOpen = null; redrawNotes();
+    redrawNotes();
+    closeNotePanel(false);
     return;
   }
   if(e.target.closest('[data-note-cancel]')){
     e.stopPropagation();
-    state.noteOpen = null; redrawNotes();
+    closeNotePanel(true);
     return;
   }
   var tw = e.target.closest('[data-tw]');
@@ -7816,18 +7865,19 @@ document.addEventListener('click', function(e){
   if(st && !st.disabled){ e.stopPropagation(); scopeTo(st.dataset.seat); }
 });
 document.addEventListener('keydown', function(e){
-  // Escape leaves the editor; Ctrl/Cmd+Enter saves without reaching for a button
-  if(state.noteOpen && e.target.id === 'noteBox'){
+  // Escape folds the panel away; Ctrl/Cmd+Enter saves without the button
+  if(NP.id){
     if(e.key === 'Escape'){
-      e.preventDefault(); state.noteOpen = null; redrawNotes(); return;
+      e.preventDefault(); closeNotePanel(true); return;
     }
-    if(e.key === 'Enter' && (e.metaKey || e.ctrlKey)){
-      e.preventDefault();
-      var btn = document.querySelector('[data-note-save]');
-      if(btn) btn.click();
-      return;
+    if(e.target.id === 'noteBox'){
+      if(e.key === 'Enter' && (e.metaKey || e.ctrlKey)){
+        e.preventDefault();
+        var btn = document.querySelector('[data-note-save]');
+        if(btn) btn.click();
+      }
+      return;                                 // never hijack typing
     }
-    return;                                   // never hijack typing
   }
   if(e.key!=='Enter' && e.key!==' ') return;
   var t=e.target.closest('[data-tw],[data-seat]');
@@ -7878,6 +7928,29 @@ var NOTES = (function(){
   try{ return JSON.parse(localStorage.getItem(NOTE_KEY) || '{}') || {}; }
   catch(e){ return {}; }
 })();
+/* Every note carries its element colour (c: 0-4), assigned in CREATION
+   order through the department sequence Fire, Wood, Earth, Water, Gold —
+   the user's call, over row order, which a re-sort would repaint. The
+   counter lives in the same store under __seq (note keys always contain
+   a pipe, so it cannot collide); notes from before colours existed are
+   assigned in load order once, here. */
+var NOTE_SEQ = (function(){
+  var s = typeof NOTES.__seq === 'number' ? NOTES.__seq : 0, dirty = false;
+  Object.keys(NOTES).forEach(function(k){
+    if(k === '__seq' || !NOTES[k] || typeof NOTES[k] !== 'object') return;
+    if(typeof NOTES[k].c !== 'number'){ NOTES[k].c = s % 5; s++; dirty = true; }
+  });
+  if(dirty){
+    NOTES.__seq = s;
+    try{ localStorage.setItem(NOTE_KEY, JSON.stringify(NOTES)); }catch(e){}
+  }
+  return s;
+})();
+function nextNoteEl(){
+  var c = NOTE_SEQ % 5;
+  NOTE_SEQ++; NOTES.__seq = NOTE_SEQ;
+  return c;
+}
 var MONTHS_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 function today(){
   var d = new Date();
@@ -7890,11 +7963,13 @@ function noteOf(id){ return NOTES[noteKeyOf(id)] || null; }
    distinction a Monday review actually cares about. */
 function noteSet(id, text){
   var k = noteKeyOf(id), v = (text || '').trim(), was = NOTES[k], who = sessionUser();
+  // an edit keeps its colour; only a genuinely new note advances the cycle
+  var c = (was && typeof was.c === 'number') ? was.c : nextNoteEl();
   if(!v){ delete NOTES[k]; }
   else if(was && was.a && was.a !== who){
-    NOTES[k] = {t:v, d:was.d, a:was.a, e:who, ed:today()};
+    NOTES[k] = {t:v, d:was.d, a:was.a, e:who, ed:today(), c:c};
   } else {
-    NOTES[k] = {t:v, d:today(), a:who};
+    NOTES[k] = {t:v, d:today(), a:who, c:c};
   }
   try{ localStorage.setItem(NOTE_KEY, JSON.stringify(NOTES)); }catch(e){}
 }
@@ -7902,60 +7977,145 @@ function noteSet(id, text){
    and the top-ten cut both change week to week; the advertiser and campaign
    do not. */
 function dealNoteId(d){ return 'dl|' + d.a + '~' + d.c; }
-/* The note itself, without a wrapper. The leaderboard puts it in a slot so it
-   can animate; the deal table puts it in a row that spans the columns. Same
-   markup, same store, same keyboard handling, one place to change it. */
-function noteInner(id, name, when, hint){
-  var n = noteOf(id), editing = state.noteOpen === id;
-  if(!n && !editing) return '';
-  if(!editing){
-    var who = n.a || '';
-    return '<div class="lb-note">'+
-      '<span class="note-t">'+esc(n.t)+'</span>'+
-      '<span class="note-m">'+
-        (who ? '<i class="ava" aria-hidden="true">'+esc(initials(who))+'</i>'+
-               '<b>'+esc(who)+'</b> \u00b7 ' : '<span class="anon">Unsigned</span> \u00b7 ')+
-        esc(n.d)+
-        (n.e ? '<span class="edby">\u00b7 edited by <b>'+esc(n.e)+'</b>, '+esc(n.ed)+'</span>' : '')+
-        ' \u00b7 <button type="button" data-note="'+esc(id)+'">Edit</button></span>'+
-      '</div>';
-  }
-  return '<div class="lb-note edit">'+
-    '<label for="noteBox">Note on '+esc(name)+' \u00b7 '+esc(when)+'</label>'+
-    '<textarea id="noteBox" rows="2" maxlength="280" placeholder="'+esc(hint)+'">'+
-      esc(n ? n.t : '')+'</textarea>'+
-    (function(){
-      var who = sessionUser(), keeps = n && n.a && n.a !== who;
-      return '<div class="note-who" title="Taken from your session. Once there is a '+
-        'login this is whoever is signed in; on this board it is the seat you are '+
-        'viewing as.">'+
-        '<span class="note-who-l">'+(keeps ? 'Editing as' : 'Signing as')+'</span>'+
-        '<i class="ava" aria-hidden="true">'+esc(initials(who))+'</i>'+
-        '<b>'+esc(who)+'</b>'+
-        (keeps ? '<span class="note-who-n">the note stays signed by '+esc(n.a)+'</span>' : '')+
-      '</div>';
-    })()+
-    '<div class="note-act">'+
-      '<button class="chip go c-chip c-chip-filter" type="button" data-note-save="'+esc(id)+'">Save</button>'+
-      '<button class="chip c-chip c-chip-filter" type="button" data-note-cancel="1">Cancel</button>'+
-      (n ? '<button class="chip del c-chip c-chip-filter" type="button" data-note-del="'+esc(id)+'">Delete</button>' : '')+
-      '<span class="note-hint">Kept in this browser until there is somewhere shared '+
-      'to put it.</span>'+
-    '</div></div>';
-}
 function whenWord(){ return state.hz==='now' ? 'August' : 'September to December'; }
-function noteBlock(r){
-  var inner = noteInner(r.id, r.n, whenWord(),
-    'Why is this number what it is, and what happens next?');
-  return inner ? '<div class="lb-slot">'+inner+'</div>' : '';
+/* A deterministic tilt per id, so the pinned cards sit organically down
+   the column — the hero cards' fan trick at note scale. Never dead level:
+   0deg next to tilted neighbours reads as a misalignment bug. */
+function pinRot(id){
+  var h = 0;
+  for(var i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) | 0;
+  var r = (Math.abs(h) % 9) - 4;
+  return r === 0 ? 3 : r;
 }
-/* The button that opens one, wherever it sits. */
-function noteBtn(id, name){
-  var has = !!noteOf(id);
-  return '<button class="nt'+(has?' has':'')+'" type="button" data-note="'+esc(id)+'" '+
-    'title="'+(has ? 'Edit the note on '+esc(name) : 'Add a note explaining this row')+'">'+
-    (has?'Note':'+ Note')+'</button>';
+/* The trigger pair, wherever a row offers a note: the pinned card when one
+   is saved, and the [+] that folds the editor out. The card is a saturated
+   element-colour fill — a fill, not a text surface, so the DS is happy —
+   and the note text rides its title so a hover reads it without opening. */
+function noteCell(id, name){
+  var n = noteOf(id);
+  return (n
+    ? '<button class="npin el-'+(typeof n.c === 'number' ? n.c : 0)+'" type="button" '+
+      'data-note-read="'+esc(id)+'" data-name="'+esc(name)+'" '+
+      'style="--pin-rot:'+pinRot(id)+'deg" title="'+esc(n.t)+'" '+
+      'aria-label="Read the note on '+esc(name)+'" aria-haspopup="dialog">'+
+      '<i class="ph-fill ph-push-pin" aria-hidden="true"></i></button>'
+    : '')+
+    '<button class="nadd" type="button" data-note-add="'+esc(id)+'" data-name="'+esc(name)+'" '+
+    'title="'+(n ? 'Edit the note on ' : 'Add a note on ')+esc(name)+'" '+
+    'aria-label="'+(n ? 'Edit the note on ' : 'Add a note on ')+esc(name)+'" '+
+    'aria-haspopup="dialog" aria-expanded="false">'+
+    '<i class="ph ph-plus" aria-hidden="true"></i></button>';
 }
+
+/* ── The fold-out panel ────────────────────────────────────────
+   One floating panel for the whole board, parented to #salesBoard so the
+   element-colour custom properties resolve, fixed so no row clips it.
+   It folds out of the [+] the way the hero modal folds out of its card:
+   transform-origin computed to the anchor's centre, the same curve, so
+   closing shrinks back toward where the pin sits. Living outside the row
+   DOM means opening a note no longer re-renders the board at all — only
+   Save and Delete redraw, and only so the pin appears or goes. */
+var NP = {id:null, name:null, mode:null};
+function npAnchor(){
+  if(!NP.id) return null;
+  return document.querySelector('[data-note-add="'+NP.id.replace(/"/g, '\\"')+'"]');
+}
+function notePanelHTML(){
+  var n = noteOf(NP.id), who = sessionUser(), keeps = n && n.a && n.a !== who;
+  var when = whenWord(), top, body, act;
+  if(NP.mode === 'read' && n){
+    top = '<span class="np-eyebrow">Note by</span>'+
+      '<i class="ava" aria-hidden="true">'+esc(initials(n.a || '?'))+'</i>'+
+      '<b>'+esc(n.a || 'Unsigned')+'</b>';
+    body = '<span class="np-l">Note on '+esc(NP.name)+' \u00b7 '+esc(when)+'</span>'+
+      '<p class="np-text">'+esc(n.t)+'</p>'+
+      '<div class="np-by">'+esc(n.d)+
+      (n.e ? ' \u00b7 edited by <b>'+esc(n.e)+'</b>, '+esc(n.ed) : '')+'</div>';
+    act = '<button class="chip go c-chip c-chip-filter" type="button" data-note-edit="'+esc(NP.id)+'">Edit</button>'+
+      '<button class="chip del c-chip c-chip-filter" type="button" data-note-del="'+esc(NP.id)+'">Delete</button>';
+  } else {
+    top = '<span class="np-eyebrow">'+(keeps ? 'Editing as' : 'Signing as')+'</span>'+
+      '<i class="ava" aria-hidden="true">'+esc(initials(who))+'</i>'+
+      '<b>'+esc(who)+'</b>'+
+      (keeps ? '<span class="np-keeps">stays signed by '+esc(n.a)+'</span>' : '');
+    body = '<label class="np-l" for="noteBox">Note on '+esc(NP.name)+' \u00b7 '+esc(when)+'</label>'+
+      '<textarea id="noteBox" rows="4" maxlength="280" placeholder="'+
+      esc(NP.id.indexOf('dl|') === 0
+        ? 'Where has this got to, and what is the next move?'
+        : 'Why is this number what it is, and what happens next?')+'">'+
+      esc(n ? n.t : '')+'</textarea>';
+    act = '<button class="chip go c-chip c-chip-filter" type="button" data-note-save="'+esc(NP.id)+'">Save</button>'+
+      '<button class="chip c-chip c-chip-filter" type="button" data-note-cancel="1">Cancel</button>'+
+      (n ? '<button class="chip del c-chip c-chip-filter" type="button" data-note-del="'+esc(NP.id)+'">Delete</button>' : '')+
+      '<span class="np-hint">Kept in this browser.</span>';
+  }
+  return '<div class="np-top">'+top+'</div>'+
+    '<div class="np-body">'+body+'</div>'+
+    '<div class="np-act">'+act+'</div>';
+}
+function positionNotePanel(pane){
+  var a = npAnchor();
+  if(!a){   // the anchor was filtered away mid-flight: nothing to hang from
+    pane.remove(); NP.id = null; NP.mode = null; return;
+  }
+  var r = a.getBoundingClientRect();
+  var w = Math.min(340, window.innerWidth - 24);
+  var left = Math.min(Math.max(12, r.right - w), window.innerWidth - w - 12);
+  var h = pane.offsetHeight;
+  var top = r.top - h - 10;                       // above the row, as drawn
+  if(top < 12) top = Math.min(r.bottom + 10, window.innerHeight - h - 12);
+  if(top < 12) top = 12;
+  pane.style.left = left + 'px';
+  pane.style.top = top + 'px';
+  pane.style.transformOrigin =
+    (r.left + r.width/2 - left) + 'px ' + (r.top + r.height/2 - top) + 'px';
+}
+function openNotePanel(id, name, mode){
+  NP.id = id; NP.name = name; NP.mode = mode;
+  var pane = document.getElementById('notePanel');
+  if(!pane){
+    pane = document.createElement('div');
+    pane.id = 'notePanel';
+    pane.setAttribute('role', 'dialog');
+    document.getElementById('salesBoard').appendChild(pane);
+  }
+  var n = noteOf(id);
+  // a fresh note previews the colour the cycle will hand it on save
+  pane.className = 'npanel el-'+((n && typeof n.c === 'number') ? n.c : NOTE_SEQ % 5);
+  pane.setAttribute('aria-label', 'Note on '+name);
+  pane.innerHTML = notePanelHTML();
+  positionNotePanel(pane);
+  var a = npAnchor(); if(a) a.setAttribute('aria-expanded', 'true');
+  if(REDUCED || document.hidden){ pane.classList.add('in'); }
+  else { void pane.offsetHeight; pane.classList.add('in'); }
+  var box = document.getElementById('noteBox');
+  if(box){ box.focus(); box.setSelectionRange(box.value.length, box.value.length); }
+  else { pane.setAttribute('tabindex', '-1'); pane.focus(); }
+}
+function closeNotePanel(refocus){
+  var pane = document.getElementById('notePanel');
+  var a = npAnchor();
+  if(a) a.setAttribute('aria-expanded', 'false');
+  NP.id = null; NP.mode = null;
+  if(pane){
+    if(REDUCED || document.hidden){ pane.remove(); }
+    else {
+      pane.classList.remove('in');            // folds back toward the anchor
+      setTimeout(function(){ pane.remove(); }, 330);
+    }
+  }
+  if(refocus && a) a.focus();
+}
+/* The panel is fixed, so the page scrolling under it must carry it along.
+   capture:true catches the shell's inner scrollport, not just the window. */
+window.addEventListener('scroll', function(){
+  var p = document.getElementById('notePanel');
+  if(p && NP.id) positionNotePanel(p);
+}, true);
+window.addEventListener('resize', function(){
+  var p = document.getElementById('notePanel');
+  if(p && NP.id) positionNotePanel(p);
+});
 
 /* ── Take this view away ───────────────────────────────────────
    The link already carries the scope, but a link is no use in a deck. This
@@ -8346,7 +8506,6 @@ function renderLeaderboard(){
               'title="Narrow the board to '+esc(r.n)+'">'+esc(r.n)+
               '<span class="sub">'+(r.sub?esc(r.sub)+' · ':'')+esc(r.shareTxt||'')+
               ' of '+esc(r.shareOf||'the level above')+'</span></span>')+
-        (r.resid ? '' : noteBtn(r.id, r.n))+
       '</span>'+
       '<span class="bul">'+
         '<span class="bul-rail"></span>'+
@@ -8370,7 +8529,8 @@ function renderLeaderboard(){
       '<span class="st"><span class="pill c-badge '+({green:'c-badge-success',amber:'c-badge-warning',red:'c-badge-error'})[r.s]+'" title="'+esc(statusWhy(r.pct, r.ly))+'">'+
         '<i class="dot"></i>'+
         (r.s==='green'?'Green':r.s==='amber'?'Amber':'Red')+'</span></span>'+
-      '</div></div>' + noteBlock(r);
+      '<span class="ncell">'+(r.resid ? '' : noteCell(r.id, r.n))+'</span>'+
+      '</div></div>';
   }).join('');
 
   document.getElementById('lbNote').innerHTML = (isNow
@@ -8668,16 +8828,13 @@ function renderDeals(){
       '</td></tr>';
     return;
   }
-  var cols = deep ? 5 : 4;
   document.getElementById('dealRows').innerHTML = rows.map(function(x){
     var d = x.d, i = x.i, nid = dealNoteId(d);
-    var note = noteInner(nid, d.a, whenWord(),
-      'Where has this got to, and what is the next move?');
     return '<tr>'+
       '<td><span class="adv">'+esc(d.a)+'</span><span class="camp">'+esc(d.c)+
         (d.trunc?'<span class="src" title="The advertiser or campaign name is cut off at this length in the source export, not here.">truncated in source</span>':'')+
         (d.dup?'<span class="src" title="The source export carries this campaign twice, at the same value. Both rows are shown rather than one being dropped.">duplicate row in source</span>':'')+
-        '</span>'+noteBtn(nid, d.a)+'</td>'+
+        '</span><span class="ncell inline">'+noteCell(nid, d.a)+'</span></td>'+
       '<td>'+(d.ip?'<span class="tag c-tag c-tag-water">'+esc(d.ip)+'</span> ':'<span class="tag ghost c-tag">untagged</span> ')+
         '<span class="camp" style="display:inline;margin-left:4px">'+esc(d.x)+'</span></td>'+
       '<td class="n num">'+rm(d.v)+'</td>'+
@@ -8692,8 +8849,7 @@ function renderDeals(){
             return who ? esc(who)+'<span class="camp">'+esc(d.o)+'\u2019s book</span>'
                        : esc(d.o); })()
         : esc(d.o))+'</td>'+
-      '</tr>'+
-      (note ? '<tr class="dn"><td colspan="'+cols+'">'+note+'</td></tr>' : '');
+      '</tr>';
   }).join('');
 }
 

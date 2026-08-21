@@ -3069,16 +3069,16 @@
    note lives against the row rather than in a comments panel somewhere else,
    so it arrives with the number instead of having to be looked up. */
 /* ── Notes: the pin, the plus, and the fold-out panel ─────────
-   A saved note's only trace on its row is a small pinned card in the
-   element colour the note was assigned at creation (Fire, Wood, Earth,
-   Water, Gold, cycling in that order — the DS department sequence). The
-   card is a saturated fill carrying only an icon, which is the one use
-   the DS permits saturated hues; every text surface below sits on the
-   element's -bg tint instead, with a dark per-element ink. The two inks
-   the token set lacks (Fire, Wood) are derived here and measured against
-   their tints: #AF3A10 is 5.4:1 on #FFEEE9, #B12A47 is 5.9:1 on #FFF2F4.
-   Each panel ink doubles as the Save fill, where white on it clears 4.5
-   for all five elements. */
+   Rebuilt against the user's reference after the first pass read as
+   functional and rigid. The panel is the mock: the element's saturated
+   hue edge to edge, light hairlines rather than framed regions, a
+   borderless field, a white Cancel pill and an obsidian Save. Text is
+   white where the hue can carry it (Fire 3.15, Water 4.57, Wood 2.46 —
+   the user saw the white-on-orange measurement and chose the reference
+   look); on Earth and Gold white lands around 2:1, which is unreadable
+   rather than merely non-compliant, so those two panels carry obsidian
+   text on the same saturated fill. The pinned card is the mock's
+   sticky: element fill, pin glyph tucked in the corner, per-row tilt. */
 #salesBoard .ncell{display:flex; align-items:center; justify-content:flex-end; gap:8px; min-width:0;}
 #salesBoard .ncell.inline{display:inline-flex; margin-top:6px; vertical-align:middle; justify-content:flex-start;}
 #salesBoard .nadd{width:28px; height:28px; flex:none; display:inline-grid; place-items:center;
@@ -3087,69 +3087,88 @@
   transition:background .14s var(--ease), color .14s var(--ease);}
 #salesBoard .nadd::after{content:''; position:absolute; inset:-8px;}   /* 44px hit area */
 #salesBoard .nadd:hover{background:var(--sunk); color:var(--ink);}
-/* the pinned card: element fill, icon glyph, and a per-row tilt so the
-   column reads organically rather than as a rank of chips */
-#salesBoard .npin{width:30px; height:30px; flex:none; display:inline-grid; place-items:center;
-  border:0; border-radius:8px; background:var(--np-hue); color:var(--np-glyph); font-size:15px;
-  cursor:pointer; position:relative; box-shadow:var(--shadow-1);
-  transform:rotate(var(--pin-rot, -4deg));
+/* the pinned sticky: element fill, the pin glyph sitting in its top-left
+   corner in the element's dark ink, and a per-row tilt so the column
+   reads organically rather than as a rank of chips */
+#salesBoard .npin{width:40px; height:46px; flex:none; border:0; border-radius:10px;
+  background:var(--np-hue); color:var(--np-ink); cursor:pointer; position:relative;
+  box-shadow:var(--shadow-2); transform:rotate(var(--pin-rot, -4deg));
   transition:transform .18s var(--ease), box-shadow .18s var(--ease);}
-#salesBoard .npin::after{content:''; position:absolute; inset:-7px;}
-#salesBoard .npin:hover, #salesBoard .npin:focus-visible{transform:rotate(0deg) scale(1.06); box-shadow:var(--shadow-2);}
+#salesBoard .npin i{position:absolute; top:4px; left:5px; font-size:14px;}
+#salesBoard .npin::after{content:''; position:absolute; inset:-4px;}
+#salesBoard .npin:hover, #salesBoard .npin:focus-visible{transform:rotate(0deg) scale(1.05); box-shadow:var(--shadow-3);}
 #salesBoard .nadd:focus-visible, #salesBoard .npin:focus-visible{outline:2px solid var(--navy); outline-offset:2px;}
 #salesBoard .lb-head .s-note{text-align:right;}
 
-/* the element sequence: hue for fills, -bg/-bg-strong tints for surfaces,
-   ink for text on those tints, glyph for the icon on the saturated fill
-   (ink everywhere it clears 3:1; Water alone needs white) */
-#salesBoard .el-0{--np-hue:var(--orange); --np-bg:var(--color-fire-bg);  --np-strong:var(--color-fire-bg-strong);  --np-ink:#AF3A10; --np-glyph:#0A0A0A;}
-#salesBoard .el-1{--np-hue:var(--salmon); --np-bg:var(--color-wood-bg);  --np-strong:var(--color-wood-bg-strong);  --np-ink:#B12A47; --np-glyph:#0A0A0A;}
-#salesBoard .el-2{--np-hue:var(--green);  --np-bg:var(--color-earth-bg); --np-strong:var(--color-earth-bg-strong); --np-ink:var(--green-ink); --np-glyph:#0A0A0A;}
-#salesBoard .el-3{--np-hue:var(--navy);   --np-bg:var(--color-water-bg); --np-strong:var(--color-water-bg-strong); --np-ink:var(--navy-ink); --np-glyph:#fff;}
-#salesBoard .el-4{--np-hue:var(--amber);  --np-bg:var(--color-gold-bg);  --np-strong:var(--color-gold-bg-strong);  --np-ink:var(--amber-ink); --np-glyph:#0A0A0A;}
+/* the element sequence: hue for the fill, ink for the pin glyph and the
+   avatar initials, fg for every line of text on the saturated ground */
+#salesBoard .el-0{--np-hue:var(--orange); --np-ink:#AF3A10; --np-fg:#fff;}
+#salesBoard .el-1{--np-hue:var(--salmon); --np-ink:#B12A47; --np-fg:#fff;}
+#salesBoard .el-2{--np-hue:var(--green);  --np-ink:#00734D; --np-fg:var(--color-obsidian);}
+#salesBoard .el-3{--np-hue:var(--navy);   --np-ink:#0B4FA8; --np-fg:#fff;}
+#salesBoard .el-4{--np-hue:var(--amber);  --np-ink:#8A5A00; --np-fg:var(--color-obsidian);}
 
-/* the panel folds out of the [+] on the hero modal's curve; the JS points
-   transform-origin at the anchor, so closing shrinks back onto the pin */
+/* ── The panel, and the hero modal's swing at note scale ──────
+   The same parameterized FLIP the card modal uses: translate+scale from
+   the anchor's rect about a top-left origin, with the mid-flight rotateY
+   pose, mirrored (--nsw-dir) when the anchor sits right of the viewport
+   centre so the panel always turns toward the viewer. Opening swings out
+   of the [+]; closing swings back into it. */
 #salesBoard .npanel{position:fixed; z-index:60; width:min(340px, calc(100vw - 24px));
-  background:var(--np-bg); border:2px solid var(--np-hue); border-radius:var(--r-md);
-  box-shadow:var(--shadow-3); opacity:0; transform:scale(.25);
-  transition:transform .32s cubic-bezier(.16,1,.3,1), opacity .22s var(--ease);}
-#salesBoard .npanel.in{opacity:1; transform:scale(1);}
-#salesBoard .np-top{display:flex; align-items:center; gap:8px; padding:10px 14px;
-  background:var(--np-strong);
-  border-radius:calc(var(--r-md) - 2px) calc(var(--r-md) - 2px) 0 0;
-  border-bottom:1px solid color-mix(in srgb, var(--np-hue) 30%, transparent);}
+  background:var(--np-hue); border:0; border-radius:var(--r-lg);
+  box-shadow:0 25px 50px -12px rgba(0,0,0,.25); color:var(--np-fg);
+  transform-origin:top left;}
+#salesBoard .npanel.is-opening{animation:np-swing-open .6s cubic-bezier(.25,.9,.35,1) both;}
+#salesBoard .npanel.is-closing{animation:np-swing-close .45s cubic-bezier(.3,.6,.35,1) both;}
+@keyframes np-swing-open{
+  0%{transform:translate(var(--nsw-dx, 0px), var(--nsw-dy, 0px)) scale(var(--nsw-sx, 1), var(--nsw-sy, 1)); opacity:.4;}
+  45%{transform:translate(calc(var(--nsw-dx, 0px) * .5), calc(var(--nsw-dy, 0px) * .5)) scale(.7) rotateY(calc(48deg * var(--nsw-dir, 1))) rotateZ(calc(-7deg * var(--nsw-dir, 1))); opacity:1;}
+  78%{transform:translate(0px, 0px) scale(1) rotateY(calc(-7deg * var(--nsw-dir, 1))) rotateZ(calc(1deg * var(--nsw-dir, 1)));}
+  100%{transform:none; opacity:1;}
+}
+@keyframes np-swing-close{
+  0%{transform:none; opacity:1;}
+  50%{transform:translate(calc(var(--nsw-dx, 0px) * .5), calc(var(--nsw-dy, 0px) * .5)) scale(.7) rotateY(calc(45deg * var(--nsw-dir, 1))) rotateZ(calc(-6deg * var(--nsw-dir, 1))); opacity:1;}
+  100%{transform:translate(var(--nsw-dx, 0px), var(--nsw-dy, 0px)) scale(var(--nsw-sx, 1), var(--nsw-sy, 1)); opacity:.35;}
+}
+#salesBoard .np-top{display:flex; align-items:center; gap:8px; padding:14px 16px 11px;
+  border-bottom:1px solid color-mix(in srgb, var(--np-fg) 60%, transparent);}
 #salesBoard .np-eyebrow{font-size:var(--text-label3-size); font-weight:700;
-  letter-spacing:var(--tracking-eyebrow); text-transform:uppercase; color:var(--np-ink);}
-#salesBoard .np-top .ava{background:var(--np-ink);}
-#salesBoard .np-top b{font-weight:800; color:var(--ink); font-size:var(--text-caption-size);}
-#salesBoard .np-keeps{font-size:var(--text-label3-size); font-weight:700; color:var(--np-ink); margin-left:auto; text-align:right;}
-#salesBoard .np-body{padding:12px 14px 0;}
+  letter-spacing:var(--tracking-eyebrow); text-transform:uppercase; color:var(--np-fg);}
+/* the mock's avatar: a white coin with quiet grey initials, whatever the hue */
+#salesBoard .npanel .ava{background:var(--color-neutral-1); color:var(--color-neutral-5);}
+#salesBoard .np-top b{font-weight:800; color:var(--np-fg); font-size:var(--text-caption-size);}
+#salesBoard .np-keeps{font-size:var(--text-label3-size); font-weight:700; color:var(--np-fg);
+  opacity:.85; margin-left:auto; text-align:right;}
+#salesBoard .np-body{padding:12px 16px 0;}
 #salesBoard .np-l{display:block; font-size:var(--text-label3-size); font-weight:700;
-  letter-spacing:var(--tracking-eyebrow); text-transform:uppercase; color:var(--np-ink); margin-bottom:7px;}
-#salesBoard .npanel textarea{width:100%; box-sizing:border-box; font:inherit; font-size:var(--text-label2-size);
-  line-height:1.5; color:var(--ink); background:var(--surface);
-  border:1px solid color-mix(in srgb, var(--np-hue) 40%, transparent); border-radius:10px;
-  padding:9px 11px; resize:vertical; min-height:84px;}
-#salesBoard .npanel textarea:focus-visible{outline:2px solid var(--np-hue); outline-offset:1px;}
-#salesBoard .np-text{margin:0; font-size:var(--text-body2-size); line-height:1.55; color:var(--ink);
-  font-weight:600; white-space:pre-wrap; overflow-wrap:break-word;}
-#salesBoard .np-by{display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin-top:10px;
-  font-size:var(--text-label3-size); font-weight:700; color:var(--np-ink);}
-#salesBoard .np-by b{font-weight:800; color:var(--ink);}
-#salesBoard .np-act{display:flex; gap:6px; align-items:center; padding:12px 14px 14px; flex-wrap:wrap;}
-#salesBoard .np-act .chip.go{background:var(--np-ink); border-color:var(--np-ink); color:#fff;}
-#salesBoard .np-act .chip.del{color:var(--red-ink);
-  border-color:color-mix(in srgb, var(--red-ink) 30%, transparent);}
-#salesBoard .np-hint{font-size:var(--text-label3-size); color:var(--faint); margin-left:auto; text-align:right;}
-/* initials rather than a photo: there is no directory to pull one from, and a
-   two-letter chip is enough to tell three people's notes apart at a glance.
-   Ink-on-tint pairing, never white on a saturated hue. */
-#salesBoard .ava{display:inline-grid; place-items:center; width:20px; height:20px; flex:none;
-  border-radius:50%; background:var(--navy-ink); color:var(--canvas); font-size:var(--text-label3-size);
-  font-weight:800; letter-spacing:0; font-style:normal;}
+  letter-spacing:var(--tracking-eyebrow); text-transform:uppercase; color:var(--np-fg); margin-bottom:8px;}
+/* the field is the panel: no box, no border, just the caret on the hue */
+#salesBoard .npanel textarea{display:block; width:100%; box-sizing:border-box; font:inherit;
+  font-size:var(--text-label2-size); line-height:1.55; color:var(--np-fg);
+  caret-color:var(--np-fg); background:transparent; border:0; border-radius:6px;
+  padding:2px 0; resize:none; min-height:150px;}
+#salesBoard .npanel textarea::placeholder{color:var(--np-fg); opacity:.55;}
+#salesBoard .npanel textarea:focus{outline:none;}
+#salesBoard .npanel textarea:focus-visible{outline:2px solid var(--np-fg); outline-offset:3px;}
+#salesBoard .np-text{margin:0; font-size:var(--text-body2-size); line-height:1.55; color:var(--np-fg);
+  font-weight:600; white-space:pre-wrap; overflow-wrap:break-word; min-height:60px;}
+#salesBoard .np-by{display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin-top:12px;
+  font-size:var(--text-label3-size); font-weight:700; color:var(--np-fg); opacity:.85;}
+#salesBoard .np-by b{font-weight:800; color:var(--np-fg);}
+/* actions under their own hairline, ranged right like the mock */
+#salesBoard .np-act{display:flex; gap:8px; align-items:center; justify-content:flex-end;
+  margin:12px 16px 0; padding:12px 0 14px; flex-wrap:wrap;
+  border-top:1px solid color-mix(in srgb, var(--np-fg) 60%, transparent);}
+#salesBoard .np-act .chip{border-radius:var(--r-pill); padding:7px 16px;}
+#salesBoard .np-act .chip.go{background:var(--obsidian); border-color:var(--obsidian); color:#fff;}
+#salesBoard .np-act .np-cancel{background:var(--color-neutral-1); border-color:var(--color-neutral-1);
+  color:var(--color-neutral-5);}
+#salesBoard .np-act .chip.del{background:transparent; color:var(--np-fg);
+  border:1px solid color-mix(in srgb, var(--np-fg) 55%, transparent); margin-right:auto;}
 @media (prefers-reduced-motion: reduce){
-  #salesBoard .npanel, #salesBoard .npin{transition:none;}
+  #salesBoard .npanel.is-opening, #salesBoard .npanel.is-closing{animation:none;}
+  #salesBoard .npin{transition:none;}
 }
 
 /* ── Motion ────────────────────────────────────────────────────
@@ -8031,23 +8050,23 @@ function notePanelHTML(){
       '<p class="np-text">'+esc(n.t)+'</p>'+
       '<div class="np-by">'+esc(n.d)+
       (n.e ? ' \u00b7 edited by <b>'+esc(n.e)+'</b>, '+esc(n.ed) : '')+'</div>';
-    act = '<button class="chip go c-chip c-chip-filter" type="button" data-note-edit="'+esc(NP.id)+'">Edit</button>'+
-      '<button class="chip del c-chip c-chip-filter" type="button" data-note-del="'+esc(NP.id)+'">Delete</button>';
+    act = '<button class="chip del c-chip c-chip-filter" type="button" data-note-del="'+esc(NP.id)+'">Delete</button>'+
+      '<button class="chip go c-chip c-chip-filter" type="button" data-note-edit="'+esc(NP.id)+'">Edit</button>';
   } else {
-    top = '<span class="np-eyebrow">'+(keeps ? 'Editing as' : 'Signing as')+'</span>'+
+    top = '<span class="np-eyebrow">'+(keeps ? 'Editing as' : 'Signing in as')+'</span>'+
       '<i class="ava" aria-hidden="true">'+esc(initials(who))+'</i>'+
       '<b>'+esc(who)+'</b>'+
       (keeps ? '<span class="np-keeps">stays signed by '+esc(n.a)+'</span>' : '');
     body = '<label class="np-l" for="noteBox">Note on '+esc(NP.name)+' \u00b7 '+esc(when)+'</label>'+
-      '<textarea id="noteBox" rows="4" maxlength="280" placeholder="'+
+      '<textarea id="noteBox" rows="6" maxlength="280" placeholder="'+
       esc(NP.id.indexOf('dl|') === 0
         ? 'Where has this got to, and what is the next move?'
         : 'Why is this number what it is, and what happens next?')+'">'+
       esc(n ? n.t : '')+'</textarea>';
-    act = '<button class="chip go c-chip c-chip-filter" type="button" data-note-save="'+esc(NP.id)+'">Save</button>'+
-      '<button class="chip c-chip c-chip-filter" type="button" data-note-cancel="1">Cancel</button>'+
-      (n ? '<button class="chip del c-chip c-chip-filter" type="button" data-note-del="'+esc(NP.id)+'">Delete</button>' : '')+
-      '<span class="np-hint">Kept in this browser.</span>';
+    // Delete leads and hangs left; Cancel and Save range right, as drawn
+    act = (n ? '<button class="chip del c-chip c-chip-filter" type="button" data-note-del="'+esc(NP.id)+'">Delete</button>' : '')+
+      '<button class="chip np-cancel c-chip c-chip-filter" type="button" data-note-cancel="1">Cancel</button>'+
+      '<button class="chip go c-chip c-chip-filter" type="button" data-note-save="'+esc(NP.id)+'">Save</button>';
   }
   return '<div class="np-top">'+top+'</div>'+
     '<div class="np-body">'+body+'</div>'+
@@ -8067,8 +8086,23 @@ function positionNotePanel(pane){
   if(top < 12) top = 12;
   pane.style.left = left + 'px';
   pane.style.top = top + 'px';
-  pane.style.transformOrigin =
-    (r.left + r.width/2 - left) + 'px ' + (r.top + r.height/2 - top) + 'px';
+  // no inline transform-origin: the swing's FLIP deltas are computed about
+  // the stylesheet's top-left origin, and an inline centre would corrupt them
+}
+/* The swing's FLIP vars, the card modal's contract at note scale: the
+   panel is measured untransformed, the deltas map its rect back onto the
+   anchor's, and --nsw-dir mirrors the turn when the anchor sits right of
+   the viewport centre so the panel always rotates toward the viewer. */
+function setNoteSwingVars(pane, a){
+  pane.classList.remove('is-opening', 'is-closing');
+  void pane.offsetWidth;                      // measure untransformed
+  var from = a.getBoundingClientRect();
+  var to = pane.getBoundingClientRect();
+  pane.style.setProperty('--nsw-dx', (from.left - to.left).toFixed(1)+'px');
+  pane.style.setProperty('--nsw-dy', (from.top - to.top).toFixed(1)+'px');
+  pane.style.setProperty('--nsw-sx', (from.width / to.width).toFixed(4));
+  pane.style.setProperty('--nsw-sy', (from.height / to.height).toFixed(4));
+  pane.style.setProperty('--nsw-dir', (from.left + from.width/2) < window.innerWidth/2 ? '1' : '-1');
 }
 function openNotePanel(id, name, mode){
   NP.id = id; NP.name = name; NP.mode = mode;
@@ -8079,6 +8113,8 @@ function openNotePanel(id, name, mode){
     pane.setAttribute('role', 'dialog');
     document.getElementById('salesBoard').appendChild(pane);
   }
+  var morph = NP.wasOpen === id;              // read -> edit: no re-swing
+  NP.wasOpen = id;
   var n = noteOf(id);
   // a fresh note previews the colour the cycle will hand it on save
   pane.className = 'npanel el-'+((n && typeof n.c === 'number') ? n.c : NOTE_SEQ % 5);
@@ -8086,8 +8122,10 @@ function openNotePanel(id, name, mode){
   pane.innerHTML = notePanelHTML();
   positionNotePanel(pane);
   var a = npAnchor(); if(a) a.setAttribute('aria-expanded', 'true');
-  if(REDUCED || document.hidden){ pane.classList.add('in'); }
-  else { void pane.offsetHeight; pane.classList.add('in'); }
+  if(!morph && !REDUCED && !document.hidden && a){
+    setNoteSwingVars(pane, a);
+    pane.classList.add('is-opening');         // swings out of the [+]
+  }
   var box = document.getElementById('noteBox');
   if(box){ box.focus(); box.setSelectionRange(box.value.length, box.value.length); }
   else { pane.setAttribute('tabindex', '-1'); pane.focus(); }
@@ -8096,12 +8134,13 @@ function closeNotePanel(refocus){
   var pane = document.getElementById('notePanel');
   var a = npAnchor();
   if(a) a.setAttribute('aria-expanded', 'false');
-  NP.id = null; NP.mode = null;
+  NP.id = null; NP.mode = null; NP.wasOpen = null;
   if(pane){
-    if(REDUCED || document.hidden){ pane.remove(); }
+    if(REDUCED || document.hidden || !a){ pane.remove(); }
     else {
-      pane.classList.remove('in');            // folds back toward the anchor
-      setTimeout(function(){ pane.remove(); }, 330);
+      setNoteSwingVars(pane, a);              // re-read: the page may have scrolled
+      pane.classList.add('is-closing');       // swings back into the [+]
+      setTimeout(function(){ pane.remove(); }, 480);
     }
   }
   if(refocus && a) a.focus();

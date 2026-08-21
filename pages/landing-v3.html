@@ -2464,19 +2464,21 @@
    dashed shortfall are improvised extensions the DS does not define:
    a 2px Neutral-9 marker crossing the track, and a dashed outline
    in the DS error red for the distance still to close.
-   The radius is --radius-md by the user's call, on the track and on all
-   three segment shapes so they stay one family. At this height it renders
-   exactly as the pill did: CSS scales overlapping radii by the smallest
-   side/sum ratio, so 999px on a 32px-tall box already resolved to 16px,
-   which is --radius-md's value. Naming it says what the shape is instead
-   of leaving it to the clamp — and it means a future height change moves
-   the corner honestly rather than silently unrounding. */
-#salesBoard .attn-bar{position:relative; height:32px; background:var(--bar-track); border-radius:var(--radius-md); overflow:visible;}
+   The corner is 8px, on the track and on all three segment shapes so
+   they stay one family. It is a literal rather than a token because the
+   radius ladder starts at 12px and every value on it is >= half this
+   bar's 32px height, which is the point at which a rectangle becomes a
+   stadium — --radius-md rendered identically to the pill for exactly
+   that reason. 8px is a quarter of the height, which reads as the same
+   kind of corner as the card holding it (20px on a ~100px box) rather
+   than as a capsule. The month .stack already carries a literal 8px for
+   the same reason, in the same board. */
+#salesBoard .attn-bar{position:relative; height:32px; background:var(--bar-track); border-radius:8px; overflow:visible;}
 #salesBoard .attn-seg{position:absolute; top:0; height:32px;}
-#salesBoard .attn-seg.b{left:0; background:var(--obsidian); border-radius:var(--radius-md) 0 0 var(--radius-md);}
-#salesBoard .attn-seg.p{background:var(--navy); border-radius:0 var(--radius-md) var(--radius-md) 0;}
+#salesBoard .attn-seg.b{left:0; background:var(--obsidian); border-radius:8px 0 0 8px;}
+#salesBoard .attn-seg.p{background:var(--navy); border-radius:0 8px 8px 0;}
 #salesBoard .attn-short{position:absolute; top:0; height:32px; border:1.5px dashed var(--red);
-  border-left:0; border-radius:0 var(--radius-md) var(--radius-md) 0; opacity:.75;}
+  border-left:0; border-radius:0 8px 8px 0; opacity:.75;}
 #salesBoard .attn-tick{position:absolute; top:-6px; bottom:-6px; width:2px; background:var(--ink);}
 #salesBoard .attn-tick span{position:absolute; top:-17px; right:0; font-size:var(--text-label3-size); font-weight:800;
   white-space:nowrap; color:var(--ink);}
@@ -2564,7 +2566,15 @@
 #salesBoard .bul-o{position:absolute; top:9px; height:8px; border:1.5px dashed var(--navy); border-left:0;
   border-radius:0 var(--radius-pill) var(--radius-pill) 0; opacity:.62;}
 #salesBoard .bul-t{position:absolute; top:4px; height:18px; width:2px; background:var(--ink);}
-#salesBoard .bul-t::after{content:attr(data-l); position:absolute; top:-2px; left:5px; font-size:var(--text-label3-size);
+/* The label sits above the bar, not beside it. At top:-2px it rendered at
+   y=2 in a 26px cell whose rail spans y=9-17, so the word lay across the
+   bar and the dashed opportunity segment and could not be read at all.
+   -15px is measured from the tick, whose own top is 4px: the label clears
+   the rail by 5px and still lands 8px inside the row's top edge, of the
+   24px of clear space the 76px row leaves above this cell. This is the
+   same placement the attainment rail has always used for its own tick
+   label, so the two now read the same way. */
+#salesBoard .bul-t::after{content:attr(data-l); position:absolute; top:-15px; left:5px; font-size:var(--text-label3-size);
   font-weight:800; color:var(--muted); white-space:nowrap;}
 #salesBoard .bul-t.flip::after{left:auto; right:5px;}
 /* the opportunity runs past the rail: a solid cap says the bar is cut, not ended */
@@ -7393,7 +7403,8 @@ function podLabel(v){ return v.indexOf('~direct')===0 ? 'Reports direct' : v; }
 /* The VP line reads as a filter and behaves as a seat. There are only two
    lines and neither has a revenue row of its own, so putting them in the
    leaderboard would have pushed the nine books down a level for no gain.
-   This way Tai's default view is unchanged and a VP still gets a seat. */
+   This way the top-of-tree default view is unchanged and a VP still
+   gets a seat. */
 /* Each select offers only what the one before it allows: heads inside the
    chosen line, managers inside the chosen head. Choosing a level clears
    everything under it, because a manager from another book is not a
@@ -7776,13 +7787,24 @@ var NOTE_KEY = 'collabrium-notes-v1';
 
    Notes carry the author they were saved with, so unlocking afterwards does
    not rewrite what somebody signed. */
-var SESSION_TOP = 'Tai';
+/* Exploring from the top, you are whoever holds the account row. That
+   name is read from the sidebar's own .c-search-input-title, exactly as
+   the greeting reads it, so there is one source for it rather than a
+   third copy to drift. It was a hardcoded 'Tai' from before that row
+   existed, which signed notes as somebody the org tree has never heard
+   of. The literal below is the fallback for a board embedded without the
+   shell, not a second source of truth. */
+function sessionTop(){
+  var el = document.querySelector('.c-search-input-title');
+  var n = el && el.textContent.trim();
+  return n || 'Bryan Wong';
+}
 function sessionUser(){
   if(state.lock){
     var p = pathOf(effNode()), last = p[p.length-1];
     if(last && last.id !== 'co') return last.label;
   }
-  return SESSION_TOP;
+  return sessionTop();
 }
 function initials(n){
   var w = (n||'').trim().split(/\s+/).filter(Boolean);

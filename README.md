@@ -5,7 +5,7 @@ card fan, an assistant, and two working spaces — Decision Space and Performanc
 Space.
 
 Live: <https://app-shell-intro.vercel.app/> (the login screen, which signs you
-into v2)
+into v3)
 
 ## Run it
 
@@ -14,11 +14,11 @@ python3 -m http.server 8791
 ```
 
 Then <http://localhost:8791/pages/login-v1.html> to start where a visitor
-starts, <http://localhost:8791/pages/landing-v2.html> for the working version
-on its own, or <http://localhost:8791/pages/landing-v1.html> for the frozen
-one.
+starts, <http://localhost:8791/pages/landing-v3.html> for the version the
+login now serves, <http://localhost:8791/pages/landing-v2.html> for v2 on its
+own, or <http://localhost:8791/pages/landing-v1.html> for the frozen one.
 
-`/` redirects to **the login screen**, and its Astro ID button goes to **v2**.
+`/` redirects to **the login screen**, and its Astro ID button goes to **v3**.
 That is the whole route: there is no identity provider behind the button, it
 plays the state a real redirect would put you in and then lands on the app
 shell. Before 11 Aug the root pointed at v1 instead, so if you are looking for
@@ -35,8 +35,9 @@ serves `Last-Modified` and browsers hold onto this page.
 
 | Path | What it is |
 |---|---|
-| `pages/login-v1.html` | the login screen, and what `/` serves. Signs into v2 |
-| `pages/landing-v2.html` | **the working version. New implementation goes here.** |
+| `pages/login-v1.html` | the login screen, and what `/` serves. Signs into v3 |
+| `pages/landing-v3.html` | what the login signs into. The variant whose board consumes real `collabrium-dls` component classes rather than restating their values |
+| `pages/landing-v2.html` | **the working version. New implementation goes here.** The by-value reference v3 is diffed against |
 | `pages/landing-v1.html` | the previous version, frozen. Kept so v2 can be diffed against it |
 | `pages/assets/charts.bundle.js` | committed chart bundle — built, not hand-edited |
 | `pages/decision-workspace-v2.html` | the pre-port snapshot two comments in the page cite as provenance. Kept for that reason, and excluded from the deploy by `.vercelignore`. |

@@ -8048,6 +8048,12 @@ var NOTES = (function(){
   try{ return JSON.parse(localStorage.getItem(NOTE_KEY) || '{}') || {}; }
   catch(e){ return {}; }
 })();
+function noteId(){
+  return 'n' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+}
+function saveLocal(){
+  try{ localStorage.setItem(NOTE_KEY, JSON.stringify(NOTES)); }catch(e){}
+}
 /* Every note carries its element colour (c: 0-4), assigned in CREATION
    order through the department sequence Fire, Wood, Earth, Water, Gold —
    the user's call, over row order, which a re-sort would repaint. The
@@ -8057,17 +8063,21 @@ var NOTES = (function(){
 var NOTE_SEQ = (function(){
   var s = typeof NOTES.__seq === 'number' ? NOTES.__seq : 0, dirty = false;
   Object.keys(NOTES).forEach(function(k){
-    if(k === '__seq' || !NOTES[k] || typeof NOTES[k] !== 'object') return;
+    // __seq and __pushed are the store's own bookkeeping, never rows
+    if(k.indexOf('__') === 0 || !NOTES[k] || typeof NOTES[k] !== 'object') return;
     // rows hold LISTS of notes now; single-note values from before are
     // wrapped once, here, so nothing written earlier is lost
     if(!Array.isArray(NOTES[k])){ NOTES[k] = [NOTES[k]]; dirty = true; }
     NOTES[k].forEach(function(n){
       if(n && typeof n.c !== 'number'){ n.c = s % 5; s++; dirty = true; }
+      // a stable id, so a shared store addresses the note rather than its
+      // position — an index races the moment two people are writing
+      if(n && !n.i){ n.i = noteId(); dirty = true; }
     });
   });
   if(dirty){
     NOTES.__seq = s;
-    try{ localStorage.setItem(NOTE_KEY, JSON.stringify(NOTES)); }catch(e){}
+    saveLocal();
   }
   return s;
 })();
@@ -8094,20 +8104,142 @@ function noteSet(id, idx, text){
   var k = noteKeyOf(id), v = (text || '').trim(), who = sessionUser();
   var list = notesOf(id).slice();
   var was = idx >= 0 ? list[idx] : null;
+  var rid = was ? was.i : null;                // the stable id the shared store addresses
+  var fresh = false;
   if(!v){
     if(idx >= 0) list.splice(idx, 1);          // an emptied note is a deletion
   } else if(was && was.a && was.a !== who){
-    list[idx] = {t:v, d:was.d, a:was.a, e:who, ed:today(), c:was.c};
+    list[idx] = {i:rid, t:v, d:was.d, a:was.a, e:who, ed:today(), c:was.c};
   } else if(was){
-    list[idx] = {t:v, d:today(), a:who, c:was.c};
+    list[idx] = {i:rid, t:v, d:today(), a:who, c:was.c};
   } else {
     if(list.length >= NOTE_CAP) return;       // the buttons disable at the cap; this backstops them
     // only a genuinely new note advances the colour cycle
-    list.push({t:v, d:today(), a:who, c:nextNoteEl()});
+    rid = noteId(); fresh = true;
+    list.push({i:rid, t:v, d:today(), a:who, c:nextNoteEl()});
   }
   if(list.length) NOTES[k] = list; else delete NOTES[k];
-  try{ localStorage.setItem(NOTE_KEY, JSON.stringify(NOTES)); }catch(e){}
+  saveLocal();
+  /* The local write already happened, so the pin appears before the round
+     trip lands. The server's answer re-syncs the row after it. */
+  if(NOTES_REMOTE){
+    if(!v){ if(rid) noteRemoteDelete(rid); }
+    else noteRemotePut(k, v, who, fresh ? null : rid, fresh ? rid : null);
+  }
 }
+/* ── The shared store ──────────────────────────────────────────
+   localStorage is the offline cache and the fallback; /api/notes is the
+   truth when it answers {configured:true}. With no database wired up the
+   function says configured:false and everything below stands down, which
+   is why this can ship before anyone touches the Vercel dashboard.
+   Colour is NOT sent: the server derives it from creation order across
+   the whole board, so it owns that and the reply re-syncs it. */
+var NOTES_REMOTE = false;
+function noteFmt(ts){
+  if(!ts) return today();
+  var d = new Date(ts);
+  return isNaN(d.getTime()) ? today() : d.getDate() + ' ' + MONTHS_SHORT[d.getMonth()];
+}
+function shapeRemote(n){
+  var o = {i:n.i, t:n.t, a:n.a, c:n.c, d:noteFmt(n.ts)};
+  if(n.e){ o.e = n.e; o.ed = noteFmt(n.ets); }
+  return o;
+}
+/* One row, replaced with what the server holds — the reply to every write. */
+function adoptRow(key, notes){
+  if(!key) return;
+  if(notes && notes.length) NOTES[key] = notes.map(shapeRemote);
+  else delete NOTES[key];
+  saveLocal();
+  redrawNotes();
+}
+/* The whole store. __seq and __pushed survive: they are this browser's
+   bookkeeping, not the server's. */
+function adoptAll(map){
+  var keep = {};
+  if(typeof NOTES.__seq === 'number') keep.__seq = NOTES.__seq;
+  if(NOTES.__pushed) keep.__pushed = 1;
+  NOTES = keep;
+  Object.keys(map || {}).forEach(function(k){
+    if(map[k] && map[k].length) NOTES[k] = map[k].map(shapeRemote);
+  });
+  saveLocal();
+}
+function noteRemotePut(key, text, who, id, newId){
+  return fetch('/api/notes', {
+    method:'PUT', headers:{'content-type':'application/json'},
+    body: JSON.stringify({key:key, text:text, author:who, id:id, newId:newId})
+  }).then(function(r){
+    return r.json().then(function(j){ return {status:r.status, body:j}; },
+                         function(){ return {status:r.status, body:null}; });
+  }).then(function(x){
+    // 409 is the cap, reached by two people at once: the server's row wins
+    if(x.body && x.body.notes) adoptRow(x.body.key, x.body.notes);
+    else if(x.status === 409) noteRefresh();
+  }, function(){});                         // offline: the local write stands
+}
+function noteRemoteDelete(rid){
+  return fetch('/api/notes?id=' + encodeURIComponent(rid), {method:'DELETE'})
+    .then(function(r){ return r.json(); })
+    .then(function(j){ if(j && j.notes !== undefined) adoptRow(j.key, j.notes); },
+          function(){});
+}
+/* Every note this browser is holding, for the one-time import. */
+function localPairs(){
+  var out = [];
+  Object.keys(NOTES).forEach(function(k){
+    if(k.indexOf('__') === 0 || !Array.isArray(NOTES[k])) return;
+    NOTES[k].forEach(function(n){ if(n && n.t) out.push([k, n]); });
+  });
+  return out;
+}
+/* Pushed one at a time rather than in parallel, so the four-per-row cap
+   is applied in the order they were written rather than by whichever
+   request happens to land first. */
+function importLocal(pairs){
+  return pairs.reduce(function(chain, p){
+    return chain.then(function(){
+      return fetch('/api/notes', {
+        method:'PUT', headers:{'content-type':'application/json'},
+        body: JSON.stringify({key:p[0], text:p[1].t, author:p[1].a || sessionUser(),
+                              newId:p[1].i || noteId()})
+      }).then(function(){}, function(){});
+    });
+  }, Promise.resolve());
+}
+function noteRefresh(){
+  return fetch('/api/notes', {headers:{accept:'application/json'}})
+    .then(function(r){ return r.ok ? r.json() : null; })
+    .then(function(j){
+      if(!j || !j.configured) return false;
+      NOTES_REMOTE = true;
+      adoptAll(j.notes);
+      redrawNotes();
+      return true;
+    }, function(){ return false; });
+}
+function notesBoot(){
+  fetch('/api/notes', {headers:{accept:'application/json'}})
+    .then(function(r){ return r.ok ? r.json() : null; })
+    .then(function(j){
+      if(!j || !j.configured) return;         // no database: stay local, silently
+      NOTES_REMOTE = true;
+      var mine = NOTES.__pushed ? [] : localPairs();
+      adoptAll(j.notes);
+      if(!mine.length){ redrawNotes(); return; }
+      // first connection from this browser: its own notes go up, once
+      importLocal(mine).then(function(){
+        NOTES.__pushed = 1; saveLocal();
+        noteRefresh();
+      });
+    }, function(){});                          // offline: stay local, silently
+  /* A colleague's writing appears without a reload — but never under an
+     open panel, where a redraw at the cursor is worse than a stale row. */
+  window.addEventListener('focus', function(){
+    if(NOTES_REMOTE && !NP.id) noteRefresh();
+  });
+}
+
 /* A deal's note is keyed on what the deal is, not on where it sits. Row order
    and the top-ten cut both change week to week; the advertiser and campaign
    do not. */
@@ -9685,6 +9817,7 @@ function readHash(){
 /* ── Go ───────────────────────────────────────────────────── */
 readHash();
 applyFilters();
+notesBoot();
 
 })();
 </script>

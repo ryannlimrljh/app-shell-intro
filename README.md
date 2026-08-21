@@ -104,6 +104,42 @@ snapshot whose copy and numbers now contradict the live page.
 Anything committed under `pages/` is reachable at a public URL. That is the
 whole deployment model, and the reason `.vercelignore` exists.
 
+## Shared notes
+
+`api/notes.mjs` is the one serverless function in the project. It backs the
+notes on the leaderboard and the deals table with Postgres, so a note written
+on one machine is visible on every other. Without it the board keeps notes in
+the writer's own browser and nobody else ever sees them.
+
+**It is off until a database is attached, and that is deliberate.** With no
+connection string in the environment the function answers `200
+{"configured": false}` rather than an error, and the board silently keeps its
+browser-local behaviour. So this ships safely before anyone touches the Vercel
+dashboard, and lights up the moment they do.
+
+To turn it on, once:
+
+1. Vercel dashboard → the `app-shell-intro` project → **Storage** → **Create
+   database** → **Neon** (Postgres). The free tier is ample here.
+2. Accept the default of connecting it to this project. That is the whole
+   step: Vercel writes `DATABASE_URL` into the project's environment itself.
+3. Redeploy (or push anything). The function creates its own table on first
+   call — there is no migration to run.
+
+The first time each person opens the page after that, whatever notes their
+browser was holding are uploaded once and then marked, so nothing anybody
+wrote is stranded and nothing is uploaded twice.
+
+**No authentication.** The login screen is a prop, so `author` is whatever the
+page claims and anyone with the URL can read and write every note. That is a
+prototype trade, not an oversight: do not put anything sensitive in a note
+until real sign-in exists.
+
+Local development does not have the function — `python3 -m http.server` serves
+static files only, so `/api/notes` 404s and the board falls back to
+browser-local notes, which is the same path as an unconfigured deploy. To
+exercise the shared path locally, run `vercel dev` instead.
+
 ## Known gaps
 
 - **1280×720** — the hero fold overflows by 22px. At 380px cards the four

@@ -2951,20 +2951,30 @@
    A 135° pinstripe laid OVER the real bar colour instead of replacing
    it. The bar still reads as booked or as pipeline; the stripes say the
    split behind it is invented.
-   The line is 2px in every 8, not 4 in every 8. At half coverage this
-   washed out once the track lightened to Neutral-2 and the pipeline went
-   to Navy Blue: measured against the track, the pipeline's lit stripe
-   fell to 2.02:1, and 1.58:1 at the deepest drill. Alpha alone could not
-   recover it, since Navy is light enough that even .20 stops at 2.89:1.
-   Leaving three quarters of the bar at full strength is what carries the
-   contrast; the stripe only has to be legible as a texture. */
-#salesBoard #lbRows[data-mod="1"] .bul-b, #salesBoard #lbRows[data-mod="1"] .bul-f, #salesBoard #plats[data-mod="1"] .minibar i, #salesBoard #plats[data-mod="1"] .minibar u, #salesBoard #months[data-mod="1"] .stack i, #salesBoard #months[data-mod="1"] .stack u, #salesBoard #fandomBars[data-mod="1"] .ht i, #salesBoard #fandomBars[data-mod="1"] .ht u, #salesBoard #ipBars[data-mod="1"] .ht i, #salesBoard #attnBar[data-mod="1"] .attn-seg{
+   The line is 2px in every 8, not 4 in every 8, so three quarters of the
+   bar stays at full strength and carries the contrast; the stripe only
+   has to be legible as a texture.
+   Its DIRECTION follows the segment, and that is the rule to keep: the
+   hatch must always move a segment away from the rail, never toward it.
+   White over obsidian is free — from L=0.024 there is headroom to spare.
+   White over Navy was not: it dragged the pipeline's lit stripe to
+   2.02:1 against the track, 1.58:1 at the deepest drill, and no alpha
+   fixed it because Navy is light enough that even .20 stops at 2.89:1.
+   So every pale segment takes the same pinstripe in black, which deepens
+   it instead. */
+/* Obsidian segments: a light pinstripe. From L=0.024 there is enough
+   headroom that lightening a quarter of the bar costs nothing. */
+#salesBoard #lbRows[data-mod="1"] .bul-b, #salesBoard #plats[data-mod="1"] .minibar i, #salesBoard #months[data-mod="1"] .stack i, #salesBoard #ipBars[data-mod="1"] .ht i, #salesBoard #attnBar[data-mod="1"] .attn-seg.b{
   background-image:repeating-linear-gradient(135deg,
     rgba(255,255,255,.34) 0 2px, transparent 2px 8px);
 }
-#salesBoard #concBar[data-mod="1"] i{
+/* Pale segments — Navy pipeline, Turquoise, the concentration ribbon and
+   its Neutral-4 overflow — take the same pinstripe dark instead. Lighten
+   these and they walk into the rail; darken them and they pull away from
+   it, which is the whole job. */
+#salesBoard #lbRows[data-mod="1"] .bul-f, #salesBoard #plats[data-mod="1"] .minibar u, #salesBoard #months[data-mod="1"] .stack u, #salesBoard #fandomBars[data-mod="1"] .ht i, #salesBoard #fandomBars[data-mod="1"] .ht u, #salesBoard #attnBar[data-mod="1"] .attn-seg.p, #salesBoard #concBar[data-mod="1"] i{
   background-image:repeating-linear-gradient(135deg,
-    rgba(255,255,255,.34) 0 2px, transparent 2px 8px);
+    rgba(0,0,0,.34) 0 2px, transparent 2px 8px);
 }
 /* Heatmap cells are not bars — colour IS the reading, and a white hatch drops
    white-on-blue from 4.1:1 to about 2.7:1. They get a dotted inset ring, which
@@ -2997,12 +3007,26 @@
 #salesBoard .lb-name .nm{min-width:0;}
 #salesBoard .lb-row.d1{background:color-mix(in srgb, var(--sunk) 45%, transparent);}
 #salesBoard .lb-row.d2{background:color-mix(in srgb, var(--sunk) 80%, transparent);}
-#salesBoard .lb-row.m1 .bul-b, #salesBoard .lb-row.m1 .bul-f{
+/* The drilled rows tint toward the track, so their rail steps to
+   Neutral-3 to stay ahead of it: at Neutral-2 it measured 1.07:1 and
+   1.03:1 against its own row and simply was not there, which is what
+   made these bars read as unscaled stubs. Neutral-4 was tried and looked
+   heavier than the data, and being darker it cut pipeline-against-rail
+   to 2.80:1; Neutral-3 keeps that at 3.69:1. Head rows are on white and
+   keep Neutral-2. */
+#salesBoard .lb-row.d1 .bul-rail, #salesBoard .lb-row.d2 .bul-rail{background:var(--color-neutral-3);}
+#salesBoard .lb-row.m1 .bul-b{
   background-image:repeating-linear-gradient(135deg,
     rgba(255,255,255,.34) 0 2px, transparent 2px 8px);}
-#salesBoard .lb-row.m2 .bul-b, #salesBoard .lb-row.m2 .bul-f{
+#salesBoard .lb-row.m1 .bul-f{
+  background-image:repeating-linear-gradient(135deg,
+    rgba(0,0,0,.34) 0 2px, transparent 2px 8px);}
+#salesBoard .lb-row.m2 .bul-b{
   background-image:repeating-linear-gradient(135deg,
     rgba(255,255,255,.34) 0 2px, transparent 2px 5px);}
+#salesBoard .lb-row.m2 .bul-f{
+  background-image:repeating-linear-gradient(135deg,
+    rgba(0,0,0,.34) 0 2px, transparent 2px 5px);}
 #salesBoard .lb-row.vacant .lb-name .nm{color:var(--amber-ink); font-style:italic;}
 
 /* removed: .seatdrop announced sections that were simply not there */

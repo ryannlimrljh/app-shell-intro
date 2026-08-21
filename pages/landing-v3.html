@@ -3114,7 +3114,10 @@
    pose, mirrored (--nsw-dir) when the anchor sits right of the viewport
    centre so the panel always turns toward the viewer. Opening swings out
    of the [+]; closing swings back into it. */
-#salesBoard .npanel{position:fixed; z-index:60; width:min(340px, calc(100vw - 24px));
+/* z-index 3, on the board's re-based ladder (controls 4, menus 8): under
+   the sticky toolbar so scrolling tucks the panel beneath the controls,
+   above the sticky table heads (1) and every z-auto row. */
+#salesBoard .npanel{position:fixed; z-index:3; width:min(340px, calc(100vw - 24px));
   background:var(--np-hue); border:0; border-radius:var(--r-lg);
   box-shadow:0 25px 50px -12px rgba(0,0,0,.25); color:var(--np-fg);
   transform-origin:top left;}
@@ -3134,31 +3137,47 @@
 #salesBoard .np-top{display:flex; align-items:center; gap:8px; padding:14px 16px 11px;
   border-bottom:1px solid color-mix(in srgb, var(--np-fg) 60%, transparent);}
 #salesBoard .np-eyebrow{font-size:var(--text-label3-size); font-weight:700;
-  letter-spacing:var(--tracking-eyebrow); text-transform:uppercase; color:var(--np-fg);}
-/* the mock's avatar: a white coin with quiet grey initials, whatever the hue */
-#salesBoard .npanel .ava{background:var(--color-neutral-1); color:var(--color-neutral-5);}
+  letter-spacing:var(--tracking-eyebrow); text-transform:uppercase; color:var(--np-fg); opacity:.8;}
+/* the mock's avatar: a white COIN with quiet grey initials, whatever the
+   hue. The full rule lives here because the c38 reskin dropped the block
+   that used to define .ava, leaving the initials an unstyled italic <i>
+   in a square. */
+#salesBoard .npanel .ava{display:inline-grid; place-items:center; width:24px; height:24px;
+  flex:none; border-radius:50%; background:var(--color-neutral-1); color:var(--color-neutral-5);
+  font-size:var(--text-label3-size); font-weight:800; letter-spacing:0; font-style:normal;}
 #salesBoard .np-top b{font-weight:800; color:var(--np-fg); font-size:var(--text-caption-size);}
 #salesBoard .np-keeps{font-size:var(--text-label3-size); font-weight:700; color:var(--np-fg);
   opacity:.85; margin-left:auto; text-align:right;}
 #salesBoard .np-body{padding:12px 16px 0;}
-#salesBoard .np-l{display:block; font-size:var(--text-label3-size); font-weight:700;
-  letter-spacing:var(--tracking-eyebrow); text-transform:uppercase; color:var(--np-fg); margin-bottom:8px;}
+/* copy hierarchy: a quiet kicker, then the subject at h4 as the panel's
+   one big element — everything used to be the same 11px caps line and
+   nothing led */
+#salesBoard .np-kick{display:block; font-size:var(--text-label3-size); font-weight:700;
+  letter-spacing:var(--tracking-eyebrow); text-transform:uppercase; color:var(--np-fg);
+  opacity:.8; margin-bottom:2px;}
+#salesBoard .np-title{display:block; font-family:var(--font-primary);
+  font-size:var(--text-h4-size); line-height:var(--text-h4-lh); font-weight:var(--text-h4-weight);
+  color:var(--np-fg); margin-bottom:8px;}
 /* the field is the panel: no box, no border, just the caret on the hue */
 #salesBoard .npanel textarea{display:block; width:100%; box-sizing:border-box; font:inherit;
   font-size:var(--text-label2-size); line-height:1.55; color:var(--np-fg);
   caret-color:var(--np-fg); background:transparent; border:0; border-radius:6px;
   padding:2px 0; resize:none; min-height:150px;}
 #salesBoard .npanel textarea::placeholder{color:var(--np-fg); opacity:.55;}
-#salesBoard .npanel textarea:focus{outline:none;}
-#salesBoard .npanel textarea:focus-visible{outline:2px solid var(--np-fg); outline-offset:3px;}
+/* no focus box: a textarea always matches :focus-visible once focused,
+   so the outline drew a frame over the borderless field on every open.
+   The caret is the focus indicator here, as in the mock. */
+#salesBoard .npanel textarea:focus, #salesBoard .npanel textarea:focus-visible{outline:none;}
 #salesBoard .np-text{margin:0; font-size:var(--text-body2-size); line-height:1.55; color:var(--np-fg);
   font-weight:600; white-space:pre-wrap; overflow-wrap:break-word; min-height:60px;}
 #salesBoard .np-by{display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin-top:12px;
   font-size:var(--text-label3-size); font-weight:700; color:var(--np-fg); opacity:.85;}
 #salesBoard .np-by b{font-weight:800; color:var(--np-fg);}
-/* actions under their own hairline, ranged right like the mock */
+/* actions under their own hairline, ranged right like the mock. The
+   border runs full-bleed like the header's — the two rules frame the
+   panel and must agree — with the spacing carried as padding inside. */
 #salesBoard .np-act{display:flex; gap:8px; align-items:center; justify-content:flex-end;
-  margin:12px 16px 0; padding:12px 0 14px; flex-wrap:wrap;
+  margin:12px 0 0; padding:12px 16px 14px; flex-wrap:wrap;
   border-top:1px solid color-mix(in srgb, var(--np-fg) 60%, transparent);}
 #salesBoard .np-act .chip{border-radius:var(--r-pill); padding:7px 16px;}
 #salesBoard .np-act .chip.go{background:var(--obsidian); border-color:var(--obsidian); color:#fff;}
@@ -8046,7 +8065,8 @@ function notePanelHTML(){
     top = '<span class="np-eyebrow">Note by</span>'+
       '<i class="ava" aria-hidden="true">'+esc(initials(n.a || '?'))+'</i>'+
       '<b>'+esc(n.a || 'Unsigned')+'</b>';
-    body = '<span class="np-l">Note on '+esc(NP.name)+' \u00b7 '+esc(when)+'</span>'+
+    body = '<span class="np-kick">Note \u00b7 '+esc(when)+'</span>'+
+      '<span class="np-title">'+esc(NP.name)+'</span>'+
       '<p class="np-text">'+esc(n.t)+'</p>'+
       '<div class="np-by">'+esc(n.d)+
       (n.e ? ' \u00b7 edited by <b>'+esc(n.e)+'</b>, '+esc(n.ed) : '')+'</div>';
@@ -8057,7 +8077,8 @@ function notePanelHTML(){
       '<i class="ava" aria-hidden="true">'+esc(initials(who))+'</i>'+
       '<b>'+esc(who)+'</b>'+
       (keeps ? '<span class="np-keeps">stays signed by '+esc(n.a)+'</span>' : '');
-    body = '<label class="np-l" for="noteBox">Note on '+esc(NP.name)+' \u00b7 '+esc(when)+'</label>'+
+    body = '<span class="np-kick">Note \u00b7 '+esc(when)+'</span>'+
+      '<label class="np-title" for="noteBox">'+esc(NP.name)+'</label>'+
       '<textarea id="noteBox" rows="6" maxlength="280" placeholder="'+
       esc(NP.id.indexOf('dl|') === 0
         ? 'Where has this got to, and what is the next move?'

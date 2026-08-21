@@ -1438,7 +1438,7 @@
   .c-hcard-avatars{display:flex;} /* block spacing comes from the card's shared 12px gap, like every other block */
   .c-hcard-avatar{width:28px; height:28px; border:2px solid var(--color-neutral-1); margin-left:-8px;}
   .c-hcard-avatar:first-child{margin-left:0;}
-  .c-hcard-bar{width:100%; height:4px; margin-top:auto; border-radius:var(--radius-pill); background:var(--color-neutral-3); overflow:hidden;}
+  .c-hcard-bar{width:100%; height:4px; margin-top:auto; border-radius:var(--radius-pill); background:var(--color-neutral-2); overflow:hidden;}
   /* Percentage is per card via --hcard-bar-pct; 72% stays the fallback so the
      team card that predates the variable is unchanged. */
   .c-hcard-bar-fill{width:var(--hcard-bar-pct, 72%); height:100%; background:var(--color-obsidian);}
@@ -2251,6 +2251,14 @@
   /* DS Progress Bar (c-progress) palette: the Neutral-3 track, the
      data-viz reserve for non-department stacked segments, and the
      Neutral-4 overflow grey for segments past that reserve.
+     The track is Neutral-2 by the user's call, one step lighter than the
+     Neutral-3 the DS's c-progress spec names — a deliberate departure,
+     logged here so it does not read as a token slip. It costs the track
+     most of its edge against a white card (#f0f0f0 on #ffffff is 1.13:1,
+     where Neutral-3 gave 1.48:1), so the far end of every bar is now read
+     from the target tick and the printed Booked/Target pair rather than
+     from where the grey stops. Neutral-4 keeps the overflow segment,
+     which is a segment and not a track.
      The reserve's first colour is Navy Blue by the user's call, replacing
      the Purple that held the slot: every pipeline segment on the board is
      now #1473E6 and the swatch legends follow. Navy is Water's department
@@ -2258,7 +2266,7 @@
      progress — that trade is deliberate, not an oversight. There is no
      --blue alias because --navy above already names this token; a second
      name for one colour is how a palette starts drifting. */
-  --bar-track:var(--color-neutral-3); --bar-overflow:var(--color-neutral-4);
+  --bar-track:var(--color-neutral-2); --bar-overflow:var(--color-neutral-4);
   --turquoise:var(--color-turquoise);
 
   /* saturated hues re-valued for use as TEXT (>=4.5:1 on surface) */

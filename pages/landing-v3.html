@@ -8491,12 +8491,33 @@ function noteVP(){
   return v ? {w:v.width, h:v.height, ox:v.offsetLeft, oy:v.offsetTop}
            : {w:window.innerWidth, h:window.innerHeight, ox:0, oy:0};
 }
+/* The band a floating note may actually occupy, which is not the screen.
+   Both edges are chrome that paints above it — the sticky controls at the
+   top, the ask box at the bottom — so a note placed behind either is not
+   dimmed, it is gone. That is what sliced the note in two on a phone,
+   where the controls take a third of the height. Measured live and in
+   visual-viewport coordinates, so it holds while iOS is zoomed or
+   scrolled under a keyboard. If honouring both edges would leave under
+   200px, both stand down: overlapping chrome is readable, a sliver is
+   not. */
+function noteBand(V){
+  var top = 12, bot = V.h - 12, oy = V.oy || 0;
+  var c = document.getElementById('controls');
+  if(c) top = Math.max(top, Math.round(c.getBoundingClientRect().bottom - oy + 8));
+  var k = document.getElementById('askBox');
+  if(k){
+    var kt = Math.round(k.getBoundingClientRect().top - oy - 8);
+    if(kt > 200) bot = Math.min(bot, kt);       // 0 while it is hidden
+  }
+  if(bot - top < 200){ top = 12; bot = V.h - 12; }
+  return {top: top, bottom: Math.max(top + 160, bot)};
+}
 function positionNotePanel(pane){
   var a = npAnchor();
   if(!a){   // the anchor was filtered away mid-flight: nothing to hang from
     pane.remove(); NP.id = null; NP.mode = null; return;
   }
-  var V = noteVP(), r = a.getBoundingClientRect();
+  var V = noteVP(), B = noteBand(V), r = a.getBoundingClientRect();
   /* Two coordinate spaces, and they only agree when nothing is zoomed and
      no keyboard is up: a fixed element positions against the LAYOUT
      viewport, while the anchor's rect and the keyboard live in the VISUAL
@@ -8506,17 +8527,17 @@ function positionNotePanel(pane){
   pane.style.width = w + 'px';
   // the keyboard is why this is not just a CSS max-height: 100vh does not
   // shrink for it, and the header and Save have to stay reachable
-  pane.style.maxHeight = Math.max(160, Math.round(V.h - 24)) + 'px';
+  pane.style.maxHeight = Math.max(160, B.bottom - B.top) + 'px';
   var aTop = r.top - V.oy, aBot = r.bottom - V.oy, aRight = r.right - V.ox;
   var left = Math.min(Math.max(12, aRight - w), V.w - w - 12);
   var h = pane.offsetHeight;
   var top = aTop - h - 10;                        // above the row, as drawn
-  if(top < 12) top = aBot + 10;                   // no room above: go below it
+  if(top < B.top) top = aBot + 10;                // no room above: go below it
   /* Then keep the whole panel on screen whatever the anchor is doing. A
      top-only clamp left it hanging off the bottom when the anchor sat
      below the fold, which put Save out of reach. */
-  top = Math.min(top, V.h - h - 12);
-  if(top < 12) top = 12;
+  top = Math.min(top, B.bottom - h);
+  if(top < B.top) top = B.top;
   pane.style.left = (left + V.ox) + 'px';
   pane.style.top = (top + V.oy) + 'px';
   // no inline transform-origin: the swing's FLIP deltas are computed about
@@ -8621,15 +8642,16 @@ function showNotePeek(btn, id){
   }
   pk.className = 'npeek';
   pk.innerHTML = notePeekHTML(id);
-  var r = btn.getBoundingClientRect();
-  var w = Math.min(280, window.innerWidth - 24);
+  var V = noteVP(), B = noteBand(V), r = btn.getBoundingClientRect();
+  var w = Math.min(280, V.w - 24);
   pk.style.width = w + 'px';
-  pk.style.left = Math.min(Math.max(12, r.right - w), window.innerWidth - w - 12) + 'px';
+  pk.style.left = (Math.min(Math.max(12, r.right - V.ox - w), V.w - w - 12) + V.ox) + 'px';
   pk.style.top = '0px';                        // measure first, then place
   var h = pk.offsetHeight;
-  var top = r.top - h - 8;
-  if(top < 12) top = Math.min(r.bottom + 8, window.innerHeight - h - 12);
-  pk.style.top = top + 'px';
+  var top = r.top - V.oy - h - 8;
+  if(top < B.top) top = Math.min(r.bottom - V.oy + 8, B.bottom - h);
+  if(top < B.top) top = B.top;
+  pk.style.top = (top + V.oy) + 'px';
   pk.classList.add('on');
 }
 function hideNotePeek(){

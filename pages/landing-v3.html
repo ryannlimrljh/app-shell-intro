@@ -3469,6 +3469,33 @@
      nothing to its left is just a stray line. */
   #salesBoard[data-h="now"] .controls.compact .frow > .rangebar + .flab + .fsel-wrap{
     margin-left:4px; padding-left:12px; border-left:1px solid var(--rule);}
+  /* No card around the strip. A rounded box that stops 16px short of the
+     screen is the grammar for a row that has ended, and this one has not:
+     it scrolls. Full-bleed, the last chip is cut by the screen instead,
+     and the fade at the edge reads as "more this way" rather than as a
+     frame. */
+  #salesBoard .controls.compact .filters{border:0; background:none; box-shadow:none;
+    border-radius:0;}
+  #salesBoard .controls.compact .frow{margin-inline:calc(var(--page-gutter) * -1);
+    padding:5px var(--page-gutter);
+    -webkit-mask-image:linear-gradient(to right,#000 calc(100% - 28px),transparent);
+    mask-image:linear-gradient(to right,#000 calc(100% - 28px),transparent);}
+  /* the scope strip loses the card that framed it, so it carries its own */
+  #salesBoard .controls.compact .filters > .collapse{border-radius:10px;}
+  #salesBoard .controls.compact .fscope{border:1px solid var(--rule); border-radius:10px;}
+  /* Smaller box, same type: 11px is already the floor, so the height comes
+     off the 44px coarse rule instead. The floor survives as a hit area —
+     the transparent ::after puts each target back to 44 and stays inside
+     the row's 5px padding, so it cannot poach a tap from the row above. */
+  #salesBoard .controls.compact .frow .fsel-trigger,
+  #salesBoard .controls.compact .frow .fpill,
+  #salesBoard .controls.compact .frow .cmp-btn,
+  #salesBoard .controls.compact .frow .fclear{position:relative; min-height:0; height:36px;
+    padding-block:0; padding-inline:10px; gap:4px; font-size:var(--text-label3-size);}
+  #salesBoard .controls.compact .frow .fsel-trigger::after,
+  #salesBoard .controls.compact .frow .fpill::after,
+  #salesBoard .controls.compact .frow .cmp-btn::after,
+  #salesBoard .controls.compact .frow .fclear::after{content:''; position:absolute; inset:-4px 0;}
 }
 /* on a short viewport a toolbar would eat the board it exists to serve */
 @media (max-height:640px){ #salesBoard .controls{position:static;} }

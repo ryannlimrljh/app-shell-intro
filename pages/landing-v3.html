@@ -3404,6 +3404,11 @@
   #salesBoard .icb{width:44px; height:44px;}
   /* the note controls are controls: the [+] and the bin get the same floor */
   #salesBoard .nadd, #salesBoard .np-del{width:44px; height:44px;}
+  /* 16px or iOS Safari zooms the whole page when this field takes focus,
+     which drags the panel off the left edge and pushes its header above
+     the top. Nothing else fixes it — the zoom is triggered purely by the
+     computed font-size of the focused field. */
+  #salesBoard .npanel textarea{font-size:16px;}
   #salesBoard .crumbrow .tools{gap:8px;}
 }
 /* On a phone the same toolbar is a third of the screen, so it drops to what
@@ -8477,25 +8482,43 @@ function notePanelHTML(){
     '<div class="np-body">'+body+'</div>'+
     '<div class="np-act">'+act+'</div>';
 }
+/* The visible box, which is not window.innerHeight on a phone: iOS does
+   not shrink that for the keyboard, so every clamp measured against it
+   was placing the panel behind one. visualViewport reports the real box
+   and how far it sits under the layout viewport. */
+function noteVP(){
+  var v = window.visualViewport;
+  return v ? {w:v.width, h:v.height, ox:v.offsetLeft, oy:v.offsetTop}
+           : {w:window.innerWidth, h:window.innerHeight, ox:0, oy:0};
+}
 function positionNotePanel(pane){
   var a = npAnchor();
   if(!a){   // the anchor was filtered away mid-flight: nothing to hang from
     pane.remove(); NP.id = null; NP.mode = null; return;
   }
-  var r = a.getBoundingClientRect();
-  var w = Math.min(340, window.innerWidth - 24);
-  var left = Math.min(Math.max(12, r.right - w), window.innerWidth - w - 12);
+  var V = noteVP(), r = a.getBoundingClientRect();
+  /* Two coordinate spaces, and they only agree when nothing is zoomed and
+     no keyboard is up: a fixed element positions against the LAYOUT
+     viewport, while the anchor's rect and the keyboard live in the VISUAL
+     one. Everything below is computed in visual space, then V.ox/V.oy
+     convert the answer back for the fixed placement. */
+  var w = Math.min(340, V.w - 24);
+  pane.style.width = w + 'px';
+  // the keyboard is why this is not just a CSS max-height: 100vh does not
+  // shrink for it, and the header and Save have to stay reachable
+  pane.style.maxHeight = Math.max(160, Math.round(V.h - 24)) + 'px';
+  var aTop = r.top - V.oy, aBot = r.bottom - V.oy, aRight = r.right - V.ox;
+  var left = Math.min(Math.max(12, aRight - w), V.w - w - 12);
   var h = pane.offsetHeight;
-  var top = r.top - h - 10;                       // above the row, as drawn
-  if(top < 12) top = r.bottom + 10;               // no room above: go below it
-  /* Then keep the whole panel on screen whatever the anchor is doing. The
-     top-only clamp this replaces left it hanging off the bottom when the
-     anchor sat below the fold — "above the anchor" is still a big number
-     there — which put Save out of reach on a short viewport. */
-  top = Math.min(top, window.innerHeight - h - 12);
+  var top = aTop - h - 10;                        // above the row, as drawn
+  if(top < 12) top = aBot + 10;                   // no room above: go below it
+  /* Then keep the whole panel on screen whatever the anchor is doing. A
+     top-only clamp left it hanging off the bottom when the anchor sat
+     below the fold, which put Save out of reach. */
+  top = Math.min(top, V.h - h - 12);
   if(top < 12) top = 12;
-  pane.style.left = left + 'px';
-  pane.style.top = top + 'px';
+  pane.style.left = (left + V.ox) + 'px';
+  pane.style.top = (top + V.oy) + 'px';
   // no inline transform-origin: the swing's FLIP deltas are computed about
   // the stylesheet's top-left origin, and an inline centre would corrupt them
 }
@@ -8649,6 +8672,17 @@ window.addEventListener('resize', function(){
   var p = document.getElementById('notePanel');
   if(p && NP.id) positionNotePanel(p);
 });
+/* The keyboard opening is a visualViewport resize, not a window one, and
+   dismissing it scrolls that viewport back. Without these the panel is
+   positioned once and then stranded behind the keyboard. */
+if(window.visualViewport){
+  ['resize', 'scroll'].forEach(function(ev){
+    window.visualViewport.addEventListener(ev, function(){
+      var p = document.getElementById('notePanel');
+      if(p && NP.id) positionNotePanel(p);
+    });
+  });
+}
 
 /* ── Take this view away ───────────────────────────────────────
    The link already carries the scope, but a link is no use in a deck. This

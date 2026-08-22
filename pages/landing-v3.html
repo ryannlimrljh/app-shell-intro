@@ -3202,6 +3202,18 @@
 @media (prefers-reduced-motion: reduce){
   #salesBoard .npeek{transition:none;}
 }
+/* The peek is a hover affordance. A touch device synthesises mouseover on
+   tap, which flashed it open before the panel replaced it; there, the tap
+   itself opens the panel and shows more than the peek ever would. */
+@media (hover: none), (pointer: coarse){
+  #salesBoard .npeek{display:none;}
+}
+@media (max-width:640px){
+  /* one column: two 148px cards give a preview about sixty characters
+     wide. The platform and month cards collapse the same way here. */
+  #salesBoard .np-grid{grid-template-columns:1fr;}
+  #salesBoard .np-card{min-height:0;}
+}
 
 /* ── The panel, and the hero modal's swing at note scale ──────
    The same parameterized FLIP the card modal uses: translate+scale from
@@ -3243,7 +3255,12 @@
 #salesBoard .np-top b{font-weight:800; color:var(--np-fg); font-size:var(--text-caption-size);}
 #salesBoard .np-keeps{font-size:var(--text-label3-size); font-weight:700; color:var(--np-fg);
   opacity:.85; margin-left:auto; text-align:right;}
-#salesBoard .np-body{padding:12px 16px 0;}
+/* The header and the actions must stay reachable however short the
+   viewport gets — a keyboard on a small phone eats most of it — so the
+   panel is capped and the body is the part that scrolls. */
+#salesBoard .npanel{max-height:calc(100vh - 24px); display:flex; flex-direction:column;}
+#salesBoard .np-top, #salesBoard .np-act{flex:none;}
+#salesBoard .np-body{padding:12px 16px 0; overflow-y:auto; min-height:0;}
 /* copy hierarchy: a quiet kicker, then the subject at h4 as the panel's
    one big element — everything used to be the same 11px caps line and
    nothing led */
@@ -3282,7 +3299,10 @@
    never Tier 2) on the same .c-icon-btn as the [+]. It keeps the row's
    left seat. fg rather than destructive red: red on the saturated Fire
    and Wood grounds is near-invisible, and the bin shape says it. */
-#salesBoard .np-del{margin-right:auto; color:var(--np-fg); font-size:16px;}
+#salesBoard .np-del{margin-right:auto; color:var(--np-fg); font-size:16px; position:relative;}
+/* the same 44px hit area the [+] carries: this is the destructive control
+   and it was the smallest thing in the row */
+#salesBoard .np-del::after{content:''; position:absolute; inset:-6px;}
 #salesBoard .np-del:hover{background:color-mix(in srgb, var(--np-fg) 16%, transparent);}
 #salesBoard .np-del:focus-visible{outline:2px solid var(--np-fg); outline-offset:2px;}
 @media (prefers-reduced-motion: reduce){
@@ -3382,6 +3402,8 @@
      not care that they sit outside the toolbar */
   #salesBoard .chip, #salesBoard .crumb{min-height:44px;}
   #salesBoard .icb{width:44px; height:44px;}
+  /* the note controls are controls: the [+] and the bin get the same floor */
+  #salesBoard .nadd, #salesBoard .np-del{width:44px; height:44px;}
   #salesBoard .crumbrow .tools{gap:8px;}
 }
 /* On a phone the same toolbar is a third of the screen, so it drops to what
@@ -8465,7 +8487,12 @@ function positionNotePanel(pane){
   var left = Math.min(Math.max(12, r.right - w), window.innerWidth - w - 12);
   var h = pane.offsetHeight;
   var top = r.top - h - 10;                       // above the row, as drawn
-  if(top < 12) top = Math.min(r.bottom + 10, window.innerHeight - h - 12);
+  if(top < 12) top = r.bottom + 10;               // no room above: go below it
+  /* Then keep the whole panel on screen whatever the anchor is doing. The
+     top-only clamp this replaces left it hanging off the bottom when the
+     anchor sat below the fold — "above the anchor" is still a big number
+     there — which put Save out of reach on a short viewport. */
+  top = Math.min(top, window.innerHeight - h - 12);
   if(top < 12) top = 12;
   pane.style.left = left + 'px';
   pane.style.top = top + 'px';
@@ -8586,7 +8613,13 @@ function hideNotePeek(){
   var pk = document.getElementById('notePeek');
   if(pk) pk.classList.remove('on');
 }
+/* Hover-capable pointers only: on touch the tap opens the panel, and a
+   synthesised mouseover would just flash the peek on the way there. */
+function canHover(){
+  return !!(window.matchMedia && matchMedia('(hover: hover) and (pointer: fine)').matches);
+}
 document.addEventListener('mouseover', function(e){
+  if(!canHover()) return;
   var b = e.target.closest('[data-note-read],[data-note-stack]');
   if(b && !b.classList.contains('np-hidden'))
     showNotePeek(b, b.dataset.noteRead || b.dataset.noteStack);

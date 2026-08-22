@@ -3456,6 +3456,19 @@
   #salesBoard .controls.compact .views .v-s{display:block; font-size:var(--text-caption-size); font-weight:800;}
   #salesBoard .controls{padding-block:6px 7px;}
   #salesBoard .controls.compact{padding-block:6px 7px;}
+  /* Inside the slice strip the range group is one flex item, not a card:
+     no border, no padding of its own, and no scroller, because the strip
+     around it is the scroller now. Last in the block so it outranks the
+     row rules above, which it ties with on specificity. */
+  #salesBoard .controls.compact .frow > .rangebar{display:flex; flex:0 0 auto; width:auto;
+    align-items:center; gap:8px; margin:0; padding:0; border:0; background:none;
+    box-shadow:none; overflow:visible;}
+  /* where range ends and slice begins, now that they share one strip. The
+     hidden Slice label sits between them in the DOM. Scoped to View 01,
+     since the range group is hidden in the projection and a divider with
+     nothing to its left is just a stray line. */
+  #salesBoard[data-h="now"] .controls.compact .frow > .rangebar + .flab + .fsel-wrap{
+    margin-left:4px; padding-left:12px; border-left:1px solid var(--rule);}
 }
 /* on a short viewport a toolbar would eat the board it exists to serve */
 @media (max-height:640px){ #salesBoard .controls{position:static;} }
@@ -3538,9 +3551,17 @@
 /* Visibility rather than [hidden], so there is something to transition. It
    still leaves the accessibility tree when shut, which display:none did, and
    which opacity alone would not. */
-/* panel chrome, position and open/close from .c-filter-panel.is-right;
+/* Panel chrome and open/close from .c-filter-panel.is-right, but fixed
+   and parented to the board rather than absolute inside the bar, the same
+   departure .fsel-panel makes and for the same two reasons: the compact
+   range row is overflow-y:hidden, which clipped this panel to nothing on a
+   phone, and the slice strip it now sits in carries a mask, which clips
+   even fixed descendants. The script measures left/top/max-height from the
+   trigger, so the DS offsets stand down.
    268px holds the two-column baseline rows the DS's 240 floor would wrap */
-#salesBoard .cmp-menu{min-width:268px;}
+#salesBoard .cmp-menu{position:fixed; top:auto; left:auto; right:auto;
+  width:min(268px, calc(100vw - 16px)); min-width:0;
+  max-height:min(48vh, 340px); overflow-y:auto; overscroll-behavior:contain;}
 
 #salesBoard .cmp-opt{display:flex; align-items:flex-start; gap:10px; width:100%; text-align:left;
   background:none; border:0; font:inherit; padding:9px 10px; border-radius:14px;
@@ -9815,8 +9836,24 @@ var syncFsels = function(){};
 // the comparison picker
 (function(){
   var btn = document.getElementById('cmpBtn'), menu = document.getElementById('cmpMenu'),
-      wrap = document.getElementById('cmp');
+      wrap = document.getElementById('cmp'), board = document.getElementById('salesBoard');
   if(!btn || !menu || !wrap) return;
+  // out of the bar and onto the board: see the panel's CSS note
+  if(board) board.appendChild(menu);
+  function place(){
+    var tr = btn.getBoundingClientRect();
+    // no box to hang off: the whole range group is hidden in View 02, and
+    // measuring a 0x0 trigger threw the panel across the screen
+    if(!tr.width && !tr.height) return;
+    var vw = document.documentElement.clientWidth,
+        vh = document.documentElement.clientHeight,
+        w = menu.offsetWidth || 268;
+    // right-aligned to the trigger, which is what .is-right meant, then
+    // clamped into the viewport rather than trusting that alignment holds
+    menu.style.left = Math.round(Math.max(8, Math.min(tr.right - w, vw - w - 8))) + 'px';
+    menu.style.top = Math.round(tr.bottom + 8) + 'px';
+    menu.style.maxHeight = Math.round(Math.max(160, Math.min(340, vh - tr.bottom - 16))) + 'px';
+  }
   function isOpen(){ return !menu.classList.contains('shut'); }
   function open(on){
     menu.hidden = false;                       // the class carries the state now
@@ -9824,6 +9861,7 @@ var syncFsels = function(){};
     menu.classList.toggle('is-open', on);      // .c-filter-panel.is-open — the DS side of the same state
     btn.classList.toggle('is-open', on);       // .c-filter-trigger.is-open
     btn.setAttribute('aria-expanded', on ? 'true' : 'false');
+    if(on) place();
   }
   open(false);
   btn.addEventListener('click', function(e){
@@ -9852,6 +9890,32 @@ var syncFsels = function(){};
   document.addEventListener('keydown', function(e){
     if(e.key === 'Escape' && isOpen()){ open(false); btn.focus(); }
   });
+})();
+
+/* ── One control strip on a phone ─────────────────────────────
+   The range row is two live controls at this width, so below 760 it moves
+   inside the slice scroller and the toolbar loses a whole row. A real move
+   rather than a CSS reflow: the element travels, so its role and its
+   data-only="now" rule travel with it. */
+(function(){
+  var bars = document.querySelector('#salesBoard .ctl-bars'),
+      rb = document.querySelector('#salesBoard .rangebar'),
+      frow = document.querySelector('#salesBoard #filters .frow');
+  if(!bars || !rb || !frow) return;
+  var mq = window.matchMedia('(max-width:760px)');
+  function apply(){
+    if(mq.matches){
+      if(rb.parentNode !== frow) frow.insertBefore(rb, frow.firstChild);
+    } else if(rb.parentNode !== bars){
+      bars.insertBefore(rb, bars.firstChild);   // where it was authored
+    }
+  }
+  apply();
+  // both signals: the media query is the precise one, resize is the one
+  // that cannot be missed, and apply() is two parent checks either way
+  if(mq.addEventListener) mq.addEventListener('change', apply);
+  else if(mq.addListener) mq.addListener(apply);
+  window.addEventListener('resize', apply);
 })();
 
 function applyFilters(){

@@ -1,0 +1,1337 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Collabrium · Feedback board</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<!-- Same weight list as the dashboard: 800 is the heading token, 700 the
+     label token. A weight missing here gets faux-bolded from the nearest
+     loaded cut instead of using the real face Mulish ships. -->
+<link href="https://fonts.googleapis.com/css2?family=Mulish:wght@400;500;600;700;800;900&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css" />
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css" />
+<link rel="stylesheet" href="../collabrium-dls/tokens.css?v=f278e40" />
+<link rel="stylesheet" href="../collabrium-dls/components.css?v=f278e40" />
+<style>
+  *{box-sizing:border-box;}
+  html,body{margin:0; height:100%;}
+  body{font-family:var(--font-primary); color:var(--color-neutral-9);
+    background:var(--color-canvas-warm); -webkit-font-smoothing:antialiased;}
+
+  /* The DS ships .c-shell at a fixed 480px, which is the height its own
+     component gallery renders it at, not a page height. Every real screen
+     has to say so; the dashboard does the same. Without it the sidebar
+     stops halfway down the window and the board is clipped. */
+  .c-shell{height:100dvh;}
+  /* The gutter belongs to .fb-wrap instead, so the dot grid runs to the
+     edges of the content area rather than stopping short of them. */
+  .c-shell-content{padding:0;}
+  /* Pinned to the bottom, the way the dashboard does it: the DS leaves the
+     footer sitting directly under the last nav item, which reads as
+     unfinished in a sidebar with two items and a lot of height. Its
+     existing border-top then reads as a divider above the account row. */
+  .c-sidebar-footer{margin-top:auto;}
+  /* Collapsed, the labels and the account row go; the DS handles the rest. */
+  .c-sidebar.is-collapsed .c-sidebar-item span.label,
+  .c-sidebar.is-collapsed .c-sidebar-footer{display:none;}
+
+  /* ══ The board surface ═══════════════════════════════════════════════
+     A dot grid, which is the one borrowed signal from the whiteboard
+     tools everybody already knows: it says "things are placed here"
+     without pretending to be an infinite canvas. Placement is owned by
+     the clustering, not by dragging, so an infinite canvas would be a
+     promise the board does not keep.
+     The dot is Neutral-3 at low alpha on the shell's own warm canvas, so
+     no new surface colour, and it disappears entirely behind a card. */
+  .fb-wrap{--fb-dot:rgba(0,0,0,.055);
+    background-image:radial-gradient(var(--fb-dot) 1.2px, transparent 1.2px);
+    background-size:22px 22px; background-position:-1px -1px;
+    min-height:100%; padding:var(--spacing-32) var(--page-gutter) var(--spacing-60);}
+
+  .fb-inner{max-width:1180px; margin:0 auto; display:flex; flex-direction:column;
+    gap:var(--spacing-24);}
+
+  /* ══ Header ══════════════════════════════════════════════════════════ */
+  .fb-head{display:flex; align-items:flex-start; justify-content:space-between;
+    gap:var(--spacing-24); flex-wrap:wrap;}
+  .fb-head h1{margin:0; font-size:var(--text-h1-size); line-height:var(--text-h1-lh);
+    font-weight:var(--text-h1-weight); letter-spacing:var(--text-h1-tracking);}
+  .fb-head .sub{margin:6px 0 0; font-size:var(--text-body2-size);
+    line-height:var(--text-body2-lh); color:var(--color-neutral-5); max-width:56ch;}
+  .fb-head-right{display:flex; align-items:center; gap:var(--spacing-12); flex:none;}
+
+  /* ── The vote budget. Five is the mechanic, so it is stated as five
+       objects rather than as a number in a sentence: you can see what you
+       have left without reading. Spent dots hollow out; they are real
+       state, which is the only reason a dot is allowed to be here. */
+  .fb-budget{display:flex; align-items:center; gap:var(--spacing-8);
+    height:40px; padding:0 var(--spacing-12); border-radius:var(--radius-md);
+    background:var(--color-neutral-1); border:1px solid var(--color-neutral-3);
+    box-shadow:var(--shadow-1);}
+  .fb-budget .pips{display:flex; gap:5px;}
+  .fb-budget .pip{width:9px; height:9px; border-radius:var(--radius-pill);
+    background:var(--color-obsidian);
+    transition:background-color var(--duration-fast) var(--ease-standard),
+               box-shadow var(--duration-fast) var(--ease-standard);}
+  .fb-budget .pip.spent{background:transparent; box-shadow:inset 0 0 0 1.5px var(--color-neutral-4);}
+  .fb-budget .txt{font-size:var(--text-label3-size); font-weight:700;
+    letter-spacing:var(--tracking-eyebrow); text-transform:uppercase;
+    color:var(--color-neutral-5); white-space:nowrap;}
+  .fb-budget.is-out .txt{color:var(--color-orange);}
+
+  /* ══ Controls ════════════════════════════════════════════════════════ */
+  .fb-controls{display:flex; align-items:center; justify-content:space-between;
+    gap:var(--spacing-16); flex-wrap:wrap;}
+  .fb-filters{display:flex; align-items:center; gap:var(--spacing-4); flex-wrap:wrap;}
+  .fb-sep{width:1px; height:20px; background:var(--color-neutral-3); margin:0 4px;}
+  .fb-sort{display:flex; align-items:center; gap:var(--spacing-8);}
+  .fb-sort .lab{font-size:var(--text-label3-size); font-weight:700;
+    letter-spacing:var(--tracking-eyebrow); text-transform:uppercase;
+    color:var(--color-neutral-5);}
+  .fb-seg{display:inline-flex; padding:3px; gap:2px; border-radius:var(--radius-pill);
+    background:var(--color-neutral-2); border:1px solid var(--color-neutral-3);}
+  .fb-seg button{font-family:inherit; font-size:var(--text-label2-size); font-weight:700;
+    height:26px; padding:0 var(--spacing-12); border:none; border-radius:var(--radius-pill);
+    background:transparent; color:var(--color-neutral-5); cursor:pointer;
+    transition:background-color var(--duration-fast) var(--ease-standard),
+               color var(--duration-fast) var(--ease-standard);}
+  .fb-seg button:hover{color:var(--color-neutral-9);}
+  .fb-seg button[aria-pressed="true"]{background:var(--color-neutral-1);
+    color:var(--color-neutral-9); box-shadow:var(--shadow-1);}
+  .fb-seg button:focus-visible{outline:2px solid var(--color-obsidian); outline-offset:2px;}
+
+  /* ══ Regions, one per cluster ════════════════════════════════════════
+     A region is a card because it genuinely groups: everything inside it
+     is one topic, and the header states which words put them together.
+     Regions are sized by content, laid out in a masonry-ish column flow
+     so a two-note topic does not claim the same height as a six-note one. */
+  .fb-board{columns:3; column-gap:var(--spacing-20);}
+  /* One column when there is one thing in it. A multi-column container
+     flows its children across the columns, so the empty state came out
+     as an icon in the first, its sentence in the second and its buttons
+     in the third. grid-column does not apply here; there is no grid. */
+  .fb-board.is-one{columns:1;}
+  .fb-region{break-inside:avoid; margin:0 0 var(--spacing-20);
+    background:var(--color-neutral-1); border:1px solid var(--color-neutral-3);
+    border-radius:var(--radius-lg); box-shadow:var(--shadow-1);
+    padding:var(--spacing-16); display:flex; flex-direction:column; gap:var(--spacing-12);}
+  .fb-region.is-shipped{background:transparent; box-shadow:none;
+    border-style:dashed; border-color:var(--color-neutral-4);}
+
+  .fb-region-head{display:flex; align-items:flex-start; gap:var(--spacing-8);}
+  .fb-why{--fb-ink:var(--color-neutral-5); --fb-read:var(--color-neutral-9);}
+  .fb-region-head .t{flex:1; min-width:0;}
+  .fb-region h2{margin:0; font-size:var(--text-h4-size); line-height:1.25;
+    font-weight:var(--text-h4-weight); letter-spacing:-.01em;}
+  .fb-region .meta{margin:4px 0 0; font-size:var(--text-caption-size);
+    color:var(--color-neutral-5);}
+  /* Why these notes are together, in the board's own words. Without this
+     the grouping is a black box, and a black box that is wrong once stops
+     being trusted for everything after it. */
+  .fb-why{display:flex; flex-wrap:wrap; gap:4px;}
+  .fb-why .c-tag{height:20px; padding:0 8px; font-size:11px; color:var(--fb-read);}
+  .fb-why .c-tag .dot{background:var(--fb-ink);}   /* the dot stays vivid */
+
+  .fb-notes{display:flex; flex-direction:column; gap:var(--spacing-8);}
+
+  /* ══ A sticky ════════════════════════════════════════════════════════
+     Element colour carries cluster identity, not decoration: every note
+     in one region shares a hue, so the eye groups them before it reads
+     them. That is the reason this page uses the elemental tints outside a
+     department surface, which is a documented departure from the DS rule
+     that tints belong to the element owning the content. */
+  .fb-note{position:relative; text-align:left; width:100%; font-family:inherit;
+    padding:var(--spacing-12); border-radius:var(--radius-md); cursor:pointer;
+    background:var(--fb-tint); border:1px solid var(--fb-line);
+    transform:rotate(var(--fb-rot, 0deg));
+    transition:transform var(--duration-fast) var(--ease-standard),
+               box-shadow var(--duration-fast) var(--ease-standard);}
+  .fb-note:hover{transform:rotate(0deg) translateY(-1px); box-shadow:var(--shadow-2);}
+  .fb-note:active{transform:rotate(0deg) translateY(0); box-shadow:var(--shadow-1);}
+  .fb-note:focus-visible{outline:2px solid var(--color-obsidian); outline-offset:2px;}
+  .fb-note .body{margin:0; font-size:var(--text-body2-size); line-height:1.45;
+    color:var(--color-neutral-9); display:-webkit-box; -webkit-line-clamp:5;
+    -webkit-box-orient:vertical; overflow:hidden;}
+  .fb-note-foot{display:flex; align-items:center; gap:var(--spacing-8);
+    margin-top:var(--spacing-12);}
+  .fb-who{display:flex; align-items:center; gap:6px; min-width:0; flex:1;}
+  .fb-av{width:22px; height:22px; border-radius:var(--radius-pill); flex:none;
+    display:flex; align-items:center; justify-content:center;
+    background:var(--fb-ink); color:var(--color-neutral-1);
+    font-size:10px; font-weight:800; letter-spacing:.02em;}
+  /* --fb-ink fills, --fb-read reads. The vivid element colour measured
+     2.8:1 against its own 8% tint, which is under the 4.5 floor for text
+     this size; the darkened ink clears it while keeping the element
+     recognisable. The DS ships .c-tag the same vivid way, which is why
+     the why-chips below are corrected here too rather than left alone. */
+  .fb-who .n{font-size:var(--text-caption-size); color:var(--fb-read); font-weight:700;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .fb-note.is-shipped{opacity:.72;}
+  .fb-note.is-shipped .body{text-decoration:none;}
+
+  /* ── Backing a request. The count is the number, the caret is the verb,
+       and the whole pill is the target so it clears 44px on a finger. */
+  .fb-vote{display:inline-flex; align-items:center; gap:5px; flex:none;
+    height:28px; min-width:52px; padding:0 10px; border-radius:var(--radius-pill);
+    font-family:inherit; font-size:var(--text-label2-size); font-weight:800;
+    background:var(--color-neutral-1); color:var(--color-neutral-9);
+    border:1px solid var(--fb-line); cursor:pointer;
+    transition:background-color var(--duration-fast) var(--ease-standard),
+               color var(--duration-fast) var(--ease-standard),
+               transform var(--duration-instant) var(--ease-standard);}
+  .fb-vote i{font-size:var(--icon-micro); line-height:1;}
+  .fb-vote:hover:not(:disabled){background:var(--color-neutral-2);}
+  .fb-vote:active:not(:disabled){transform:scale(.96);}
+  .fb-vote.is-mine{background:var(--fb-ink); border-color:var(--fb-ink);
+    color:var(--color-neutral-1);}
+  .fb-vote.is-mine:hover{background:var(--fb-ink); filter:brightness(1.08);}
+  .fb-vote:disabled{opacity:.45; cursor:not-allowed;}
+  .fb-vote:focus-visible{outline:2px solid var(--color-obsidian); outline-offset:2px;}
+
+  .fb-note .c-badge{position:absolute; top:-8px; right:10px;
+    background:var(--color-neutral-1);}
+
+  /* ══ Skeleton, for the first load ════════════════════════════════════
+     Shaped like the thing it is standing in for, so the board does not
+     jump when the data lands. */
+  .fb-sk{background:var(--color-neutral-2); border-radius:var(--radius-sm);
+    height:12px; margin-bottom:8px;}
+  .fb-sk.w70{width:70%;} .fb-sk.w45{width:45%;} .fb-sk.w90{width:90%;}
+  @media (prefers-reduced-motion:no-preference){
+    .fb-sk{animation:fbPulse 1.4s var(--ease-standard) infinite;}
+    @keyframes fbPulse{0%,100%{opacity:1;} 50%{opacity:.45;}}
+  }
+
+  /* ══ Compose and detail ══════════════════════════════════════════════ */
+  .fb-scrim{position:fixed; inset:0; z-index:800; background:rgba(8,8,8,.28);
+    backdrop-filter:blur(2px); -webkit-backdrop-filter:blur(2px);
+    display:flex; align-items:center; justify-content:center; padding:var(--spacing-24);}
+  .fb-scrim[hidden]{display:none;}
+  .fb-modal{width:100%; max-width:560px; max-height:calc(100dvh - 48px);
+    display:flex; flex-direction:column;
+    background:var(--color-neutral-1); border-radius:var(--radius-lg);
+    box-shadow:var(--shadow-4); overflow:hidden;}
+  .fb-modal-head{display:flex; align-items:center; justify-content:space-between;
+    gap:var(--spacing-12); padding:var(--spacing-16) var(--spacing-16) var(--spacing-12);}
+  .fb-modal-head h3{margin:0; font-size:var(--text-h4-size); font-weight:var(--text-h4-weight);}
+  .fb-modal-body{padding:0 var(--spacing-16) var(--spacing-16); overflow:auto;}
+  .fb-modal-foot{display:flex; align-items:center; justify-content:space-between;
+    gap:var(--spacing-12); padding:var(--spacing-12) var(--spacing-16);
+    border-top:1px solid var(--color-neutral-3);}
+  .fb-modal-foot .right{display:flex; gap:var(--spacing-8); margin-left:auto;}
+
+  .fb-ta{width:100%; min-height:120px; resize:vertical; font-family:inherit;
+    font-size:var(--text-body1-size); line-height:1.5; color:var(--color-neutral-9);
+    padding:var(--spacing-12); border-radius:var(--radius-sm);
+    border:1px solid var(--color-neutral-3); background:var(--color-neutral-1);}
+  .fb-ta:focus{outline:none; border:2px solid var(--color-obsidian); padding:11px;}
+  .fb-count{font-size:var(--text-caption-size); color:var(--color-neutral-5);}
+  .fb-count.is-near{color:var(--color-orange);}
+
+  /* ── The duplicate nudge. It runs the same matcher the board clusters
+       with, so catching a repeat here is also what keeps the regions
+       readable later. Framed as an offer, never as a block. */
+  .fb-dupes{margin-top:var(--spacing-16); padding-top:var(--spacing-16);
+    border-top:1px solid var(--color-neutral-3);}
+  .fb-dupes h4{margin:0 0 var(--spacing-8); font-size:var(--text-label1-size);
+    font-weight:700;}
+  .fb-dupe{display:flex; align-items:center; gap:var(--spacing-12);
+    padding:var(--spacing-8) var(--spacing-12); border-radius:var(--radius-sm);
+    background:var(--color-neutral-2); margin-bottom:var(--spacing-8);}
+  .fb-dupe .txt{flex:1; min-width:0; font-size:var(--text-body2-size); line-height:1.4;
+    display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;}
+
+  .fb-detail-body{font-size:var(--text-body1-size); line-height:1.55;
+    white-space:pre-wrap; word-break:break-word;}
+  .fb-detail-meta{margin-top:var(--spacing-16); padding-top:var(--spacing-16);
+    border-top:1px solid var(--color-neutral-3); display:flex; flex-direction:column;
+    gap:var(--spacing-12);}
+  .fb-row{display:flex; align-items:center; gap:var(--spacing-8); flex-wrap:wrap;}
+  .fb-row .k{font-size:var(--text-label3-size); font-weight:700;
+    letter-spacing:var(--tracking-eyebrow); text-transform:uppercase;
+    color:var(--color-neutral-5); width:88px; flex:none;}
+  .fb-row .v{font-size:var(--text-body2-size); color:var(--color-neutral-9);}
+
+  /* ══ Offline banner ══════════════════════════════════════════════════ */
+  .fb-offline{display:flex; align-items:flex-start; gap:var(--spacing-12);
+    padding:var(--spacing-12) var(--spacing-16); border-radius:var(--radius-md);
+    background:var(--color-gold-bg); border:1px solid rgba(255,164,37,.38);
+    font-size:var(--text-body2-size); line-height:1.45;}
+  .fb-offline i{font-size:var(--icon-base); color:var(--color-amber); flex:none;}
+  .fb-offline b{display:block;}
+
+  .fb-empty-actions{display:flex; gap:var(--spacing-8); margin-top:var(--spacing-8);
+    flex-wrap:wrap; justify-content:center;}
+
+  a.c-sidebar-item{text-decoration:none;}
+
+  /* ══ Narrow ══════════════════════════════════════════════════════════ */
+  @media (max-width:1080px){ .fb-board{columns:2;} }
+  @media (max-width:760px){
+    /* ---- The nav becomes a box in the corner, which is what the dashboard
+       does at this width and for the same arithmetic: the rail costs 88px of
+       a 375px screen and runs the full page height to hold two items.
+       absolute rather than fixed, and .c-shell becomes the containing block.
+       The band on .c-shell-main reserves the space rather than overlaying it,
+       so nothing sticky inside the content has to know the box is there. */
+    .c-shell{position:relative;}
+    .c-shell .c-sidebar-shell{position:absolute; top:var(--spacing-16);
+      left:var(--spacing-16); margin:0; z-index:50;}
+    .c-shell-main{padding-top:74px;}
+    .c-sidebar.is-collapsed .c-sidebar-header{padding:var(--spacing-8);}
+    /* Collapsed on a phone is the header alone. Leaving the items in made
+       the box 165px tall, which put it over the top of the board rather
+       than in the band reserved for it. Expanding is how you reach them,
+       and expanding overlays, which is why a tap outside closes it. */
+    .c-sidebar.is-collapsed .c-sidebar-item,
+    .c-sidebar.is-collapsed .c-sidebar-footer{display:none;}
+    .fb-wrap{padding:var(--spacing-20) var(--spacing-16) var(--spacing-48);}
+    .fb-board{columns:1;}
+    .fb-head h1{font-size:26px; line-height:1.2;}
+    .fb-head-right{width:100%; justify-content:space-between;}
+    .fb-controls{gap:var(--spacing-12);}
+    .fb-modal{max-width:none;}
+    /* 16px or iOS Safari zooms the page the moment this takes focus, which
+       is a whole-layout event, not a font-size one. */
+    .fb-ta{font-size:16px;}
+  }
+  @media (pointer:coarse){
+    .fb-vote{height:36px; min-width:60px;}
+    .fb-seg button{height:34px;}
+    /* 36px to match the dashboard's own filter row, with the 44px floor
+       kept as a hit area rather than a box: the transparent ::after puts
+       the target back to 44 and the 8px row gap keeps two rows of chips
+       from sharing one. */
+    .fb-filters{gap:var(--spacing-8);}
+    .fb-filters .c-chip-filter{position:relative; height:36px;}
+    .fb-filters .c-chip-filter::after{content:''; position:absolute; inset:-4px 0;}
+  }
+  @media (prefers-reduced-motion:reduce){
+    .fb-note,.fb-vote{transition:none;}
+    .fb-note{transform:none;}
+    .fb-note:hover{transform:none;}
+  }
+</style>
+</head>
+<body>
+
+<div class="c-shell">
+  <div class="c-sidebar-shell" id="shellSidebarShell">
+    <nav class="c-sidebar" id="shellSidebarNav">
+      <div class="c-sidebar-header">
+        <button class="c-dept-trigger" type="button" aria-label="Collabrium">
+          <span class="c-sidebar-logo-live-wrap"><iframe src="../collabrium-dls/logo.html" title="Collabrium" scrolling="no"></iframe></span>
+        </button>
+        <img class="c-sidebar-logo-collapsed" src="../collabrium-dls/SVG/coin.svg" alt="Collabrium" />
+      </div>
+      <div class="c-sidebar-section">Overview</div>
+      <a class="c-sidebar-item" href="landing-v3.html"><i class="ph-fill ph-house"></i><span class="label">Dashboard</span><span class="c-sidebar-hover-text">Dashboard</span></a>
+      <a class="c-sidebar-item active" href="feedback-v1.html" aria-current="page"><i class="ph-fill ph-lightbulb-filament"></i><span class="label">Feedback</span><span class="c-sidebar-hover-text">Feedback</span></a>
+      <div class="c-sidebar-footer">
+        <button class="c-sidebar-account" type="button">
+          <span class="c-search-input-avatar">BW</span>
+          <span class="c-search-input-text">
+            <span class="c-search-input-title">Bryan Wong</span>
+            <span class="c-search-input-subtitle">Head of Revenue</span>
+          </span>
+        </button>
+      </div>
+    </nav>
+    <button class="c-sidebar-toggle" type="button" aria-label="Collapse sidebar" id="sidebarToggle">
+      <svg viewBox="0 0 20 20" fill="none">
+        <rect x="2.5" y="3.5" width="15" height="13" rx="2" stroke="currentColor" stroke-width="1.4"/>
+        <line x1="9" y1="3.5" x2="9" y2="16.5" stroke="currentColor" stroke-width="1.4"/>
+        <path id="sidebarArrow" d="M13.5 7 11 10l2.5 3" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+  </div>
+
+  <div class="c-shell-main">
+    <div class="c-shell-content">
+      <div class="fb-wrap">
+        <div class="fb-inner">
+
+          <div id="fbOffline" hidden></div>
+
+          <header class="fb-head">
+            <div>
+              <h1>What should we fix first</h1>
+              <p class="sub">Thirty days, ten of us. Post what got in your way, back the
+                things you want handled, and the board sorts itself by what the group
+                actually agrees on.</p>
+            </div>
+            <div class="fb-head-right">
+              <div class="fb-budget" id="fbBudget" title="Votes you have left to spend">
+                <span class="pips" id="fbPips" aria-hidden="true"></span>
+                <span class="txt" id="fbBudgetTxt">5 votes left</span>
+              </div>
+              <button class="c-btn c-btn-primary c-btn-md" type="button" id="fbAdd">
+                <i class="ph ph-plus"></i> Add feedback
+              </button>
+            </div>
+          </header>
+
+          <div class="fb-controls">
+            <div class="fb-filters" id="fbFilters" role="group" aria-label="Filter">
+              <button class="c-chip c-chip-filter is-active" type="button" data-st="all">Everything</button>
+              <button class="c-chip c-chip-filter" type="button" data-st="new">Open</button>
+              <button class="c-chip c-chip-filter" type="button" data-st="planned">Planned</button>
+              <button class="c-chip c-chip-filter" type="button" data-st="shipped">Shipped</button>
+              <span class="fb-sep" aria-hidden="true"></span>
+              <button class="c-chip c-chip-filter" type="button" data-own="mine">Mine</button>
+              <button class="c-chip c-chip-filter" type="button" data-own="backed">I backed</button>
+            </div>
+            <div class="fb-sort">
+              <span class="lab" id="fbSortLab">Sort</span>
+              <div class="fb-seg" role="group" aria-labelledby="fbSortLab" id="fbSort">
+                <button type="button" data-sort="votes" aria-pressed="true">Most backed</button>
+                <button type="button" data-sort="new" aria-pressed="false">Newest</button>
+              </div>
+            </div>
+          </div>
+
+          <main id="fbBoard" class="fb-board" aria-live="polite"></main>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="fb-scrim" id="fbScrim" hidden>
+  <div class="fb-modal" role="dialog" aria-modal="true" aria-labelledby="fbModalTitle" id="fbModal"></div>
+</div>
+
+<div class="c-toast-host" id="fbToasts"></div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════════════
+   The feedback board.
+
+   Three things are load-bearing here and everything else serves them.
+
+   1. CLUSTERING. Notes group by weighted term overlap, not by a chosen
+      category. Terms are weighted by how rare they are on this board, so
+      "leaderboard" pulls two notes together and "the" does not, and the
+      words that did the pulling are printed on the region header. A board
+      that groups silently is a board nobody trusts the second time.
+
+      What it cannot do, stated plainly: it matches words, not meanings.
+      "Slow" and "laggy" will not meet. The duplicate nudge at compose
+      time is the mitigation, because a person reading two near-matches
+      catches what the arithmetic misses.
+
+   2. SCARCITY. Five open votes each. Backing everything is the same as
+      backing nothing, and with ten people an uncapped board just ranks
+      whoever posted first. Shipping a request releases its votes.
+
+   3. THE LOOP. New, Planned, Shipped, each stamped with who moved it.
+      A feedback board with no visible consequence stops receiving
+      feedback in about a fortnight.
+
+   Storage is /api/feedback when a database is attached and localStorage
+   when it is not, and the page says which out loud rather than quietly
+   pretending the group can see what you wrote.
+
+   NO AUTHENTICATION. The signed-in name is read off the shell. Ten
+   colleagues who know each other, thirty days; that is the whole
+   security model, and it is not one that survives contact with a
+   wider group. */
+
+(function () {
+'use strict';
+
+var REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+var LS_KEY = 'collabrium-feedback-v1';
+var MAX_LEN = 400;
+var POLL_MS = 20000;
+var DEFAULT_BUDGET = 5;
+
+var STATE = {
+  notes: [],
+  budget: DEFAULT_BUDGET,
+  remote: false,
+  loaded: false,
+  st: 'all',          // status filter
+  own: null,          // 'mine' | 'backed' | null
+  sort: 'votes',
+  open: null          // id of the note whose detail is open, or 'compose'
+};
+
+/* ── Who is writing ──────────────────────────────────────────────────
+   One source, the shell's account block, so the byline can never drift
+   from the name on screen. */
+function me() {
+  var el = document.querySelector('.c-search-input-title');
+  return (el && el.textContent.trim()) || 'Unsigned';
+}
+function initials(name) {
+  var p = String(name || '').trim().split(/\s+/);
+  return ((p[0] || '?')[0] + (p.length > 1 ? p[p.length - 1][0] : '')).toUpperCase();
+}
+function esc(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+  });
+}
+var MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+function when(ts) {
+  var d = ts ? new Date(ts) : new Date();
+  if (isNaN(d.getTime())) return '';
+  return d.getDate() + ' ' + MONTHS[d.getMonth()];
+}
+function newId() {
+  return 'f' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+}
+
+/* ═══ 1. The matcher ═══════════════════════════════════════════════════
+   Everything about grouping lives here: the board's regions and the
+   compose-time nudge are the same function at two thresholds. */
+
+/* Only true function words. Domain-common words are deliberately absent:
+   "dashboard" appears in half the notes on a dashboard's feedback board,
+   and the rarity weighting below already strips its pull to nearly zero.
+   A hand-written domain stoplist would have to be maintained forever and
+   would be wrong the moment the product changed. */
+var STOP = ('a about after all also am an and any are as at be because been before being ' +
+  'but by can cant could did do does doing done dont each even every for from get got had ' +
+  'has have having he her here hers him his how i if in into is it its just like make me ' +
+  'more most much my no nor not now of off on once one only or other our out over own re ' +
+  'same she should since so some such than that the their them then there these they thing ' +
+  'things this those through to too under until up us use used using very was way we well ' +
+  'were what when where which while who why will with would you your ' +
+  /* The second list is the one that earned its place empirically. Without
+     it the board grouped a note about an export button with a note about
+     the filter row, because both happened to contain the word "hand".
+     These are words that appear in feedback of every kind and describe
+     none of it. */
+  'add ago always another ask asked back bit come day days end ever far feel find first ' +
+  'give given go goes going good great hand hard help keep kind know last later least let ' +
+  'long look looking lot made many maybe mean might mine month morning need needs never ' +
+  'new next often old open opening put quite rather really right said say see seem seems ' +
+  'set show something sometimes soon stay still sure take takes tell thanks think time ' +
+  'times try trying turn twice two want wanted week weeks whole work working year yes yet'
+  ).split(' ');
+var STOPSET = {};
+for (var si = 0; si < STOP.length; si++) STOPSET[STOP[si]] = 1;
+
+/* Crude, deliberately. A real stemmer would be a dependency and a
+   maintenance surface; these five suffixes cover the plural-and-tense
+   drift that actually separates two people describing one problem. */
+function stem(w) {
+  if (w.length > 4 && /ies$/.test(w)) return w.slice(0, -3) + 'y';
+  if (w.length > 4 && /(sses|shes|ches|xes)$/.test(w)) return w.slice(0, -2);
+  if (w.length > 3 && /s$/.test(w) && !/ss$/.test(w)) return w.slice(0, -1);
+  if (w.length > 5 && /ing$/.test(w)) return w.slice(0, -3);
+  if (w.length > 4 && /ed$/.test(w)) return w.slice(0, -2);
+  return w;
+}
+function terms(text) {
+  var raw = String(text || '').toLowerCase().replace(/[^a-z0-9\s'-]/g, ' ').split(/\s+/);
+  var out = {}, n = 0;
+  for (var i = 0; i < raw.length; i++) {
+    var w = raw[i].replace(/^['-]+|['-]+$/g, '');
+    if (w.length < 3 || STOPSET[w]) continue;
+    var s = stem(w);
+    // the surface form, for naming, and where it first appeared, which is
+    // what tells a subject from a word that merely turned up
+    if (!out[s]) { out[s] = {w: w, at: n}; }
+    n++;
+  }
+  return n ? out : null;
+}
+
+/* How distinctive each word is on this board. A word in two notes out of
+   fourteen says something; a word in eleven of them says nothing, and it
+   stops counting on its own without anyone maintaining a list. */
+function corpus(notes) {
+  var df = {}, docs = [];
+  for (var i = 0; i < notes.length; i++) {
+    var t = terms(notes[i].t) || {};
+    docs.push(t);
+    for (var k in t) if (t.hasOwnProperty(k)) df[k] = (df[k] || 0) + 1;
+  }
+  var N = notes.length, spec = {};
+  for (var w in df) if (df.hasOwnProperty(w)) spec[w] = 1 - df[w] / N;
+  return {docs: docs, spec: spec, df: df, N: N};
+}
+
+/* Ranking for the compose-time nudge only; the board groups with group()
+   above. How likely it is that two notes are about the same thing: the
+   chance that at least one of the words they share is a real subject
+   rather than a coincidence. Each shared word gets one attempt to convince,
+   weighted by how distinctive it is, and the failures multiply.
+
+   This is not cosine, and the difference matters. Cosine asks what
+   PROPORTION of each note is shared, which is the wrong question for two
+   sentences: "Leaderboard is slow on my phone" and "the leaderboard
+   redraws every time I change a filter" have one word in common out of
+   eight each, so cosine scored them 0.07 and the board grouped nothing.
+   Sharing a distinctive subject is the signal; sentence length around it
+   is noise.
+
+   Presence, not frequency. In a two-sentence note a word said twice is
+   an accident of phrasing, not emphasis. */
+function sim(a, b, spec) {
+  var miss = 1, hit = false, w;
+  for (w in a) if (a.hasOwnProperty(w) && b.hasOwnProperty(w)) {
+    hit = true;
+    miss *= (1 - (spec[w] || 0) * 0.9);   // .9: no single word is ever proof
+  }
+  return hit ? 1 - miss : 0;
+}
+
+/* Group by the word a set of notes has in common, strongest topic first,
+   each note landing in exactly one region.
+
+   Two earlier attempts are worth recording, because both looked
+   reasonable and both were measured to be wrong.
+
+   Cosine similarity scored two notes that both lead with "leaderboard"
+   at 0.07, because one shared word out of eight each is a small
+   PROPORTION. It grouped nothing at all.
+
+   Rarity-weighted pair similarity with average-link clustering grouped
+   most things, but a word in three notes scored LOWER than a word in
+   two, so the bigger a topic got the harder it was to hold together, and
+   the same two notes clustered or did not depending on how many
+   unrelated notes happened to be on the board. On fourteen labelled
+   notes it found the leaderboard trio; on nine it split them.
+
+   This does neither. Its ranking signal is where a word appears rather
+   than how rare it is: people put the subject of a complaint at the
+   front. "Leaderboard is slow" leads with its topic, while "hard to
+   reach with one hand" does not, which is what separates a real subject
+   from a word two notes happen to share. Measured on the same labelled
+   set at three board sizes, it holds every topic together at all three:
+   fourteen notes to five regions covering twelve, nine to three
+   covering eight, four to one covering three.
+
+   It also cannot chain and cannot blob, because a note is assigned once
+   and a region is named by the word that assigned it. What it cannot do
+   is still what it never could: match meanings. "Slow" and "laggy" will
+   not meet. The nudge at compose time is where a person catches that. */
+function group(notes) {
+  var C = corpus(notes), N = notes.length, where = {}, i, w;
+  if (!N) return {regions: [], corpus: C};
+
+  for (i = 0; i < N; i++) {
+    var d = C.docs[i];
+    for (w in d) if (d.hasOwnProperty(w)) (where[w] || (where[w] = [])).push(i);
+  }
+
+  /* A word in most of the notes is describing the product, not a topic.
+     The floor matters more than the fraction: on a four-note board where
+     three are about one thing, that thing is still the topic. */
+  var ceiling = Math.max(3, Math.floor(N * 0.6));
+  var cand = [];
+  for (w in where) if (where.hasOwnProperty(w)) {
+    var hits = where[w];
+    if (hits.length < 2 || hits.length > ceiling) continue;
+    var lead = 0;
+    for (i = 0; i < hits.length; i++) lead += C.docs[hits[i]][w].at;
+    cand.push({w: w, hits: hits, lead: lead / hits.length});
+  }
+  // earliest-mentioned wins, and a bigger topic breaks a tie
+  cand.sort(function (a, b) { return (a.lead - b.lead) || (b.hits.length - a.hits.length); });
+
+  var taken = [], regions = [];
+  for (i = 0; i < cand.length; i++) {
+    var free = cand[i].hits.filter(function (k) { return !taken[k]; });
+    if (free.length < 2) continue;               // already spoken for elsewhere
+    for (var f = 0; f < free.length; f++) taken[free[f]] = true;
+    regions.push({term: C.docs[free[0]][cand[i].w].w, idx: free,
+                  why: alsoShared(free, C, cand[i].w)});
+  }
+  for (i = 0; i < N; i++) if (!taken[i]) regions.push({term: null, idx: [i], why: []});
+  return {regions: regions, corpus: C};
+}
+
+/* The other words most of a region has in common. The heading names one
+   word; these say what else it was that made them a group, so a reader
+   can see the reasoning rather than trusting it. */
+function alsoShared(idx, C, main) {
+  if (idx.length < 2) return [];
+  var count = {}, i, w;
+  for (i = 0; i < idx.length; i++) {
+    var d = C.docs[idx[i]];
+    for (w in d) if (d.hasOwnProperty(w)) count[w] = (count[w] || 0) + 1;
+  }
+  var need = Math.max(2, Math.ceil(idx.length * 0.6)), out = [];
+  for (w in count) if (count.hasOwnProperty(w) && w !== main && count[w] >= need) out.push(w);
+  out.sort(function (a, b) { return (C.spec[b] || 0) - (C.spec[a] || 0); });
+  return out.slice(0, 2).map(function (s) {
+    for (i = 0; i < idx.length; i++) if (C.docs[idx[i]][s]) return C.docs[idx[i]][s].w;
+    return s;
+  });
+}
+
+/* ═══ 2. Storage ═══════════════════════════════════════════════════════
+   The API when there is one, this device when there is not, and the page
+   says which. Local mode is a real fallback, not a silent one: writing
+   into a void believing colleagues can see it is worse than not writing. */
+
+function loadLocal() {
+  try {
+    var v = JSON.parse(localStorage.getItem(LS_KEY) || '{}');
+    return Array.isArray(v.notes) ? v.notes : [];
+  } catch (e) { return []; }
+}
+function saveLocal() {
+  try { localStorage.setItem(LS_KEY, JSON.stringify({notes: STATE.notes})); } catch (e) {}
+}
+
+function api(method, body, query) {
+  var url = '/api/feedback' + (query || '');
+  var opt = {method: method, headers: {'content-type': 'application/json'}};
+  if (body) opt.body = JSON.stringify(body);
+  return fetch(url, opt).then(function (r) {
+    return r.json().then(function (j) { return {status: r.status, body: j}; },
+                         function () { return {status: r.status, body: null}; });
+  });
+}
+
+function adopt(x) {
+  if (!x || !x.body) return false;
+  if (x.body.configured === false) { STATE.remote = false; return false; }
+  if (x.status >= 400 || !Array.isArray(x.body.notes)) return false;
+  STATE.remote = true;
+  STATE.notes = x.body.notes;
+  if (typeof x.body.budget === 'number') STATE.budget = x.body.budget;
+  saveLocal();                                   // the cache, for the next cold start
+  return true;
+}
+
+function boot() {
+  STATE.notes = loadLocal();
+  render();                                       // the cache paints first
+  api('GET').then(function (x) {
+    var ok = adopt(x);
+    STATE.loaded = true;
+    if (!ok) STATE.remote = false;
+    render();
+  }, function () {
+    STATE.loaded = true; STATE.remote = false; render();
+  });
+}
+
+/* ═══ 3. Votes ═════════════════════════════════════════════════════════ */
+
+function spent() {
+  var who = me(), n = 0;
+  for (var i = 0; i < STATE.notes.length; i++) {
+    var f = STATE.notes[i];
+    if (f.st === 'shipped') continue;             // shipping gives the vote back
+    if ((f.v || []).indexOf(who) >= 0) n++;
+  }
+  return n;
+}
+function left() { return Math.max(0, STATE.budget - spent()); }
+function iBacked(f) { return (f.v || []).indexOf(me()) >= 0; }
+
+function toggleVote(id) {
+  var f = find(id); if (!f) return;
+  var who = me(), on = !iBacked(f);
+  if (on && f.st !== 'shipped' && left() <= 0) {
+    toast('warning', 'No votes left',
+      'Take a vote back from something else to back this. Shipped requests return theirs.');
+    return;
+  }
+  f.v = (f.v || []).slice();
+  if (on) f.v.push(who); else f.v.splice(f.v.indexOf(who), 1);
+  saveLocal(); render();                          // optimistic, the reply re-syncs
+  if (!STATE.remote) return;
+  api('PUT', {id: id, vote: on, author: who}).then(function (x) {
+    if (x.status === 409) {
+      toast('warning', 'No votes left', 'Someone else spent it first. Nothing was saved.');
+    }
+    if (!adopt(x)) return;
+    render();
+  }, function () { offline(); });
+}
+
+/* ═══ 4. Writes ════════════════════════════════════════════════════════ */
+
+function find(id) {
+  for (var i = 0; i < STATE.notes.length; i++) if (STATE.notes[i].i === id) return STATE.notes[i];
+  return null;
+}
+
+function post(text, cb) {
+  var who = me(), id = newId();
+  STATE.notes.push({i: id, t: text, a: who, ts: new Date().toISOString(), st: 'new', v: []});
+  saveLocal(); render();
+  if (!STATE.remote) { if (cb) cb(id); return; }
+  api('PUT', {text: text, author: who, newId: id}).then(function (x) {
+    if (adopt(x)) render();
+    if (cb) cb(id);
+  }, function () { offline(); if (cb) cb(id); });
+}
+
+function setStatus(id, st) {
+  var f = find(id); if (!f) return;
+  f.st = st; f.stb = me(); f.sts = new Date().toISOString();
+  saveLocal(); render();
+  if (!STATE.remote) return;
+  api('PUT', {id: id, status: st, author: me()}).then(function (x) {
+    if (adopt(x)) render();
+  }, function () { offline(); });
+}
+
+function remove(id) {
+  var f = find(id); if (!f) return;
+  if (f.a !== me()) return;                       // the buttons hide; this is the rule
+  STATE.notes = STATE.notes.filter(function (n) { return n.i !== id; });
+  saveLocal(); closeModal(); render();
+  if (!STATE.remote) return;
+  api('DELETE', null, '?id=' + encodeURIComponent(id) + '&author=' + encodeURIComponent(me()))
+    .then(function (x) { if (adopt(x)) render(); }, function () { offline(); });
+}
+
+var warned = false;
+function offline() {
+  STATE.remote = false;
+  if (!warned) { warned = true; toast('warning', 'Saved on this device only',
+    'The board could not be reached, so this is not shared yet.'); }
+  render();
+}
+
+/* ═══ 5. Rendering ═════════════════════════════════════════════════════ */
+
+var ELS = ['fire', 'wood', 'earth', 'water', 'gold'];
+var ELINK = {fire: '--color-orange', wood: '--color-salmon-pink', earth: '--color-green',
+             water: '--color-navy', gold: '--color-amber'};
+/* The reading weight of each element: the same hue taken dark enough to
+   clear 4.5:1 as small text on its own 8% tint. Same values the dashboard's
+   notes use, so one element reads the same in both places. */
+var EREAD = {fire: '#AF3A10', wood: '#B12A47', earth: '#00734D',
+             water: '#0B4FA8', gold: '#8A5A00'};
+
+function visible() {
+  var who = me();
+  return STATE.notes.filter(function (f) {
+    if (STATE.st !== 'all' && (f.st || 'new') !== STATE.st) return false;
+    if (STATE.own === 'mine' && f.a !== who) return false;
+    if (STATE.own === 'backed' && !iBacked(f)) return false;
+    return true;
+  });
+}
+
+function statusBadge(st) {
+  if (st === 'planned') return '<span class="c-badge c-badge-warning">Planned</span>';
+  if (st === 'shipped') return '<span class="c-badge c-badge-success">' +
+    '<i class="ph-fill ph-check"></i> Shipped</span>';
+  return '';
+}
+
+/* A stable pseudo-rotation per note. Deterministic, so a note does not
+   twitch every time the board redraws. */
+function rot(id) {
+  var h = 0;
+  for (var i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) & 0xffff;
+  return ((h % 25) / 10 - 1.2).toFixed(2);
+}
+
+function noteHTML(f, el) {
+  var mine = iBacked(f), n = (f.v || []).length;
+  return '<div class="fb-note' + (f.st === 'shipped' ? ' is-shipped' : '') + '" ' +
+      'style="--fb-rot:' + rot(f.i) + 'deg" ' +
+      'data-open="' + esc(f.i) + '" role="button" tabindex="0" ' +
+      'aria-label="Feedback from ' + esc(f.a) + ', ' + n + ' backing. Open">' +
+    statusBadge(f.st) +
+    '<p class="body">' + esc(f.t) + '</p>' +
+    '<div class="fb-note-foot">' +
+      '<span class="fb-who"><span class="fb-av">' + esc(initials(f.a)) + '</span>' +
+      '<span class="n">' + esc(String(f.a).split(' ')[0]) + '</span></span>' +
+      '<button class="fb-vote' + (mine ? ' is-mine' : '') + '" type="button" ' +
+        'data-vote="' + esc(f.i) + '"' +
+        (!mine && f.st !== 'shipped' && left() <= 0 ? ' disabled' : '') +
+        ' aria-pressed="' + (mine ? 'true' : 'false') + '" ' +
+        'aria-label="' + (mine ? 'You backed this. Take it back' : 'Back this') +
+        ', ' + n + ' so far">' +
+        '<i class="ph-fill ph-caret-up"></i>' + n +
+      '</button>' +
+    '</div>' +
+  '</div>';
+}
+
+function regionHTML(region, notes, el, shipped) {
+  var idxs = region.idx, total = 0, i;
+  for (i = 0; i < idxs.length; i++) total += (notes[idxs[i]].v || []).length;
+
+  var order = idxs.slice().sort(function (a, b) {
+    if (STATE.sort === 'new') return new Date(notes[b].ts || 0) - new Date(notes[a].ts || 0);
+    var d = (notes[b].v || []).length - (notes[a].v || []).length;
+    return d || (new Date(notes[b].ts || 0) - new Date(notes[a].ts || 0));
+  });
+
+  var head = '';
+  if (region.term) {
+    var title = region.term.charAt(0).toUpperCase() + region.term.slice(1);
+    head = '<div class="fb-region-head"><div class="t">' +
+      '<h2>' + esc(title) + '</h2>' +
+      '<p class="meta">' + idxs.length + ' notes mention it' +
+        (total ? ' · ' + total + ' backing' : '') + '</p>' +
+      '</div></div>' +
+      // the heading is one word; these are the others the group has in
+      // common, so the grouping can be checked rather than believed
+      (region.why.length ? '<div class="fb-why">' + region.why.map(function (w) {
+        return '<span class="c-tag c-tag-' + el + '"><span class="dot"></span>' + esc(w) + '</span>';
+      }).join('') + '</div>' : '');
+  }
+  return '<section class="fb-region' + (shipped ? ' is-shipped' : '') + '">' + head +
+    '<div class="fb-notes">' +
+      order.map(function (k) { return noteHTML(notes[k], el); }).join('') +
+    '</div></section>';
+}
+
+function skeleton() {
+  var one = '<section class="fb-region"><div class="fb-sk w45"></div>' +
+    '<div class="fb-notes">' +
+    '<div class="fb-note" style="--fb-tint:var(--color-neutral-2);--fb-line:var(--color-neutral-3)">' +
+      '<div class="fb-sk w90"></div><div class="fb-sk w70"></div><div class="fb-sk w45"></div></div>' +
+    '<div class="fb-note" style="--fb-tint:var(--color-neutral-2);--fb-line:var(--color-neutral-3)">' +
+      '<div class="fb-sk w70"></div><div class="fb-sk w90"></div></div>' +
+    '</div></section>';
+  return one + one + one;
+}
+
+function emptyHTML() {
+  var filtered = STATE.notes.length > 0;
+  if (filtered) {
+    return '<div class="c-empty"><i class="ph ph-funnel"></i>' +
+      '<h4>Nothing matches that filter</h4>' +
+      '<p>There are ' + STATE.notes.length + ' notes on the board. Widen the filter to see them.</p>' +
+      '<div class="fb-empty-actions">' +
+      '<button class="c-btn c-btn-secondary c-btn-sm" type="button" id="fbClearFilters">Clear filters</button>' +
+      '</div></div>';
+  }
+  return '<div class="c-empty"><i class="ph ph-lightbulb-filament"></i>' +
+    '<h4>Nobody has posted yet</h4>' +
+    '<p>Say what got in your way this week. One sentence is enough. The board groups ' +
+      'related notes on its own once a few are in.</p>' +
+    '<div class="fb-empty-actions">' +
+    '<button class="c-btn c-btn-primary c-btn-sm" type="button" id="fbFirst">' +
+      '<i class="ph ph-plus"></i> Write the first one</button>' +
+    '<button class="c-btn c-btn-ghost c-btn-sm" type="button" id="fbSeed">' +
+      'Post six examples to try it</button>' +
+    '</div></div>';
+}
+
+function renderBudget() {
+  var l = left(), pips = '';
+  // solid first, hollowing out from the right, the way a battery empties.
+  // Spent-first read as a bar filling up, which is the opposite meaning.
+  for (var i = 0; i < STATE.budget; i++) {
+    pips += '<span class="pip' + (i < l ? '' : ' spent') + '"></span>';
+  }
+  document.getElementById('fbPips').innerHTML = pips;
+  document.getElementById('fbBudgetTxt').textContent =
+    l === 0 ? 'No votes left' : (l === 1 ? '1 vote left' : l + ' votes left');
+  document.getElementById('fbBudget').classList.toggle('is-out', l === 0);
+}
+
+function renderOffline() {
+  var box = document.getElementById('fbOffline');
+  if (STATE.remote || !STATE.loaded) { box.hidden = true; box.innerHTML = ''; return; }
+  box.hidden = false;
+  box.innerHTML = '<div class="fb-offline"><i class="ph-fill ph-warning-circle"></i>' +
+    '<span><b>This board is on your device only.</b>' +
+    'No shared store is attached, so nobody else can see what you post here yet. ' +
+    'Everything below still works, it is just private to this browser.</span></div>';
+}
+
+function render() {
+  renderBudget();
+  renderOffline();
+
+  var host = document.getElementById('fbBoard');
+  host.classList.remove('is-one');
+  if (!STATE.loaded && !STATE.notes.length) { host.innerHTML = skeleton(); return; }
+
+  var list = visible();
+  if (!list.length) {
+    host.classList.add('is-one');
+    host.innerHTML = emptyHTML();
+    return;
+  }
+
+  /* Shipped work is filed on its own. It is the proof the board works, so
+     it stays on the page, but it is done: it should not compete for
+     attention with what is still open. */
+  var open = list.filter(function (f) { return f.st !== 'shipped'; });
+  var done = list.filter(function (f) { return f.st === 'shipped'; });
+
+  /* Reading order is the board's answer to "what first", so it is the
+     group's backing that decides it, not the grouping's own confidence. */
+  var order = group(open).regions.sort(function (a, b) {
+    if (STATE.sort === 'new') {
+      var na = Math.max.apply(null, a.idx.map(function (i) { return new Date(open[i].ts || 0); }));
+      var nb = Math.max.apply(null, b.idx.map(function (i) { return new Date(open[i].ts || 0); }));
+      return nb - na;
+    }
+    var va = 0, vb = 0, i;
+    for (i = 0; i < a.idx.length; i++) va += (open[a.idx[i]].v || []).length;
+    for (i = 0; i < b.idx.length; i++) vb += (open[b.idx[i]].v || []).length;
+    return (vb - va) || (b.idx.length - a.idx.length);
+  });
+
+  var html = order.map(function (g, n) {
+    return regionHTML(g, open, ELS[n % ELS.length], false);
+  }).join('');
+
+  if (done.length) {
+    html += '<section class="fb-region is-shipped">' +
+      '<div class="fb-region-head"><div class="t"><h2>Shipped</h2>' +
+      '<p class="meta">' + done.length + ' done. Votes on these are back in everyone\'s budget.</p>' +
+      '</div></div><div class="fb-notes">' +
+      done.map(function (f) { return noteHTML(f, 'earth'); }).join('') +
+      '</div></section>';
+  }
+
+  host.innerHTML = html;
+
+  /* Element colour is set per region rather than per note so a region
+     reads as one thing at a glance. */
+  var regions = host.querySelectorAll('.fb-region');
+  for (var r = 0; r < regions.length; r++) {
+    var el = regions[r].classList.contains('is-shipped') ? 'earth' : ELS[r % ELS.length];
+    var why = regions[r].querySelector('.fb-why');
+    if (why) {
+      why.style.setProperty('--fb-ink', 'var(' + ELINK[el] + ')');
+      why.style.setProperty('--fb-read', EREAD[el]);
+    }
+    var notes = regions[r].querySelectorAll('.fb-note');
+    for (var q = 0; q < notes.length; q++) {
+      notes[q].style.setProperty('--fb-tint', 'var(--color-' + el + '-bg)');
+      notes[q].style.setProperty('--fb-line', 'color-mix(in srgb, var(' + ELINK[el] + ') 30%, transparent)');
+      notes[q].style.setProperty('--fb-ink', 'var(' + ELINK[el] + ')');
+      notes[q].style.setProperty('--fb-read', EREAD[el]);
+    }
+  }
+}
+
+/* ═══ 6. Compose, and the duplicate nudge ══════════════════════════════ */
+
+function openModal(html, onMount) {
+  var scrim = document.getElementById('fbScrim'), modal = document.getElementById('fbModal');
+  modal.innerHTML = html;
+  scrim.hidden = false;
+  if (onMount) onMount(modal);
+  var first = modal.querySelector('textarea, button');
+  if (first) first.focus();
+}
+function closeModal() {
+  document.getElementById('fbScrim').hidden = true;
+  document.getElementById('fbModal').innerHTML = '';
+  STATE.open = null;
+}
+
+function compose() {
+  STATE.open = 'compose';
+  openModal(
+    '<div class="fb-modal-head"><h3 id="fbModalTitle">Add feedback</h3>' +
+      '<button class="c-icon-btn" type="button" data-close aria-label="Close">' +
+      '<i class="ph ph-x"></i></button></div>' +
+    '<div class="fb-modal-body">' +
+      '<label for="fbText" class="c-helper" style="display:block;margin-bottom:6px">' +
+        'What got in your way? One or two sentences beats a list.</label>' +
+      '<textarea class="fb-ta" id="fbText" maxlength="' + MAX_LEN + '" ' +
+        'placeholder="The leaderboard takes a few seconds to redraw every time I change a filter."></textarea>' +
+      '<div id="fbDupes"></div>' +
+    '</div>' +
+    '<div class="fb-modal-foot">' +
+      '<span class="fb-count" id="fbCount">0 / ' + MAX_LEN + '</span>' +
+      '<span class="right">' +
+        '<button class="c-btn c-btn-ghost c-btn-md" type="button" data-close>Cancel</button>' +
+        '<button class="c-btn c-btn-primary c-btn-md" type="button" id="fbPost" disabled>Post</button>' +
+      '</span>' +
+    '</div>',
+    function (modal) {
+      var ta = modal.querySelector('#fbText'),
+          count = modal.querySelector('#fbCount'),
+          post = modal.querySelector('#fbPost'),
+          dupes = modal.querySelector('#fbDupes'), timer;
+      ta.addEventListener('input', function () {
+        var v = ta.value.trim();
+        count.textContent = ta.value.length + ' / ' + MAX_LEN;
+        count.classList.toggle('is-near', ta.value.length > MAX_LEN - 40);
+        post.disabled = v.length < 3;
+        clearTimeout(timer);
+        timer = setTimeout(function () { showDupes(dupes, v); }, 250);
+      });
+      post.addEventListener('click', function () {
+        var v = ta.value.trim();
+        if (v.length < 3) return;
+        post.disabled = true;
+        closeModal();
+        postThen(v);
+      });
+    });
+}
+
+/* Posting is the moment to say what happened to it. The toast names the
+   next step rather than congratulating anyone. */
+function postThen(text) {
+  post(text, function () {
+    toast('success', 'Posted', STATE.remote
+      ? 'The group can see it now. Back it yourself if you want it counted.'
+      : 'Saved on this device. Nobody else can see it yet.');
+  });
+}
+
+/* Deliberately wider than the board's own grouping. A weak match shown
+   to a person costs them a glance; a duplicate that slips through costs
+   the board a topic split in two for the rest of the pilot. */
+var NUDGE = 0.55;
+
+function showDupes(host, text) {
+  if (text.length < 8) { host.innerHTML = ''; return; }
+  var pool = STATE.notes;
+  if (!pool.length) { host.innerHTML = ''; return; }
+
+  /* The candidate is scored against the board including itself, so its own
+     words carry a normal rarity rather than looking unique by construction. */
+  var C = corpus(pool.concat([{t: text}]));
+  var mine = C.docs[C.docs.length - 1];
+  if (!mine) { host.innerHTML = ''; return; }
+
+  var hits = [];
+  for (var i = 0; i < pool.length; i++) {
+    var s = sim(mine, C.docs[i], C.spec);
+    if (s >= NUDGE) hits.push({f: pool[i], s: s});
+  }
+  hits.sort(function (a, b) { return b.s - a.s; });
+  hits = hits.slice(0, 3);
+  if (!hits.length) { host.innerHTML = ''; return; }
+
+  host.innerHTML = '<div class="fb-dupes"><h4>' +
+    (hits.length === 1 ? 'Someone may have said this already'
+                       : 'A few people may have said this already') + '</h4>' +
+    hits.map(function (h) {
+      var n = (h.f.v || []).length;
+      return '<div class="fb-dupe"><span class="txt">' + esc(h.f.t) + '</span>' +
+        '<button class="c-btn c-btn-secondary c-btn-sm" type="button" ' +
+        'data-back="' + esc(h.f.i) + '">Back this' + (n ? ' (' + n + ')' : '') + '</button></div>';
+    }).join('') + '</div>';
+}
+
+/* ═══ 7. Detail ════════════════════════════════════════════════════════ */
+
+function detail(id) {
+  var f = find(id); if (!f) return;
+  STATE.open = id;
+  var mine = f.a === me(), voters = f.v || [], backed = iBacked(f);
+  var names = voters.slice(0, 4).map(esc).join(', ') +
+    (voters.length > 4 ? ' and ' + (voters.length - 4) + ' more' : '');
+
+  openModal(
+    '<div class="fb-modal-head"><h3 id="fbModalTitle">Feedback</h3>' +
+      '<button class="c-icon-btn" type="button" data-close aria-label="Close">' +
+      '<i class="ph ph-x"></i></button></div>' +
+    '<div class="fb-modal-body">' +
+      '<p class="fb-detail-body">' + esc(f.t) + '</p>' +
+      '<div class="fb-detail-meta">' +
+        '<div class="fb-row"><span class="k">From</span><span class="v">' +
+          esc(f.a) + ' on ' + when(f.ts) + '</span></div>' +
+        '<div class="fb-row"><span class="k">Backed by</span><span class="v">' +
+          (voters.length ? names : 'Nobody yet') + '</span></div>' +
+        '<div class="fb-row"><span class="k">Status</span>' +
+          ['new', 'planned', 'shipped'].map(function (s) {
+            return '<button class="c-chip c-chip-filter' + ((f.st || 'new') === s ? ' is-active' : '') +
+              '" type="button" data-status="' + s + '">' +
+              (s === 'new' ? 'Open' : s === 'planned' ? 'Planned' : 'Shipped') + '</button>';
+          }).join('') +
+        '</div>' +
+        (f.stb ? '<div class="fb-row"><span class="k"></span><span class="v c-helper">' +
+          esc(f.stb) + ' moved this on ' + when(f.sts) + '</span></div>' : '') +
+      '</div>' +
+    '</div>' +
+    '<div class="fb-modal-foot">' +
+      (mine ? '<button class="c-icon-btn" type="button" id="fbDel" ' +
+              'aria-label="Withdraw this request" title="Withdraw this request">' +
+              '<i class="ph ph-trash"></i></button>' : '<span></span>') +
+      '<span class="right">' +
+        '<button class="c-btn c-btn-secondary c-btn-md" type="button" data-vote="' + esc(f.i) + '">' +
+          (backed ? 'Take my vote back' : 'Back this') + '</button>' +
+        '<button class="c-btn c-btn-primary c-btn-md" type="button" data-close>Done</button>' +
+      '</span>' +
+    '</div>',
+    function (modal) {
+      var del = modal.querySelector('#fbDel');
+      if (del) del.addEventListener('click', function () {
+        if (window.confirm('Withdraw this? People who backed it get their votes back.')) remove(f.i);
+      });
+    });
+}
+
+/* ═══ 8. Toasts ════════════════════════════════════════════════════════ */
+
+function toast(tone, title, message) {
+  var host = document.getElementById('fbToasts');
+  var el = document.createElement('div');
+  el.className = 'c-toast is-entering';
+  el.setAttribute('role', 'status');
+  el.innerHTML = '<i class="ph-fill ' +
+      (tone === 'success' ? 'ph-check-circle' : tone === 'warning' ? 'ph-warning-circle' : 'ph-info') +
+      ' tone tone-' + (tone === 'success' ? 'success' : tone === 'warning' ? 'warning' : 'neutral') + '"></i>' +
+    '<div class="body"><div class="title">' + esc(title) + '</div>' +
+    '<div class="message">' + esc(message) + '</div></div>' +
+    '<button class="c-icon-btn" type="button" data-toast-close aria-label="Dismiss">' +
+    '<i class="ph ph-x"></i></button>';
+  host.appendChild(el);
+  requestAnimationFrame(function () { el.classList.remove('is-entering'); });
+  var kill = setTimeout(function () { drop(el); }, 6000);
+  el.addEventListener('click', function (e) {
+    if (e.target.closest('[data-toast-close]')) { clearTimeout(kill); drop(el); }
+  });
+}
+function drop(el) {
+  el.classList.add('is-exiting');
+  setTimeout(function () { if (el.parentNode) el.parentNode.removeChild(el); }, REDUCED ? 0 : 240);
+}
+
+/* ═══ 9. Wiring ════════════════════════════════════════════════════════ */
+
+document.getElementById('fbAdd').addEventListener('click', compose);
+
+document.getElementById('fbFilters').addEventListener('click', function (e) {
+  var b = e.target.closest('button'); if (!b) return;
+  if (b.dataset.st) {
+    STATE.st = b.dataset.st;
+    var all = this.querySelectorAll('[data-st]');
+    for (var i = 0; i < all.length; i++) all[i].classList.toggle('is-active', all[i] === b);
+  } else if (b.dataset.own) {
+    STATE.own = STATE.own === b.dataset.own ? null : b.dataset.own;
+    var owns = this.querySelectorAll('[data-own]');
+    for (var j = 0; j < owns.length; j++) {
+      owns[j].classList.toggle('is-active', owns[j].dataset.own === STATE.own);
+    }
+  }
+  render();
+});
+
+document.getElementById('fbSort').addEventListener('click', function (e) {
+  var b = e.target.closest('button'); if (!b) return;
+  STATE.sort = b.dataset.sort;
+  var all = this.querySelectorAll('button');
+  for (var i = 0; i < all.length; i++) {
+    all[i].setAttribute('aria-pressed', all[i] === b ? 'true' : 'false');
+  }
+  render();
+});
+
+/* One delegate for the board and one for the modal: every control inside
+   both is rewritten on render, so binding per element would leak. */
+document.getElementById('fbBoard').addEventListener('click', function (e) {
+  var v = e.target.closest('[data-vote]');
+  if (v) { e.stopPropagation(); toggleVote(v.dataset.vote); return; }
+  var o = e.target.closest('[data-open]');
+  if (o) { detail(o.dataset.open); return; }
+  if (e.target.closest('#fbFirst')) { compose(); return; }
+  if (e.target.closest('#fbSeed')) { seed(); return; }
+  if (e.target.closest('#fbClearFilters')) {
+    STATE.st = 'all'; STATE.own = null;
+    var chips = document.querySelectorAll('#fbFilters .c-chip-filter');
+    for (var i = 0; i < chips.length; i++) {
+      chips[i].classList.toggle('is-active', chips[i].dataset.st === 'all');
+    }
+    render();
+  }
+});
+document.getElementById('fbBoard').addEventListener('keydown', function (e) {
+  if (e.key !== 'Enter' && e.key !== ' ') return;
+  var o = e.target.closest('[data-open]');
+  if (o) { e.preventDefault(); detail(o.dataset.open); }
+});
+
+document.getElementById('fbScrim').addEventListener('click', function (e) {
+  if (e.target === this) { closeModal(); return; }
+  if (e.target.closest('[data-close]')) { closeModal(); return; }
+  var back = e.target.closest('[data-back]');
+  if (back) { toggleVote(back.dataset.back); closeModal();
+    toast('success', 'Backed', 'Added your vote instead of a second copy.'); return; }
+  var vote = e.target.closest('[data-vote]');
+  if (vote) { toggleVote(vote.dataset.vote); detail(vote.dataset.vote); return; }
+  var st = e.target.closest('[data-status]');
+  if (st && STATE.open && STATE.open !== 'compose') {
+    setStatus(STATE.open, st.dataset.status);
+    detail(STATE.open);
+  }
+});
+
+document.addEventListener('keydown', function (e) {
+  if (e.key === 'Escape' && !document.getElementById('fbScrim').hidden) { closeModal(); return; }
+  if (e.key !== 'n' && e.key !== 'N') return;
+  var t = e.target, tag = (t.tagName || '').toLowerCase();
+  if (tag === 'input' || tag === 'textarea' || t.isContentEditable) return;
+  if (!document.getElementById('fbScrim').hidden) return;
+  e.preventDefault(); compose();
+});
+
+/* On a phone the rail starts as the corner box; on a laptop it starts open.
+   Read once at load rather than on resize: a rail that collapses itself
+   while someone is dragging a window is fighting them. */
+var NARROW = window.matchMedia('(max-width:760px)');
+function setCollapsed(on) {
+  document.getElementById('shellSidebarNav').classList.toggle('is-collapsed', on);
+  var t = document.getElementById('sidebarToggle');
+  t.setAttribute('aria-label', on ? 'Expand sidebar' : 'Collapse sidebar');
+  document.getElementById('sidebarArrow').setAttribute('d',
+    on ? 'M11 7l2.5 3-2.5 3' : 'M13.5 7 11 10l2.5 3');
+}
+if (NARROW.matches) setCollapsed(true);
+/* Expanded, the box overlays the board, so it needs a way out that is not
+   one small button. Only where it actually overlays. */
+document.addEventListener('click', function (e) {
+  if (!NARROW.matches || e.target.closest('#shellSidebarShell')) return;
+  setCollapsed(true);
+});
+
+document.getElementById('sidebarToggle').addEventListener('click', function () {
+  setCollapsed(!document.getElementById('shellSidebarNav').classList.contains('is-collapsed'));
+});
+
+/* ── Six real-shaped examples, so the clustering can be judged before the
+     group has posted anything. They go to the shared board under your own
+     name and you can withdraw any of them, which is why this is a button
+     and not a silent seed. */
+function seed() {
+  var samples = [
+    'The leaderboard takes a few seconds to redraw every time I change a filter, and I change filters a lot.',
+    'Leaderboard is slow to load on my phone over 5G. It is fine on the laptop.',
+    'I cannot tell whether the forecast number includes the deals I marked as at risk last week.',
+    'Forecast and the pipeline total disagree by about 200K and I do not know which one to quote.',
+    'Add a way to export the deals table to Excel. Finance asks for it every Monday.',
+    'When I share my screen the filters reset for the person opening the link, so we are never looking at the same board.'
+  ];
+  var i = 0;
+  (function next() {
+    if (i >= samples.length) {
+      toast('neutral', 'Six examples posted',
+        'They are on the board under your name. Withdraw any of them from its detail view.');
+      return;
+    }
+    post(samples[i++], next);
+  })();
+}
+
+/* ── Keeping up. A shared board with stale counts is worse than one that
+     is obviously stale: it looks settled while the argument moved on.
+     Paused while a modal is open, so the board never reshuffles under
+     someone's hand, and while the tab is hidden, so a backgrounded tab
+     is not polling all afternoon. */
+setInterval(function () {
+  if (document.hidden || !STATE.remote) return;
+  if (!document.getElementById('fbScrim').hidden) return;
+  api('GET').then(function (x) { if (adopt(x)) render(); }, function () {});
+}, POLL_MS);
+
+boot();
+
+})();
+</script>
+</body>
+</html>

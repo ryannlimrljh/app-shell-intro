@@ -37,6 +37,7 @@ serves `Last-Modified` and browsers hold onto this page.
 |---|---|
 | `pages/login-v1.html` | the login screen, and what `/` serves. Signs into v3 |
 | `pages/landing-v3.html` | what the login signs into. The variant whose board consumes real `collabrium-dls` component classes rather than restating their values |
+| `pages/feedback-v1.html` | the feedback board for the 30-day pioneer group. Second item in the sidebar, on `api/feedback.mjs` |
 | `pages/landing-v2.html` | **the working version. New implementation goes here.** The by-value reference v3 is diffed against |
 | `pages/landing-v1.html` | the previous version, frozen. Kept so v2 can be diffed against it |
 | `pages/assets/charts.bundle.js` | committed chart bundle — built, not hand-edited |
@@ -139,6 +140,44 @@ Local development does not have the function — `python3 -m http.server` serves
 static files only, so `/api/notes` 404s and the board falls back to
 browser-local notes, which is the same path as an unconfigured deploy. To
 exercise the shared path locally, run `vercel dev` instead.
+
+## The feedback board
+
+`pages/feedback-v1.html`, reached from the second item in the sidebar. It is
+where the ten people using this during the first 30 days say what got in
+their way, back each other's requests, and see what happened to them. Backed
+by `api/feedback.mjs` on the same Neon database as the notes, and it degrades
+the same way: no database means `{"configured": false}`, the board runs on
+`localStorage`, and it says so on the page rather than pretending the group
+can see what you wrote.
+
+Three rules do the work:
+
+- **Five open votes each.** Backing everything is the same as backing
+  nothing; with ten people an uncapped board just ranks whoever posted
+  first. Shipping a request releases the votes on it, so delivering
+  something hands everyone their vote back.
+- **The board groups notes itself.** No tags, no categories to pick. It
+  groups by the word a set of notes has in common, ranked by where that
+  word appears rather than how rare it is, because people put the subject
+  of a complaint at the front. Each region is named by the word that
+  grouped it and prints the other words the group shares, so a grouping
+  can be checked rather than trusted.
+- **New, Planned, Shipped,** each stamped with who moved it. Anyone can
+  move anything; with no roles to check, naming the person is the only
+  accountability available.
+
+**What the grouping cannot do:** it matches words, not meanings. "Slow" and
+"laggy" will not meet. The mitigation is the duplicate nudge while you type,
+which runs the same matcher at a lower bar and offers to add your vote to a
+near-match instead of posting a second copy. It was measured on a labelled
+set at three board sizes rather than tuned by eye; the thresholds and what
+they were measured against are in the comments at the top of the script.
+
+**No authentication,** exactly as with notes. The signed-in name is read off
+the shell, so `author` is whatever the page claims and anyone with the URL
+can post, vote and set status. Ten colleagues who know each other for thirty
+days is the whole security model.
 
 ## Known gaps
 

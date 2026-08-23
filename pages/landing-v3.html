@@ -8174,38 +8174,36 @@ function noteId(){
 function saveLocal(){
   try{ localStorage.setItem(NOTE_KEY, JSON.stringify(NOTES)); }catch(e){}
 }
-/* Every note carries its element colour (c: 0-4), assigned in CREATION
-   order through the department sequence Fire, Wood, Earth, Water, Gold —
-   the user's call, over row order, which a re-sort would repaint. The
-   counter lives in the same store under __seq (note keys always contain
-   a pipe, so it cannot collide); notes from before colours existed are
-   assigned in load order once, here. */
-var NOTE_SEQ = (function(){
-  var s = typeof NOTES.__seq === 'number' ? NOTES.__seq : 0, dirty = false;
+/* Every note carries its element colour (c: 0-4): its place in its own
+   row, walking the departments Fire, Wood, Earth, Water, Gold. A row caps
+   at four notes, so a stack always shows four different colours in that
+   order — and because the server derives it the same way, the board can
+   colour a note it has not saved yet.
+
+   It used to be a browser-local counter under __seq, guessing at a
+   table-wide sequence only the server could see. The two had no reason to
+   agree, so the panel you typed in and the pin you got back were often
+   different colours. That is what looked like a broken cycle. */
+function elColour(i){ return i % 5; }
+(function(){
+  var dirty = false;
   Object.keys(NOTES).forEach(function(k){
     // __seq and __pushed are the store's own bookkeeping, never rows
     if(k.indexOf('__') === 0 || !NOTES[k] || typeof NOTES[k] !== 'object') return;
     // rows hold LISTS of notes now; single-note values from before are
     // wrapped once, here, so nothing written earlier is lost
     if(!Array.isArray(NOTES[k])){ NOTES[k] = [NOTES[k]]; dirty = true; }
-    NOTES[k].forEach(function(n){
-      if(n && typeof n.c !== 'number'){ n.c = s % 5; s++; dirty = true; }
+    NOTES[k].forEach(function(n, i){
+      // anything written under the old counter is renumbered to its row
+      // position, which is what the server will send back anyway
+      if(n && n.c !== elColour(i)){ n.c = elColour(i); dirty = true; }
       // a stable id, so a shared store addresses the note rather than its
       // position — an index races the moment two people are writing
       if(n && !n.i){ n.i = noteId(); dirty = true; }
     });
   });
-  if(dirty){
-    NOTES.__seq = s;
-    saveLocal();
-  }
-  return s;
+  if(dirty) saveLocal();
 })();
-function nextNoteEl(){
-  var c = NOTE_SEQ % 5;
-  NOTE_SEQ++; NOTES.__seq = NOTE_SEQ;
-  return c;
-}
 var MONTHS_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 function today(){
   var d = new Date();
@@ -8233,15 +8231,19 @@ function noteSet(id, idx, text){
     if(idx >= 0) list.splice(idx, 1);          // an emptied note is a deletion
   } else if(was && was.a && was.a !== who){
     // an edit never silently reopens a resolved note
-    list[idx] = {i:rid, t:v, d:was.d, a:was.a, e:who, ed:today(), c:was.c, r:was.r, rd:was.rd};
+    list[idx] = {i:rid, t:v, d:was.d, a:was.a, e:who, ed:today(), c:elColour(idx), r:was.r, rd:was.rd};
   } else if(was){
-    list[idx] = {i:rid, t:v, d:today(), a:who, c:was.c, r:was.r, rd:was.rd};
+    list[idx] = {i:rid, t:v, d:today(), a:who, c:elColour(idx), r:was.r, rd:was.rd};
   } else {
     if(list.length >= NOTE_CAP) return;       // the buttons disable at the cap; this backstops them
-    // only a genuinely new note advances the colour cycle
+    // a new note takes the next colour in the row, which is the one the
+    // fold-out has been showing while it was being written
     rid = noteId(); fresh = true;
-    list.push({i:rid, t:v, d:today(), a:who, c:nextNoteEl()});
+    list.push({i:rid, t:v, d:today(), a:who, c:elColour(list.length)});
   }
+  // a note removed from the middle moves the ones after it up the row,
+  // and their colours move with them — the same renumbering the server does
+  list.forEach(function(n, i){ n.c = elColour(i); });
   if(list.length) NOTES[k] = list; else delete NOTES[k];
   saveLocal();
   /* The local write already happened, so the pin appears before the round
@@ -8278,11 +8280,11 @@ function adoptRow(key, notes){
   saveLocal();
   redrawNotes();
 }
-/* The whole store. __seq and __pushed survive: they are this browser's
-   bookkeeping, not the server's. */
+/* The whole store. __pushed survives: it is this browser's bookkeeping,
+   not the server's. __seq is deliberately dropped — the colour counter it
+   held is gone, and colour now comes off the note's place in its row. */
 function adoptAll(map){
   var keep = {};
-  if(typeof NOTES.__seq === 'number') keep.__seq = NOTES.__seq;
   if(NOTES.__pushed) keep.__pushed = 1;
   NOTES = keep;
   Object.keys(map || {}).forEach(function(k){
@@ -8621,10 +8623,11 @@ function openNotePanel(id, name, mode, idx){
   NP.wasOpen = id;
   var list = notesOf(id);
   var n = NP.noteIdx >= 0 ? list[NP.noteIdx] : null;
-  // tidy is neutral chrome; otherwise the note's colour, or a preview of
-  // the colour the cycle will hand a fresh note on save
+  // tidy is neutral chrome; otherwise the note's colour — and for one not
+  // yet written, the colour its place in the row will give it, which both
+  // sides compute the same way, so the pin comes back in this colour
   pane.className = mode === 'tidy' ? 'npanel tidy'
-    : 'npanel el-'+(n ? n.c : NOTE_SEQ % 5);
+    : 'npanel el-'+(n ? n.c : elColour(list.length));
   pane.setAttribute('aria-label', mode === 'tidy'
     ? list.length+' notes on '+name : 'Note on '+name);
   pane.innerHTML = notePanelHTML();

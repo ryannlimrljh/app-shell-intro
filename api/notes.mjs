@@ -34,13 +34,20 @@ const CAP = 4;        // four notes to a row — the same rule the UI enforces
 const MAX_LEN = 280;  // the textarea's own maxlength
 const MAX_KEY = 200;
 
-/* Colour is NOT stored. It is a pure function of creation order —
-   (seq - 1) % 5 walks Fire, Wood, Earth, Water, Gold — which means the
-   server is the single authority on it, and deleting a note never
-   repaints the ones around it, because seq values do not shift. */
+/* Colour is NOT stored. It is the note's place in its own row — walking
+   Fire, Wood, Earth, Water, Gold — so the server stays the authority on
+   it while the client can still predict it: a row caps at four notes, so
+   a stack is always Fire, Wood, Earth, Water, and a note being composed
+   knows its colour before it is saved.
+
+   It was (seq - 1) % 5, the table-wide insert order, which nothing on the
+   board could see: the panel showed one colour and the saved pin came
+   back another. The cost of the change is that deleting a note repaints
+   the ones after it, since they have moved up the row. */
 const SHAPE = `id, board_key, body, author, created_at, edited_by, edited_at,
                resolved_by, resolved_at,
-               ((seq - 1) % 5)::int AS colour`;
+               ((row_number() OVER (PARTITION BY board_key ORDER BY seq) - 1) % 5)::int
+                 AS colour`;
 
 const row = (r) => ({
   i: r.id,

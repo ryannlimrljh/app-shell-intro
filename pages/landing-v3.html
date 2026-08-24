@@ -10161,29 +10161,47 @@ notesBoot();
 
 <!-- ══ First-run tour ═══════════════════════════════════════════════════
      Self-contained: this style block, the script below it, and the
-     "Show me around" item in the account menu are the whole feature. -->
+     "Show me around" item in the account menu are the whole feature.
+     Runs on every load by design; nothing is remembered between visits. -->
 <style>
-  /* The blocker freezes the page; the hole is the spotlight, drawn as a
-     transparent box whose enormous shadow is the dim. One element gives
-     dim and cutout together, and moving it moves both. */
+  /* The blocker freezes the page; the hole is the spotlight, a
+     transparent box whose enormous shadow is the veil. The veil is the
+     house scrim, warm canvas at .9, the same wash the hero card modal
+     and the tidy overlay bring up, so the tour reads as one more of the
+     board's own overlays rather than a lightbox from somewhere else.
+     On that wash the hole takes the card grammar: hairline plus lift. */
   .tw-blocker{position:fixed; inset:0; z-index:120; background:transparent;}
   .tw-hole{position:fixed; z-index:121; pointer-events:none;
-    border:2px solid rgba(255,255,255,.92); border-radius:14px;
-    box-shadow:0 0 0 9999px rgba(8,8,8,.52);
-    transition:left 240ms var(--ease-standard), top 240ms var(--ease-standard),
-               width 240ms var(--ease-standard), height 240ms var(--ease-standard);}
-  /* The welcome step has no target: the hole collapses to a point mid-screen
-     and its shadow dims everything evenly. The ring would show as a 4px
+    border:1px solid var(--color-neutral-4); border-radius:14px;
+    box-shadow:0 0 0 9999px color-mix(in srgb, var(--color-canvas-warm) 90%, transparent),
+               0 8px 24px rgba(189,189,189,.4);
+    transition:left .52s cubic-bezier(.25,.9,.35,1), top .52s cubic-bezier(.25,.9,.35,1),
+               width .52s cubic-bezier(.25,.9,.35,1), height .52s cubic-bezier(.25,.9,.35,1);}
+  /* The welcome step has no target: the hole collapses to a point and its
+     shadow washes everything evenly. A 1px hairline would show as a
      speck, so it goes. */
   .tw-hole.tw-bare{border-color:transparent;}
 
   .tw-card{position:fixed; z-index:122; width:min(340px, calc(100vw - 24px));
-    background:var(--color-neutral-1); border-radius:var(--radius-lg);
-    /* the element colour of the step, cycling the five departments the way
-       the notes and the feedback board already do */
-    border-top:4px solid var(--tw-el, var(--color-obsidian));
-    box-shadow:var(--shadow-4); padding:var(--spacing-16);
-    font-family:var(--font-primary); color:var(--color-neutral-9);}
+    background:var(--color-neutral-1); border:1px solid var(--color-neutral-3);
+    border-radius:var(--radius-lg); box-shadow:var(--shadow-4);
+    padding:var(--spacing-16); font-family:var(--font-primary);
+    color:var(--color-neutral-9);
+    /* the swing measures its deltas about this corner, like the note panel */
+    transform-origin:top left;
+    transition:opacity .18s var(--ease-standard);}
+  .tw-card.tw-out{opacity:0;}
+  /* np-swing-open at tour scale: same curve, same mid-flight pose. The
+     JS gates it on !document.hidden exactly as the note panel does, so
+     an environment that never grants a frame shows the card plainly
+     instead of freezing it at the first keyframe. */
+  .tw-card.is-opening{animation:tw-swing-open .6s cubic-bezier(.25,.9,.35,1) both;}
+  @keyframes tw-swing-open{
+    0%{transform:translate(var(--tw-dx, 0px), var(--tw-dy, 0px)) scale(var(--tw-sx, 1), var(--tw-sy, 1)); opacity:.4;}
+    45%{transform:translate(calc(var(--tw-dx, 0px) * .5), calc(var(--tw-dy, 0px) * .5)) scale(.7) rotateY(calc(48deg * var(--tw-dir, 1))) rotateZ(calc(-7deg * var(--tw-dir, 1))); opacity:1;}
+    78%{transform:translate(0px, 0px) scale(1) rotateY(calc(-7deg * var(--tw-dir, 1))) rotateZ(calc(1deg * var(--tw-dir, 1)));}
+    100%{transform:none; opacity:1;}
+  }
   .tw-k{font-size:var(--text-label3-size); font-weight:700;
     letter-spacing:var(--tracking-eyebrow); text-transform:uppercase;
     color:var(--color-neutral-5);}
@@ -10200,45 +10218,50 @@ notesBoot();
       bottom:calc(12px + env(safe-area-inset-bottom, 0px)); width:auto;}
   }
   @media (prefers-reduced-motion:reduce){
-    .tw-hole{transition:none;}
+    .tw-hole, .tw-card{transition:none;}
+    .tw-card.is-opening{animation:none;}
   }
 </style>
 <script>
 (function () {
 'use strict';
 
-var KEY = 'collabrium-tour-v1';
+var REDUCED = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
 
 /* Selectors are lists: the first visible match wins, so a step can say
    "the Feedback link, or failing that the nav box it lives in" and stay
    truthful when the sidebar is collapsed. */
 var STEPS = [
-  {sel: null, el: null,
+  {sel: null,
    t: 'Welcome to the sales board',
    b: 'One page that answers where the quarter stands and what deserves attention next. ' +
-      'The next six stops show you how to move around it, and it takes about a minute.'},
-  {sel: ['#cardSlider .c-card-slide'], el: '--color-orange',
+      'The next seven stops show you how to move around it, and it takes about a minute.'},
+  {sel: ['#cardSlider .c-card-slide'],
    t: 'The cards are live',
    b: 'These six recalculate as the board changes underneath them. Click any card and it ' +
       'opens up with the working behind its number.'},
-  {sel: ['#controls .views'], el: '--color-salmon-pink',
+  {sel: ['#controls .views'],
    t: 'Two horizons',
    b: 'To date shows August as it stands. The second view projects September to December. ' +
       'Every figure, bar and table on the page follows whichever one is pressed.'},
-  {sel: ['#filters'], el: '--color-green',
+  {sel: ['#filters'],
    t: 'Slice the whole board',
    b: 'Pick a line, a head of sales, a platform or a status, and everything scopes to it, ' +
       'from the headline figure down to each row. Compare lays last year alongside.'},
-  {sel: ['#lbRows > *:first-child', '#lbRows'], el: '--color-navy',
+  {sel: ['#lbRows > *:first-child', '#lbRows'],
    t: 'Open a book',
    b: 'Rows are ordered by who needs attention first. Click one to drill into that book, its ' +
       'pods and its people, each carrying its share of the number above. The chips on the ' +
       'right switch the scale between per cent and ringgit.'},
-  {sel: ['#lbRows .nadd'], el: '--color-amber',
+  {sel: ['#lbRows .nadd'],
    t: 'Pin a note',
    b: 'The plus at the end of a row opens a note that stays pinned to it. Notes are shared, ' +
       'so what you write here sits on that row for everyone, signed and dated.'},
-  {sel: ['#shellSidebarNav a[href="feedback-v1.html"]', '#shellSidebarShell'], el: '--color-orange',
+  {sel: ['.c-dept-trigger', '.c-sidebar-header', '#shellSidebarShell'],
+   t: 'Change pods',
+   b: 'The logo up top is a menu. Click it and pick a pod, Studio, Sales, Influencers or ' +
+      'Content, and the shell switches to the one you choose.'},
+  {sel: ['#shellSidebarNav a[href="feedback-v1.html"]', '#shellSidebarShell'],
    t: 'When something is off',
    b: 'Feedback in the menu is the pilot group’s own board. Post what got in your way ' +
       'and back what should be fixed first. Everyone gets five votes, so spend them where ' +
@@ -10246,13 +10269,10 @@ var STEPS = [
 ];
 
 var idx = -1, blocker = null, hole = null, card = null;
+var run = 0;            // sequence token: every async hop checks it
+var gliding = false;    // the scroll listener stands down while the tour scrolls
+var keepTrue = null;    // re-settles against async re-renders while open
 
-function seen() {
-  try { return localStorage.getItem(KEY) === '1'; } catch (e) { return true; }
-}
-function markSeen() {
-  try { localStorage.setItem(KEY, '1'); } catch (e) {}
-}
 function visible(e) {
   if (!e) return false;
   var r = e.getBoundingClientRect();
@@ -10271,6 +10291,11 @@ function esc(s) {
     return {'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[c];
   });
 }
+function scroller() { return document.querySelector('.c-shell-content'); }
+function holeBox() {
+  return {l: parseFloat(hole.style.left) || 0, t: parseFloat(hole.style.top) || 0,
+          w: parseFloat(hole.style.width) || 0, h: parseFloat(hole.style.height) || 0};
+}
 
 function build() {
   blocker = document.createElement('div');
@@ -10287,99 +10312,125 @@ function build() {
   document.body.appendChild(card);
 }
 function teardown() {
+  clearInterval(keepTrue); keepTrue = null;
   [blocker, hole, card].forEach(function (e) { if (e && e.parentNode) e.parentNode.removeChild(e); });
   blocker = hole = card = null;
-  idx = -1;
+  idx = -1; run++;
   document.removeEventListener('keydown', onKeys, true);
 }
-function endTour() { markSeen(); teardown(); }
+function endTour() { teardown(); }
 
-/* The hole hugs the target with 8px of air; the card goes below it, or
-   above when below does not fit, clamped 12px inside the viewport either
-   way. Under 640px the stylesheet overrides all of this into a bottom
-   sheet, which is why the inline values only set left and top. */
-function place(target) {
-  var vw = window.innerWidth, vh = window.innerHeight, pad = 8;
-  if (target) {
-    var r = target.getBoundingClientRect();
+/* The hole hugs a rect with 8px of air. rect is viewport-space; pass
+   null for the welcome point. */
+function setHole(rect) {
+  if (rect) {
     hole.classList.remove('tw-bare');
-    hole.style.left = (r.left - pad) + 'px';
-    hole.style.top = (r.top - pad) + 'px';
-    hole.style.width = (r.width + pad * 2) + 'px';
-    hole.style.height = (r.height + pad * 2) + 'px';
+    hole.style.left = (rect.left - 8) + 'px';
+    hole.style.top = (rect.top - 8) + 'px';
+    hole.style.width = (rect.width + 16) + 'px';
+    hole.style.height = (rect.height + 16) + 'px';
   } else {
     hole.classList.add('tw-bare');
-    hole.style.left = (vw / 2) + 'px';
-    hole.style.top = (vh / 2) + 'px';
+    hole.style.left = (window.innerWidth / 2) + 'px';
+    hole.style.top = (window.innerHeight / 2) + 'px';
     hole.style.width = '0px';
     hole.style.height = '0px';
   }
-  var cw = card.offsetWidth, ch = card.offsetHeight, left, top;
-  if (!target) {
+}
+
+/* The card goes below the hole, or above when below does not fit,
+   clamped 12px inside the viewport. Under 640px the stylesheet overrides
+   this into a bottom sheet, which is why only left and top are set. */
+function placeCard() {
+  var vw = window.innerWidth, vh = window.innerHeight;
+  var cw = card.offsetWidth, ch = card.offsetHeight, hb = holeBox(), left, top;
+  if (hb.w === 0) {
     left = (vw - cw) / 2;
     top = (vh - ch) / 2;
   } else {
-    var hr = hole.getBoundingClientRect ? {
-      left: parseFloat(hole.style.left), top: parseFloat(hole.style.top),
-      width: parseFloat(hole.style.width), height: parseFloat(hole.style.height)
-    } : null;
-    left = hr.left + hr.width / 2 - cw / 2;
-    top = hr.top + hr.height + 12;
-    if (top + ch > vh - 12) top = hr.top - ch - 12;   // no room below: go above
-    if (top < 12) top = vh - ch - 12;                 // nor above: bottom of screen
+    left = hb.l + hb.w / 2 - cw / 2;
+    top = hb.t + hb.h + 12;
+    if (top + ch > vh - 12) top = hb.t - ch - 12;    // no room below: go above
+    if (top < 12) top = vh - ch - 12;                // nor above: bottom of screen
   }
   card.style.left = Math.min(Math.max(12, left), Math.max(12, vw - cw - 12)) + 'px';
   card.style.top = Math.min(Math.max(12, top), Math.max(12, vh - ch - 12)) + 'px';
 }
 
-/* Place, then push the target clear of the card when the two boxes
-   meet, which happens when the target is most of a phone screen tall and
-   the card is the bottom sheet. Runs again from the scroll listener
-   below, because the board's sticky controls change size inside a scroll
-   handler, after any same-tick measurement. */
+/* Place from live rects, then push the target clear of the card when the
+   two boxes meet (the tall-target-against-bottom-sheet case). Instant on
+   purpose: this is the corrector, not the choreography. */
 function settle(target) {
-  place(target);
-  var sc = document.querySelector('.c-shell-content');
+  setHole(target ? target.getBoundingClientRect() : null);
+  placeCard();
+  var sc = scroller();
   if (!target || !sc || !sc.contains(target)) return;
-  var hb = {t: parseFloat(hole.style.top), h: parseFloat(hole.style.height)};
+  var hb = holeBox();
   var cr = card.getBoundingClientRect();
   var cut = (hb.t + hb.h) - cr.top + 12;
   if (cut > 0 && cr.top > hb.t) {
-    /* instant, or the place() below measures a scroll still in flight:
-       the scroller's own scroll-behavior is smooth */
     var prev = sc.style.scrollBehavior;
     sc.style.scrollBehavior = 'auto';
     sc.scrollTop += cut;
     sc.style.scrollBehavior = prev;
-    place(target);
+    setHole(target.getBoundingClientRect());
+    placeCard();
   }
 }
 
-function show(i, dir) {
-  /* A step whose target is gone is skipped in whichever direction the
-     user was travelling, so a missing element can never strand the tour. */
-  while (i >= 0 && i < STEPS.length && STEPS[i].sel && !targetOf(STEPS[i])) i += (dir || 1);
-  if (i < 0 || i >= STEPS.length) { endTour(); return; }
-  idx = i;
-  var s = STEPS[i], target = targetOf(s);
-  var sc = document.querySelector('.c-shell-content');
-  /* Instant, not smooth: the spotlight is placed straight off the rects,
-     and the dim covers the cut. The sidebar lives outside the scroller,
-     so scrolling is skipped for it. */
-  if (target && sc && sc.contains(target)) {
-    var prev = sc.style.scrollBehavior;
+/* A gentle ease-in-out tween on the scroller, driven by setTimeout so it
+   completes even where animation frames are withheld. Duration follows
+   the distance, inside sane bounds. */
+function glideScroll(sc, to, done) {
+  var from = sc.scrollTop, d = to - from;
+  if (REDUCED || Math.abs(d) < 2) {
+    var p0 = sc.style.scrollBehavior;
     sc.style.scrollBehavior = 'auto';
-    target.scrollIntoView({block: 'center', behavior: 'auto'});
-    sc.style.scrollBehavior = prev;
-    /* scrollIntoView also scrolls the document when the viewport is
-       tight, and this shell never expects that: the sidebar is absolute
-       against .c-shell, so a document scroll drags it off screen. */
-    document.documentElement.scrollTop = 0;
-    document.body.scrollTop = 0;
+    sc.scrollTop = to;
+    sc.style.scrollBehavior = p0;
+    done();
+    return;
   }
-  card.style.setProperty('--tw-el', s.el ? 'var(' + s.el + ')' : 'var(--color-obsidian)');
+  var ms = Math.min(900, Math.max(350, Math.abs(d) * 0.5)), t0 = Date.now();
+  var prev = sc.style.scrollBehavior;
+  sc.style.scrollBehavior = 'auto';
+  gliding = true;
+  (function tick() {
+    var p = Math.min(1, (Date.now() - t0) / ms);
+    var e = p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;
+    sc.scrollTop = from + d * e;
+    if (p < 1) { setTimeout(tick, 16); return; }
+    sc.style.scrollBehavior = prev;
+    gliding = false;
+    done();
+  })();
+}
+
+/* The swing's FLIP vars, the note panel's contract at coach-card scale:
+   measure the card untransformed, map its rect back onto the hole, and
+   mirror the turn when the anchor sits right of centre. The welcome step
+   anchors on a centre point, so the scale is floored to keep the bloom
+   finite. Gated on !document.hidden like every swing on this page: an
+   environment that never grants a frame gets the card plainly. */
+function swingCard() {
+  card.classList.remove('is-opening');
+  if (REDUCED || document.hidden) return;
+  void card.offsetWidth;                        // measure untransformed
+  var hb = holeBox();
+  var to = card.getBoundingClientRect();
+  var sx = Math.max(0.12, (hb.w || 24) / to.width);
+  var sy = Math.max(0.12, (hb.h || 24) / to.height);
+  card.style.setProperty('--tw-dx', (hb.l - to.left).toFixed(1) + 'px');
+  card.style.setProperty('--tw-dy', (hb.t - to.top).toFixed(1) + 'px');
+  card.style.setProperty('--tw-sx', sx.toFixed(4));
+  card.style.setProperty('--tw-sy', sy.toFixed(4));
+  card.style.setProperty('--tw-dir', (hb.l + hb.w / 2) < window.innerWidth / 2 ? '1' : '-1');
+  card.classList.add('is-opening');
+}
+
+function renderCard(i) {
+  var s = STEPS[i], last = i === STEPS.length - 1;
   card.setAttribute('aria-label', s.t);
-  var last = i === STEPS.length - 1;
   card.innerHTML =
     '<button class="c-icon-btn tw-x" type="button" data-tw="end" aria-label="Close the tour">' +
       '<i class="ph ph-x" aria-hidden="true"></i></button>' +
@@ -10393,8 +10444,51 @@ function show(i, dir) {
       '<button class="c-btn c-btn-primary c-btn-sm" type="button" data-tw="next">' +
         (i === 0 ? 'Show me' : (last ? 'Done' : 'Next')) + '</button>' +
     '</div>';
-  settle(target);
-  card.focus();
+}
+
+/* One step change, choreographed: the card slips away, the screen glides
+   while the hole travels to a rect PREDICTED for after the scroll (both
+   arrive together), settle() corrects whatever the sticky controls moved
+   in their own scroll handler, and the new card folds out of the hole. */
+function show(i, dir) {
+  if (!card) return;    // a click on a torn-down card must not restart the tour
+  while (i >= 0 && i < STEPS.length && STEPS[i].sel && !targetOf(STEPS[i])) i += (dir || 1);
+  if (i < 0 || i >= STEPS.length) { endTour(); return; }
+  idx = i;
+  var token = ++run;
+  var target = targetOf(STEPS[i]);
+  var sc = scroller();
+  var fade = card.innerHTML !== '' && !REDUCED && !document.hidden;
+  if (fade) card.classList.add('tw-out');
+
+  setTimeout(function () {
+    if (token !== run) return;
+    function arrive() {
+      if (token !== run) return;
+      settle(target);
+      renderCard(i);
+      placeCard();
+      card.classList.remove('tw-out');
+      swingCard();
+      card.focus();
+    }
+    if (target && sc && sc.contains(target)) {
+      var r = target.getBoundingClientRect();
+      /* centre the target in the band the bottom sheet leaves free on a
+         phone; on a laptop the band is the viewport */
+      var band = matchMedia('(max-width:640px)').matches ? window.innerHeight - 220 : window.innerHeight;
+      var to = Math.max(0, Math.min(sc.scrollHeight - sc.clientHeight,
+        sc.scrollTop + r.top - (band / 2 - r.height / 2)));
+      var dy = to - sc.scrollTop;
+      // the hole starts moving now, towards where the target WILL be
+      setHole({left: r.left, top: r.top - dy, width: r.width, height: r.height});
+      glideScroll(sc, to, arrive);
+    } else {
+      setHole(target ? target.getBoundingClientRect() : null);
+      // let the hole mostly land before the card folds out of it
+      setTimeout(arrive, (REDUCED || document.hidden) ? 0 : 380);
+    }
+  }, fade ? 170 : 0);
 }
 
 function onKeys(e) {
@@ -10403,7 +10497,6 @@ function onKeys(e) {
   if (e.key === 'ArrowRight') { e.preventDefault(); show(idx + 1, 1); return; }
   if (e.key === 'ArrowLeft' && idx > 0) { e.preventDefault(); show(idx - 1, -1); return; }
   if (e.key === 'Tab') {
-    /* the page is frozen, so focus stays inside the card */
     var f = card.querySelectorAll('button');
     if (!f.length) return;
     var first = f[0], last = f[f.length - 1];
@@ -10425,17 +10518,24 @@ function start() {
     else if (act === 'next') { if (idx === STEPS.length - 1) endTour(); else show(idx + 1, 1); }
   });
   window.addEventListener('resize', function () {
-    if (idx >= 0) settle(targetOf(STEPS[idx]));
+    if (idx >= 0 && !gliding) settle(targetOf(STEPS[idx]));
   });
   /* The board relays out inside its own scroll handler, so the spotlight
-     re-settles when the scroller fires. Debounced: a settle that scrolls
-     re-triggers this once, measures clear, and the cycle ends. */
-  var sc0 = document.querySelector('.c-shell-content'), st0 = null;
+     re-settles when the scroller fires. Not while the tour is doing the
+     scrolling: mid-glide rects would fight the predicted hole. */
+  /* The board also redraws itself asynchronously (the shared-notes fetch
+     re-renders the leaderboard when it answers), which moves rects with
+     no scroll to hear. A slow tick keeps the spotlight true; settle() is
+     instant and idempotent, so the tick costs nothing when nothing moved. */
+  keepTrue = setInterval(function () {
+    if (idx >= 0 && !gliding) settle(targetOf(STEPS[idx]));
+  }, 500);
+  var sc0 = scroller(), st0 = null;
   if (sc0) sc0.addEventListener('scroll', function () {
-    if (idx < 0) return;
+    if (idx < 0 || gliding) return;
     clearTimeout(st0);
     st0 = setTimeout(function () {
-      if (idx >= 0) settle(targetOf(STEPS[idx]));
+      if (idx >= 0 && !gliding) settle(targetOf(STEPS[idx]));
     }, 90);
   }, {passive: true});
   show(0, 1);
@@ -10444,13 +10544,12 @@ function start() {
 var replay = document.getElementById('tourReplay');
 if (replay) replay.addEventListener('click', function () { setTimeout(start, 60); });
 
-/* First visit only, and only after the entrance has finished: the intro's
-   last beat is the ask box revealing at 1150ms, so the tour polls for
-   that class and follows it, with a ceiling for environments where the
-   reveal never arms. ?tour=1 forces a run regardless of the seen flag. */
+/* Every load, once the entrance has finished: the intro's last beat is
+   the ask box revealing at 1150ms, so the tour polls for that class and
+   follows it, with a ceiling for environments where the reveal never
+   arms. Deliberately not remembered between visits; dismissing it only
+   closes it until the next refresh. */
 (function auto() {
-  var force = /[?&]tour=1\b/.test(location.search);
-  if (!force && seen()) return;
   var box = document.getElementById('askBox'), t0 = Date.now();
   (function wait() {
     if ((box && box.classList.contains('is-revealed')) || Date.now() - t0 > 6000) {

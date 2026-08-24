@@ -10267,7 +10267,14 @@ sc.addEventListener('wheel', function (e) {
      and a full-screen veil only repaints while a glide is actually
      running. */
   .tw-blocker{position:fixed; inset:0; z-index:120; background:transparent;}
-  .tw-hole{position:fixed; z-index:121; pointer-events:none;
+  /* The wrapper is the veil's clip: without it the hole's 9999px shadow
+     spread gives the layer paint bounds around 20,000px square, and
+     real-GPU compositors visibly re-tile a layer that size while the
+     hole moves over a scrolling page. Clipped at the viewport, the
+     layer can never exceed the screen. Absolute inside a full-screen
+     fixed wrapper keeps the same coordinate frame as fixed. */
+  .tw-veil{position:fixed; inset:0; z-index:121; overflow:hidden; pointer-events:none;}
+  .tw-hole{position:absolute; pointer-events:none;
     border:1px solid var(--color-neutral-4); border-radius:14px;
     box-shadow:0 0 0 9999px color-mix(in srgb, var(--color-canvas-warm) 90%, transparent),
                0 8px 24px rgba(189,189,189,.4);}
@@ -10379,7 +10386,7 @@ var STEPS = [
       'it matters.'}
 ];
 
-var idx = -1, blocker = null, hole = null, card = null;
+var idx = -1, blocker = null, veil = null, hole = null, card = null;
 var run = 0;            // sequence token: every async hop AND every tween tick checks it
 var gliding = false;    // the settle paths stand down while the tour is moving things
 var keepTrue = null;    // re-settles against async re-renders while open
@@ -10630,22 +10637,31 @@ function renderCard(i) {
 function build() {
   blocker = document.createElement('div');
   blocker.className = 'tw-blocker';
+  veil = document.createElement('div');
+  veil.className = 'tw-veil';
   hole = document.createElement('div');
   hole.className = 'tw-hole tw-bare';
+  veil.appendChild(hole);
   card = document.createElement('div');
   card.className = 'tw-card';
   card.setAttribute('role', 'dialog');
   card.setAttribute('aria-modal', 'true');
   card.tabIndex = -1;
   document.body.appendChild(blocker);
-  document.body.appendChild(hole);
+  document.body.appendChild(veil);
   document.body.appendChild(card);
   applyHole(pointBox());
 }
+/* Element removal and global cleanup are separate on purpose: the
+   closing fold schedules removal 470ms out, and by then a replay may be
+   running a whole new tour whose state a stale timer must not touch. */
+function removeParts(parts) {
+  parts.forEach(function (e) { if (e && e.parentNode) e.parentNode.removeChild(e); });
+}
 function teardown() {
   clearInterval(keepTrue); keepTrue = null;
-  [blocker, hole, card].forEach(function (e) { if (e && e.parentNode) e.parentNode.removeChild(e); });
-  blocker = hole = card = null;
+  removeParts([blocker, veil, card]);
+  blocker = veil = hole = card = null;
   idx = -1; run++;
   document.removeEventListener('keydown', onKeys, true);
 }
@@ -10663,7 +10679,14 @@ function endTour() {
   card.classList.add('is-closing');
   card.style.pointerEvents = 'none';
   hole.style.opacity = '0';
-  setTimeout(teardown, 470);
+  /* All the GLOBAL cleanup happens now, while it is still this tour's
+     to do; the timer only removes the elements this fold owns, so a
+     replay started during the 470ms gets a fresh, untouched tour. */
+  clearInterval(keepTrue); keepTrue = null;
+  document.removeEventListener('keydown', onKeys, true);
+  var mine = [blocker, veil, card];
+  blocker = veil = hole = card = null;
+  setTimeout(function () { removeParts(mine); }, 470);
 }
 
 /* One step change: the card slips away and re-renders WHILE HIDDEN so
@@ -10699,7 +10722,7 @@ function show(i, dir) {
       {l: prevL, t: prevT}, slot, function () {
         if (token !== run) return;
         settleSnap(target0);
-        card.focus();
+        card.focus({preventScroll: true});
       });
     return;
   }
@@ -10724,7 +10747,7 @@ function show(i, dir) {
       settleSnap(target);
       card.classList.remove('tw-out');
       swingCard();
-      card.focus();
+      card.focus({preventScroll: true});
     });
   }, fade ? 170 : 0);
 }

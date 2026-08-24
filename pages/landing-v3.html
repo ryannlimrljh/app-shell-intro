@@ -10518,7 +10518,9 @@ function frame(fn) {
    tick, so they cannot disagree, and it checks the token every tick, so
    a superseded glide stops mid-flight instead of finishing into someone
    else's step. */
+var glideGen = 0;   // only the newest glide may write; older ticks stand down
 function glide(token, sc, to, hFrom, hTo, cFrom, cTo, done) {
+  var g = ++glideGen;
   var from = sc ? sc.scrollTop : 0, d = sc ? (to - from) : 0;
   var dist = Math.max(Math.abs(d), Math.abs(hTo.t - hFrom.t), Math.abs(hTo.l - hFrom.l));
   var ms = REDUCED ? 0 : Math.min(900, Math.max(380, dist * 0.55));
@@ -10533,6 +10535,11 @@ function glide(token, sc, to, hFrom, hTo, cFrom, cTo, done) {
   if (sc) sc.style.scrollBehavior = 'auto';
   gliding = true;
   (function step() {
+    /* Superseded by a newer glide: return without touching ANYTHING.
+       The gliding flag and the scroller belong to the newer glide now;
+       an abandoned tick resetting them is exactly what let corrective
+       glides pile into the storm the recording showed. */
+    if (g !== glideGen) return;
     if (token !== run) { gliding = false; if (sc) sc.style.scrollBehavior = prev; return; }
     var p = ms ? Math.min(1, (Date.now() - t0) / ms) : 1;
     var e = p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;
@@ -10729,26 +10736,30 @@ function start() {
     else if (act === 'back') show(idx - 1, -1);
     else if (act === 'next') { if (idx === STEPS.length - 1) endTour(); else show(idx + 1, 1); }
   });
-  window.addEventListener('resize', function () {
-    if (idx >= 0 && !gliding) ensureVisible(targetOf(STEPS[idx]), run);
-  });
-  /* The board redraws parts of itself asynchronously (the shared-notes
-     fetch re-renders the leaderboard when it answers), which moves rects
-     with no scroll to hear. A slow tick keeps the spotlight true, and it
-     measures before it writes, so a quiet board costs nothing. Small
-     drift snaps; a target carried off screen flies back on the tween. */
-  keepTrue = setInterval(function () {
+  /* One corrector for every quiet-time path, and it asks its questions
+     in the only order that converges: target off screen, fly back;
+     else hole drifted, snap; else nothing. Drift-first was the trap the
+     field recording caught: a snap had aligned the hole to an OFF-SCREEN
+     target, drift then measured zero forever, and the recovery that
+     would have fixed it sat unreachable behind the early return. */
+  function holdTrue() {
     if (idx < 0 || gliding) return;
     var t = targetOf(STEPS[idx]);
     if (!t) return;
-    var want = padBox(t.getBoundingClientRect()), have = holeBox();
-    var drift = Math.max(Math.abs(want.l - have.l), Math.abs(want.t - have.t),
-                         Math.abs(want.w - have.w), Math.abs(want.h - have.h));
-    if (drift <= 2) return;
     var r = t.getBoundingClientRect();
-    if (r.top < -8 || r.bottom > window.innerHeight + 8) ensureVisible(t, run);
-    else settleSnap(t);
-  }, 500);
+    if (r.top < -8 || r.bottom > window.innerHeight + 8) { ensureVisible(t, run); return; }
+    var want = padBox(r), have = holeBox();
+    if (Math.abs(want.l - have.l) > 2 || Math.abs(want.t - have.t) > 2 ||
+        Math.abs(want.w - have.w) > 2 || Math.abs(want.h - have.h) > 2) {
+      settleSnap(t);
+    }
+  }
+  window.addEventListener('resize', holdTrue);
+  /* The board redraws parts of itself asynchronously (the shared-notes
+     fetch re-renders the leaderboard when it answers), which moves rects
+     with no scroll to hear. The slow tick keeps the spotlight true and
+     measures before it writes, so a quiet board costs nothing. */
+  keepTrue = setInterval(holdTrue, 500);
   /* The board relays out inside its own scroll handler, so the spotlight
      re-settles when the scroller fires. Not while the tour is doing the
      scrolling: mid-glide rects would fight the tween. */
@@ -10756,9 +10767,7 @@ function start() {
   if (sc0) sc0.addEventListener('scroll', function () {
     if (idx < 0 || gliding) return;
     clearTimeout(st0);
-    st0 = setTimeout(function () {
-      if (idx >= 0 && !gliding) settleSnap(targetOf(STEPS[idx]));
-    }, 90);
+    st0 = setTimeout(holdTrue, 90);
   }, {passive: true});
   show(0, 1);
 }

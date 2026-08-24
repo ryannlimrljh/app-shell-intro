@@ -3938,7 +3938,7 @@
               title="View 02 · Where the gap is forming while there is still runway">
               <span class="v-k">View 02</span>
               <span class="v-t">September to December, projection</span>
-              <span class="v-s" aria-hidden="true">Sep to Dec</span>
+              <span class="v-s" aria-hidden="true">Projection</span>
               <span class="v-d">Where the gap is forming while there is still runway</span>
             </button>
           </nav>
@@ -10608,28 +10608,21 @@ function show(i, dir) {
   idx = i;
   var token = ++run;
 
-  /* Near or far? The fold-out is the arrival ceremony for a new part of
-     the board; between two stops that sit beside each other it reads as
-     churn. Decided with the OLD card's size against the planned hole,
-     before any content swap, so the far path never flashes the next
-     step's text; the 320px threshold tolerates the slot moving a little
-     when the new content changes the card's height. */
+  /* The fold is the entrance and nothing else: the first pop blooms out
+     of the veil, and every step after it is the box moving. The push
+     swaps the text at the click, plans against the NEW card's height so
+     the landing needs no correction, and lets the one eased tween carry
+     scroll, hole and card together. Reduced motion takes the same path
+     with a zero-length tween. */
   var target0 = targetOf(STEPS[i]);
   var sc0 = scroller();
-  var p0 = target0 ? plan(target0, sc0) : {to: null, hole: pointBox()};
   var prevL = parseFloat(card.style.left), prevT = parseFloat(card.style.top);
-  var slot0 = cardSlot(p0.hole, card.offsetWidth || 340, card.offsetHeight || 180);
-  var near = card.innerHTML !== '' && !card.classList.contains('tw-out') &&
-    !REDUCED && !document.hidden && isFinite(prevL) &&
-    Math.hypot(slot0.l - prevL, slot0.t - prevT) < 320;
 
-  if (near) {
-    /* The push: text swaps at the click, then the same eased tween that
-       moves the hole carries the box to its new slot. No fold, no fade,
-       one clock. */
+  if (card.innerHTML !== '' && isFinite(prevL)) {
     hole.classList.toggle('tw-bare', !target0);
     card.classList.remove('is-opening');
     renderCard(i);
+    var p0 = target0 ? plan(target0, sc0) : {to: null, hole: pointBox()};
     var slot = cardSlot(p0.hole, card.offsetWidth, card.offsetHeight);
     glide(token, p0.to === null ? null : sc0, p0.to || 0, holeBox(), p0.hole,
       {l: prevL, t: prevT}, slot, function () {
@@ -10640,6 +10633,9 @@ function show(i, dir) {
     return;
   }
 
+  /* Only the very first show reaches this: the card has no content yet,
+     so there is nothing to fade or to push. It flies the hole in and
+     blooms the card out of it. */
   var fade = card.innerHTML !== '' && !REDUCED && !document.hidden;
   if (fade) card.classList.add('tw-out');
 

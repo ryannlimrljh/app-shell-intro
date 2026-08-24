@@ -10192,6 +10192,11 @@ notesBoot();
     transform-origin:top left;
     transition:opacity .18s var(--ease-standard);}
   .tw-card.tw-out{opacity:0;}
+  /* The card is focused programmatically on every step so the keyboard
+     stays trapped inside it; the container itself must not wear the
+     browser's default ring for that. The buttons inside keep their own
+     focus-visible rings, which is where keyboard focus actually lives. */
+  .tw-card:focus{outline:none;}
   /* np-swing-open at tour scale: same curve, same mid-flight pose. The
      JS gates it on !document.hidden exactly as the note panel does, so
      an environment that never grants a frame shows the card plainly
@@ -10351,9 +10356,8 @@ function plan(target, sc) {
    hole-plus-card stack, so below fits by construction whenever the
    viewport has the room. Under 640px the stylesheet overrides this into
    a bottom sheet, which is why only left and top are set. */
-function placeCard() {
-  var vw = window.innerWidth, vh = window.innerHeight;
-  var cw = card.offsetWidth, ch = card.offsetHeight, hb = holeBox(), left, top;
+function cardSlot(hb, cw, ch) {
+  var vw = window.innerWidth, vh = window.innerHeight, left, top;
   if (hb.w === 0) {
     left = (vw - cw) / 2;
     top = (vh - ch) / 2;
@@ -10363,8 +10367,13 @@ function placeCard() {
     if (top + ch > vh - 12) top = hb.t - ch - 12;    // no room below: go above
     if (top < 12) top = vh - ch - 12;                // nor above: bottom of screen
   }
-  card.style.left = Math.min(Math.max(12, left), Math.max(12, vw - cw - 12)) + 'px';
-  card.style.top = Math.min(Math.max(12, top), Math.max(12, vh - ch - 12)) + 'px';
+  return {l: Math.min(Math.max(12, left), Math.max(12, vw - cw - 12)),
+          t: Math.min(Math.max(12, top), Math.max(12, vh - ch - 12))};
+}
+function placeCard() {
+  var s = cardSlot(holeBox(), card.offsetWidth, card.offsetHeight);
+  card.style.left = s.l + 'px';
+  card.style.top = s.t + 'px';
 }
 
 /* Snap to live rects. Never scrolls: the few pixels the sticky bar's
@@ -10383,7 +10392,7 @@ function ensureVisible(target, token) {
   if (!target || !sc || !sc.contains(target)) { settleSnap(target); return; }
   var p = plan(target, sc);
   if (p.to === null || Math.abs(p.to - sc.scrollTop) <= 8) { settleSnap(target); return; }
-  glide(token, sc, p.to, holeBox(), p.hole, function () {
+  glide(token, sc, p.to, holeBox(), p.hole, null, null, function () {
     if (token !== run) return;
     settleSnap(target);
   });
@@ -10404,7 +10413,7 @@ function frame(fn) {
    tick, so they cannot disagree, and it checks the token every tick, so
    a superseded glide stops mid-flight instead of finishing into someone
    else's step. */
-function glide(token, sc, to, hFrom, hTo, done) {
+function glide(token, sc, to, hFrom, hTo, cFrom, cTo, done) {
   var from = sc ? sc.scrollTop : 0, d = sc ? (to - from) : 0;
   var dist = Math.max(Math.abs(d), Math.abs(hTo.t - hFrom.t), Math.abs(hTo.l - hFrom.l));
   var ms = REDUCED ? 0 : Math.min(900, Math.max(380, dist * 0.55));
@@ -10418,6 +10427,10 @@ function glide(token, sc, to, hFrom, hTo, done) {
     if (sc) sc.scrollTop = from + d * e;
     applyHole({l: hFrom.l + (hTo.l - hFrom.l) * e, t: hFrom.t + (hTo.t - hFrom.t) * e,
                w: hFrom.w + (hTo.w - hFrom.w) * e, h: hFrom.h + (hTo.h - hFrom.h) * e});
+    if (cFrom) {
+      card.style.left = (cFrom.l + (cTo.l - cFrom.l) * e) + 'px';
+      card.style.top = (cFrom.t + (cTo.t - cFrom.t) * e) + 'px';
+    }
     if (p < 1) { frame(step); return; }
     if (sc) sc.style.scrollBehavior = prev;
     gliding = false;
@@ -10501,6 +10514,39 @@ function show(i, dir) {
   if (i < 0 || i >= STEPS.length) { endTour(); return; }
   idx = i;
   var token = ++run;
+
+  /* Near or far? The fold-out is the arrival ceremony for a new part of
+     the board; between two stops that sit beside each other it reads as
+     churn. Decided with the OLD card's size against the planned hole,
+     before any content swap, so the far path never flashes the next
+     step's text; the 320px threshold tolerates the slot moving a little
+     when the new content changes the card's height. */
+  var target0 = targetOf(STEPS[i]);
+  var sc0 = scroller();
+  var p0 = target0 ? plan(target0, sc0) : {to: null, hole: pointBox()};
+  var prevL = parseFloat(card.style.left), prevT = parseFloat(card.style.top);
+  var slot0 = cardSlot(p0.hole, card.offsetWidth || 340, card.offsetHeight || 180);
+  var near = card.innerHTML !== '' && !card.classList.contains('tw-out') &&
+    !REDUCED && !document.hidden && isFinite(prevL) &&
+    Math.hypot(slot0.l - prevL, slot0.t - prevT) < 320;
+
+  if (near) {
+    /* The push: text swaps at the click, then the same eased tween that
+       moves the hole carries the box to its new slot. No fold, no fade,
+       one clock. */
+    hole.classList.toggle('tw-bare', !target0);
+    card.classList.remove('is-opening');
+    renderCard(i);
+    var slot = cardSlot(p0.hole, card.offsetWidth, card.offsetHeight);
+    glide(token, p0.to === null ? null : sc0, p0.to || 0, holeBox(), p0.hole,
+      {l: prevL, t: prevT}, slot, function () {
+        if (token !== run) return;
+        settleSnap(target0);
+        card.focus();
+      });
+    return;
+  }
+
   var fade = card.innerHTML !== '' && !REDUCED && !document.hidden;
   if (fade) card.classList.add('tw-out');
 
@@ -10513,7 +10559,7 @@ function show(i, dir) {
     renderCard(i);                             // real height before the plan
     var hFrom = holeBox();
     var p = target ? plan(target, sc) : {to: null, hole: pointBox()};
-    glide(token, p.to === null ? null : sc, p.to || 0, hFrom, p.hole, function () {
+    glide(token, p.to === null ? null : sc, p.to || 0, hFrom, p.hole, null, null, function () {
       if (token !== run) return;
       settleSnap(target);
       card.classList.remove('tw-out');

@@ -12,3 +12,12 @@
 # pre-port snapshot, so its copy and numbers now contradict the live page, and
 # anyone who found the URL would reasonably read it as current.
 pages/decision-workspace-v2.html
+
+# pages/decision-space-sales.html and pages/head-of-sales.html are working
+# drafts from 7 August, kept locally and never committed. They upload like
+# anything else under pages/ — this file governs the deployment, not
+# .gitignore, so being untracked does not keep them off a public URL. Their
+# figures are a snapshot of that date and would read as current to anyone
+# who found the link.
+pages/decision-space-sales.html
+pages/head-of-sales.html

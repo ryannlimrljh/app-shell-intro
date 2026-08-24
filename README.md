@@ -37,7 +37,7 @@ serves `Last-Modified` and browsers hold onto this page.
 |---|---|
 | `pages/login-v1.html` | the login screen, and what `/` serves. Signs into v3 |
 | `pages/landing-v3.html` | what the login signs into. The variant whose board consumes real `collabrium-dls` component classes rather than restating their values |
-| `pages/feedback-v1.html` | the feedback board for the 30-day pioneer group. Second item in the sidebar, on `api/feedback.mjs` |
+| `pages/feedback-v1.html` | the feedback board for the 30-day pioneer group, on `api/feedback.mjs`. Built and working, deliberately not linked from the nav yet |
 | `pages/landing-v2.html` | **the working version. New implementation goes here.** The by-value reference v3 is diffed against |
 | `pages/landing-v1.html` | the previous version, frozen. Kept so v2 can be diffed against it |
 | `pages/assets/charts.bundle.js` | committed chart bundle — built, not hand-edited |
@@ -143,9 +143,16 @@ exercise the shared path locally, run `vercel dev` instead.
 
 ## The feedback board
 
-`pages/feedback-v1.html`, reached from the second item in the sidebar. It is
-where the ten people using this during the first 30 days say what got in
-their way, back each other's requests, and see what happened to them. Backed
+**Not linked from the nav yet, on purpose.** The page is finished and the
+function behind it is live, but the dashboard sidebar does not point at it
+until the group is ready to be invited. Open it directly to work on it. To
+put it back, the sidebar needs the anchor next to Dashboard in
+`pages/landing-v3.html` and the `a.c-sidebar-item` underline rule that goes
+with it; both came out in one commit, so its diff is the whole change.
+
+`pages/feedback-v1.html`. It is where the ten people using this during the
+first 30 days say what got in their way, back each other's requests, and see
+what happened to them. Backed
 by `api/feedback.mjs` on the same Neon database as the notes, and it degrades
 the same way: no database means `{"configured": false}`, the board runs on
 `localStorage`, and it says so on the page rather than pretending the group

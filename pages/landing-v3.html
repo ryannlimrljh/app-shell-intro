@@ -1541,10 +1541,6 @@
      against. The existing border-top (from components.css, untouched)
      is what reads as "a divider on top of the row" once this sits
      pinned at the bottom, directly above the account row below. */
-  /* The nav holds one button and one link now. components.css styles
-     .c-sidebar-item as a button, so the anchor arrives with the
-     browser default underline and its own inline layout. */
-  a.c-sidebar-item{text-decoration:none;}
   .c-sidebar-footer{margin-top:auto;}
 
   /* Sidebar footer — account row, now a menu trigger. Not a documented
@@ -1959,7 +1955,6 @@
         </div>
         <div class="c-sidebar-section">Overview</div>
         <button class="c-sidebar-item active" type="button"><i class="ph-fill ph-house"></i><span class="label">Dashboard</span><span class="c-sidebar-hover-text">Dashboard</span></button>
-        <a class="c-sidebar-item" href="feedback-v1.html"><i class="ph-fill ph-lightbulb-filament"></i><span class="label">Feedback</span><span class="c-sidebar-hover-text">Feedback</span></a>
         <div class="c-sidebar-footer">
           <button class="c-sidebar-account" type="button" id="accountMenuTrigger" aria-haspopup="menu" aria-expanded="false" aria-controls="accountMenu">
             <span class="c-search-input-avatar">BW</span>

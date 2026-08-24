@@ -10275,6 +10275,9 @@ sc.addEventListener('wheel', function (e) {
      shadow washes everything evenly. A 1px hairline would show as a
      speck, so it goes. */
   .tw-hole.tw-bare{border-color:transparent;}
+  /* opacity only: geometry is the tween's, but the exit fades the veil
+     out from under the folding card, and opacity rides the compositor */
+  .tw-hole{transition:opacity .32s var(--ease-standard);}
 
   .tw-card{position:fixed; z-index:122; width:min(340px, calc(100vw - 24px));
     background:var(--color-neutral-1); border:1px solid var(--color-neutral-3);
@@ -10295,6 +10298,14 @@ sc.addEventListener('wheel', function (e) {
      an environment that never grants a frame shows the card plainly
      instead of freezing it at the first keyframe. */
   .tw-card.is-opening{animation:tw-swing-open .6s cubic-bezier(.25,.9,.35,1) both;}
+  /* the exit, on the note panel's close curve: faster than the entrance,
+     because dismissal should not be admired */
+  .tw-card.is-closing{animation:tw-swing-close .45s cubic-bezier(.3,.6,.35,1) both;}
+  @keyframes tw-swing-close{
+    0%{transform:none; opacity:1;}
+    50%{transform:translate(calc(var(--tw-dx, 0px) * .5), calc(var(--tw-dy, 0px) * .5)) scale(.7) rotateY(calc(45deg * var(--tw-dir, 1))) rotateZ(calc(-6deg * var(--tw-dir, 1))); opacity:1;}
+    100%{transform:translate(var(--tw-dx, 0px), var(--tw-dy, 0px)) scale(var(--tw-sx, 1), var(--tw-sy, 1)); opacity:.15;}
+  }
   @keyframes tw-swing-open{
     0%{transform:translate(var(--tw-dx, 0px), var(--tw-dy, 0px)) scale(var(--tw-sx, 1), var(--tw-sy, 1)); opacity:.4;}
     45%{transform:translate(calc(var(--tw-dx, 0px) * .5), calc(var(--tw-dy, 0px) * .5)) scale(.7) rotateY(calc(48deg * var(--tw-dir, 1))) rotateZ(calc(-7deg * var(--tw-dir, 1))); opacity:1;}
@@ -10318,7 +10329,8 @@ sc.addEventListener('wheel', function (e) {
   }
   @media (prefers-reduced-motion:reduce){
     .tw-card{transition:none;}
-    .tw-card.is-opening{animation:none;}
+    .tw-card.is-opening, .tw-card.is-closing{animation:none;}
+    .tw-hole{transition:none;}
   }
 </style>
 <script>
@@ -10537,10 +10549,7 @@ function glide(token, sc, to, hFrom, hTo, cFrom, cTo, done) {
    anchors on a centre point, so the scale is floored to keep the bloom
    finite. Gated on !document.hidden like every swing on this page: an
    environment that never grants a frame gets the card plainly. */
-function swingCard() {
-  card.classList.remove('is-opening');
-  if (REDUCED || document.hidden) return;
-  void card.offsetWidth;                        // measure untransformed
+function setSwingVars() {
   var hb = holeBox();
   var to = card.getBoundingClientRect();
   var sx = Math.max(0.12, (hb.w || 24) / to.width);
@@ -10550,6 +10559,12 @@ function swingCard() {
   card.style.setProperty('--tw-sx', sx.toFixed(4));
   card.style.setProperty('--tw-sy', sy.toFixed(4));
   card.style.setProperty('--tw-dir', (hb.l + hb.w / 2) < window.innerWidth / 2 ? '1' : '-1');
+}
+function swingCard() {
+  card.classList.remove('is-opening');
+  if (REDUCED || document.hidden) return;
+  void card.offsetWidth;                        // measure untransformed
+  setSwingVars();
   card.classList.add('is-opening');
 }
 
@@ -10593,7 +10608,22 @@ function teardown() {
   idx = -1; run++;
   document.removeEventListener('keydown', onKeys, true);
 }
-function endTour() { teardown(); }
+/* The exit mirrors the entrance: the card folds back into its spotlight
+   while the veil lifts, then the tour leaves the DOM. idx and the token
+   go first, so keys, ticks, in-flight glides and a second click on Done
+   all stand down for the duration. */
+function endTour() {
+  if (!card || idx < 0) return;               // gone, or already folding
+  idx = -1; run++;
+  if (REDUCED || document.hidden || !card.innerHTML) { teardown(); return; }
+  card.classList.remove('is-opening');        // a close mid-bloom folds from
+  void card.offsetWidth;                      // where the card truly is
+  setSwingVars();
+  card.classList.add('is-closing');
+  card.style.pointerEvents = 'none';
+  hole.style.opacity = '0';
+  setTimeout(teardown, 470);
+}
 
 /* One step change: the card slips away and re-renders WHILE HIDDEN so
    its height is real, the flight plan centres hole and card as one

@@ -10571,22 +10571,41 @@ function glide(token, sc, to, hFrom, hTo, cFrom, cTo, done) {
    anchors on a centre point, so the scale is floored to keep the bloom
    finite. Gated on !document.hidden like every swing on this page: an
    environment that never grants a frame gets the card plainly. */
-function setSwingVars() {
-  var hb = holeBox();
+function setSwingVars(box) {
   var to = card.getBoundingClientRect();
-  var sx = Math.max(0.12, (hb.w || 24) / to.width);
-  var sy = Math.max(0.12, (hb.h || 24) / to.height);
-  card.style.setProperty('--tw-dx', (hb.l - to.left).toFixed(1) + 'px');
-  card.style.setProperty('--tw-dy', (hb.t - to.top).toFixed(1) + 'px');
+  var sx = Math.max(0.1, (box.w || 24) / to.width);
+  var sy = Math.max(0.1, (box.h || 24) / to.height);
+  card.style.setProperty('--tw-dx', (box.l - to.left).toFixed(1) + 'px');
+  card.style.setProperty('--tw-dy', (box.t - to.top).toFixed(1) + 'px');
   card.style.setProperty('--tw-sx', sx.toFixed(4));
   card.style.setProperty('--tw-sy', sy.toFixed(4));
-  card.style.setProperty('--tw-dir', (hb.l + hb.w / 2) < window.innerWidth / 2 ? '1' : '-1');
+  card.style.setProperty('--tw-dir', (box.l + box.w / 2) < window.innerWidth / 2 ? '1' : '-1');
+}
+/* Where a dismissed tour goes: into the account button, because that is
+   the menu that holds "Show me around", so the exit itself says where to
+   find the tour again. Collapsed rails hide the avatar, so the anchor
+   walks the same ladder the pods step does; the spotlight is the floor. */
+function closeAnchor() {
+  var sels = ['#accountMenuTrigger', '.c-sidebar-header', '#shellSidebarShell'];
+  for (var i = 0; i < sels.length; i++) {
+    var e = document.querySelector(sels[i]);
+    if (!e) continue;
+    var r = e.getBoundingClientRect();
+    // on screen in BOTH axes: a rail caught mid-slide sits at x < 0 and
+    // must not become the goodbye's destination
+    if (r.width > 4 && r.height > 4 && r.bottom > 0 && r.top < window.innerHeight &&
+        r.right > 0 && r.left < window.innerWidth) {
+      return {l: r.left, t: r.top, w: r.width, h: r.height};
+    }
+  }
+  var hb = holeBox();
+  return {l: hb.l, t: hb.t, w: hb.w || 24, h: hb.h || 24};
 }
 function swingCard() {
   card.classList.remove('is-opening');
   if (REDUCED || document.hidden) return;
   void card.offsetWidth;                        // measure untransformed
-  setSwingVars();
+  setSwingVars(holeBox());
   card.classList.add('is-opening');
 }
 
@@ -10640,7 +10659,7 @@ function endTour() {
   if (REDUCED || document.hidden || !card.innerHTML) { teardown(); return; }
   card.classList.remove('is-opening');        // a close mid-bloom folds from
   void card.offsetWidth;                      // where the card truly is
-  setSwingVars();
+  setSwingVars(closeAnchor());
   card.classList.add('is-closing');
   card.style.pointerEvents = 'none';
   hole.style.opacity = '0';

@@ -10522,6 +10522,13 @@ function glide(token, sc, to, hFrom, hTo, cFrom, cTo, done) {
   var from = sc ? sc.scrollTop : 0, d = sc ? (to - from) : 0;
   var dist = Math.max(Math.abs(d), Math.abs(hTo.t - hFrom.t), Math.abs(hTo.l - hFrom.l));
   var ms = REDUCED ? 0 : Math.min(900, Math.max(380, dist * 0.55));
+  /* The iris: on a long flight the window pinches to a dot, crosses,
+     and reopens over the destination. An open window dragged across the
+     page strobes, bright over white cards, dark over bars, bright again
+     over canvas, which is exactly the flicker a recording showed along
+     the two leaderboard steps. Size rides a sine envelope; positions
+     are untouched. Short corrective moves keep the window open. */
+  var iris = dist > 220;
   var t0 = Date.now(), prev = sc ? sc.style.scrollBehavior : '';
   if (sc) sc.style.scrollBehavior = 'auto';
   gliding = true;
@@ -10530,8 +10537,16 @@ function glide(token, sc, to, hFrom, hTo, cFrom, cTo, done) {
     var p = ms ? Math.min(1, (Date.now() - t0) / ms) : 1;
     var e = p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;
     if (sc) sc.scrollTop = from + d * e;
-    applyHole({l: hFrom.l + (hTo.l - hFrom.l) * e, t: hFrom.t + (hTo.t - hFrom.t) * e,
-               w: hFrom.w + (hTo.w - hFrom.w) * e, h: hFrom.h + (hTo.h - hFrom.h) * e});
+    var cx = (hFrom.l + hFrom.w / 2) + ((hTo.l + hTo.w / 2) - (hFrom.l + hFrom.w / 2)) * e;
+    var cy = (hFrom.t + hFrom.h / 2) + ((hTo.t + hTo.h / 2) - (hFrom.t + hFrom.h / 2)) * e;
+    var w = hFrom.w + (hTo.w - hFrom.w) * e;
+    var h = hFrom.h + (hTo.h - hFrom.h) * e;
+    if (iris) {
+      var f = Math.pow(Math.sin(Math.PI * e), 1.5);
+      w = w * (1 - f) + 56 * f;
+      h = h * (1 - f) + 56 * f;
+    }
+    applyHole({l: cx - w / 2, t: cy - h / 2, w: w, h: h});
     if (cFrom) {
       card.style.left = (cFrom.l + (cTo.l - cFrom.l) * e) + 'px';
       card.style.top = (cFrom.t + (cTo.t - cFrom.t) * e) + 'px';

@@ -10308,38 +10308,49 @@ function padBox(r) { return {l: r.left - 8, t: r.top - 8, w: r.width + 16, h: r.
 function pointBox() {
   return {l: window.innerWidth / 2, t: window.innerHeight / 2, w: 0, h: 0};
 }
-/* the band the card leaves free for the spotlight on a phone */
-function bandH() {
-  return matchMedia('(max-width:640px)').matches ? window.innerHeight - 220 : window.innerHeight;
-}
+function sheetMode() { return matchMedia('(max-width:640px)').matches; }
 
-function build() {
-  blocker = document.createElement('div');
-  blocker.className = 'tw-blocker';
-  hole = document.createElement('div');
-  hole.className = 'tw-hole tw-bare';
-  card = document.createElement('div');
-  card.className = 'tw-card';
-  card.setAttribute('role', 'dialog');
-  card.setAttribute('aria-modal', 'true');
-  card.tabIndex = -1;
-  document.body.appendChild(blocker);
-  document.body.appendChild(hole);
-  document.body.appendChild(card);
-  applyHole(pointBox());
+/* ── The flight plan ──────────────────────────────────────────────────
+   Everything the recording showed as a bump traces back to planning the
+   scroll for the hole alone. This plans the whole landing: the band the
+   viewport actually offers (under the sticky controls when the target
+   lives below them in the document, above the bottom sheet on a phone),
+   and the hole-plus-card stack centred inside it. The card's height is
+   real, not guessed, because the card renders before the flight. */
+function plan(target, sc) {
+  var vh = window.innerHeight;
+  var r = target.getBoundingClientRect();
+  var holeH = r.height + 16;
+  var ch = card.offsetHeight;
+
+  var ctrl = document.getElementById('controls');
+  var covered = 12;
+  if (ctrl && sc && sc.contains(target) &&
+      (ctrl.compareDocumentPosition(target) & Node.DOCUMENT_POSITION_FOLLOWING)) {
+    covered = ctrl.offsetHeight + 12;      // the bar will sit over the top band
+  }
+  var bandTop = covered;
+  var bandBot = vh - (sheetMode() ? 232 : 12);
+
+  var stackH = sheetMode() ? holeH : holeH + 12 + ch;
+  var room = bandBot - bandTop;
+  var holeTop = stackH <= room ? bandTop + (room - stackH) / 2 : bandTop;
+
+  var to = null;
+  if (sc && sc.contains(target)) {
+    to = Math.max(0, Math.min(sc.scrollHeight - sc.clientHeight,
+      sc.scrollTop + (r.top - 8) - holeTop));
+    var dy = to - sc.scrollTop;
+    return {to: to, hole: {l: r.left - 8, t: r.top - 8 - dy, w: r.width + 16, h: holeH}};
+  }
+  return {to: null, hole: padBox(r)};
 }
-function teardown() {
-  clearInterval(keepTrue); keepTrue = null;
-  [blocker, hole, card].forEach(function (e) { if (e && e.parentNode) e.parentNode.removeChild(e); });
-  blocker = hole = card = null;
-  idx = -1; run++;
-  document.removeEventListener('keydown', onKeys, true);
-}
-function endTour() { teardown(); }
 
 /* The card goes below the hole, or above when below does not fit,
-   clamped 12px inside the viewport. Under 640px the stylesheet overrides
-   this into a bottom sheet, which is why only left and top are set. */
+   clamped 12px inside the viewport. The flight plan centres the
+   hole-plus-card stack, so below fits by construction whenever the
+   viewport has the room. Under 640px the stylesheet overrides this into
+   a bottom sheet, which is why only left and top are set. */
 function placeCard() {
   var vw = window.innerWidth, vh = window.innerHeight;
   var cw = card.offsetWidth, ch = card.offsetHeight, hb = holeBox(), left, top;
@@ -10356,41 +10367,26 @@ function placeCard() {
   card.style.top = Math.min(Math.max(12, top), Math.max(12, vh - ch - 12)) + 'px';
 }
 
-function instantScroll(sc, to) {
-  var prev = sc.style.scrollBehavior;
-  sc.style.scrollBehavior = 'auto';
-  sc.scrollTop = to;
-  sc.style.scrollBehavior = prev;
-}
-
-/* Place from live rects, and put the world right when it has moved: if
-   the target has drifted out of view (the board re-renders itself
-   asynchronously), recentre the scroller rather than leaving a clamped
-   card pointing at nothing. Then push the target clear of the card when
-   the two boxes meet, the tall-target-against-bottom-sheet case.
-   Instant on purpose: this is the corrector, not the choreography. */
-function settle(target) {
-  var sc = scroller();
-  var inScroller = target && sc && sc.contains(target);
-  if (inScroller) {
-    var r0 = target.getBoundingClientRect();
-    if (r0.top < 0 || r0.bottom > window.innerHeight) {
-      var to = Math.max(0, Math.min(sc.scrollHeight - sc.clientHeight,
-        sc.scrollTop + r0.top - (bandH() / 2 - r0.height / 2)));
-      if (Math.abs(to - sc.scrollTop) > 4) instantScroll(sc, to);
-    }
-  }
+/* Snap to live rects. Never scrolls: the few pixels the sticky bar's
+   compact pose moves after its own scroll handler are absorbed here,
+   while the card is still faded out. */
+function settleSnap(target) {
   applyHole(target ? padBox(target.getBoundingClientRect()) : pointBox());
   placeCard();
-  if (!inScroller) return;
-  var hb = holeBox();
-  var cr = card.getBoundingClientRect();
-  var cut = (hb.t + hb.h) - cr.top + 12;
-  if (cut > 0 && cr.top > hb.t) {
-    instantScroll(sc, sc.scrollTop + cut);
-    applyHole(padBox(target.getBoundingClientRect()));
-    placeCard();
-  }
+}
+
+/* When the board re-renders and carries the target away, fly back on
+   the same tween rather than jumping: the bumps in the recording were
+   exactly the instant corrections this replaces. */
+function ensureVisible(target, token) {
+  var sc = scroller();
+  if (!target || !sc || !sc.contains(target)) { settleSnap(target); return; }
+  var p = plan(target, sc);
+  if (p.to === null || Math.abs(p.to - sc.scrollTop) <= 8) { settleSnap(target); return; }
+  glide(token, sc, p.to, holeBox(), p.hole, function () {
+    if (token !== run) return;
+    settleSnap(target);
+  });
 }
 
 /* One animation tick: requestAnimationFrame when the browser grants
@@ -10469,9 +10465,36 @@ function renderCard(i) {
     '</div>';
 }
 
-/* One step change: the card slips away, the tween carries the scroll and
-   the hole together, settle() corrects what the board's own handlers
-   move after the fact, and the new card folds out of the hole. */
+function build() {
+  blocker = document.createElement('div');
+  blocker.className = 'tw-blocker';
+  hole = document.createElement('div');
+  hole.className = 'tw-hole tw-bare';
+  card = document.createElement('div');
+  card.className = 'tw-card';
+  card.setAttribute('role', 'dialog');
+  card.setAttribute('aria-modal', 'true');
+  card.tabIndex = -1;
+  document.body.appendChild(blocker);
+  document.body.appendChild(hole);
+  document.body.appendChild(card);
+  applyHole(pointBox());
+}
+function teardown() {
+  clearInterval(keepTrue); keepTrue = null;
+  [blocker, hole, card].forEach(function (e) { if (e && e.parentNode) e.parentNode.removeChild(e); });
+  blocker = hole = card = null;
+  idx = -1; run++;
+  document.removeEventListener('keydown', onKeys, true);
+}
+function endTour() { teardown(); }
+
+/* One step change: the card slips away and re-renders WHILE HIDDEN so
+   its height is real, the flight plan centres hole and card as one
+   stack, the tween carries the scroll and the hole together, the hole
+   snaps to live rects behind the faded card, and the card folds out of
+   the hole. Nothing corrects the scroll after landing, because the
+   landing was planned for everything it has to hold. */
 function show(i, dir) {
   if (!card) return;    // a click on a torn-down card must not restart the tour
   while (i >= 0 && i < STEPS.length && STEPS[i].sel && !targetOf(STEPS[i])) i += (dir || 1);
@@ -10485,23 +10508,14 @@ function show(i, dir) {
     if (token !== run) return;
     var target = targetOf(STEPS[i]);           // re-read: the board may have redrawn
     var sc = scroller();
-    var inScroller = target && sc && sc.contains(target);
     hole.classList.toggle('tw-bare', !target);
-    var hFrom = holeBox(), hTo, to = 0;
-    if (inScroller) {
-      var r = target.getBoundingClientRect();
-      to = Math.max(0, Math.min(sc.scrollHeight - sc.clientHeight,
-        sc.scrollTop + r.top - (bandH() / 2 - r.height / 2)));
-      var dy = to - sc.scrollTop;
-      hTo = padBox({left: r.left, top: r.top - dy, width: r.width, height: r.height});
-    } else {
-      hTo = target ? padBox(target.getBoundingClientRect()) : pointBox();
-    }
-    glide(token, inScroller ? sc : null, to, hFrom, hTo, function () {
+    card.classList.add('tw-out');              // stays hidden through the flight
+    renderCard(i);                             // real height before the plan
+    var hFrom = holeBox();
+    var p = target ? plan(target, sc) : {to: null, hole: pointBox()};
+    glide(token, p.to === null ? null : sc, p.to || 0, hFrom, p.hole, function () {
       if (token !== run) return;
-      settle(target);
-      renderCard(i);
-      placeCard();
+      settleSnap(target);
       card.classList.remove('tw-out');
       swingCard();
       card.focus();
@@ -10536,21 +10550,24 @@ function start() {
     else if (act === 'next') { if (idx === STEPS.length - 1) endTour(); else show(idx + 1, 1); }
   });
   window.addEventListener('resize', function () {
-    if (idx >= 0 && !gliding) settle(targetOf(STEPS[idx]));
+    if (idx >= 0 && !gliding) ensureVisible(targetOf(STEPS[idx]), run);
   });
   /* The board redraws parts of itself asynchronously (the shared-notes
      fetch re-renders the leaderboard when it answers), which moves rects
      with no scroll to hear. A slow tick keeps the spotlight true, and it
-     measures before it writes, so a quiet board costs nothing. */
+     measures before it writes, so a quiet board costs nothing. Small
+     drift snaps; a target carried off screen flies back on the tween. */
   keepTrue = setInterval(function () {
     if (idx < 0 || gliding) return;
     var t = targetOf(STEPS[idx]);
     if (!t) return;
     var want = padBox(t.getBoundingClientRect()), have = holeBox();
-    if (Math.abs(want.l - have.l) > 2 || Math.abs(want.t - have.t) > 2 ||
-        Math.abs(want.w - have.w) > 2 || Math.abs(want.h - have.h) > 2) {
-      settle(t);
-    }
+    var drift = Math.max(Math.abs(want.l - have.l), Math.abs(want.t - have.t),
+                         Math.abs(want.w - have.w), Math.abs(want.h - have.h));
+    if (drift <= 2) return;
+    var r = t.getBoundingClientRect();
+    if (r.top < -8 || r.bottom > window.innerHeight + 8) ensureVisible(t, run);
+    else settleSnap(t);
   }, 500);
   /* The board relays out inside its own scroll handler, so the spotlight
      re-settles when the scroller fires. Not while the tour is doing the
@@ -10560,7 +10577,7 @@ function start() {
     if (idx < 0 || gliding) return;
     clearTimeout(st0);
     st0 = setTimeout(function () {
-      if (idx >= 0 && !gliding) settle(targetOf(STEPS[idx]));
+      if (idx >= 0 && !gliding) settleSnap(targetOf(STEPS[idx]));
     }, 90);
   }, {passive: true});
   show(0, 1);

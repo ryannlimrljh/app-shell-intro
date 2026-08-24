@@ -4663,6 +4663,7 @@
          return trip login-v1.html makes with location.href = 'landing-v2.html'.
          The menu's close handler matches .c-account-menu-item, not the tag, so
          the menu still closes on the way out. -->
+    <button class="c-account-menu-item" type="button" role="menuitem" id="tourReplay"><i class="ph-fill ph-compass"></i><span>Show me around</span></button>
     <a class="c-account-menu-item" href="login-v1.html" role="menuitem"><i class="ph-fill ph-sign-out"></i><span>Log out</span></a>
   </div>
 
@@ -10154,6 +10155,311 @@ function readHash(){
 readHash();
 applyFilters();
 notesBoot();
+
+})();
+</script>
+
+<!-- ══ First-run tour ═══════════════════════════════════════════════════
+     Self-contained: this style block, the script below it, and the
+     "Show me around" item in the account menu are the whole feature. -->
+<style>
+  /* The blocker freezes the page; the hole is the spotlight, drawn as a
+     transparent box whose enormous shadow is the dim. One element gives
+     dim and cutout together, and moving it moves both. */
+  .tw-blocker{position:fixed; inset:0; z-index:120; background:transparent;}
+  .tw-hole{position:fixed; z-index:121; pointer-events:none;
+    border:2px solid rgba(255,255,255,.92); border-radius:14px;
+    box-shadow:0 0 0 9999px rgba(8,8,8,.52);
+    transition:left 240ms var(--ease-standard), top 240ms var(--ease-standard),
+               width 240ms var(--ease-standard), height 240ms var(--ease-standard);}
+  /* The welcome step has no target: the hole collapses to a point mid-screen
+     and its shadow dims everything evenly. The ring would show as a 4px
+     speck, so it goes. */
+  .tw-hole.tw-bare{border-color:transparent;}
+
+  .tw-card{position:fixed; z-index:122; width:min(340px, calc(100vw - 24px));
+    background:var(--color-neutral-1); border-radius:var(--radius-lg);
+    /* the element colour of the step, cycling the five departments the way
+       the notes and the feedback board already do */
+    border-top:4px solid var(--tw-el, var(--color-obsidian));
+    box-shadow:var(--shadow-4); padding:var(--spacing-16);
+    font-family:var(--font-primary); color:var(--color-neutral-9);}
+  .tw-k{font-size:var(--text-label3-size); font-weight:700;
+    letter-spacing:var(--tracking-eyebrow); text-transform:uppercase;
+    color:var(--color-neutral-5);}
+  .tw-t{margin:6px 0 0; font-size:var(--text-h4-size); font-weight:var(--text-h4-weight);
+    line-height:1.25; padding-right:28px;}
+  .tw-b{margin:8px 0 0; font-size:var(--text-body2-size); line-height:1.5;}
+  .tw-act{display:flex; align-items:center; justify-content:flex-end;
+    gap:var(--spacing-8); margin-top:var(--spacing-16);}
+  .tw-x{position:absolute; top:10px; right:10px;}
+  @media (max-width:640px){
+    /* a bottom sheet: beside-the-target placement has nowhere to go on a
+       phone, and the thumb is already down there */
+    .tw-card{left:12px !important; right:12px; top:auto !important;
+      bottom:calc(12px + env(safe-area-inset-bottom, 0px)); width:auto;}
+  }
+  @media (prefers-reduced-motion:reduce){
+    .tw-hole{transition:none;}
+  }
+</style>
+<script>
+(function () {
+'use strict';
+
+var KEY = 'collabrium-tour-v1';
+
+/* Selectors are lists: the first visible match wins, so a step can say
+   "the Feedback link, or failing that the nav box it lives in" and stay
+   truthful when the sidebar is collapsed. */
+var STEPS = [
+  {sel: null, el: null,
+   t: 'Welcome to the sales board',
+   b: 'One page that answers where the quarter stands and what deserves attention next. ' +
+      'The next six stops show you how to move around it, and it takes about a minute.'},
+  {sel: ['#cardSlider .c-card-slide'], el: '--color-orange',
+   t: 'The cards are live',
+   b: 'These six recalculate as the board changes underneath them. Click any card and it ' +
+      'opens up with the working behind its number.'},
+  {sel: ['#controls .views'], el: '--color-salmon-pink',
+   t: 'Two horizons',
+   b: 'To date shows August as it stands. The second view projects September to December. ' +
+      'Every figure, bar and table on the page follows whichever one is pressed.'},
+  {sel: ['#filters'], el: '--color-green',
+   t: 'Slice the whole board',
+   b: 'Pick a line, a head of sales, a platform or a status, and everything scopes to it, ' +
+      'from the headline figure down to each row. Compare lays last year alongside.'},
+  {sel: ['#lbRows > *:first-child', '#lbRows'], el: '--color-navy',
+   t: 'Open a book',
+   b: 'Rows are ordered by who needs attention first. Click one to drill into that book, its ' +
+      'pods and its people, each carrying its share of the number above. The chips on the ' +
+      'right switch the scale between per cent and ringgit.'},
+  {sel: ['#lbRows .nadd'], el: '--color-amber',
+   t: 'Pin a note',
+   b: 'The plus at the end of a row opens a note that stays pinned to it. Notes are shared, ' +
+      'so what you write here sits on that row for everyone, signed and dated.'},
+  {sel: ['#shellSidebarNav a[href="feedback-v1.html"]', '#shellSidebarShell'], el: '--color-orange',
+   t: 'When something is off',
+   b: 'Feedback in the menu is the pilot group’s own board. Post what got in your way ' +
+      'and back what should be fixed first. Everyone gets five votes, so spend them where ' +
+      'it matters.'}
+];
+
+var idx = -1, blocker = null, hole = null, card = null;
+
+function seen() {
+  try { return localStorage.getItem(KEY) === '1'; } catch (e) { return true; }
+}
+function markSeen() {
+  try { localStorage.setItem(KEY, '1'); } catch (e) {}
+}
+function visible(e) {
+  if (!e) return false;
+  var r = e.getBoundingClientRect();
+  return r.width > 4 && r.height > 4 && getComputedStyle(e).visibility !== 'hidden';
+}
+function targetOf(step) {
+  if (!step.sel) return null;
+  for (var i = 0; i < step.sel.length; i++) {
+    var e = document.querySelector(step.sel[i]);
+    if (visible(e)) return e;
+  }
+  return null;
+}
+function esc(s) {
+  return String(s).replace(/[&<>"]/g, function (c) {
+    return {'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[c];
+  });
+}
+
+function build() {
+  blocker = document.createElement('div');
+  blocker.className = 'tw-blocker';
+  hole = document.createElement('div');
+  hole.className = 'tw-hole tw-bare';
+  card = document.createElement('div');
+  card.className = 'tw-card';
+  card.setAttribute('role', 'dialog');
+  card.setAttribute('aria-modal', 'true');
+  card.tabIndex = -1;
+  document.body.appendChild(blocker);
+  document.body.appendChild(hole);
+  document.body.appendChild(card);
+}
+function teardown() {
+  [blocker, hole, card].forEach(function (e) { if (e && e.parentNode) e.parentNode.removeChild(e); });
+  blocker = hole = card = null;
+  idx = -1;
+  document.removeEventListener('keydown', onKeys, true);
+}
+function endTour() { markSeen(); teardown(); }
+
+/* The hole hugs the target with 8px of air; the card goes below it, or
+   above when below does not fit, clamped 12px inside the viewport either
+   way. Under 640px the stylesheet overrides all of this into a bottom
+   sheet, which is why the inline values only set left and top. */
+function place(target) {
+  var vw = window.innerWidth, vh = window.innerHeight, pad = 8;
+  if (target) {
+    var r = target.getBoundingClientRect();
+    hole.classList.remove('tw-bare');
+    hole.style.left = (r.left - pad) + 'px';
+    hole.style.top = (r.top - pad) + 'px';
+    hole.style.width = (r.width + pad * 2) + 'px';
+    hole.style.height = (r.height + pad * 2) + 'px';
+  } else {
+    hole.classList.add('tw-bare');
+    hole.style.left = (vw / 2) + 'px';
+    hole.style.top = (vh / 2) + 'px';
+    hole.style.width = '0px';
+    hole.style.height = '0px';
+  }
+  var cw = card.offsetWidth, ch = card.offsetHeight, left, top;
+  if (!target) {
+    left = (vw - cw) / 2;
+    top = (vh - ch) / 2;
+  } else {
+    var hr = hole.getBoundingClientRect ? {
+      left: parseFloat(hole.style.left), top: parseFloat(hole.style.top),
+      width: parseFloat(hole.style.width), height: parseFloat(hole.style.height)
+    } : null;
+    left = hr.left + hr.width / 2 - cw / 2;
+    top = hr.top + hr.height + 12;
+    if (top + ch > vh - 12) top = hr.top - ch - 12;   // no room below: go above
+    if (top < 12) top = vh - ch - 12;                 // nor above: bottom of screen
+  }
+  card.style.left = Math.min(Math.max(12, left), Math.max(12, vw - cw - 12)) + 'px';
+  card.style.top = Math.min(Math.max(12, top), Math.max(12, vh - ch - 12)) + 'px';
+}
+
+/* Place, then push the target clear of the card when the two boxes
+   meet, which happens when the target is most of a phone screen tall and
+   the card is the bottom sheet. Runs again from the scroll listener
+   below, because the board's sticky controls change size inside a scroll
+   handler, after any same-tick measurement. */
+function settle(target) {
+  place(target);
+  var sc = document.querySelector('.c-shell-content');
+  if (!target || !sc || !sc.contains(target)) return;
+  var hb = {t: parseFloat(hole.style.top), h: parseFloat(hole.style.height)};
+  var cr = card.getBoundingClientRect();
+  var cut = (hb.t + hb.h) - cr.top + 12;
+  if (cut > 0 && cr.top > hb.t) {
+    /* instant, or the place() below measures a scroll still in flight:
+       the scroller's own scroll-behavior is smooth */
+    var prev = sc.style.scrollBehavior;
+    sc.style.scrollBehavior = 'auto';
+    sc.scrollTop += cut;
+    sc.style.scrollBehavior = prev;
+    place(target);
+  }
+}
+
+function show(i, dir) {
+  /* A step whose target is gone is skipped in whichever direction the
+     user was travelling, so a missing element can never strand the tour. */
+  while (i >= 0 && i < STEPS.length && STEPS[i].sel && !targetOf(STEPS[i])) i += (dir || 1);
+  if (i < 0 || i >= STEPS.length) { endTour(); return; }
+  idx = i;
+  var s = STEPS[i], target = targetOf(s);
+  var sc = document.querySelector('.c-shell-content');
+  /* Instant, not smooth: the spotlight is placed straight off the rects,
+     and the dim covers the cut. The sidebar lives outside the scroller,
+     so scrolling is skipped for it. */
+  if (target && sc && sc.contains(target)) {
+    var prev = sc.style.scrollBehavior;
+    sc.style.scrollBehavior = 'auto';
+    target.scrollIntoView({block: 'center', behavior: 'auto'});
+    sc.style.scrollBehavior = prev;
+    /* scrollIntoView also scrolls the document when the viewport is
+       tight, and this shell never expects that: the sidebar is absolute
+       against .c-shell, so a document scroll drags it off screen. */
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+  }
+  card.style.setProperty('--tw-el', s.el ? 'var(' + s.el + ')' : 'var(--color-obsidian)');
+  card.setAttribute('aria-label', s.t);
+  var last = i === STEPS.length - 1;
+  card.innerHTML =
+    '<button class="c-icon-btn tw-x" type="button" data-tw="end" aria-label="Close the tour">' +
+      '<i class="ph ph-x" aria-hidden="true"></i></button>' +
+    '<div class="tw-k">' + (i + 1) + ' of ' + STEPS.length + '</div>' +
+    '<h3 class="tw-t">' + esc(s.t) + '</h3>' +
+    '<p class="tw-b">' + esc(s.b) + '</p>' +
+    '<div class="tw-act">' +
+      (i === 0
+        ? '<button class="c-btn c-btn-ghost c-btn-sm" type="button" data-tw="end">Skip the tour</button>'
+        : '<button class="c-btn c-btn-ghost c-btn-sm" type="button" data-tw="back">Back</button>') +
+      '<button class="c-btn c-btn-primary c-btn-sm" type="button" data-tw="next">' +
+        (i === 0 ? 'Show me' : (last ? 'Done' : 'Next')) + '</button>' +
+    '</div>';
+  settle(target);
+  card.focus();
+}
+
+function onKeys(e) {
+  if (idx < 0) return;
+  if (e.key === 'Escape') { e.stopPropagation(); endTour(); return; }
+  if (e.key === 'ArrowRight') { e.preventDefault(); show(idx + 1, 1); return; }
+  if (e.key === 'ArrowLeft' && idx > 0) { e.preventDefault(); show(idx - 1, -1); return; }
+  if (e.key === 'Tab') {
+    /* the page is frozen, so focus stays inside the card */
+    var f = card.querySelectorAll('button');
+    if (!f.length) return;
+    var first = f[0], last = f[f.length - 1];
+    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+  }
+}
+
+function start() {
+  if (idx >= 0) return;                     // already running
+  build();
+  document.addEventListener('keydown', onKeys, true);
+  card.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-tw]');
+    if (!b) return;
+    var act = b.getAttribute('data-tw');
+    if (act === 'end') endTour();
+    else if (act === 'back') show(idx - 1, -1);
+    else if (act === 'next') { if (idx === STEPS.length - 1) endTour(); else show(idx + 1, 1); }
+  });
+  window.addEventListener('resize', function () {
+    if (idx >= 0) settle(targetOf(STEPS[idx]));
+  });
+  /* The board relays out inside its own scroll handler, so the spotlight
+     re-settles when the scroller fires. Debounced: a settle that scrolls
+     re-triggers this once, measures clear, and the cycle ends. */
+  var sc0 = document.querySelector('.c-shell-content'), st0 = null;
+  if (sc0) sc0.addEventListener('scroll', function () {
+    if (idx < 0) return;
+    clearTimeout(st0);
+    st0 = setTimeout(function () {
+      if (idx >= 0) settle(targetOf(STEPS[idx]));
+    }, 90);
+  }, {passive: true});
+  show(0, 1);
+}
+
+var replay = document.getElementById('tourReplay');
+if (replay) replay.addEventListener('click', function () { setTimeout(start, 60); });
+
+/* First visit only, and only after the entrance has finished: the intro's
+   last beat is the ask box revealing at 1150ms, so the tour polls for
+   that class and follows it, with a ceiling for environments where the
+   reveal never arms. ?tour=1 forces a run regardless of the seen flag. */
+(function auto() {
+  var force = /[?&]tour=1\b/.test(location.search);
+  if (!force && seen()) return;
+  var box = document.getElementById('askBox'), t0 = Date.now();
+  (function wait() {
+    if ((box && box.classList.contains('is-revealed')) || Date.now() - t0 > 6000) {
+      setTimeout(start, 900);
+      return;
+    }
+    setTimeout(wait, 250);
+  })();
+})();
 
 })();
 </script>

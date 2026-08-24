@@ -2887,7 +2887,11 @@
 /* The native select is the state store, not the control: every existing
    handler still reads and writes it, and the trigger beside it mirrors what
    it holds. Hidden rather than removed so none of that logic has to move. */
-#salesBoard .fsel{display:none;}
+/* Belt and braces: the markup carries `hidden` as well, because a
+   screenshot from the field showed these rendering as native selects in
+   a Safari this rule somehow did not reach. Two independent mechanisms;
+   both must fail for that to happen again. */
+#salesBoard .fsel, #salesBoard .fsel[hidden]{display:none;}
 #salesBoard .fsel-wrap{display:inline-flex; flex:0 0 auto;}
 /* trigger box, states and disabled from .c-filter-trigger; only the label
    clamp is local, so one long exec name cannot push the row into a wrap */
@@ -3740,6 +3744,50 @@
   #salesBoard .fnote{margin-left:0; flex:1 0 100%;}
 }
 
+/* ── The bar becomes one line above the phone breakpoint too ────
+   The compact treatment only ever existed under 760px, so a laptop got
+   the full three-band bar permanently: 209px sticky at 1440, 285 at
+   1180, measured. Same grammar as the approved phone strip: short view
+   labels, no card-in-card chrome, everything on one thin line that
+   scrolls sideways under a fade when it runs out of room. Every control
+   keeps its click, state and panel; nothing is hidden, so nothing is
+   lost. */
+@media (min-width:761px){
+  #salesBoard .controls{display:flex; align-items:center; flex-wrap:wrap;
+    gap:8px 14px; padding-block:8px 9px;}
+  /* the two horizons as a slim segmented pair: the short labels already
+     exist for the phone, the long titles and subtitles stay in the DOM
+     for the JS that updates them */
+  #salesBoard .views{flex:0 0 auto; display:inline-flex; width:auto; gap:0;
+    border:1px solid var(--rule); border-radius:var(--radius-pill); padding:3px;
+    background:var(--surface);}
+  #salesBoard .views button{flex:0 0 auto; display:block; height:34px;
+    padding:0 var(--spacing-16); border:0; border-radius:var(--radius-pill);}
+  #salesBoard .views .v-k, #salesBoard .views .v-t, #salesBoard .views .v-d{display:none;}
+  #salesBoard .views .v-s{display:block; font-size:var(--text-label2-size); font-weight:800;}
+  /* card chrome off both bands: a rounded box that has not ended is the
+     wrong grammar, the same call already made on the phone strip */
+  /* basis 0, not auto: auto measures max-content, and a strip whose whole
+     point is that it can shrink then wraps below the views instead of
+     sharing their row. The selector matches the always-on .compact rules'
+     specificity so the margin that stacked the bands stands down. */
+  #salesBoard .controls.compact .ctl-bars{flex:1 1 0%; min-width:0; margin-top:0;}
+  #salesBoard .rangebar{border:0; background:none; box-shadow:none; padding:0;
+    margin:0; flex-wrap:nowrap;}
+  #salesBoard .filters{flex:1 1 320px; min-width:0; margin-top:0; border:0;
+    background:none; box-shadow:none;}
+  #salesBoard .filters > .collapse{border-radius:10px;}
+  #salesBoard .fscope{border:1px solid var(--rule); border-radius:10px;}
+  #salesBoard .frow{flex-wrap:nowrap; overflow-x:auto; overflow-y:hidden;
+    padding:2px; gap:8px; scrollbar-width:none;
+    -webkit-mask-image:linear-gradient(to right,#000 calc(100% - 28px),transparent);
+    mask-image:linear-gradient(to right,#000 calc(100% - 28px),transparent);}
+  #salesBoard .frow::-webkit-scrollbar{display:none;}
+  /* the small-caps labels cost width the strip does not have; every
+     trigger already names itself */
+  #salesBoard .flab{display:none;}
+}
+
 /* ── Focus, on every interactive surface ─────────────────────── */
 #salesBoard a:focus-visible, #salesBoard button:focus-visible, #salesBoard input:focus-visible{
   outline:2px solid var(--navy); outline-offset:2px; border-radius:4px;}
@@ -3927,12 +3975,12 @@
 
             <div class="frow" role="group" aria-label="Slice">
               <span class="flab">Slice</span>
-              <select class="fsel" id="fLine" aria-label="Filter by VP line"></select>
-              <select class="fsel" id="fHos" aria-label="Filter by Head of Sales"></select>
-              <select class="fsel" id="fMgr" aria-label="Filter by sales manager"></select>
-              <select class="fsel" id="fPerson" aria-label="Filter by sales exec"></select>
-              <select class="fsel" id="fPlatform" aria-label="Filter by platform"></select>
-              <select class="fsel" id="fStatus" aria-label="Filter by status"></select>
+              <select class="fsel" hidden id="fLine" aria-label="Filter by VP line"></select>
+              <select class="fsel" hidden id="fHos" aria-label="Filter by Head of Sales"></select>
+              <select class="fsel" hidden id="fMgr" aria-label="Filter by sales manager"></select>
+              <select class="fsel" hidden id="fPerson" aria-label="Filter by sales exec"></select>
+              <select class="fsel" hidden id="fPlatform" aria-label="Filter by platform"></select>
+              <select class="fsel" hidden id="fStatus" aria-label="Filter by status"></select>
               <button class="fclear fade c-btn c-btn-ghost c-btn-sm" type="button" id="fClear">Clear slice</button>
             </div>
 
@@ -10156,6 +10204,51 @@ readHash();
 applyFilters();
 notesBoot();
 
+})();
+</script>
+
+<script>
+/* ── Vertical wheel over a horizontal scroller ─────────────────────────
+   The hero fan is overflow-x:auto and fills the whole first screen, and
+   iPadOS Safari has a long-standing fault where a vertical two-finger
+   scroll over a nested horizontal-only scroller is consumed instead of
+   chained to the page: wheel-scrolling does nothing until the fan is out
+   of view, which reads as "the page does not scroll". The chain is made
+   by hand instead, identically in every engine: vertical intent over a
+   horizontal-only scroller moves the page directly. Horizontal intent is
+   untouched, so the fan and the tables still pan sideways. */
+(function () {
+'use strict';
+var sc = document.querySelector('.c-shell-content');
+if (!sc) return;
+function horizontalTrap(el) {
+  while (el && el !== sc && el.nodeType === 1) {
+    var cs = getComputedStyle(el);
+    /* Capability, not declaration: overflow-x:auto alone makes overflow-y
+       COMPUTE to auto per spec, so testing the declared style matched
+       nothing. A trap is anything that can pan sideways but has no
+       vertical content of its own to give the wheel to. */
+    if ((cs.overflowX === 'auto' || cs.overflowX === 'scroll') &&
+        el.scrollWidth > el.clientWidth + 1 &&
+        el.scrollHeight <= el.clientHeight + 1) {
+      return el;
+    }
+    el = el.parentNode;
+  }
+  return null;
+}
+sc.addEventListener('wheel', function (e) {
+  if (Math.abs(e.deltaY) <= Math.abs(e.deltaX)) return;   // sideways: theirs
+  if (!horizontalTrap(e.target)) return;
+  e.preventDefault();
+  var dy = e.deltaY * (e.deltaMode === 1 ? 16 : 1);
+  /* instant, not the scroller's smooth: each wheel tick is its own
+     motion, and smoothing every tick reads as lag */
+  var prev = sc.style.scrollBehavior;
+  sc.style.scrollBehavior = 'auto';
+  sc.scrollTop += dy;
+  sc.style.scrollBehavior = prev;
+}, {passive: false});
 })();
 </script>
 

@@ -33,9 +33,67 @@
      unfinished in a sidebar with two items and a lot of height. Its
      existing border-top then reads as a divider above the account row. */
   .c-sidebar-footer{margin-top:auto;}
-  /* Collapsed, the labels and the account row go; the DS handles the rest. */
-  .c-sidebar.is-collapsed .c-sidebar-item span.label,
-  .c-sidebar.is-collapsed .c-sidebar-footer{display:none;}
+
+  /* ── The account row. Not a DS component: .c-sidebar-account is a
+     page-level class the dashboard invented, composed out of UserPicker's
+     avatar/name/role classes. This page copied the markup and not the
+     rules, so the button fell back to UA styling: auto width, a real
+     border, no flex, and the avatar and the two lines of text stacked
+     into a 100px box that hung outside a 72px rail. Ported from
+     landing-v3 verbatim so the two rails are the same row, not two
+     readings of it. */
+  .c-sidebar-account{display:flex; align-items:center; gap:var(--spacing-12);
+    width:100%; padding:var(--spacing-8) var(--spacing-12);
+    margin-bottom:var(--spacing-4); border:none; background:transparent;
+    border-radius:var(--radius-sm); font-family:inherit; text-align:left;
+    cursor:pointer;
+    transition:background-color var(--duration-fast) var(--ease-standard);}
+  .c-sidebar-account:hover{background:var(--color-neutral-2);}
+  /* Collapsed the labels go, but the person does not: the avatar stays and
+     re-centres, the same way a nav item keeps its icon. Dropping the whole
+     footer left the collapsed rail with no sign of who was signed in, and
+     no way to reach Log out. */
+  .c-sidebar.is-collapsed .c-sidebar-item span.label{display:none;}
+  .c-sidebar.is-collapsed .c-sidebar-account{justify-content:center;
+    padding:var(--spacing-8) 0;}
+  .c-sidebar.is-collapsed .c-sidebar-account .c-search-input-text{display:none;}
+
+  /* ── The account menu. Settings and Log out, opening above the row,
+     since the row is pinned to the bottom and has no space under it.
+     position:fixed and outside .c-sidebar in the markup, because
+     .c-sidebar sets overflow-x:clip and a clipped ancestor clips an
+     absolute child whatever its offsets: the same escape the collapsed
+     toggle button already takes. z-index:60 clears .c-sidebar-shell's 50
+     on a phone, where the rail is an overlay that would otherwise paint
+     over its own popover. */
+  .c-account-menu{display:none; position:fixed; width:200px; z-index:60;
+    background:var(--color-neutral-1); border:1px solid var(--color-neutral-3);
+    border-radius:var(--radius-md); box-shadow:var(--shadow-3);
+    padding:var(--spacing-4); overflow:hidden;}
+  .c-account-menu.is-open{display:block;}
+  /* text-decoration:none is for Log out, which is an <a> because it has a
+     destination. Inert on the button that shares the class. */
+  .c-account-menu-item{display:flex; align-items:center; gap:var(--spacing-12);
+    width:100%; height:36px; padding:0 var(--spacing-8); border:none;
+    background:transparent; border-radius:var(--radius-sm);
+    font-family:var(--font-primary); font-size:var(--text-body1-size);
+    font-weight:500; color:var(--color-neutral-9); text-decoration:none;
+    text-align:left; cursor:pointer;
+    transition:background-color var(--duration-fast) var(--ease-standard);}
+  .c-account-menu-item:hover{background:var(--color-neutral-2);}
+  .c-account-menu-item i{flex:none; font-size:16px; color:var(--color-neutral-5);}
+
+  /* The collapsed rail's hover label. Same z-index reasoning as the menu
+     above; the DS ships it at 20, which the rail out-ranks here. */
+  .c-sidebar-hover-label{z-index:60;}
+
+  /* The department switcher's panel. Only the placement is ours; every
+     visual rule comes from the system's own .c-dept-dropdown. fixed rather
+     than the system's absolute, and z-index for the same reason as the two
+     popovers above: .c-sidebar clips, and the rail outranks the DS default
+     of 20. [hidden] is what the system's .c-dept-dropdown[hidden] keys off,
+     so the panel is toggled by attribute rather than by a page-local class. */
+  .c-dept-dropdown{position:fixed; z-index:60;}
 
   /* ══ The board surface ═══════════════════════════════════════════════
      A dot grid, which is the one borrowed signal from the whiteboard
@@ -58,8 +116,11 @@
     gap:var(--spacing-24); flex-wrap:wrap;}
   .fb-head h1{margin:0; font-size:var(--text-h1-size); line-height:var(--text-h1-lh);
     font-weight:var(--text-h1-weight); letter-spacing:var(--text-h1-tracking);}
+  /* 76ch, not 56: at the narrower measure this ran to three lines and
+     the third carried two words. Two full lines sit better under a
+     one-line heading and cost the canvas nothing. */
   .fb-head .sub{margin:6px 0 0; font-size:var(--text-body2-size);
-    line-height:var(--text-body2-lh); color:var(--color-neutral-5); max-width:56ch;}
+    line-height:var(--text-body2-lh); color:var(--color-neutral-5); max-width:76ch;}
   .fb-head-right{display:flex; align-items:center; gap:var(--spacing-12); flex:none;}
 
   /* ── The vote budget. Five is the mechanic, so it is stated as five
@@ -72,13 +133,19 @@
     box-shadow:var(--shadow-1);}
   .fb-budget .pips{display:flex; gap:5px;}
   .fb-budget .pip{width:9px; height:9px; border-radius:var(--radius-pill);
-    background:var(--color-obsidian);
+    background:var(--color-neutral-9);
     transition:background-color var(--duration-fast) var(--ease-standard),
                box-shadow var(--duration-fast) var(--ease-standard);}
-  .fb-budget .pip.spent{background:transparent; box-shadow:inset 0 0 0 1.5px var(--color-neutral-4);}
+  /* Spent is a white circle with an outline, not a hole: on the warm
+     canvas a transparent pip picked up whatever was behind it, and the
+     row read as four dots and a smudge rather than four spent and one
+     left. */
+  .fb-budget .pip.spent{background:var(--color-neutral-1);
+    box-shadow:inset 0 0 0 1.5px var(--color-neutral-4);}
   .fb-budget .txt{font-size:var(--text-label3-size); font-weight:700;
     letter-spacing:var(--tracking-eyebrow); text-transform:uppercase;
     color:var(--color-neutral-5); white-space:nowrap;}
+  .fb-budget.is-out{border-color:var(--color-orange);}
   .fb-budget.is-out .txt{color:var(--color-orange);}
 
   /* ══ Controls ════════════════════════════════════════════════════════ */
@@ -102,96 +169,321 @@
     color:var(--color-neutral-9); box-shadow:var(--shadow-1);}
   .fb-seg button:focus-visible{outline:2px solid var(--color-obsidian); outline-offset:2px;}
 
-  /* ══ Regions, one per cluster ════════════════════════════════════════
-     A region is a card because it genuinely groups: everything inside it
-     is one topic, and the header states which words put them together.
-     Regions are sized by content, laid out in a masonry-ish column flow
-     so a two-note topic does not claim the same height as a six-note one. */
-  .fb-board{columns:3; column-gap:var(--spacing-20);}
-  /* One column when there is one thing in it. A multi-column container
-     flows its children across the columns, so the empty state came out
-     as an icon in the first, its sentence in the second and its buttons
-     in the third. grid-column does not apply here; there is no grid. */
-  .fb-board.is-one{columns:1;}
-  .fb-region{break-inside:avoid; margin:0 0 var(--spacing-20);
-    background:var(--color-neutral-1); border:1px solid var(--color-neutral-3);
-    border-radius:var(--radius-lg); box-shadow:var(--shadow-1);
-    padding:var(--spacing-16); display:flex; flex-direction:column; gap:var(--spacing-12);}
-  .fb-region.is-shipped{background:transparent; box-shadow:none;
-    border-style:dashed; border-color:var(--color-neutral-4);}
+  /* The rule under the standfirst. Last child of .fb-head and full width,
+     so it spans the header instead of splitting the flex row. */
+  .fb-rule{order:3; width:100%; height:0; margin:var(--spacing-8) 0 0;
+    border:0; border-top:1px solid var(--color-neutral-3);}
 
-  .fb-region-head{display:flex; align-items:flex-start; gap:var(--spacing-8);}
-  .fb-why{--fb-ink:var(--color-neutral-5); --fb-read:var(--color-neutral-9);}
-  .fb-region-head .t{flex:1; min-width:0;}
-  .fb-region h2{margin:0; font-size:var(--text-h4-size); line-height:1.25;
-    font-weight:var(--text-h4-weight); letter-spacing:-.01em;}
-  .fb-region .meta{margin:4px 0 0; font-size:var(--text-caption-size);
-    color:var(--color-neutral-5);}
-  /* Why these notes are together, in the board's own words. Without this
-     the grouping is a black box, and a black box that is wrong once stops
-     being trusted for everything after it. */
-  .fb-why{display:flex; flex-wrap:wrap; gap:4px;}
-  .fb-why .c-tag{height:20px; padding:0 8px; font-size:11px; color:var(--fb-read);}
-  .fb-why .c-tag .dot{background:var(--fb-ink);}   /* the dot stays vivid */
+  /* ══ The canvas ══════════════════════════════════════════════════════
+     Notes are placed, not flowed. Every note is absolutely positioned by
+     the layout pass in section 5, which is what buys the scatter: a
+     column flow can stagger but it cannot overlap, and overlap is the
+     thing that makes a wall of stickies read as a wall rather than a
+     list. The canvas is as tall as the pass says and no taller.
 
-  .fb-notes{display:flex; flex-direction:column; gap:var(--spacing-8);}
+     One structural consequence worth stating: absolute children do not
+     size their parent, so the height is written to --fb-h by JS. Nothing
+     below the canvas can be laid out until the pass has run, which is
+     why the pass is synchronous at the end of render() rather than in a
+     rAF, where the page would flash a collapsed board first. */
+  .fb-canvas{position:relative; min-height:var(--fb-h, 320px);
+    transition:min-height var(--duration-slow) var(--ease-standard);}
+  /* The empty state flows normally; only real notes are placed. The class
+     drops the measured height so the canvas does not reserve a wall's
+     worth of blank space around one sentence. */
+  .fb-canvas.is-flow{min-height:0;}
+
+  /* The cluster's name. Type on the canvas, not a card: a box around a
+     group would draw the boundary the clustering is not confident enough
+     to promise, and the whole point of the drift is that a note can sit
+     at the edge of one. */
+  .fb-drift{position:absolute; pointer-events:none; margin:0;
+    font-size:var(--text-label3-size); font-weight:800;
+    letter-spacing:var(--tracking-eyebrow); text-transform:uppercase;
+    color:var(--color-neutral-5); white-space:nowrap;
+    opacity:0; transition:opacity var(--duration-slow) var(--ease-standard);}
+  .fb-canvas.is-clustered .fb-drift{opacity:1;}
+  .fb-drift .n{color:var(--color-neutral-4); font-weight:700;}
 
   /* ══ A sticky ════════════════════════════════════════════════════════
-     Element colour carries cluster identity, not decoration: every note
-     in one region shares a hue, so the eye groups them before it reads
-     them. That is the reason this page uses the elemental tints outside a
-     department surface, which is a documented departure from the DS rule
-     that tints belong to the element owning the content. */
-  .fb-note{position:relative; text-align:left; width:100%; font-family:inherit;
-    padding:var(--spacing-12); border-radius:var(--radius-md); cursor:pointer;
-    background:var(--fb-tint); border:1px solid var(--fb-line);
-    transform:rotate(var(--fb-rot, 0deg));
-    transition:transform var(--duration-fast) var(--ease-standard),
-               box-shadow var(--duration-fast) var(--ease-standard);}
-  .fb-note:hover{transform:rotate(0deg) translateY(-1px); box-shadow:var(--shadow-2);}
-  .fb-note:active{transform:rotate(0deg) translateY(0); box-shadow:var(--shadow-1);}
-  .fb-note:focus-visible{outline:2px solid var(--color-obsidian); outline-offset:2px;}
-  .fb-note .body{margin:0; font-size:var(--text-body2-size); line-height:1.45;
-    color:var(--color-neutral-9); display:-webkit-box; -webkit-line-clamp:5;
+     The dashboard's note, on this canvas. Saturated element fill rather
+     than the 8% tint this page used to carry, and the colour is now the
+     note's place in the posting sequence, not its cluster: the wall
+     should look like five colours of paper somebody grabbed in turn.
+     Cluster membership is carried by where a note sits, which is the one
+     signal that can survive the clustering changing under a live board.
+
+     --np-hue fills, --np-fg is every line of text on it, --np-ink is the
+     element taken dark enough to read on white. The three come as a set
+     from .el-0 through .el-4 below; the contrast reasoning is there. */
+  /* Square by default. A wall of paper is squares, and it is also what
+     makes the scatter legible: every tile is the same height, so a row
+     cannot end up with one note twice the depth of its neighbours and a
+     ragged band of canvas under the short ones. Long notes clamp and say
+     so by being opened. */
+  .fb-note{position:absolute; text-align:left; font-family:inherit;
+    width:var(--fb-w, 210px); aspect-ratio:1; overflow:hidden;
+    display:flex; flex-direction:column; padding:var(--spacing-12);
+    border:0; border-radius:var(--radius-md); cursor:pointer;
+    background:var(--np-hue); color:var(--np-fg); box-shadow:var(--shadow-2);
+    /* --fb-push is the part-the-pile displacement, written per note by
+       the pointer pass. It is a separate variable from the placement so
+       the layout can move a note without fighting the interaction. */
+    transform:translate3d(var(--fb-push, 0px), var(--fb-lift, 0px), 0)
+              rotate(var(--fb-rot, 0deg)) scale(var(--fb-scale, 1));
+    transition:transform var(--duration-base) var(--ease-standard),
+               box-shadow var(--duration-fast) var(--ease-standard),
+               left var(--duration-slow) var(--ease-standard),
+               top var(--duration-slow) var(--ease-standard),
+               opacity var(--duration-base) var(--ease-standard);}
+  /* The note under the pointer squares up, lifts and comes to the front.
+     z-index is written by the pointer pass, not here: it has to beat the
+     stacking the layout gave every note to its right. */
+  .fb-note.is-peeked{--fb-rot:0deg; --fb-lift:-10px; --fb-scale:1.06;
+    box-shadow:var(--shadow-3);}
+  .fb-note:focus-visible{outline:2px solid var(--color-obsidian); outline-offset:3px;}
+  /* flex:1 with min-height:0 so the clamp has a box to clamp inside;
+     without the min-height a flex child refuses to shrink below its
+     content and the footer is pushed out of the square. */
+  .fb-note .body{margin:0; flex:1; min-height:0;
+    font-size:var(--text-body2-size); line-height:1.45; color:var(--np-fg);
+    display:-webkit-box; -webkit-line-clamp:6;
     -webkit-box-orient:vertical; overflow:hidden;}
+  /* A screenshot rides above the text at a fixed ratio, so a tall
+     portrait grab cannot make one note four times the height of its
+     neighbours and blow the scatter apart. */
+  /* A screenshot takes the top of the square and the sentence takes what
+     is left, rather than the image setting the note's height. */
+  .fb-note .shot{display:block; width:100%; height:46%; flex:none;
+    object-fit:cover; border-radius:var(--radius-sm);
+    margin-bottom:var(--spacing-8); background:rgba(255,255,255,.25);}
+  .fb-note .shot ~ .body{-webkit-line-clamp:3;}
   .fb-note-foot{display:flex; align-items:center; gap:var(--spacing-8);
-    margin-top:var(--spacing-12);}
+    flex:none; margin-top:var(--spacing-8);}
   .fb-who{display:flex; align-items:center; gap:6px; min-width:0; flex:1;}
+  /* The dashboard's coin: white whatever the hue, initials in the
+     element's own ink. White is the one ground that clears 4.5:1 for all
+     five inks, which a tint of the fill would not. */
   .fb-av{width:22px; height:22px; border-radius:var(--radius-pill); flex:none;
     display:flex; align-items:center; justify-content:center;
-    background:var(--fb-ink); color:var(--color-neutral-1);
+    background:#fff; color:var(--np-ink);
     font-size:10px; font-weight:800; letter-spacing:.02em;}
-  /* --fb-ink fills, --fb-read reads. The vivid element colour measured
-     2.8:1 against its own 8% tint, which is under the 4.5 floor for text
-     this size; the darkened ink clears it while keeping the element
-     recognisable. The DS ships .c-tag the same vivid way, which is why
-     the why-chips below are corrected here too rather than left alone. */
-  .fb-who .n{font-size:var(--text-caption-size); color:var(--fb-read); font-weight:700;
+  /* No opacity on it. Water measures 4.54 at full strength, so a byline
+     at .9 would composite its way under the floor; the hierarchy here is
+     carried by size and weight instead, which costs no contrast. */
+  .fb-who .n{font-size:var(--text-caption-size); color:var(--np-fg); font-weight:700;
     white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
-  .fb-note.is-shipped{opacity:.72;}
-  .fb-note.is-shipped .body{text-decoration:none;}
+  /* Shipped is quieter but still legible: the whole note steps back
+     rather than the text striking through, because a shipped request is
+     a record of a win, not a crossed-out chore. */
+  .fb-note.is-shipped{opacity:.6; box-shadow:var(--shadow-1);}
 
-  /* ── Backing a request. The count is the number, the caret is the verb,
-       and the whole pill is the target so it clears 44px on a finger. */
+  /* ── Backing a request. On a saturated ground the neutral pill this used
+       to be disappeared, so it is a white chip with the element's ink, and
+       inverts to the ink when it is yours. */
   .fb-vote{display:inline-flex; align-items:center; gap:5px; flex:none;
     height:28px; min-width:52px; padding:0 10px; border-radius:var(--radius-pill);
     font-family:inherit; font-size:var(--text-label2-size); font-weight:800;
-    background:var(--color-neutral-1); color:var(--color-neutral-9);
-    border:1px solid var(--fb-line); cursor:pointer;
+    background:#fff; color:var(--np-ink); border:0; cursor:pointer;
     transition:background-color var(--duration-fast) var(--ease-standard),
                color var(--duration-fast) var(--ease-standard),
                transform var(--duration-instant) var(--ease-standard);}
   .fb-vote i{font-size:var(--icon-micro); line-height:1;}
   .fb-vote:hover:not(:disabled){background:var(--color-neutral-2);}
-  .fb-vote:active:not(:disabled){transform:scale(.96);}
-  .fb-vote.is-mine{background:var(--fb-ink); border-color:var(--fb-ink);
-    color:var(--color-neutral-1);}
-  .fb-vote.is-mine:hover{background:var(--fb-ink); filter:brightness(1.08);}
-  .fb-vote:disabled{opacity:.45; cursor:not-allowed;}
-  .fb-vote:focus-visible{outline:2px solid var(--color-obsidian); outline-offset:2px;}
+  .fb-vote:active:not(:disabled){transform:scale(.94);}
+  .fb-vote.is-mine{background:var(--np-ink); color:#fff;}
+  .fb-vote.is-mine:hover{filter:brightness(1.12);}
+  .fb-vote:disabled{opacity:.5; cursor:not-allowed;}
+  .fb-vote:focus-visible{outline:2px solid #fff; outline-offset:2px;}
 
   .fb-note .c-badge{position:absolute; top:-8px; right:10px;
-    background:var(--color-neutral-1);}
+    background:var(--color-neutral-1); box-shadow:var(--shadow-1);}
+
+  /* ── The element sequence, fills and text both taken from the
+       dashboard so a note looks the same in both places.
+
+       White on all five is the reference look, asked for and kept after
+       the measurements were put on the table: white reads 3.15 on Fire,
+       2.49 on Wood, 6.02 on Earth, 4.54 on Water and 7.13 on Gold. Two
+       of those are under the 4.5 floor for text at this size. The white
+       chips carry the interactive parts, and those clear it comfortably
+       (5.9 to 7.78), so the failure is confined to the note's own prose
+       on Fire and Wood. Recorded here rather than left to be
+       rediscovered. */
+  .el-0{--np-hue:var(--color-orange);      --np-ink:#AF3A10; --np-fg:#fff;}
+  .el-1{--np-hue:var(--color-salmon-pink); --np-ink:#B12A47; --np-fg:#fff;}
+  .el-2{--np-hue:var(--color-green);       --np-ink:#00734D; --np-fg:#fff;}
+  .el-3{--np-hue:var(--color-navy);        --np-ink:#0B4FA8; --np-fg:#fff;}
+  .el-4{--np-hue:var(--color-amber);       --np-ink:#8A5A00; --np-fg:#fff;}
+
+  /* ══ Writing one ═════════════════════════════════════════════════════
+     The compose surface is a note, not a dialog about a note: same paper,
+     same hue as the one it is about to become, and it arrives by swinging
+     out of the button that asked for it. The swing is the dashboard's own
+     np-swing, which reads as a card being pulled off a pad rather than a
+     panel fading in, and it is what makes the canvas feel like somewhere
+     things are placed by hand.
+
+     position:fixed and outside the canvas: .fb-wrap is a scrolling
+     surface and the note has to stay put while the compose box is open.
+     Its z-index clears the toast host and the shell's rail. */
+  .fb-compose{position:fixed; z-index:70; width:min(360px, calc(100vw - 24px));
+    transform-style:preserve-3d;
+    background:var(--np-hue); color:var(--np-fg); border:0;
+    border-radius:var(--radius-lg); box-shadow:0 25px 50px -12px rgba(0,0,0,.28);
+    display:flex; flex-direction:column; max-height:calc(100dvh - 24px);
+    transform-origin:top left;}
+  /* The dashboard's swing, verbatim. --nsw-* place the start pose on the
+     anchor's own rect; --nsw-dir mirrors the turn when the anchor sits
+     right of centre so the card always rotates toward the reader. */
+  .fb-compose.is-opening{animation:fbSwingIn .6s cubic-bezier(.25,.9,.35,1) both;}
+  .fb-compose.is-closing{animation:fbSwingOut .45s cubic-bezier(.3,.6,.35,1) both;}
+  @keyframes fbSwingIn{
+    0%{transform:translate(var(--nsw-dx,0px), var(--nsw-dy,0px)) scale(var(--nsw-sx,1), var(--nsw-sy,1)); opacity:.4;}
+    45%{transform:translate(calc(var(--nsw-dx,0px) * .5), calc(var(--nsw-dy,0px) * .5)) scale(.7) rotateY(calc(48deg * var(--nsw-dir,1))) rotateZ(calc(-7deg * var(--nsw-dir,1))); opacity:1;}
+    78%{transform:translate(0,0) scale(1) rotateY(calc(-7deg * var(--nsw-dir,1))) rotateZ(calc(1deg * var(--nsw-dir,1)));}
+    100%{transform:none; opacity:1;}
+  }
+  @keyframes fbSwingOut{
+    0%{transform:none; opacity:1;}
+    50%{transform:translate(calc(var(--nsw-dx,0px) * .5), calc(var(--nsw-dy,0px) * .5)) scale(.7) rotateY(calc(45deg * var(--nsw-dir,1))) rotateZ(calc(-6deg * var(--nsw-dir,1))); opacity:1;}
+    100%{transform:translate(var(--nsw-dx,0px), var(--nsw-dy,0px)) scale(var(--nsw-sx,1), var(--nsw-sy,1)); opacity:.35;}
+  }
+
+  /* ── Inside the panel, laid out as the dashboard lays its own out:
+       a hairline under the header, a hairline over the actions, and the
+       body between them as the only part that scrolls. Both hairlines
+       and every line of type are the note's foreground, which is white
+       on all five papers. */
+  .fb-compose .np-top{display:flex; align-items:center; gap:8px;
+    padding:14px 16px 11px; flex:none;
+    border-bottom:1px solid color-mix(in srgb, var(--np-fg) 60%, transparent);}
+  .fb-compose .np-eyebrow{font-size:var(--text-label3-size); font-weight:700;
+    letter-spacing:var(--tracking-eyebrow); text-transform:uppercase;
+    color:var(--np-fg);}
+  /* A white coin with quiet grey initials, whatever the hue. */
+  .fb-compose .ava{display:inline-grid; place-items:center; width:24px; height:24px;
+    flex:none; border-radius:50%; background:var(--color-neutral-1);
+    color:var(--color-neutral-5); font-size:var(--text-label3-size);
+    font-weight:800; font-style:normal;}
+  .fb-compose .np-top b{font-weight:800; color:var(--np-fg);
+    font-size:var(--text-caption-size);}
+  /* No close cross. Cancel closes the one being written, Done closes the
+     one being read, Escape closes either, and a click on the canvas
+     closes a note that holds no unsaved words. A cross on top of all
+     four was a fifth way to do what four things already did. */
+
+  /* The bottom padding is what keeps the last thing in the body — the
+     status chips on a note being read — off the hairline above the
+     actions. Without it the chips and the rule touched. */
+  .fb-compose .np-body{padding:12px 16px 16px; overflow-y:auto; flex:1; min-height:0;}
+  .fb-compose .np-kick{display:block; font-size:var(--text-label3-size);
+    font-weight:700; letter-spacing:var(--tracking-eyebrow); text-transform:uppercase;
+    color:var(--np-fg); margin-bottom:2px;}
+  /* The field is the panel: no box, no border, just the caret on the hue. */
+  .fb-compose textarea{display:block; width:100%; box-sizing:border-box; font:inherit;
+    font-size:var(--text-label2-size); line-height:1.55; color:var(--np-fg);
+    caret-color:var(--np-fg); background:transparent; border:0;
+    padding:2px 0; resize:none; min-height:132px;}
+  /* No focus box. A textarea matches :focus-visible the moment it is
+     focused, which drew a frame over a borderless field on every open;
+     the caret is the focus indicator here, as on the dashboard. */
+  .fb-compose textarea:focus, .fb-compose textarea:focus-visible{outline:none;}
+  .fb-compose textarea::placeholder{color:var(--np-fg); opacity:.72;}
+
+  /* Read mode: the same panel with the note in it instead of a field. */
+  .fb-compose .np-text{margin:0; font-size:var(--text-body2-size); line-height:1.55;
+    color:var(--np-fg); font-weight:600; white-space:pre-wrap; overflow-wrap:break-word;}
+  .fb-compose .np-shot{display:block; width:100%; max-height:260px; object-fit:contain;
+    border-radius:var(--radius-sm); margin:12px 0 0;
+    background:color-mix(in srgb, var(--np-fg) 18%, transparent);}
+  .fb-compose .np-by{display:flex; align-items:center; gap:6px; flex-wrap:wrap;
+    margin-top:12px; font-size:var(--text-label3-size); font-weight:700;
+    color:var(--np-fg);}
+  .fb-compose .np-by b{font-weight:800;}
+  .fb-compose .np-status{display:flex; gap:6px; flex-wrap:wrap; margin-top:14px;}
+  /* Status is chosen on the note, so the chips are white paper on the
+     hue rather than the board's neutral filter chips, which would
+     disappear into the fill. */
+  .fb-compose .np-st{height:26px; padding:0 12px; border-radius:var(--radius-pill);
+    font-family:inherit; font-size:var(--text-label3-size); font-weight:800;
+    background:transparent; color:var(--np-fg); cursor:pointer;
+    border:1px solid color-mix(in srgb, var(--np-fg) 60%, transparent);}
+  .fb-compose .np-st.is-on{background:#fff; color:var(--np-ink); border-color:#fff;}
+  .fb-compose .np-st:focus-visible{outline:2px solid #fff; outline-offset:2px;}
+
+  /* ── Attaching a screenshot. The DS FileUploader's structure and its
+       classes, with the colours that assume a Neutral-1 ground taken to
+       the note's own white: a Neutral-3 dashed hairline is invisible on
+       a saturated fill. Everything else — the box model, the 22px kind
+       badge, the 24px remove target — is the component as documented. */
+  .fb-compose .c-uploader{max-width:none; gap:var(--spacing-8); margin-top:12px;}
+  .fb-compose .c-uploader-zone{padding:var(--spacing-12); gap:6px;
+    flex-direction:row; justify-content:center; background:transparent;
+    border:1px dashed color-mix(in srgb, var(--np-fg) 70%, transparent);
+    border-radius:var(--radius-md);}
+  .fb-compose .c-uploader-zone:hover,
+  .fb-compose .c-uploader-zone.dragover{
+    background:color-mix(in srgb, var(--np-fg) 16%, transparent);
+    border:1px dashed var(--np-fg);}
+  .fb-compose .c-uploader-zone i,
+  .fb-compose .c-uploader-label{color:var(--np-fg);}
+  .fb-compose .c-uploader-label{font-size:var(--text-caption-size);}
+  .fb-compose .c-uploader-row{background:transparent; align-items:center;
+    border:1px solid color-mix(in srgb, var(--np-fg) 45%, transparent);}
+  .fb-compose .c-uploader-name,
+  .fb-compose .c-uploader-size,
+  .fb-compose .c-uploader-remove{color:var(--np-fg);}
+  .fb-compose .c-uploader-kind{background:transparent; color:var(--np-fg);
+    border:1px solid color-mix(in srgb, var(--np-fg) 60%, transparent);}
+  .fb-compose .c-uploader-remove:hover{background:color-mix(in srgb, var(--np-fg) 20%, transparent);}
+  .fb-compose .c-uploader-thumb{width:34px; height:34px; flex:none; object-fit:cover;
+    border-radius:var(--radius-sm);}
+
+  /* ── The actions, under their own hairline and ranged right. Cancel is
+       white paper, the primary is obsidian: the dashboard's own pair, and
+       the one place on this note where a control is not the hue. */
+  .fb-compose .np-act{display:flex; gap:8px; align-items:center;
+    justify-content:flex-end; flex-wrap:wrap; flex:none;
+    padding:12px 16px 14px;
+    border-top:1px solid color-mix(in srgb, var(--np-fg) 60%, transparent);}
+  .fb-compose .np-count{margin-right:auto; font-size:var(--text-label3-size);
+    font-weight:700; color:var(--np-fg);}
+  .fb-compose .np-count.is-near{text-decoration:underline;}
+  .fb-compose .np-chip{height:32px; padding:0 16px; border:0;
+    border-radius:var(--radius-pill); font-family:inherit;
+    font-size:var(--text-label2-size); font-weight:800; cursor:pointer;
+    transition:transform var(--duration-instant) var(--ease-standard),
+               opacity var(--duration-fast) var(--ease-standard);}
+  .fb-compose .np-chip:active:not(:disabled){transform:scale(.96);}
+  .fb-compose .np-chip:disabled{opacity:.5; cursor:not-allowed;}
+  .fb-compose .np-chip.cancel{background:var(--color-neutral-1); color:var(--color-neutral-5);}
+  .fb-compose .np-chip.go{background:var(--color-obsidian); color:#fff;}
+  .fb-compose .np-chip:focus-visible{outline:2px solid #fff; outline-offset:2px;}
+  .fb-compose .np-del{margin-right:auto; width:32px; height:32px; flex:none;
+    display:grid; place-items:center; border:0; border-radius:var(--radius-sm);
+    background:transparent; color:var(--np-fg); cursor:pointer;}
+  .fb-compose .np-del:hover{background:color-mix(in srgb, var(--np-fg) 20%, transparent);}
+  .fb-compose .np-del + .np-count{margin-right:auto;}
+
+  /* ── An opened note is bigger than a note. The tile is 210px square, so
+       a panel at the compose box's 360 was only two-thirds wider and read
+       as a slightly grown tile rather than as the note opened up. At 440
+       it is more than twice the tile's edge, the sentence gets a
+       comfortable measure instead of four words a line, and the deeper
+       shadow lifts it off the wall it came from. */
+  .fb-compose.is-read{width:min(440px, calc(100vw - 24px));
+    box-shadow:0 32px 64px -16px rgba(0,0,0,.34);}
+  .fb-compose.is-read .np-text{font-size:var(--text-body1-size); line-height:1.5;}
+
+  /* The note the compose box turns into, mid-flight. Painted over the
+     canvas so the shrink lands on the real note rather than beside it. */
+  .fb-note.is-landing{opacity:0;}
+  /* One of each note on screen. While a note is open as a panel, its tile
+     stands down rather than sitting underneath a larger copy of itself.
+     visibility, not display: the rect has to survive for the panel to be
+     placed against and for the close swing to land on. */
+  .fb-note.is-open-elsewhere{visibility:hidden;}
 
   /* ══ Skeleton, for the first load ════════════════════════════════════
      Shaped like the thing it is standing in for, so the board does not
@@ -199,62 +491,59 @@
   .fb-sk{background:var(--color-neutral-2); border-radius:var(--radius-sm);
     height:12px; margin-bottom:8px;}
   .fb-sk.w70{width:70%;} .fb-sk.w45{width:45%;} .fb-sk.w90{width:90%;}
+  /* Blank paper. It takes the placement pass like a real note, so the
+     wall it stands in for is the wall that arrives. */
+  .fb-sk-note{--np-hue:var(--color-neutral-1); --np-fg:var(--color-neutral-5);
+    --np-ink:var(--color-neutral-5); box-shadow:var(--shadow-1); pointer-events:none;}
   @media (prefers-reduced-motion:no-preference){
     .fb-sk{animation:fbPulse 1.4s var(--ease-standard) infinite;}
     @keyframes fbPulse{0%,100%{opacity:1;} 50%{opacity:.45;}}
   }
 
-  /* ══ Compose and detail ══════════════════════════════════════════════ */
-  .fb-scrim{position:fixed; inset:0; z-index:800; background:rgba(8,8,8,.28);
-    backdrop-filter:blur(2px); -webkit-backdrop-filter:blur(2px);
-    display:flex; align-items:center; justify-content:center; padding:var(--spacing-24);}
-  .fb-scrim[hidden]{display:none;}
-  .fb-modal{width:100%; max-width:560px; max-height:calc(100dvh - 48px);
-    display:flex; flex-direction:column;
-    background:var(--color-neutral-1); border-radius:var(--radius-lg);
-    box-shadow:var(--shadow-4); overflow:hidden;}
-  .fb-modal-head{display:flex; align-items:center; justify-content:space-between;
-    gap:var(--spacing-12); padding:var(--spacing-16) var(--spacing-16) var(--spacing-12);}
-  .fb-modal-head h3{margin:0; font-size:var(--text-h4-size); font-weight:var(--text-h4-weight);}
-  .fb-modal-body{padding:0 var(--spacing-16) var(--spacing-16); overflow:auto;}
-  .fb-modal-foot{display:flex; align-items:center; justify-content:space-between;
-    gap:var(--spacing-12); padding:var(--spacing-12) var(--spacing-16);
-    border-top:1px solid var(--color-neutral-3);}
-  .fb-modal-foot .right{display:flex; gap:var(--spacing-8); margin-left:auto;}
-
-  .fb-ta{width:100%; min-height:120px; resize:vertical; font-family:inherit;
-    font-size:var(--text-body1-size); line-height:1.5; color:var(--color-neutral-9);
-    padding:var(--spacing-12); border-radius:var(--radius-sm);
-    border:1px solid var(--color-neutral-3); background:var(--color-neutral-1);}
-  .fb-ta:focus{outline:none; border:2px solid var(--color-obsidian); padding:11px;}
-  .fb-count{font-size:var(--text-caption-size); color:var(--color-neutral-5);}
-  .fb-count.is-near{color:var(--color-orange);}
+  /* ══ Compose and detail ══════════════════════════════════════════════
+     There is no modal here any more, and no scrim. A note is written on
+     paper and read on the same paper, so both are .fb-compose below; the
+     white dialog that used to open over the board was the one place the
+     page stopped looking like a wall of notes. */
 
   /* ── The duplicate nudge. It runs the same matcher the board clusters
        with, so catching a repeat here is also what keeps the regions
        readable later. Framed as an offer, never as a block. */
-  .fb-dupes{margin-top:var(--spacing-16); padding-top:var(--spacing-16);
-    border-top:1px solid var(--color-neutral-3);}
-  .fb-dupes h4{margin:0 0 var(--spacing-8); font-size:var(--text-label1-size);
-    font-weight:700;}
-  .fb-dupe{display:flex; align-items:center; gap:var(--spacing-12);
-    padding:var(--spacing-8) var(--spacing-12); border-radius:var(--radius-sm);
-    background:var(--color-neutral-2); margin-bottom:var(--spacing-8);}
-  .fb-dupe .txt{flex:1; min-width:0; font-size:var(--text-body2-size); line-height:1.4;
-    display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;}
+  /* ── The duplicate nudge, on the note rather than in spite of it. The
+       rows used to be Neutral-2, which over a saturated fill read as
+       translucent white boxes stuck on the paper. They now take
+       --np-ink: the element's own hue taken dark, which is already in
+       the file as the colour the vote chip and the avatar use, so this
+       introduces no new value. It is the same paper, in shadow.
 
-  .fb-detail-body{font-size:var(--text-body1-size); line-height:1.55;
-    white-space:pre-wrap; word-break:break-word;}
-  .fb-detail-meta{margin-top:var(--spacing-16); padding-top:var(--spacing-16);
-    border-top:1px solid var(--color-neutral-3); display:flex; flex-direction:column;
-    gap:var(--spacing-12);}
-  .fb-row{display:flex; align-items:center; gap:var(--spacing-8); flex-wrap:wrap;}
-  .fb-row .k{font-size:var(--text-label3-size); font-weight:700;
-    letter-spacing:var(--tracking-eyebrow); text-transform:uppercase;
-    color:var(--color-neutral-5); width:88px; flex:none;}
-  .fb-row .v{font-size:var(--text-body2-size); color:var(--color-neutral-9);}
+       White on it clears the floor on all five (Fire 6.1, Wood 6.38,
+       Earth 5.9, Water 7.78, Gold 5.93) and separates from the fill it
+       sits on by 1.7 to 3.0, which is enough to read as a recess. */
+  .fb-dupes{margin-top:var(--spacing-16); padding-top:var(--spacing-16);
+    border-top:1px solid color-mix(in srgb, var(--np-fg) 60%, transparent);}
+  .fb-dupes h4{margin:0 0 var(--spacing-8); font-size:var(--text-label1-size);
+    font-weight:700; color:var(--np-fg);}
+  .fb-dupe{display:flex; align-items:center; gap:var(--spacing-12);
+    padding:var(--spacing-8) var(--spacing-8) var(--spacing-8) var(--spacing-12);
+    border-radius:var(--radius-md); background:var(--np-ink);
+    color:var(--np-fg); margin-bottom:var(--spacing-8);}
+  .fb-dupe .txt{flex:1; min-width:0; font-size:var(--text-body2-size); line-height:1.4;
+    color:var(--np-fg);
+    display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;}
+  /* White paper on the recess, the same chip the vote pill and Cancel
+     are, so every light control on this note is made of one material. */
+  .fb-dupe .back{flex:none; height:28px; padding:0 12px; border:0;
+    border-radius:var(--radius-pill); font-family:inherit;
+    font-size:var(--text-label3-size); font-weight:800;
+    background:#fff; color:var(--np-ink); cursor:pointer;
+    transition:transform var(--duration-instant) var(--ease-standard);}
+  .fb-dupe .back:active{transform:scale(.95);}
+  .fb-dupe .back:focus-visible{outline:2px solid #fff; outline-offset:2px;}
 
   /* ══ Offline banner ══════════════════════════════════════════════════ */
+  /* Kept, unused by the page today: the offline banner was removed while
+     the shared store is being decided, and this is the recipe to put it
+     back with rather than reinvent. */
   .fb-offline{display:flex; align-items:flex-start; gap:var(--spacing-12);
     padding:var(--spacing-12) var(--spacing-16); border-radius:var(--radius-md);
     background:var(--color-gold-bg); border:1px solid rgba(255,164,37,.38);
@@ -268,14 +557,20 @@
   a.c-sidebar-item{text-decoration:none;}
 
   /* ══ Narrow ══════════════════════════════════════════════════════════ */
-  @media (max-width:1080px){ .fb-board{columns:2;} }
-  @media (max-width:760px){
-    /* ---- The nav becomes a box in the corner, which is what the dashboard
-       does at this width and for the same arithmetic: the rail costs 88px of
-       a 375px screen and runs the full page height to hold two items.
-       absolute rather than fixed, and .c-shell becomes the containing block.
-       The band on .c-shell-main reserves the space rather than overlaying it,
-       so nothing sticky inside the content has to know the box is there. */
+
+  /* ---- The nav becomes a box in the corner, which is what the dashboard
+     does and for the same arithmetic: the rail costs 88px of a 375px screen
+     and runs the full page height to hold two items. absolute rather than
+     fixed, and .c-shell becomes the containing block. The band on
+     .c-shell-main reserves the space rather than overlaying it, so nothing
+     sticky inside the content has to know the box is there.
+
+     640, not the 760 the board uses, because this is the dashboard's
+     breakpoint and the nav is the one thing on both pages. At 700px the
+     two disagreed: a corner box here, a rail in flow there, so walking
+     between Dashboard and Feedback changed the shape of the navigation
+     rather than just its contents. The board keeps its own 760 below. */
+  @media (max-width:640px){
     .c-shell{position:relative;}
     .c-shell .c-sidebar-shell{position:absolute; top:var(--spacing-16);
       left:var(--spacing-16); margin:0; z-index:50;}
@@ -284,18 +579,25 @@
     /* Collapsed on a phone is the header alone. Leaving the items in made
        the box 165px tall, which put it over the top of the board rather
        than in the band reserved for it. Expanding is how you reach them,
-       and expanding overlays, which is why a tap outside closes it. */
+       and expanding overlays, which is why a tap outside closes it. The
+       footer goes with them here, and only here: on a laptop the collapsed
+       rail keeps the avatar. */
     .c-sidebar.is-collapsed .c-sidebar-item,
     .c-sidebar.is-collapsed .c-sidebar-footer{display:none;}
+  }
+
+  @media (max-width:760px){
     .fb-wrap{padding:var(--spacing-20) var(--spacing-16) var(--spacing-48);}
-    .fb-board{columns:1;}
     .fb-head h1{font-size:26px; line-height:1.2;}
     .fb-head-right{width:100%; justify-content:space-between;}
     .fb-controls{gap:var(--spacing-12);}
-    .fb-modal{max-width:none;}
     /* 16px or iOS Safari zooms the page the moment this takes focus, which
        is a whole-layout event, not a font-size one. */
-    .fb-ta{font-size:16px;}
+    .fb-compose textarea{font-size:16px;}
+    /* The note is the width of the screen here, so it is pinned to the
+       gutter rather than right-aligned under a button that is itself
+       nearly full width. */
+    .fb-compose{width:calc(100vw - 32px);}
   }
   @media (pointer:coarse){
     .fb-vote{height:36px; min-width:60px;}
@@ -308,10 +610,18 @@
     .fb-filters .c-chip-filter{position:relative; height:36px;}
     .fb-filters .c-chip-filter::after{content:''; position:absolute; inset:-4px 0;}
   }
+  /* Reduced motion takes the movement away, so it must not leave the
+     board depending on movement to be readable. The layout pass stops
+     overlapping the notes here (see REDUCED in layout()), which is what
+     makes it safe to switch the parting off: nothing is hidden behind
+     anything, so nothing needs to be pushed aside to be read. The tilt
+     goes too — it is decoration, and a straightened wall is the honest
+     version of this board for someone who asked for less. */
   @media (prefers-reduced-motion:reduce){
-    .fb-note,.fb-vote{transition:none;}
+    .fb-note,.fb-vote,.fb-canvas{transition:none;}
     .fb-note{transform:none;}
-    .fb-note:hover{transform:none;}
+    .fb-compose.is-opening,.fb-compose.is-closing{animation:none;}
+    .fb-drift{transition:none;}
   }
 </style>
 </head>
@@ -321,16 +631,24 @@
   <div class="c-sidebar-shell" id="shellSidebarShell">
     <nav class="c-sidebar" id="shellSidebarNav">
       <div class="c-sidebar-header">
-        <button class="c-dept-trigger" type="button" aria-label="Collabrium">
-          <span class="c-sidebar-logo-live-wrap"><iframe src="../collabrium-dls/logo.html" title="Collabrium" scrolling="no"></iframe></span>
+        <!-- Three marks, one shown at a time, and CSS picks which rather than
+             JS swapping a src: the live wrap is the animated default, the
+             static img is a picked department's lockup, and the collapsed
+             icon is shown only by .c-sidebar.is-collapsed in components.css. -->
+        <button class="c-dept-trigger js-dept-trigger" type="button" aria-haspopup="listbox"
+                aria-expanded="false" aria-label="Switch department" aria-controls="deptDropdown">
+          <span class="c-sidebar-logo-live-wrap js-dept-logo-live"><iframe src="../collabrium-dls/logo.html" title="Collabrium" scrolling="no"></iframe></span>
+          <img class="c-dept-logo-static js-dept-logo-static" alt="" style="display:none" />
+          <i class="ph ph-caret-down js-dept-chevron c-dept-chevron"></i>
         </button>
-        <img class="c-sidebar-logo-collapsed" src="../collabrium-dls/SVG/coin.svg" alt="Collabrium" />
+        <img class="c-sidebar-logo-collapsed js-dept-logo-collapsed" src="../collabrium-dls/SVG/coin.svg" alt="Collabrium" />
       </div>
       <div class="c-sidebar-section">Overview</div>
       <a class="c-sidebar-item" href="landing-v3.html"><i class="ph-fill ph-house"></i><span class="label">Dashboard</span><span class="c-sidebar-hover-text">Dashboard</span></a>
       <a class="c-sidebar-item active" href="feedback-v1.html" aria-current="page"><i class="ph-fill ph-lightbulb-filament"></i><span class="label">Feedback</span><span class="c-sidebar-hover-text">Feedback</span></a>
       <div class="c-sidebar-footer">
-        <button class="c-sidebar-account" type="button">
+        <button class="c-sidebar-account" type="button" id="accountMenuTrigger"
+                aria-haspopup="menu" aria-expanded="false" aria-controls="accountMenu">
           <span class="c-search-input-avatar">BW</span>
           <span class="c-search-input-text">
             <span class="c-search-input-title">Bryan Wong</span>
@@ -353,8 +671,6 @@
       <div class="fb-wrap">
         <div class="fb-inner">
 
-          <div id="fbOffline" hidden></div>
-
           <header class="fb-head">
             <div>
               <h1>What should we fix first</h1>
@@ -363,14 +679,24 @@
                 actually agrees on.</p>
             </div>
             <div class="fb-head-right">
-              <div class="fb-budget" id="fbBudget" title="Votes you have left to spend">
+              <!-- The dots carry the count and the word carries only the
+                   noun. That means the number exists in shape alone, so the
+                   whole pill takes a live aria-label with the count spelled
+                   out; renderBudget() keeps it in step. -->
+              <div class="fb-budget" id="fbBudget" role="img"
+                   aria-label="5 votes left" title="Votes you have left to spend">
                 <span class="pips" id="fbPips" aria-hidden="true"></span>
-                <span class="txt" id="fbBudgetTxt">5 votes left</span>
+                <span class="txt">Votes</span>
               </div>
               <button class="c-btn c-btn-primary c-btn-md" type="button" id="fbAdd">
                 <i class="ph ph-plus"></i> Add feedback
               </button>
             </div>
+            <!-- Closes the standfirst and opens the working surface. Last in
+                 the flex row and full width, so it spans the header rather
+                 than sitting between the text and the controls and pushing
+                 them onto their own line. -->
+            <hr class="fb-rule" />
           </header>
 
           <div class="fb-controls">
@@ -382,6 +708,16 @@
               <span class="fb-sep" aria-hidden="true"></span>
               <button class="c-chip c-chip-filter" type="button" data-own="mine">Mine</button>
               <button class="c-chip c-chip-filter" type="button" data-own="backed">I backed</button>
+              <span class="fb-sep" aria-hidden="true"></span>
+              <!-- Not a filter: it hides nothing. It sits in the filter row
+                   because that is where the board's controls are, and it is
+                   marked as a toggle rather than a choice among the chips to
+                   its left, which is what aria-pressed says and data-st does
+                   not. -->
+              <button class="c-chip c-chip-filter fb-cluster" type="button"
+                      id="fbCluster" aria-pressed="false">
+                <i class="ph ph-graph"></i> Cluster
+              </button>
             </div>
             <div class="fb-sort">
               <span class="lab" id="fbSortLab">Sort</span>
@@ -392,7 +728,7 @@
             </div>
           </div>
 
-          <main id="fbBoard" class="fb-board" aria-live="polite"></main>
+          <main id="fbBoard" class="fb-canvas" aria-live="polite"></main>
 
         </div>
       </div>
@@ -400,8 +736,45 @@
   </div>
 </div>
 
-<div class="fb-scrim" id="fbScrim" hidden>
-  <div class="fb-modal" role="dialog" aria-modal="true" aria-labelledby="fbModalTitle" id="fbModal"></div>
+<!-- Both of these are siblings of .c-shell, not children of .c-sidebar:
+     .c-sidebar sets overflow-x:clip, which clips a fixed child of it just
+     as surely as an absolute one. Same escape the sidebar toggle takes. -->
+<div class="c-sidebar-hover-label" id="shellSidebarHoverLabel" role="tooltip"></div>
+
+<div class="c-account-menu" id="accountMenu" role="menu" aria-hidden="true">
+  <button class="c-account-menu-item" type="button" role="menuitem"><i class="ph-fill ph-gear"></i><span>Settings</span></button>
+  <!-- An anchor, not a button: this row has a destination, so cmd-click
+       opens a tab, the URL previews on hover, and it works without JS.
+       The close handler matches the class, not the tag, so the menu still
+       closes on the way out. -->
+  <a class="c-account-menu-item" href="login-v1.html" role="menuitem"><i class="ph-fill ph-sign-out"></i><span>Log out</span></a>
+</div>
+
+<!-- Outside .c-sidebar and position:fixed, unlike the system's own absolutely
+     positioned .c-dept-dropdown: .c-sidebar sets overflow-x:clip, so a panel
+     positioned inside it is clipped at the rail's edge. Same escape the
+     account menu and the hover label above already take. -->
+<div class="c-dept-dropdown" id="deptDropdown" role="listbox" aria-label="Departments" hidden>
+  <div class="c-dept-option is-active" role="option" aria-selected="true" aria-label="Collabrium (Default)" data-dept="default" data-name="Collabrium (Default)" data-element-icon="../collabrium-dls/SVG/coin.svg">
+    <span class="c-dept-option-logo"><img src="../collabrium-dls/logo-lockups/collabrium-default-logo.svg" alt="" style="--logo-scale:0.6" /></span>
+    <i class="ph ph-check c-dept-check"></i>
+  </div>
+  <div class="c-dept-option" role="option" aria-selected="false" aria-label="Studio" data-dept="studio" data-name="Studio" data-logo="../collabrium-dls/logo-lockups/collabStudio.svg" data-element-icon="../collabrium-dls/SVG/fire.svg">
+    <span class="c-dept-option-logo"><img src="../collabrium-dls/logo-lockups/collabStudio.svg" alt="" /></span>
+    <i class="ph ph-check c-dept-check"></i>
+  </div>
+  <div class="c-dept-option" role="option" aria-selected="false" aria-label="Sales" data-dept="sales" data-name="Sales" data-logo="../collabrium-dls/logo-lockups/collabSales.svg" data-element-icon="../collabrium-dls/SVG/gold.svg">
+    <span class="c-dept-option-logo"><img src="../collabrium-dls/logo-lockups/collabSales.svg" alt="" /></span>
+    <i class="ph ph-check c-dept-check"></i>
+  </div>
+  <div class="c-dept-option" role="option" aria-selected="false" aria-label="Influencers" data-dept="influencers" data-name="Influencers" data-logo="../collabrium-dls/logo-lockups/collabInfluencers.svg" data-element-icon="../collabrium-dls/SVG/earth.svg">
+    <span class="c-dept-option-logo"><img src="../collabrium-dls/logo-lockups/collabInfluencers.svg" alt="" /></span>
+    <i class="ph ph-check c-dept-check"></i>
+  </div>
+  <div class="c-dept-option" role="option" aria-selected="false" aria-label="Content" data-dept="content" data-name="Content" data-logo="../collabrium-dls/logo-lockups/collabContent.svg" data-element-icon="../collabrium-dls/SVG/wood.svg">
+    <span class="c-dept-option-logo"><img src="../collabrium-dls/logo-lockups/collabContent.svg" alt="" /></span>
+    <i class="ph ph-check c-dept-check"></i>
+  </div>
 </div>
 
 <div class="c-toast-host" id="fbToasts"></div>
@@ -457,8 +830,21 @@ var STATE = {
   st: 'all',          // status filter
   own: null,          // 'mine' | 'backed' | null
   sort: 'votes',
-  open: null          // id of the note whose detail is open, or 'compose'
+  open: null,         // id of the note whose detail is open, or 'compose'
+  clustered: false,   // is the canvas pulled into drifts
+  /* id -> place in the posting sequence, which is what picks a note's
+     colour. Held rather than derived on each call because elOf() runs
+     once per note per render and indexOf would make that quadratic. */
+  order: {}
 };
+
+/* Rebuilt whenever the note list is replaced. STATE.notes arrives ordered
+   by seq from the server, and locally it is append-only, so the array
+   index IS the posting order in both paths. */
+function reindex() {
+  STATE.order = {};
+  for (var i = 0; i < STATE.notes.length; i++) STATE.order[STATE.notes[i].i] = i;
+}
 
 /* ── Who is writing ──────────────────────────────────────────────────
    One source, the shell's account block, so the byline can never drift
@@ -699,6 +1085,7 @@ function adopt(x) {
   if (x.status >= 400 || !Array.isArray(x.body.notes)) return false;
   STATE.remote = true;
   STATE.notes = x.body.notes;
+  reindex();
   if (typeof x.body.budget === 'number') STATE.budget = x.body.budget;
   saveLocal();                                   // the cache, for the next cold start
   return true;
@@ -706,6 +1093,7 @@ function adopt(x) {
 
 function boot() {
   STATE.notes = loadLocal();
+  reindex();
   render();                                       // the cache paints first
   api('GET').then(function (x) {
     var ok = adopt(x);
@@ -736,7 +1124,7 @@ function toggleVote(id) {
   var who = me(), on = !iBacked(f);
   if (on && f.st !== 'shipped' && left() <= 0) {
     toast('warning', 'No votes left',
-      'Take a vote back from something else to back this. Shipped requests return theirs.');
+      'Remove a vote from something else to vote for this. Shipped requests return theirs.');
     return;
   }
   f.v = (f.v || []).slice();
@@ -759,12 +1147,29 @@ function find(id) {
   return null;
 }
 
-function post(text, cb) {
+/* The next sequence number, for the offline path only. The server owns
+   the real one; this keeps a browser-local board's colours monotonic so
+   a withdrawal there does not repaint everything after it either. */
+function nextQ() {
+  var m = -1;
+  for (var i = 0; i < STATE.notes.length; i++) {
+    var q = STATE.notes[i].q;
+    if (typeof q === 'number' && q > m) m = q;
+  }
+  return m + 1;
+}
+
+/* thumb is what the canvas draws and what is cached locally; full is the
+   grab the detail view fetches. Only the thumb goes into STATE, so the
+   localStorage cache cannot be blown out by a few screenshots. */
+function post(text, cb, thumb, full) {
   var who = me(), id = newId();
-  STATE.notes.push({i: id, t: text, a: who, ts: new Date().toISOString(), st: 'new', v: []});
-  saveLocal(); render();
+  STATE.notes.push({i: id, q: nextQ(), t: text, a: who, ts: new Date().toISOString(),
+                    st: 'new', v: [], img: thumb || undefined});
+  reindex(); saveLocal(); render();
   if (!STATE.remote) { if (cb) cb(id); return; }
-  api('PUT', {text: text, author: who, newId: id}).then(function (x) {
+  api('PUT', {text: text, author: who, newId: id,
+              img: full || undefined, thumb: thumb || undefined}).then(function (x) {
     if (adopt(x)) render();
     if (cb) cb(id);
   }, function () { offline(); if (cb) cb(id); });
@@ -784,7 +1189,8 @@ function remove(id) {
   var f = find(id); if (!f) return;
   if (f.a !== me()) return;                       // the buttons hide; this is the rule
   STATE.notes = STATE.notes.filter(function (n) { return n.i !== id; });
-  saveLocal(); closeModal(); render();
+  reindex();
+  saveLocal(); render();
   if (!STATE.remote) return;
   api('DELETE', null, '?id=' + encodeURIComponent(id) + '&author=' + encodeURIComponent(me()))
     .then(function (x) { if (adopt(x)) render(); }, function () { offline(); });
@@ -800,14 +1206,18 @@ function offline() {
 
 /* ═══ 5. Rendering ═════════════════════════════════════════════════════ */
 
-var ELS = ['fire', 'wood', 'earth', 'water', 'gold'];
-var ELINK = {fire: '--color-orange', wood: '--color-salmon-pink', earth: '--color-green',
-             water: '--color-navy', gold: '--color-amber'};
-/* The reading weight of each element: the same hue taken dark enough to
-   clear 4.5:1 as small text on its own 8% tint. Same values the dashboard's
-   notes use, so one element reads the same in both places. */
-var EREAD = {fire: '#AF3A10', wood: '#B12A47', earth: '#00734D',
-             water: '#0B4FA8', gold: '#8A5A00'};
+/* Five papers, taken in turn. The index is the note's place in the posting
+   sequence, not its cluster and not its place on screen, so a note keeps
+   the colour it was written on however the board is filtered or arranged.
+   STATE.notes arrives ordered by seq, which is the posting order. */
+var ELN = 5;
+function elOf(f) {
+  /* f.q is the row's seq, which the server assigns once and never reuses,
+     so a withdrawal cannot repaint the notes after it. Cached notes from
+     before this shipped have no q; those fall back to array position. */
+  var q = (typeof f.q === 'number') ? f.q : STATE.order[f.i];
+  return 'el-' + ((q === undefined ? 0 : q) % ELN);
+}
 
 function visible() {
   var who = me();
@@ -828,19 +1238,27 @@ function statusBadge(st) {
 
 /* A stable pseudo-rotation per note. Deterministic, so a note does not
    twitch every time the board redraws. */
+/* The tilt, deterministic from the note's id so a redraw does not
+   reshuffle the wall. Widened from a barely-there +/-1.2 degrees to
+   roughly +/-4.5: at the old range the squares read as a slightly
+   sloppy grid rather than as paper somebody put up by hand. Anything
+   past about six starts to look like a mistake instead of a hand. */
 function rot(id) {
   var h = 0;
   for (var i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) & 0xffff;
-  return ((h % 25) / 10 - 1.2).toFixed(2);
+  return ((h % 91) / 10 - 4.5).toFixed(2);
 }
 
-function noteHTML(f, el) {
+function noteHTML(f) {
   var mine = iBacked(f), n = (f.v || []).length;
-  return '<div class="fb-note' + (f.st === 'shipped' ? ' is-shipped' : '') + '" ' +
+  var shot = f.img
+    ? '<img class="shot" src="' + esc(f.img) + '" alt="Screenshot attached to this note" />'
+    : '';
+  return '<div class="fb-note ' + elOf(f) + (f.st === 'shipped' ? ' is-shipped' : '') + '" ' +
       'style="--fb-rot:' + rot(f.i) + 'deg" ' +
       'data-open="' + esc(f.i) + '" role="button" tabindex="0" ' +
       'aria-label="Feedback from ' + esc(f.a) + ', ' + n + ' backing. Open">' +
-    statusBadge(f.st) +
+    statusBadge(f.st) + shot +
     '<p class="body">' + esc(f.t) + '</p>' +
     '<div class="fb-note-foot">' +
       '<span class="fb-who"><span class="fb-av">' + esc(initials(f.a)) + '</span>' +
@@ -849,7 +1267,7 @@ function noteHTML(f, el) {
         'data-vote="' + esc(f.i) + '"' +
         (!mine && f.st !== 'shipped' && left() <= 0 ? ' disabled' : '') +
         ' aria-pressed="' + (mine ? 'true' : 'false') + '" ' +
-        'aria-label="' + (mine ? 'You backed this. Take it back' : 'Back this') +
+        'aria-label="' + (mine ? 'You voted for this. Remove your vote' : 'Vote this') +
         ', ' + n + ' so far">' +
         '<i class="ph-fill ph-caret-up"></i>' + n +
       '</button>' +
@@ -857,45 +1275,14 @@ function noteHTML(f, el) {
   '</div>';
 }
 
-function regionHTML(region, notes, el, shipped) {
-  var idxs = region.idx, total = 0, i;
-  for (i = 0; i < idxs.length; i++) total += (notes[idxs[i]].v || []).length;
-
-  var order = idxs.slice().sort(function (a, b) {
-    if (STATE.sort === 'new') return new Date(notes[b].ts || 0) - new Date(notes[a].ts || 0);
-    var d = (notes[b].v || []).length - (notes[a].v || []).length;
-    return d || (new Date(notes[b].ts || 0) - new Date(notes[a].ts || 0));
-  });
-
-  var head = '';
-  if (region.term) {
-    var title = region.term.charAt(0).toUpperCase() + region.term.slice(1);
-    head = '<div class="fb-region-head"><div class="t">' +
-      '<h2>' + esc(title) + '</h2>' +
-      '<p class="meta">' + idxs.length + ' notes mention it' +
-        (total ? ' · ' + total + ' backing' : '') + '</p>' +
-      '</div></div>' +
-      // the heading is one word; these are the others the group has in
-      // common, so the grouping can be checked rather than believed
-      (region.why.length ? '<div class="fb-why">' + region.why.map(function (w) {
-        return '<span class="c-tag c-tag-' + el + '"><span class="dot"></span>' + esc(w) + '</span>';
-      }).join('') + '</div>' : '');
-  }
-  return '<section class="fb-region' + (shipped ? ' is-shipped' : '') + '">' + head +
-    '<div class="fb-notes">' +
-      order.map(function (k) { return noteHTML(notes[k], el); }).join('') +
-    '</div></section>';
-}
-
+/* The first load. Placed by the same pass the real notes are, so the
+   skeleton scatters the way the board will rather than promising a
+   layout the board does not have. */
 function skeleton() {
-  var one = '<section class="fb-region"><div class="fb-sk w45"></div>' +
-    '<div class="fb-notes">' +
-    '<div class="fb-note" style="--fb-tint:var(--color-neutral-2);--fb-line:var(--color-neutral-3)">' +
-      '<div class="fb-sk w90"></div><div class="fb-sk w70"></div><div class="fb-sk w45"></div></div>' +
-    '<div class="fb-note" style="--fb-tint:var(--color-neutral-2);--fb-line:var(--color-neutral-3)">' +
-      '<div class="fb-sk w70"></div><div class="fb-sk w90"></div></div>' +
-    '</div></section>';
-  return one + one + one;
+  var one = '<div class="fb-note fb-sk-note" style="--fb-rot:0deg">' +
+    '<div class="fb-sk w90"></div><div class="fb-sk w70"></div>' +
+    '<div class="fb-sk w45"></div></div>';
+  return one + one + one + one + one;
 }
 
 function emptyHTML() {
@@ -928,158 +1315,803 @@ function renderBudget() {
     pips += '<span class="pip' + (i < l ? '' : ' spent') + '"></span>';
   }
   document.getElementById('fbPips').innerHTML = pips;
-  document.getElementById('fbBudgetTxt').textContent =
-    l === 0 ? 'No votes left' : (l === 1 ? '1 vote left' : l + ' votes left');
-  document.getElementById('fbBudget').classList.toggle('is-out', l === 0);
+  var box = document.getElementById('fbBudget');
+  /* The label is the only place the count is written down now, so it is
+     the one thing a screen reader has to go on. */
+  box.setAttribute('aria-label',
+    l === 0 ? 'No votes left' : (l === 1 ? '1 vote left' : l + ' votes left'));
+  box.classList.toggle('is-out', l === 0);
 }
 
-function renderOffline() {
-  var box = document.getElementById('fbOffline');
-  if (STATE.remote || !STATE.loaded) { box.hidden = true; box.innerHTML = ''; return; }
-  box.hidden = false;
-  box.innerHTML = '<div class="fb-offline"><i class="ph-fill ph-warning-circle"></i>' +
-    '<span><b>This board is on your device only.</b>' +
-    'No shared store is attached, so nobody else can see what you post here yet. ' +
-    'Everything below still works, it is just private to this browser.</span></div>';
+/* The standing "this board is on your device only" banner is gone,
+   acknowledged and deliberately so while the shared store is still being
+   decided. What is NOT gone is the toast in offline() above: a banner
+   that is always there stops being read, but somebody whose write just
+   failed to reach the group has to be told at the moment it happens.
+   The Posted toast also still says which of the two happened. */
+
+/* Where every note was before the redraw, keyed by id. Read at the top of
+   render() and spent at the bottom of it, so it never survives a frame. */
+function snapshot() {
+  var map = {}, notes = document.querySelectorAll('#fbBoard .fb-note');
+  for (var i = 0; i < notes.length; i++) {
+    var id = notes[i].dataset.open;
+    if (id) map[id] = notes[i].getBoundingClientRect();
+  }
+  return map;
+}
+
+/* The move, played after the new positions are set. render() rebuilds the
+   canvas from scratch, so the notes that come back are different elements
+   with no memory of where they were and the board changed shape in one
+   frame — which is what pressing Cluster looked like. This measures the
+   old rects, puts each note back where it was with a transform, and lets
+   it travel to zero.
+
+   The rotation has to be carried through both keyframes or the note
+   un-tilts on the way, and the whole thing is skipped for anything that
+   was not on the board a moment ago: a note arriving from a filter has
+   nowhere to travel from, and should just be there. */
+function playMove(before) {
+  if (REDUCED) return;
+  var notes = document.querySelectorAll('#fbBoard .fb-note'), moved = 0;
+  for (var i = 0; i < notes.length; i++) {
+    var el = notes[i], was = before[el.dataset.open];
+    if (!was) continue;
+    var now = el.getBoundingClientRect();
+    var dx = was.left - now.left, dy = was.top - now.top;
+    if (Math.abs(dx) < 1 && Math.abs(dy) < 1) continue;
+    var r = el.style.getPropertyValue('--fb-rot') || '0deg';
+    el.animate([
+      {transform: 'translate(' + dx.toFixed(1) + 'px,' + dy.toFixed(1) + 'px) rotate(' + r + ')'},
+      {transform: 'translate(0,0) rotate(' + r + ')'}
+    ], {
+      duration: 520,
+      /* Staggered by reading order, capped so a big board does not end up
+         with a note that starts moving half a second late. */
+      delay: Math.min(moved * 22, 220),
+      easing: 'cubic-bezier(.32,.72,.3,1)',
+      fill: 'backwards'
+    });
+    moved++;
+  }
+  PEEK.dirty = true;
 }
 
 function render() {
+  var before = snapshot();
   renderBudget();
-  renderOffline();
 
   var host = document.getElementById('fbBoard');
-  host.classList.remove('is-one');
-  if (!STATE.loaded && !STATE.notes.length) { host.innerHTML = skeleton(); return; }
+  host.classList.toggle('is-clustered', STATE.clustered);
 
-  var list = visible();
-  if (!list.length) {
-    host.classList.add('is-one');
-    host.innerHTML = emptyHTML();
+  if (!STATE.loaded && !STATE.notes.length) {
+    host.classList.remove('is-flow');
+    host.innerHTML = skeleton();
+    layout(host, null);
     return;
   }
 
-  /* Shipped work is filed on its own. It is the proof the board works, so
-     it stays on the page, but it is done: it should not compete for
-     attention with what is still open. */
-  var open = list.filter(function (f) { return f.st !== 'shipped'; });
-  var done = list.filter(function (f) { return f.st === 'shipped'; });
+  var list = visible();
+  if (!list.length) {
+    host.classList.add('is-flow');
+    host.style.removeProperty('--fb-h');
+    host.innerHTML = emptyHTML();
+    return;
+  }
+  host.classList.remove('is-flow');
 
-  /* Reading order is the board's answer to "what first", so it is the
-     group's backing that decides it, not the grouping's own confidence. */
-  var order = group(open).regions.sort(function (a, b) {
-    if (STATE.sort === 'new') {
-      var na = Math.max.apply(null, a.idx.map(function (i) { return new Date(open[i].ts || 0); }));
-      var nb = Math.max.apply(null, b.idx.map(function (i) { return new Date(open[i].ts || 0); }));
-      return nb - na;
-    }
-    var va = 0, vb = 0, i;
-    for (i = 0; i < a.idx.length; i++) va += (open[a.idx[i]].v || []).length;
-    for (i = 0; i < b.idx.length; i++) vb += (open[b.idx[i]].v || []).length;
-    return (vb - va) || (b.idx.length - a.idx.length);
+  /* Shipped work stays on the canvas — it is the proof the board works —
+     but it is done, so it sorts to the back of the run and sits at 60%.
+     It no longer gets a pen of its own: a fenced-off section is exactly
+     the box this canvas is trying not to draw. */
+  var order = list.slice().sort(function (a, b) {
+    var sa = a.st === 'shipped' ? 1 : 0, sb = b.st === 'shipped' ? 1 : 0;
+    if (sa !== sb) return sa - sb;
+    if (STATE.sort === 'new') return new Date(b.ts || 0) - new Date(a.ts || 0);
+    var d = (b.v || []).length - (a.v || []).length;
+    return d || (new Date(b.ts || 0) - new Date(a.ts || 0));
   });
 
-  var html = order.map(function (g, n) {
-    return regionHTML(g, open, ELS[n % ELS.length], false);
-  }).join('');
-
-  if (done.length) {
-    html += '<section class="fb-region is-shipped">' +
-      '<div class="fb-region-head"><div class="t"><h2>Shipped</h2>' +
-      '<p class="meta">' + done.length + ' done. Votes on these are back in everyone\'s budget.</p>' +
-      '</div></div><div class="fb-notes">' +
-      done.map(function (f) { return noteHTML(f, 'earth'); }).join('') +
-      '</div></section>';
+  /* Cluster mode runs the same matcher the board has always used; the
+     only thing that changes is where the notes are put. Regions come
+     back as indices into `open`, so the drifts are built here and the
+     placement is left to layout(). */
+  var drifts = null;
+  if (STATE.clustered) {
+    var open = order.filter(function (f) { return f.st !== 'shipped'; });
+    var done = order.filter(function (f) { return f.st === 'shipped'; });
+    var regions = group(open).regions.sort(function (x, y) {
+      return (y.idx.length - x.idx.length) ||
+             (sumVotes(y.idx, open) - sumVotes(x.idx, open));
+    });
+    /* Everything the matcher could not place goes into one drift, not one
+       drift each. A board of twelve notes where nine group produces three
+       singletons, and three labels reading "On its own · 1" is three
+       labels saying the same thing about different paper. */
+    var loose = [];
+    drifts = [];
+    regions.forEach(function (g) {
+      var notes = g.idx.map(function (i) { return open[i]; });
+      if (!g.term) { loose = loose.concat(notes); return; }
+      drifts.push({term: g.term, why: g.why, notes: notes});
+    });
+    if (loose.length) drifts.push({term: null, why: [], notes: loose});
+    /* Shipped is a drift like any other, named rather than fenced. */
+    if (done.length) drifts.push({term: 'shipped', why: [], notes: done, done: true});
+    order = drifts.reduce(function (acc, d) { return acc.concat(d.notes); }, []);
   }
 
-  host.innerHTML = html;
+  /* Interleaved, not notes-then-labels: the label is a heading for the
+     run that follows it, and emitting all ten notes and then all five
+     headings reads correctly to nobody. Placement is absolute either way,
+     so the DOM order costs nothing visually and is the only order a
+     screen reader or the tab key has to go on. layout() walks .fb-note
+     and .fb-drift by index, and both stay in drift order this way. */
+  host.innerHTML = drifts
+    ? drifts.map(function (d) {
+        return driftHTML(d) + d.notes.map(noteHTML).join('');
+      }).join('')
+    : order.map(noteHTML).join('');
 
-  /* Element colour is set per region rather than per note so a region
-     reads as one thing at a glance. */
-  var regions = host.querySelectorAll('.fb-region');
-  for (var r = 0; r < regions.length; r++) {
-    var el = regions[r].classList.contains('is-shipped') ? 'earth' : ELS[r % ELS.length];
-    var why = regions[r].querySelector('.fb-why');
-    if (why) {
-      why.style.setProperty('--fb-ink', 'var(' + ELINK[el] + ')');
-      why.style.setProperty('--fb-read', EREAD[el]);
+  layout(host, drifts);
+  playMove(before);
+}
+
+function sumVotes(idx, list) {
+  var t = 0;
+  for (var i = 0; i < idx.length; i++) t += (list[idx[i]].v || []).length;
+  return t;
+}
+
+/* The cluster's name and the words that made it one. Type on the canvas:
+   the heading names one word, the tail says what else the group has in
+   common, so a grouping can be checked rather than believed. That was
+   true when regions were cards and it is still the reason this text
+   exists now that they are not. */
+function driftHTML(d) {
+  var name = d.term ? d.term.charAt(0).toUpperCase() + d.term.slice(1) : 'On its own';
+  var tail = d.why && d.why.length ? ' &middot; ' + d.why.map(esc).join(', ') : '';
+  /* A real heading. It is the only thing that says these notes belong
+     together once the boxes are gone, so it has to carry that meaning to
+     a reader who cannot see them sitting close. */
+  return '<h2 class="fb-drift">' + esc(name) +
+    ' <span class="n">' + d.notes.length + tail + '</span></h2>';
+}
+
+/* ═══ 5b. Placement ════════════════════════════════════════════════════
+
+   Notes are absolutely positioned, so this is what decides the board's
+   shape. Two arrangements, one pass.
+
+   SCATTER runs the notes left to right in overlapping rows. The overlap
+   is the point: a gap between every card reads as a list with bad
+   margins, and the wall only looks like a wall once the papers touch.
+
+   CLUSTER keeps the same run but breaks it at the drifts, each one
+   labelled and separated by a gap wide enough to read as a break without
+   drawing a line.
+
+   Heights are measured rather than assumed, because a note with a
+   screenshot is roughly twice a one-line note and a row packed on an
+   assumed height would either collide or leave a band of empty canvas.
+   The measure happens after innerHTML and before any left/top is set,
+   which is one forced layout per render rather than one per note. */
+var NOTE_W = 210;      // the paper's edge. Square, so this is its height too
+var OVERLAP = 30;      // how far each note tucks under the one before it
+var ROW_GAP = 18;      // breathing room between rows, after the tallest note
+var DRIFT_GAP_X = 52;  // between two clusters side by side
+var DRIFT_GAP_Y = 40;  // between one band of clusters and the next
+var LABEL_H = 26;      // the drift's name sits in this band above its notes
+
+function layout(host, drifts) {
+  var notes = host.querySelectorAll('.fb-note');
+  if (!notes.length) { host.style.removeProperty('--fb-h'); return; }
+
+  var W = host.clientWidth || 900;
+  /* Below roughly two notes wide the scatter has nothing to scatter into:
+     overlapping cards on a 375px screen means every note is half-hidden
+     with no pointer to part them. One column, still tilted. */
+  var narrow = W < 2 * NOTE_W + 40;
+  var w = narrow ? Math.min(W, 320) : NOTE_W;
+  /* Overlap is what the pointer parts. With reduced motion the parting is
+     off, so the overlap has to go with it or the notes underneath become
+     unreachable by anything except the tab key. A positive gap instead. */
+  var step = narrow ? w : (REDUCED ? w + 14 : w - OVERLAP);
+
+  var i, h = [];
+  for (i = 0; i < notes.length; i++) {
+    notes[i].style.setProperty('--fb-w', w + 'px');
+    h.push(notes[i].offsetHeight);
+  }
+
+  /* Places notes [from, to) as an overlapping run inside `avail` pixels,
+     starting at (x0, y0), wrapping to a new row when the run runs out of
+     width. Returns the bottom it reached. Jitter is deterministic from
+     the note's id, so a redraw does not reshuffle the wall. */
+  function place(from, to, x0, y0, avail) {
+    var perRow = narrow ? 1 : Math.max(1, Math.floor((avail - w) / step) + 1);
+    var col = 0, rowTop = y0, rowMax = 0, low = y0, k;
+    for (k = from; k < to; k++) {
+      if (col >= perRow) { rowTop += rowMax + ROW_GAP; col = 0; rowMax = 0; }
+      var key = notes[k].dataset.open || String(k);
+      var jx = narrow ? 0 : jit(key, 13) - 6;
+      var jy = narrow ? 0 : jit(key + 'y', 25) - 12;
+      var x = narrow ? x0 + Math.round((avail - w) / 2) : x0 + col * step + jx;
+      var top = rowTop + Math.max(0, jy);
+      notes[k].style.left = Math.max(0, Math.min(x, W - w)) + 'px';
+      notes[k].style.top = top + 'px';
+      /* Later notes sit on top of earlier ones, which is what makes the
+         overlap read as a pile rather than a mistake. The peek pass
+         overrides this for whichever note the pointer is on. */
+      notes[k].style.zIndex = String(10 + k);
+      var bot = top + h[k];
+      if (bot - rowTop > rowMax) rowMax = bot - rowTop;
+      if (bot > low) low = bot;
+      col++;
     }
-    var notes = regions[r].querySelectorAll('.fb-note');
-    for (var q = 0; q < notes.length; q++) {
-      notes[q].style.setProperty('--fb-tint', 'var(--color-' + el + '-bg)');
-      notes[q].style.setProperty('--fb-line', 'color-mix(in srgb, var(' + ELINK[el] + ') 30%, transparent)');
-      notes[q].style.setProperty('--fb-ink', 'var(' + ELINK[el] + ')');
-      notes[q].style.setProperty('--fb-read', EREAD[el]);
+    return low;
+  }
+
+  var bottom;
+  if (!drifts) {
+    bottom = place(0, notes.length, 0, 0, W);
+  } else {
+    /* Drifts pack left to right and wrap, rather than each claiming a
+       band of its own: four two-note topics stacked vertically is four
+       screens of mostly empty canvas, and the point of the horizontal
+       run is that you can see the topics beside each other. */
+    var at = 0, x = 0, rowTop = 0, rowLow = 0;
+    var labels = host.querySelectorAll('.fb-drift');
+    bottom = 0;
+    for (i = 0; i < drifts.length; i++) {
+      var n = drifts[i].notes.length;
+      var runW = Math.min(W, (n - 1) * step + w);
+      if (x > 0 && x + runW > W) {          // no room beside the last one
+        rowTop = rowLow + DRIFT_GAP_Y;
+        x = 0;
+      }
+      if (labels[i]) {
+        labels[i].style.left = x + 'px';
+        labels[i].style.top = rowTop + 'px';
+      }
+      var low = place(at, at + n, x, rowTop + LABEL_H, runW);
+      if (low > rowLow) rowLow = low;
+      if (low > bottom) bottom = low;
+      x += runW + DRIFT_GAP_X;
+      at += n;
     }
   }
+
+  host.style.setProperty('--fb-h', (bottom + 8) + 'px');
+  PEEK.step = step;
+  PEEK.dirty = true;
 }
 
-/* ═══ 6. Compose, and the duplicate nudge ══════════════════════════════ */
-
-function openModal(html, onMount) {
-  var scrim = document.getElementById('fbScrim'), modal = document.getElementById('fbModal');
-  modal.innerHTML = html;
-  scrim.hidden = false;
-  if (onMount) onMount(modal);
-  var first = modal.querySelector('textarea, button');
-  if (first) first.focus();
+/* A deterministic small integer from a string, for jitter that survives a
+   redraw. Same hash rot() uses; kept separate so the two can be tuned
+   without one silently changing the other. */
+function jit(key, span) {
+  var x = 0;
+  for (var i = 0; i < key.length; i++) x = (x * 31 + key.charCodeAt(i)) & 0xffff;
+  return x % span;
 }
-function closeModal() {
-  document.getElementById('fbScrim').hidden = true;
-  document.getElementById('fbModal').innerHTML = '';
+
+/* ═══ 5c. Parting the pile ═════════════════════════════════════════════
+
+   Moving across the canvas pushes the notes either side of the pointer
+   out of the way and squares up the one underneath, which is how you
+   read a stack of paper you have not sorted. Nothing here changes the
+   layout: the pass only writes --fb-push on notes near the pointer and
+   clears it when the pointer leaves, so the placement above stays the
+   single source of where a note lives.
+
+   Off on a coarse pointer. There is no hover on a finger, and pushing
+   cards around as a side effect of scrolling would be a bug. */
+var PEEK = {el: null, dirty: true, rects: null, step: 198};
+/* The reach is measured in neighbours, not pixels. Two notes sit one
+   `step` apart, so a fixed pixel radius that felt right at one note width
+   moved the neighbour by two pixels at another. At 2.2 steps the note
+   beside the pointer moves about 17px and the one beyond it about 3,
+   which is a pile opening rather than the whole row sliding. */
+var PUSH_REACH = 2.2;
+var PUSH_MAX = 30;    // how far the nearest neighbour moves
+
+function peekAt(host, px, py) {
+  var notes = host.querySelectorAll('.fb-note');
+  if (!notes.length) return;
+  if (PEEK.dirty || !PEEK.rects || PEEK.rects.length !== notes.length) {
+    PEEK.rects = [];
+    for (var r = 0; r < notes.length; r++) {
+      var b = notes[r].getBoundingClientRect();
+      PEEK.rects.push({cx: b.left + b.width / 2, cy: b.top + b.height / 2, h: b.height});
+    }
+    PEEK.dirty = false;
+  }
+
+  /* The note under the pointer, topmost first — the DOM order is the
+     stacking order, so the last match wins. */
+  var hit = -1, i;
+  for (i = 0; i < notes.length; i++) {
+    var q = notes[i].getBoundingClientRect();
+    if (px >= q.left && px <= q.right && py >= q.top && py <= q.bottom) hit = i;
+  }
+
+  for (i = 0; i < notes.length; i++) {
+    var m = PEEK.rects[i], push = 0;
+    if (hit >= 0 && i !== hit) {
+      /* Only the band the pointer is in gets parted. Without the vertical
+         test the row above shuffles too, which reads as the whole board
+         flinching rather than one pile opening. */
+      var dy = Math.abs(m.cy - py);
+      if (dy < m.h * 0.75) {
+        var dx = m.cx - px;
+        var d = Math.abs(dx), R = PEEK.step * PUSH_REACH;
+        if (d < R) push = (dx < 0 ? -1 : 1) * (1 - d / R) * PUSH_MAX;
+      }
+    }
+    notes[i].style.setProperty('--fb-push', push.toFixed(1) + 'px');
+    var on = i === hit;
+    notes[i].classList.toggle('is-peeked', on);
+    if (on) notes[i].style.zIndex = String(900);
+    else notes[i].style.zIndex = String(10 + i);
+  }
+  PEEK.el = hit >= 0 ? notes[hit] : null;
+}
+
+function peekOff(host) {
+  var notes = host.querySelectorAll('.fb-note');
+  for (var i = 0; i < notes.length; i++) {
+    notes[i].style.setProperty('--fb-push', '0px');
+    notes[i].classList.remove('is-peeked');
+    notes[i].style.zIndex = String(10 + i);
+  }
+  PEEK.el = null;
+}
+
+/* ═══ 6. Writing one, and reading one ══════════════════════════════════
+
+   Both are the same piece of paper. A note is written on a sticky and
+   read on a sticky, and the sticky swings out of whatever you pressed to
+   get it — the Add button for a new one, the note's own tile for an
+   existing one. There is no modal on this page: a white dialog over a
+   wall of coloured paper was the one place the board stopped looking
+   like what it is. */
+var COMPOSE = null;
+
+/* Clicking away closes the note, but only while it is still empty:
+   somebody who has typed two sentences and clicked the canvas has not
+   asked to throw them away. A note being read closes on any click out.
+
+   Bound one tick after opening and unbound on close, rather than left on
+   the document permanently. The click that opens the note is still
+   propagating when the panel is built, so a permanent listener catches
+   that very click and closes what it just opened. */
+function awayFromCompose(e) {
+  if (!COMPOSE) return;
+  if (e.target.closest('.fb-compose')) return;
+  if (COMPOSE.mode !== 'read') {
+    var ta = COMPOSE.panel.querySelector('textarea');
+    if (ta && ta.value.trim().length >= 3) return;
+    if (COMPOSE.shot) return;
+  }
+  closeCompose();
+}
+
+function anchorSwing(panel, anchor) {
+  /* The start pose: the panel scaled and translated onto the anchor's own
+     rect, so frame zero of the animation is the thing that was pressed.
+     Mirrored when the anchor sits right of centre, so the card turns
+     toward the reader rather than away. */
+  var a = anchor.getBoundingClientRect(), p = panel.getBoundingClientRect();
+  panel.style.setProperty('--nsw-dx', (a.left - p.left) + 'px');
+  panel.style.setProperty('--nsw-dy', (a.top - p.top) + 'px');
+  panel.style.setProperty('--nsw-sx', (a.width / Math.max(1, p.width)).toFixed(3));
+  panel.style.setProperty('--nsw-sy', (a.height / Math.max(1, p.height)).toFixed(3));
+  panel.style.setProperty('--nsw-dir',
+    a.left + a.width / 2 > window.innerWidth / 2 ? '-1' : '1');
+}
+
+function placePanel(panel, anchor) {
+  /* Measured after the panel is in the DOM: its height depends on how
+     much of it the viewport can give it.
+
+     A note opens over its own tile, sharing the tile's top-left corner,
+     so the paper grows out of where it already was. The compose panel
+     hangs under its button and ranges right with it. Both are clamped
+     into the viewport, which is what actually decides the position on a
+     small screen. */
+  var a = anchor.getBoundingClientRect();
+  var w = panel.offsetWidth, h = panel.offsetHeight;
+  var overTile = anchor.classList && anchor.classList.contains('fb-note');
+  var left = overTile ? a.left : a.right - w;
+  var top = overTile ? a.top : a.bottom + 10;
+  left = Math.min(Math.max(8, left), Math.max(8, window.innerWidth - w - 8));
+  if (top + h > window.innerHeight - 8) top = window.innerHeight - h - 8;
+  panel.style.left = Math.round(left) + 'px';
+  panel.style.top = Math.round(Math.max(8, top)) + 'px';
+}
+
+function closeCompose(instant) {
+  if (!COMPOSE) return;
+  document.removeEventListener('click', awayFromCompose);
+  var panel = COMPOSE.panel;
+  if (COMPOSE.tile) COMPOSE.tile.classList.remove('is-open-elsewhere');
+  COMPOSE = null;
   STATE.open = null;
+  var done = function () { if (panel.parentNode) panel.parentNode.removeChild(panel); };
+  if (instant || REDUCED) { done(); return; }
+  panel.classList.remove('is-opening');
+  panel.classList.add('is-closing');
+  panel.addEventListener('animationend', done, {once: true});
+  setTimeout(done, 600);                    // in case the animation never fires
+}
+
+/* The month, for the note's kicker. The dashboard writes "Note · August"
+   and this says the same thing about the same kind of object. */
+var MONTHS_LONG = ['January','February','March','April','May','June','July',
+                   'August','September','October','November','December'];
+function monthWord(ts) {
+  var d = ts ? new Date(ts) : new Date();
+  return MONTHS_LONG[d.getMonth()] || '';
+}
+
+/* One panel, two modes. Write and read are the same piece of paper with
+   different things on it, which is the whole reason a note opens as a
+   note: the thing you clicked and the thing that opened are visibly the
+   same object, and a white modal would break that. */
+function panelHTML(mode, f) {
+  var who = me(), top, body, act;
+
+  if (mode === 'read') {
+    var voters = f.v || [], backed = iBacked(f), mine = f.a === who;
+    var names = voters.slice(0, 4).map(esc).join(', ') +
+      (voters.length > 4 ? ' and ' + (voters.length - 4) + ' more' : '');
+    top = '<span class="np-eyebrow">Note by</span>' +
+      '<i class="ava" aria-hidden="true">' + esc(initials(f.a)) + '</i>' +
+      '<b>' + esc(f.a) + '</b>' +
+      '';
+    body = '<span class="np-kick">Note &middot; ' + esc(monthWord(f.ts)) + '</span>' +
+      '<p class="np-text">' + esc(f.t) + '</p>' +
+      (f.img ? '<img class="np-shot" src="' + esc(f.img) + '" data-full="' + esc(f.i) +
+               '" alt="Screenshot attached to this note" />' : '') +
+      '<div class="np-by">' + esc(when(f.ts)) + ' &middot; ' +
+        (voters.length ? 'backed by <b>' + names + '</b>' : 'nobody has backed it yet') +
+      '</div>' +
+      '<div class="np-status">' +
+        ['new', 'planned', 'shipped'].map(function (st) {
+          return '<button class="np-st' + ((f.st || 'new') === st ? ' is-on' : '') +
+            '" type="button" data-status="' + st + '">' +
+            (st === 'new' ? 'Open' : st === 'planned' ? 'Planned' : 'Shipped') + '</button>';
+        }).join('') +
+      '</div>' +
+      (f.stb ? '<div class="np-by">' + esc(f.stb) + ' moved this on ' + esc(when(f.sts)) + '</div>' : '');
+    act = (mine ? '<button class="np-del" type="button" data-del="' + esc(f.i) + '" ' +
+                  'aria-label="Withdraw this request" title="Withdraw this request">' +
+                  '<i class="ph ph-trash"></i></button>' : '') +
+      '<button class="np-chip cancel" type="button" data-vote="' + esc(f.i) + '">' +
+        (backed ? 'Remove my vote' : 'Vote this') + '</button>' +
+      '<button class="np-chip go" type="button" data-cancel>Done</button>';
+    return '<div class="np-top">' + top + '</div>' +
+           '<div class="np-body">' + body + '</div>' +
+           '<div class="np-act">' + act + '</div>';
+  }
+
+  top = '<span class="np-eyebrow">Signing in as</span>' +
+    '<i class="ava" aria-hidden="true">' + esc(initials(who)) + '</i>' +
+    '<b>' + esc(who) + '</b>' +
+    '';
+  body = '<span class="np-kick">Note &middot; ' + esc(monthWord()) + '</span>' +
+    '<textarea id="fbText" maxlength="' + MAX_LEN + '" ' +
+      'aria-label="What got in your way" ' +
+      'placeholder="What got in your way, and what would you rather happen?"></textarea>' +
+    /* The DS FileUploader. The zone stays visible once a file is
+       attached, per the component's own Do. */
+    '<div class="c-uploader">' +
+      '<button class="c-uploader-zone" type="button" data-pick>' +
+        '<i class="ph ph-upload-simple"></i>' +
+        '<span class="c-uploader-label">Attach a screenshot</span>' +
+      '</button>' +
+      '<input type="file" accept="image/*" hidden data-file />' +
+      '<div class="c-uploader-files" data-files></div>' +
+    '</div>' +
+    '<div id="fbDupes"></div>';
+  act = '<span class="np-count" id="fbCount">0 / ' + MAX_LEN + '</span>' +
+    '<button class="np-chip cancel" type="button" data-cancel>Cancel</button>' +
+    '<button class="np-chip go" type="button" id="fbPost" disabled>Post</button>';
+  return '<div class="np-top">' + top + '</div>' +
+         '<div class="np-body">' + body + '</div>' +
+         '<div class="np-act">' + act + '</div>';
+}
+
+/* Opens a panel, swinging it out of whatever was clicked. `anchor` is the
+   button for a new note and the note's own tile for an existing one, so
+   the paper always comes out of the thing you pressed. */
+function openPanel(mode, f, anchor) {
+  if (COMPOSE) closeCompose(true);
+  STATE.open = mode === 'read' ? f.i : 'compose';
+
+  var el = mode === 'read' ? elOf(f) : 'el-' + (nextQ() % ELN);
+  var panel = document.createElement('div');
+  panel.className = 'fb-compose ' + el + (mode === 'read' ? ' is-read' : '');
+  panel.setAttribute('role', 'dialog');
+  panel.setAttribute('aria-modal', 'false');
+  panel.setAttribute('aria-label', mode === 'read' ? 'Feedback from ' + f.a : 'Add feedback');
+  panel.innerHTML = panelHTML(mode, f);
+
+  document.body.appendChild(panel);
+  placePanel(panel, anchor);
+  anchorSwing(panel, anchor);
+  if (!REDUCED) panel.classList.add('is-opening');
+
+  COMPOSE = {panel: panel, anchor: anchor, mode: mode, note: f || null,
+             shot: null, thumb: null, name: '', size: 0};
+  setTimeout(function () { document.addEventListener('click', awayFromCompose); }, 0);
+  return panel;
 }
 
 function compose() {
-  STATE.open = 'compose';
-  openModal(
-    '<div class="fb-modal-head"><h3 id="fbModalTitle">Add feedback</h3>' +
-      '<button class="c-icon-btn" type="button" data-close aria-label="Close">' +
-      '<i class="ph ph-x"></i></button></div>' +
-    '<div class="fb-modal-body">' +
-      '<label for="fbText" class="c-helper" style="display:block;margin-bottom:6px">' +
-        'What got in your way? One or two sentences beats a list.</label>' +
-      '<textarea class="fb-ta" id="fbText" maxlength="' + MAX_LEN + '" ' +
-        'placeholder="The leaderboard takes a few seconds to redraw every time I change a filter."></textarea>' +
-      '<div id="fbDupes"></div>' +
-    '</div>' +
-    '<div class="fb-modal-foot">' +
-      '<span class="fb-count" id="fbCount">0 / ' + MAX_LEN + '</span>' +
-      '<span class="right">' +
-        '<button class="c-btn c-btn-ghost c-btn-md" type="button" data-close>Cancel</button>' +
-        '<button class="c-btn c-btn-primary c-btn-md" type="button" id="fbPost" disabled>Post</button>' +
-      '</span>' +
-    '</div>',
-    function (modal) {
-      var ta = modal.querySelector('#fbText'),
-          count = modal.querySelector('#fbCount'),
-          post = modal.querySelector('#fbPost'),
-          dupes = modal.querySelector('#fbDupes'), timer;
-      ta.addEventListener('input', function () {
-        var v = ta.value.trim();
-        count.textContent = ta.value.length + ' / ' + MAX_LEN;
-        count.classList.toggle('is-near', ta.value.length > MAX_LEN - 40);
-        post.disabled = v.length < 3;
-        clearTimeout(timer);
-        timer = setTimeout(function () { showDupes(dupes, v); }, 250);
-      });
-      post.addEventListener('click', function () {
-        var v = ta.value.trim();
-        if (v.length < 3) return;
-        post.disabled = true;
-        closeModal();
-        postThen(v);
-      });
-    });
+  if (COMPOSE && COMPOSE.mode !== 'read') { closeCompose(true); return; }
+  var anchor = document.getElementById('fbAdd');
+  var panel = openPanel('write', null, anchor);
+
+  var ta = panel.querySelector('#fbText'),
+      count = panel.querySelector('#fbCount'),
+      postBtn = panel.querySelector('#fbPost'),
+      dupes = panel.querySelector('#fbDupes'),
+      timer;
+
+  ta.addEventListener('input', function () {
+    var v = ta.value.trim();
+    count.textContent = ta.value.length + ' / ' + MAX_LEN;
+    count.classList.toggle('is-near', ta.value.length > MAX_LEN - 40);
+    postBtn.disabled = v.length < 3;
+    clearTimeout(timer);
+    timer = setTimeout(function () {
+      showDupes(dupes, v);
+      placePanel(panel, anchor);            // the nudge changes the height
+    }, 250);
+  });
+
+  wireAttach(panel);
+
+  panel.addEventListener('click', function (e) {
+    if (e.target.closest('[data-cancel]')) { closeCompose(); anchor.focus(); return; }
+    var back = e.target.closest('[data-back]');
+    if (back) {
+      toggleVote(back.dataset.back);
+      closeCompose();
+      toast('success', 'Backed', 'Added your vote instead of a second copy.');
+      return;
+    }
+    if (e.target.closest('#fbPost')) {
+      var v = ta.value.trim();
+      if (v.length < 3) return;
+      postBtn.disabled = true;
+      shrinkOntoCanvas(v);
+    }
+  });
+
+  ta.focus();
 }
 
-/* Posting is the moment to say what happened to it. The toast names the
-   next step rather than congratulating anyone. */
-function postThen(text) {
-  post(text, function () {
-    toast('success', 'Posted', STATE.remote
-      ? 'The group can see it now. Back it yourself if you want it counted.'
-      : 'Saved on this device. Nobody else can see it yet.');
+/* Opening one. The tile it came from is hidden while the panel is out,
+   so there is one of each note on screen rather than the note and a copy
+   of it sitting on top. */
+function detail(id, tile) {
+  var f = find(id); if (!f) return;
+  var anchor = tile || document.querySelector('.fb-note[data-open="' + id + '"]');
+  if (!anchor) return;
+  var panel = openPanel('read', f, anchor);
+  anchor.classList.add('is-open-elsewhere');
+  COMPOSE.tile = anchor;
+
+  var shot = panel.querySelector('[data-full]');
+  if (shot && STATE.remote) {
+    api('GET', null, '?img=' + encodeURIComponent(f.i)).then(function (x) {
+      /* Guarded on the image still being on screen: the fetch can land
+         after somebody has closed this note and opened another. */
+      if (x && x.body && x.body.img && shot.isConnected) shot.src = x.body.img;
+    }, function () {});
+  }
+
+  panel.addEventListener('click', function (e) {
+    if (e.target.closest('[data-cancel]')) { closeCompose(); return; }
+    var v = e.target.closest('[data-vote]');
+    if (v) { toggleVote(v.dataset.vote); refreshPanel(); return; }
+    var st = e.target.closest('[data-status]');
+    if (st) { setStatus(f.i, st.dataset.status); refreshPanel(); return; }
+    var del = e.target.closest('[data-del]');
+    if (del) {
+      if (window.confirm('Withdraw this? People who backed it get their votes back.')) {
+        closeCompose(true);
+        remove(f.i);
+      }
+    }
   });
+}
+
+/* Redraw an open read panel in place after a vote or a status change,
+   rather than closing and reopening it: reopening would swing the paper
+   out of a tile that has just moved under the new layout. */
+function refreshPanel() {
+  if (!COMPOSE || COMPOSE.mode !== 'read') return;
+  var f = find(COMPOSE.note.i);
+  if (!f) { closeCompose(true); return; }
+  COMPOSE.note = f;
+  COMPOSE.panel.innerHTML = panelHTML('read', f);
+  var tile = document.querySelector('.fb-note[data-open="' + f.i + '"]');
+  if (tile) { tile.classList.add('is-open-elsewhere'); COMPOSE.tile = tile; }
+  placePanel(COMPOSE.panel, COMPOSE.tile || COMPOSE.anchor);
+}
+
+/* ── The attachment. Downscaled in the browser before it goes anywhere:
+     a phone screenshot is 3-4MB and the sentence it illustrates is 120
+     bytes, and the board is re-read on a timer. Two sizes come out of one
+     decode — the thumbnail the canvas draws, and the full-size grab the
+     detail view fetches on demand. */
+var SHOT_MAX = 1200, THUMB_MAX = 360;
+
+function drawTo(img, max, quality) {
+  var scale = Math.min(1, max / Math.max(img.naturalWidth, img.naturalHeight));
+  var c = document.createElement('canvas');
+  c.width = Math.max(1, Math.round(img.naturalWidth * scale));
+  c.height = Math.max(1, Math.round(img.naturalHeight * scale));
+  c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+  return c.toDataURL('image/jpeg', quality);
+}
+
+function wireAttach(panel) {
+  var zone = panel.querySelector('[data-pick]'),
+      input = panel.querySelector('[data-file]'),
+      files = panel.querySelector('[data-files]');
+
+  function show() {
+    if (!COMPOSE || !COMPOSE.thumb) { files.innerHTML = ''; return; }
+    var kb = Math.round(COMPOSE.size / 1024);
+    files.innerHTML = '<div class="c-uploader-row">' +
+      '<img class="c-uploader-thumb" src="' + esc(COMPOSE.thumb) + '" alt="" />' +
+      '<span class="c-uploader-kind">IMG</span>' +
+      '<span class="c-uploader-name">' + esc(COMPOSE.name) + '</span>' +
+      '<span class="c-uploader-size">' + (kb > 999 ? (kb / 1024).toFixed(1) + ' MB' : kb + ' KB') + '</span>' +
+      '<button class="c-uploader-remove" type="button" data-drop aria-label="Remove ' +
+        esc(COMPOSE.name) + '"><i class="ph ph-x"></i></button>' +
+    '</div>';
+    placePanel(panel, COMPOSE.anchor);
+  }
+
+  function take(file) {
+    if (!file || !/^image\//.test(file.type)) {
+      toast('warn', 'Not an image', 'Attach a screenshot or a photo.');
+      return;
+    }
+    var fr = new FileReader();
+    fr.onload = function () {
+      var img = new Image();
+      img.onload = function () {
+        if (!COMPOSE) return;
+        COMPOSE.shot = drawTo(img, SHOT_MAX, 0.72);
+        COMPOSE.thumb = drawTo(img, THUMB_MAX, 0.6);
+        COMPOSE.name = file.name || 'screenshot.png';
+        /* The size shown is what will actually be stored, not what was
+           picked: saying 3.8 MB next to a 180 KB upload is a lie about
+           what the board is carrying. */
+        COMPOSE.size = Math.round(COMPOSE.shot.length * 0.75);
+        show();
+      };
+      img.onerror = function () { toast('warn', 'Could not read that', 'The file did not decode as an image.'); };
+      img.src = fr.result;
+    };
+    fr.onerror = function () { toast('warn', 'Could not read that', 'The file did not open.'); };
+    fr.readAsDataURL(file);
+  }
+
+  zone.addEventListener('click', function () { input.click(); });
+  input.addEventListener('change', function () { take(input.files && input.files[0]); input.value = ''; });
+
+  ['dragenter', 'dragover'].forEach(function (t) {
+    zone.addEventListener(t, function (e) { e.preventDefault(); zone.classList.add('dragover'); });
+  });
+  ['dragleave', 'drop'].forEach(function (t) {
+    zone.addEventListener(t, function (e) { e.preventDefault(); zone.classList.remove('dragover'); });
+  });
+  zone.addEventListener('drop', function (e) {
+    var dt = e.dataTransfer;
+    if (dt && dt.files && dt.files[0]) take(dt.files[0]);
+  });
+  /* Paste is how a screenshot actually arrives: most people grab a region
+     and hit cmd-V rather than saving a file first. */
+  panel.addEventListener('paste', function (e) {
+    var items = (e.clipboardData && e.clipboardData.items) || [];
+    for (var i = 0; i < items.length; i++) {
+      if (items[i].type && items[i].type.indexOf('image/') === 0) {
+        e.preventDefault();
+        take(items[i].getAsFile());
+        return;
+      }
+    }
+  });
+  files.addEventListener('click', function (e) {
+    if (!e.target.closest('[data-drop]')) return;
+    if (COMPOSE) { COMPOSE.shot = COMPOSE.thumb = null; COMPOSE.name = ''; COMPOSE.size = 0; }
+    show();
+  });
+}
+
+/* ── Post: the note shrinks onto the canvas rather than the box closing
+     and a note appearing somewhere. The order matters — the note has to
+     exist and be placed before there is a rect to fly to, so the post
+     lands first, the new note is hidden, the panel is animated onto its
+     rect, and only then is the note revealed. */
+function shrinkOntoCanvas(text) {
+  var panel = COMPOSE.panel, shot = COMPOSE.thumb, full = COMPOSE.shot;
+  var from = panel.getBoundingClientRect();
+
+  post(text, function (id) {
+    var note = document.querySelector('.fb-note[data-open="' + id + '"]');
+    if (!note || REDUCED) {
+      closeCompose(true);
+      said();
+      return;
+    }
+    note.classList.add('is-landing');
+    /* The open swing may still be running if somebody typed fast. Two
+       animations on one transform is a fight the fold does not need to
+       have, so the swing is stood down first — and its class removed, or
+       its `both` fill would put the panel back where it started the
+       moment the fold's own fill hands the property back. */
+    panel.classList.remove('is-opening', 'is-closing');
+    panel.getAnimations().forEach(function (a) { a.cancel(); });
+    var to = note.getBoundingClientRect();
+
+    /* The panel is detached from COMPOSE first: it is no longer the
+       compose box, it is a note in flight, and a stray Escape should not
+       try to swing it closed halfway there. */
+    document.removeEventListener('click', awayFromCompose);
+    COMPOSE = null;
+    STATE.open = null;
+
+    var sx = to.width / Math.max(1, from.width);
+    var sy = to.height / Math.max(1, from.height);
+    var dx = to.left - from.left, dy = to.top - from.top;
+    var rot = note.style.getPropertyValue('--fb-rot') || '0deg';
+
+    /* A fold, then the flight. The middle keyframe is the point: the
+       panel closes on itself about its own top edge — squashed in Y,
+       barely moved in X, tipped away on rotateX — before it travels, so
+       what you see is a sheet being folded down and put on the wall
+       rather than a rectangle being tweened into a smaller rectangle.
+
+       perspective on the transform rather than the parent, because the
+       panel is a direct child of <body> and there is nothing above it to
+       carry a perspective for it. */
+    var anim = panel.animate([
+      {transform: 'perspective(900px) translate(0,0) scale(1,1) rotateX(0deg)',
+       borderRadius: '20px', offset: 0},
+      {transform: 'perspective(900px) translate(' + (dx * 0.18).toFixed(1) + 'px,' +
+                  (dy * 0.14).toFixed(1) + 'px) scale(' +
+                  (0.5 + sx * 0.5).toFixed(3) + ',' + (sy * 0.62).toFixed(3) + ') ' +
+                  'rotateX(46deg)',
+       borderRadius: '16px', offset: 0.42},
+      {transform: 'perspective(900px) translate(' + dx.toFixed(1) + 'px,' + dy.toFixed(1) + 'px) ' +
+                  'scale(' + sx.toFixed(3) + ',' + sy.toFixed(3) + ') rotateX(0deg) rotate(' + rot + ')',
+       borderRadius: '12px', offset: 1}
+    ], {duration: 560, easing: 'cubic-bezier(.32,.72,.3,1)', fill: 'forwards'});
+
+    var land = function () {
+      note.classList.remove('is-landing');
+      if (panel.parentNode) panel.parentNode.removeChild(panel);
+      said();
+    };
+    anim.onfinish = land;
+    setTimeout(function () { if (panel.parentNode) land(); }, 900);
+  }, shot, full);
+}
+
+function said() {
+  toast('success', 'Posted', STATE.remote
+    ? 'The group can see it now. Back it yourself if you want it counted.'
+    : 'Saved on this device. Nobody else can see it yet.');
 }
 
 /* Deliberately wider than the board's own grouping. A weak match shown
@@ -1113,61 +2145,12 @@ function showDupes(host, text) {
     hits.map(function (h) {
       var n = (h.f.v || []).length;
       return '<div class="fb-dupe"><span class="txt">' + esc(h.f.t) + '</span>' +
-        '<button class="c-btn c-btn-secondary c-btn-sm" type="button" ' +
-        'data-back="' + esc(h.f.i) + '">Back this' + (n ? ' (' + n + ')' : '') + '</button></div>';
+        '<button class="back" type="button" ' +
+        'data-back="' + esc(h.f.i) + '">Vote this' + (n ? ' (' + n + ')' : '') + '</button></div>';
     }).join('') + '</div>';
 }
 
-/* ═══ 7. Detail ════════════════════════════════════════════════════════ */
-
-function detail(id) {
-  var f = find(id); if (!f) return;
-  STATE.open = id;
-  var mine = f.a === me(), voters = f.v || [], backed = iBacked(f);
-  var names = voters.slice(0, 4).map(esc).join(', ') +
-    (voters.length > 4 ? ' and ' + (voters.length - 4) + ' more' : '');
-
-  openModal(
-    '<div class="fb-modal-head"><h3 id="fbModalTitle">Feedback</h3>' +
-      '<button class="c-icon-btn" type="button" data-close aria-label="Close">' +
-      '<i class="ph ph-x"></i></button></div>' +
-    '<div class="fb-modal-body">' +
-      '<p class="fb-detail-body">' + esc(f.t) + '</p>' +
-      '<div class="fb-detail-meta">' +
-        '<div class="fb-row"><span class="k">From</span><span class="v">' +
-          esc(f.a) + ' on ' + when(f.ts) + '</span></div>' +
-        '<div class="fb-row"><span class="k">Backed by</span><span class="v">' +
-          (voters.length ? names : 'Nobody yet') + '</span></div>' +
-        '<div class="fb-row"><span class="k">Status</span>' +
-          ['new', 'planned', 'shipped'].map(function (s) {
-            return '<button class="c-chip c-chip-filter' + ((f.st || 'new') === s ? ' is-active' : '') +
-              '" type="button" data-status="' + s + '">' +
-              (s === 'new' ? 'Open' : s === 'planned' ? 'Planned' : 'Shipped') + '</button>';
-          }).join('') +
-        '</div>' +
-        (f.stb ? '<div class="fb-row"><span class="k"></span><span class="v c-helper">' +
-          esc(f.stb) + ' moved this on ' + when(f.sts) + '</span></div>' : '') +
-      '</div>' +
-    '</div>' +
-    '<div class="fb-modal-foot">' +
-      (mine ? '<button class="c-icon-btn" type="button" id="fbDel" ' +
-              'aria-label="Withdraw this request" title="Withdraw this request">' +
-              '<i class="ph ph-trash"></i></button>' : '<span></span>') +
-      '<span class="right">' +
-        '<button class="c-btn c-btn-secondary c-btn-md" type="button" data-vote="' + esc(f.i) + '">' +
-          (backed ? 'Take my vote back' : 'Back this') + '</button>' +
-        '<button class="c-btn c-btn-primary c-btn-md" type="button" data-close>Done</button>' +
-      '</span>' +
-    '</div>',
-    function (modal) {
-      var del = modal.querySelector('#fbDel');
-      if (del) del.addEventListener('click', function () {
-        if (window.confirm('Withdraw this? People who backed it get their votes back.')) remove(f.i);
-      });
-    });
-}
-
-/* ═══ 8. Toasts ════════════════════════════════════════════════════════ */
+/* ═══ 7. Toasts ════════════════════════════════════════════════════════ */
 
 function toast(tone, title, message) {
   var host = document.getElementById('fbToasts');
@@ -1193,7 +2176,7 @@ function drop(el) {
   setTimeout(function () { if (el.parentNode) el.parentNode.removeChild(el); }, REDUCED ? 0 : 240);
 }
 
-/* ═══ 9. Wiring ════════════════════════════════════════════════════════ */
+/* ═══ 8. Wiring ════════════════════════════════════════════════════════ */
 
 document.getElementById('fbAdd').addEventListener('click', compose);
 
@@ -1209,9 +2192,56 @@ document.getElementById('fbFilters').addEventListener('click', function (e) {
     for (var j = 0; j < owns.length; j++) {
       owns[j].classList.toggle('is-active', owns[j].dataset.own === STATE.own);
     }
-  }
+  } else if (b.id === 'fbCluster') {
+    STATE.clustered = !STATE.clustered;
+    b.classList.toggle('is-active', STATE.clustered);
+    b.setAttribute('aria-pressed', STATE.clustered ? 'true' : 'false');
+  } else return;
   render();
 });
+
+/* The note is fixed to the viewport and placed against a button that
+   scrolls, so it has to follow rather than sit where the button used to
+   be. Same treatment the account menu takes. */
+window.addEventListener('resize', function () {
+  if (COMPOSE) placePanel(COMPOSE.panel, COMPOSE.anchor);
+});
+
+/* Parting the pile. Delegated on the canvas rather than per note, since
+   every note is rewritten on render. pointermove is throttled to a frame:
+   the pass reads a rect per note and writing a variable per note on every
+   raw move event is the one thing here that could drop frames. */
+(function () {
+  var host = document.getElementById('fbBoard');
+  var COARSE = window.matchMedia('(pointer:coarse)');
+  var queued = false, lx = 0, ly = 0;
+
+  host.addEventListener('pointermove', function (e) {
+    if (COARSE.matches || REDUCED) return;
+    lx = e.clientX; ly = e.clientY;
+    if (queued) return;
+    queued = true;
+    requestAnimationFrame(function () { queued = false; peekAt(host, lx, ly); });
+  });
+  host.addEventListener('pointerleave', function () {
+    if (COARSE.matches || REDUCED) return;
+    peekOff(host);
+  });
+  /* Scrolling moves the notes under a stationary pointer, so the cached
+     rects stop describing where anything is. */
+  window.addEventListener('scroll', function () { PEEK.dirty = true; }, true);
+})();
+
+/* The canvas is measured, so a width change has to re-run the pass. A
+   redraw is cheap here and re-running layout() alone would not pick up a
+   note whose text rewrapped to a new height. */
+(function () {
+  var t = null;
+  window.addEventListener('resize', function () {
+    clearTimeout(t);
+    t = setTimeout(function () { PEEK.dirty = true; render(); }, 120);
+  });
+})();
 
 document.getElementById('fbSort').addEventListener('click', function (e) {
   var b = e.target.closest('button'); if (!b) return;
@@ -1229,7 +2259,7 @@ document.getElementById('fbBoard').addEventListener('click', function (e) {
   var v = e.target.closest('[data-vote]');
   if (v) { e.stopPropagation(); toggleVote(v.dataset.vote); return; }
   var o = e.target.closest('[data-open]');
-  if (o) { detail(o.dataset.open); return; }
+  if (o) { detail(o.dataset.open, o); return; }
   if (e.target.closest('#fbFirst')) { compose(); return; }
   if (e.target.closest('#fbSeed')) { seed(); return; }
   if (e.target.closest('#fbClearFilters')) {
@@ -1244,55 +2274,250 @@ document.getElementById('fbBoard').addEventListener('click', function (e) {
 document.getElementById('fbBoard').addEventListener('keydown', function (e) {
   if (e.key !== 'Enter' && e.key !== ' ') return;
   var o = e.target.closest('[data-open]');
-  if (o) { e.preventDefault(); detail(o.dataset.open); }
-});
-
-document.getElementById('fbScrim').addEventListener('click', function (e) {
-  if (e.target === this) { closeModal(); return; }
-  if (e.target.closest('[data-close]')) { closeModal(); return; }
-  var back = e.target.closest('[data-back]');
-  if (back) { toggleVote(back.dataset.back); closeModal();
-    toast('success', 'Backed', 'Added your vote instead of a second copy.'); return; }
-  var vote = e.target.closest('[data-vote]');
-  if (vote) { toggleVote(vote.dataset.vote); detail(vote.dataset.vote); return; }
-  var st = e.target.closest('[data-status]');
-  if (st && STATE.open && STATE.open !== 'compose') {
-    setStatus(STATE.open, st.dataset.status);
-    detail(STATE.open);
-  }
+  if (o) { e.preventDefault(); detail(o.dataset.open, o); }
 });
 
 document.addEventListener('keydown', function (e) {
-  if (e.key === 'Escape' && !document.getElementById('fbScrim').hidden) { closeModal(); return; }
+  if (e.key === 'Escape' && COMPOSE) {
+    var a = COMPOSE.anchor;
+    closeCompose();
+    if (a && a.isConnected) a.focus();
+    return;
+  }
   if (e.key !== 'n' && e.key !== 'N') return;
   var t = e.target, tag = (t.tagName || '').toLowerCase();
   if (tag === 'input' || tag === 'textarea' || t.isContentEditable) return;
-  if (!document.getElementById('fbScrim').hidden) return;
+  /* An open popover owns the keyboard. Without this, n put a note up
+     behind the account menu, which stayed open on top of it. */
+  var am = document.getElementById('accountMenu');
+  if (am && am.classList.contains('is-open')) return;
+  var dd = document.getElementById('deptDropdown');
+  if (dd && !dd.hidden) return;
+  if (COMPOSE) return;
   e.preventDefault(); compose();
 });
 
 /* On a phone the rail starts as the corner box; on a laptop it starts open.
    Read once at load rather than on resize: a rail that collapses itself
    while someone is dragging a window is fighting them. */
-var NARROW = window.matchMedia('(max-width:760px)');
+var NARROW = window.matchMedia('(max-width:640px)');   // the dashboard's own, see the matching @media
 function setCollapsed(on) {
   document.getElementById('shellSidebarNav').classList.toggle('is-collapsed', on);
   var t = document.getElementById('sidebarToggle');
   t.setAttribute('aria-label', on ? 'Expand sidebar' : 'Collapse sidebar');
+  /* The same two paths the dashboard swaps between. This page drew its own
+     collapsed arrow, which pointed the right way but sat a half-pixel off
+     the dashboard's, so the button twitched when you moved between them. */
   document.getElementById('sidebarArrow').setAttribute('d',
-    on ? 'M11 7l2.5 3-2.5 3' : 'M13.5 7 11 10l2.5 3');
+    on ? 'M11.5 7 14 10l-2.5 3' : 'M13.5 7 11 10l2.5 3');
 }
 if (NARROW.matches) setCollapsed(true);
+/* The rail minimises itself once the page has settled, which is what the
+   dashboard does after its intro plays. There is no intro here to wait
+   for, so the delay is measured from load: long enough to read the two
+   labels and know where you are, short enough that the canvas is not
+   kept waiting behind a rail nobody is using. It stands down the moment
+   anyone touches the rail, because a nav that collapses under the hand
+   is fighting the person using it. */
+var AUTO_MIN_MS = 1600;
+(function () {
+  if (NARROW.matches || REDUCED) return;
+  var shell = document.getElementById('shellSidebarShell');
+  var timer = setTimeout(function () {
+    var nav = document.getElementById('shellSidebarNav');
+    if (nav && !nav.classList.contains('is-collapsed')) setCollapsed(true);
+  }, AUTO_MIN_MS);
+  var cancel = function () { clearTimeout(timer); };
+  shell.addEventListener('pointerenter', cancel, {once: true});
+  shell.addEventListener('focusin', cancel, {once: true});
+})();
 /* Expanded, the box overlays the board, so it needs a way out that is not
-   one small button. Only where it actually overlays. */
+   one small button. Only where it actually overlays. Both popovers are
+   siblings of the rail rather than children, so they have to be named here
+   or using one would close the rail underneath it. */
 document.addEventListener('click', function (e) {
-  if (!NARROW.matches || e.target.closest('#shellSidebarShell')) return;
+  if (!NARROW.matches || e.target.closest('#shellSidebarShell') ||
+      e.target.closest('#accountMenu') || e.target.closest('#deptDropdown')) return;
   setCollapsed(true);
 });
 
 document.getElementById('sidebarToggle').addEventListener('click', function () {
   setCollapsed(!document.getElementById('shellSidebarNav').classList.contains('is-collapsed'));
 });
+
+/* ── The account row's menu: Settings and Log out. Opens above the row,
+     which is pinned to the bottom and has nothing under it. The panel is
+     position:fixed and lives outside the rail, so it is placed against the
+     trigger's own rect rather than by CSS. Ported from the dashboard;
+     Settings is inert on both, Log out is the only way off either page. */
+(function () {
+  var trigger = document.getElementById('accountMenuTrigger');
+  var menu = document.getElementById('accountMenu');
+  if (!trigger || !menu) return;
+
+  function place() {
+    var r = trigger.getBoundingClientRect();
+    var w = menu.offsetWidth || 200;
+    menu.style.left = Math.max(8, Math.min(r.left + r.width / 2 - w / 2,
+                                           window.innerWidth - w - 8)) + 'px';
+    menu.style.bottom = (window.innerHeight - r.top + 8) + 'px';
+  }
+  function close() {
+    menu.classList.remove('is-open');
+    menu.setAttribute('aria-hidden', 'true');
+    trigger.setAttribute('aria-expanded', 'false');
+  }
+  function open() {
+    place();
+    menu.classList.add('is-open');
+    menu.setAttribute('aria-hidden', 'false');
+    trigger.setAttribute('aria-expanded', 'true');
+  }
+
+  trigger.addEventListener('click', function (e) {
+    e.stopPropagation();
+    if (menu.classList.contains('is-open')) close(); else open();
+  });
+  menu.addEventListener('click', function (e) {
+    if (e.target.closest('.c-account-menu-item')) close();
+  });
+  document.addEventListener('click', function (e) {
+    if (!menu.classList.contains('is-open')) return;
+    if (e.target.closest('#accountMenu') || e.target.closest('#accountMenuTrigger')) return;
+    close();
+  });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') close(); });
+  window.addEventListener('resize', function () {
+    if (menu.classList.contains('is-open')) place();
+  });
+})();
+
+/* ── The department switcher. The system supplies the markup contract
+     (data-dept / data-logo / data-element-icon on each .c-dept-option) and
+     every visual rule; this wires them up and does the one thing the system
+     cannot, which is position a fixed panel next to a trigger inside a
+     clipping rail. Ported from the dashboard, which means it carries the
+     dashboard's own limit: the choice lives in memory, so walking to the
+     dashboard and back returns to the default. */
+(function () {
+  var trigger = document.querySelector('.js-dept-trigger');
+  var panel = document.getElementById('deptDropdown');
+  if (!trigger || !panel) return;
+
+  var liveMark = trigger.querySelector('.js-dept-logo-live');
+  var staticMark = trigger.querySelector('.js-dept-logo-static');
+  var collapsedMark = document.querySelector('.js-dept-logo-collapsed');
+  var chevron = trigger.querySelector('.js-dept-chevron');
+
+  function place() {
+    var r = trigger.getBoundingClientRect();
+    var w = panel.offsetWidth || 240;
+    panel.style.left = Math.max(8, Math.min(r.left, window.innerWidth - w - 8)) + 'px';
+    panel.style.top = (r.bottom + 8) + 'px';
+  }
+  function close() {
+    panel.hidden = true;
+    trigger.setAttribute('aria-expanded', 'false');
+    if (chevron) chevron.classList.replace('ph-caret-up', 'ph-caret-down');
+  }
+  function open() {
+    panel.hidden = false;          // unhidden BEFORE measuring: offsetWidth is 0 while hidden
+    place();
+    trigger.setAttribute('aria-expanded', 'true');
+    if (chevron) chevron.classList.replace('ph-caret-down', 'ph-caret-up');
+  }
+
+  trigger.addEventListener('click', function (e) {
+    e.stopPropagation();
+    if (panel.hidden) open(); else close();
+  });
+
+  panel.addEventListener('click', function (e) {
+    var opt = e.target.closest('.c-dept-option');
+    if (!opt) return;
+    var all = panel.querySelectorAll('.c-dept-option');
+    for (var i = 0; i < all.length; i++) {
+      var on = all[i] === opt;
+      all[i].classList.toggle('is-active', on);
+      all[i].setAttribute('aria-selected', String(on));
+    }
+    /* The default department has no data-logo, which is what selects the
+       animated mark over a static lockup. Absence is the signal, so there is
+       no separate "is this the default" flag to keep in step. */
+    var logo = opt.dataset.logo;
+    if (logo) {
+      staticMark.src = logo;
+      staticMark.alt = opt.dataset.name || '';
+      staticMark.style.display = '';
+      liveMark.style.display = 'none';
+    } else {
+      staticMark.style.display = 'none';
+      staticMark.removeAttribute('src');
+      liveMark.style.display = '';
+    }
+    if (collapsedMark && opt.dataset.elementIcon) collapsedMark.src = opt.dataset.elementIcon;
+    trigger.setAttribute('aria-label', 'Switch department, ' + (opt.dataset.name || ''));
+    close();
+  });
+
+  document.addEventListener('click', function (e) {
+    if (panel.hidden) return;
+    if (e.target.closest('#deptDropdown') || e.target.closest('.js-dept-trigger')) return;
+    close();
+  });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') close(); });
+  window.addEventListener('resize', function () { if (!panel.hidden) place(); });
+})();
+
+/* ── The collapsed rail's hover label. The .c-sidebar-hover-text spans were
+     already in the markup with nothing reading them, so a collapsed rail
+     was two unlabelled icons. mouseover/mouseout rather than enter/leave
+     because they bubble, which keeps this delegated; focusin/focusout give
+     the keyboard the same label. Ported from the dashboard, including its
+     one departure from the DS original: the label is anchored to the rail's
+     right edge, not the icon's, since the rail is wider than the icons and
+     anchoring to the icon put the first letter behind it. */
+(function () {
+  var label = document.getElementById('shellSidebarHoverLabel');
+  if (!label) return;
+
+  function show(item) {
+    var nav = item.closest('.c-sidebar');
+    var source = item.querySelector('.c-sidebar-hover-text');
+    if (!nav || !nav.classList.contains('is-collapsed') || !source) return;
+    var icon = item.querySelector('i');
+    if (!icon) return;
+    var ir = icon.getBoundingClientRect();
+    label.textContent = source.textContent;
+    label.style.left = (nav.getBoundingClientRect().right + 8) + 'px';
+    label.style.top = (ir.top + ir.height / 2) + 'px';
+    label.style.transform = 'translateY(-50%)';
+    label.classList.add('is-visible');
+  }
+  function hide() { label.classList.remove('is-visible'); }
+
+  document.addEventListener('mouseover', function (e) {
+    var item = e.target.closest('.c-sidebar-item');
+    if (item && !item.contains(e.relatedTarget)) show(item);
+  });
+  document.addEventListener('mouseout', function (e) {
+    var item = e.target.closest('.c-sidebar-item');
+    if (item && !item.contains(e.relatedTarget)) hide();
+  });
+  document.addEventListener('focusin', function (e) {
+    var item = e.target.closest('.c-sidebar-item');
+    if (item) show(item);
+  });
+  document.addEventListener('focusout', function (e) {
+    var item = e.target.closest('.c-sidebar-item');
+    if (item) hide();
+  });
+  /* Collapsing while the pointer sits on an item would otherwise leave the
+     label showing next to a rail that just changed width. */
+  document.addEventListener('click', function (e) {
+    if (e.target.closest('.c-sidebar-toggle') || e.target.closest('.c-sidebar-item')) hide();
+  });
+})();
 
 /* ── Six real-shaped examples, so the clustering can be judged before the
      group has posted anything. They go to the shared board under your own
@@ -1320,12 +2545,11 @@ function seed() {
 
 /* ── Keeping up. A shared board with stale counts is worse than one that
      is obviously stale: it looks settled while the argument moved on.
-     Paused while a modal is open, so the board never reshuffles under
+     Paused while a note is open, so the board never reshuffles under
      someone's hand, and while the tab is hidden, so a backgrounded tab
      is not polling all afternoon. */
 setInterval(function () {
-  if (document.hidden || !STATE.remote) return;
-  if (!document.getElementById('fbScrim').hidden) return;
+  if (document.hidden || !STATE.remote || COMPOSE) return;
   api('GET').then(function (x) { if (adopt(x)) render(); }, function () {});
 }, POLL_MS);
 

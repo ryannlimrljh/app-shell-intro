@@ -38,6 +38,13 @@ const CONN =
    rather than leaving the board permanently spent. */
 const BUDGET = 5;
 const MAX_LEN = 400;
+/* The page downscales to 1200px and re-encodes as JPEG before it sends,
+   so a normal screenshot lands well under this. The cap is here anyway:
+   the client can be edited, and one 8MB paste in a shared table is
+   everybody's problem. Measured as characters of base64, which is what
+   the column actually stores. */
+const MAX_IMG = 1400000;
+const MAX_THUMB = 90000;
 const STATUSES = ['new', 'planned', 'shipped'];
 
 const clean = (v, n) => String(v == null ? '' : v).trim().slice(0, n);
@@ -65,6 +72,19 @@ function client() {
           PRIMARY KEY (note_id, voter)
         )`)
       .then(() => sql`CREATE INDEX IF NOT EXISTS feedback_votes_voter_idx ON feedback_votes (voter)`)
+      /* Screenshots live in their own table, not a column on feedback.
+         The board is read whole on every poll, and a full-size grab is
+         two orders of magnitude larger than the sentence it illustrates:
+         inlined, one screenshot would cost more per poll than the entire
+         rest of the board. The thumbnail rides along with the note
+         because it has to be drawn on the canvas; `data` is fetched only
+         when someone opens the note. */
+      .then(() => sql`
+        CREATE TABLE IF NOT EXISTS feedback_images (
+          note_id TEXT PRIMARY KEY REFERENCES feedback(id) ON DELETE CASCADE,
+          thumb   TEXT NOT NULL,
+          data    TEXT NOT NULL
+        )`)
       .catch((e) => { bootstrapped = null; throw e; });   // let a cold start retry
   }
   return { sql, ready: bootstrapped };
@@ -75,22 +95,32 @@ function client() {
    clustering on the page needs every note at once anyway. */
 async function board(sql) {
   const rows = await sql`
-    SELECT f.id, f.body, f.author, f.status, f.created_at, f.status_by, f.status_at,
+    SELECT f.id, f.seq, f.body, f.author, f.status, f.created_at, f.status_by, f.status_at,
+           i.thumb AS thumb,
            COALESCE(
              (SELECT array_agg(v.voter ORDER BY v.created_at)
                 FROM feedback_votes v WHERE v.note_id = f.id),
              ARRAY[]::text[]
            ) AS voters
       FROM feedback f
+      LEFT JOIN feedback_images i ON i.note_id = f.id
      ORDER BY f.seq`;
   return rows.map((r) => ({
     i: r.id,
+    /* The page colours a note by its place in the posting sequence. seq is
+       the only number that can carry that: it is assigned once, never
+       reused, and survives a withdrawal, whereas a position in this array
+       would shift every note after a deleted one onto a new colour. */
+    q: Number(r.seq),
     t: r.body,
     a: r.author,
     ts: r.created_at,
     st: r.status,
     stb: r.status_by || undefined,
     sts: r.status_at || undefined,
+    /* The thumbnail is what the canvas draws. Its presence is also the
+       flag: a note with `img` has a full-size grab behind ?img=<id>. */
+    img: r.thumb || undefined,
     v: r.voters || [],
   }));
 }
@@ -108,7 +138,17 @@ export default async function handler(req, res) {
   try {
     await ready;
 
-    if (req.method === 'GET') return reply(res, await board(sql));
+    if (req.method === 'GET') {
+      /* One screenshot, full size, for the note whose detail just opened.
+         Deliberately not part of the board read. */
+      const want = clean((req.query && req.query.img) || '', 64);
+      if (want) {
+        const hit = await sql`SELECT data FROM feedback_images WHERE note_id = ${want}`;
+        if (!hit.length) return res.status(404).json({ error: 'no such image' });
+        return res.status(200).json({ configured: true, img: hit[0].data });
+      }
+      return reply(res, await board(sql));
+    }
 
     if (req.method === 'PUT') {
       const b = req.body || {};
@@ -176,6 +216,19 @@ export default async function handler(req, res) {
       const id = clean(b.newId, 64) ||
         ('f' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8));
       await sql`INSERT INTO feedback (id, body, author) VALUES (${id}, ${text}, ${who})`;
+      /* The image is written after the note, and its failure is not the
+         note's: someone who attached a 20MB screenshot should still get
+         their sentence on the board rather than a silent nothing. */
+      if (b.img && b.thumb) {
+        const full = String(b.img), thumb = String(b.thumb);
+        const ok = full.length <= MAX_IMG && thumb.length <= MAX_THUMB &&
+                   full.startsWith('data:image/') && thumb.startsWith('data:image/');
+        if (ok) {
+          await sql`INSERT INTO feedback_images (note_id, thumb, data)
+                    VALUES (${id}, ${thumb}, ${full})
+                    ON CONFLICT (note_id) DO NOTHING`;
+        }
+      }
       return reply(res, await board(sql));
     }
 

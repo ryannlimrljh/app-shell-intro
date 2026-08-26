@@ -248,6 +248,12 @@ them precomputed they will be recomputed anyway.
 - **Every bar, tick, rail and shortfall marker.**
 - **The hero cards.** Four of the six rewrite themselves from the filtered
   model on every change.
+- **The greeting's mark.** The emoji after the name shows a celebration
+  whenever the current slice's forecast has caught its target, so it follows
+  the filters like everything else. `renderHeroCards()` publishes that as
+  `window.__sliceAhead`; nothing else needs to know about it. Below that it
+  falls back to the local weather, then to the hour on the reader's own clock,
+  neither of which touches your data.
 
 ---
 

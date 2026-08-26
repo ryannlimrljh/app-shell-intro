@@ -84,6 +84,11 @@
   .c-canvas-greeting{text-align:center; padding:0 var(--page-gutter);}
   .c-canvas-greeting h1{margin:0 0 var(--spacing-8); font-family:var(--font-primary); font-size:var(--text-h1-size); font-weight:var(--text-h1-weight); color:var(--color-neutral-9);}
   .c-canvas-greeting p{margin:0; font-family:var(--font-primary); font-size:var(--text-body1-size); font-weight:var(--text-body1-weight); color:var(--color-neutral-5);}
+  /* Every emoji carries more advance width than its glyph, so the full
+     stop after it was floating a clear space away from the name. The
+     nudge is smaller than the narrowest overhang, so no mark in the
+     set can collide with the stop. */
+  #greetingMood{margin-inline-end:-.18em;}
 
   /* Greeting entrance — held invisible until the nav has finished its
      own auto-collapse (see revealCanvasContent() in the script below),
@@ -1995,8 +2000,8 @@
           <!-- &nbsp;, not a plain space: at the mobile type size "Good morning, Bryan"
              fills the line almost exactly and an ordinary space let the sunflower
              wrap onto the second line by itself. -->
-        <h1 id="greetingH1"><span id="greetingText"></span>&nbsp;<span aria-hidden="true">🌻</span>.</h1>
-          <p id="greetingSubtitle">Here's what needs your eyes today. I've flagged your top 3.</p>
+        <h1 id="greetingH1"><span id="greetingText"></span>&nbsp;<span id="greetingMood" aria-hidden="true">🌻</span>.</h1>
+          <p id="greetingSubtitle">Here's what needs your eyes today.</p>
         </div>
         <div class="c-card-slider" id="cardSlider" tabindex="0" role="region" aria-roledescription="carousel" aria-label="Highlights">
           <div class="c-card-slider-track">
@@ -4755,7 +4760,7 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
 
 (function () {
   // Content region greeting — "Good [morning/afternoon/evening],
-  // [First name]". Same "follow system setting" idea as the canvas
+  // [First name] ✨." Same "follow system setting" idea as the canvas
   // date above: the time-of-day segment is read from the visitor's own
   // system clock (new Date().getHours()), not hardcoded to "Good
   // morning" regardless of when the page is actually opened. First name
@@ -4763,14 +4768,142 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
   // (currently "Bryan Wong") rather than a second hardcoded "Bryan" —
   // one source for the name, so the greeting can't drift out of sync
   // with the account row if that name ever changes.
+  //
+  // The mark after the name answers, in the one character it has,
+  // whichever of three things is most worth saying right now:
+  //
+  //   1. Status, and only in one direction. When this slice's forecast
+  //      has caught its target that is news, so it takes the character.
+  //      Being behind is the ordinary mid-month state and the board
+  //      below already says so at length; a greeting that frowns at
+  //      someone every morning stops being a greeting.
+  //   2. Weather, when it is notable. Rain, storm, snow, drizzle, fog.
+  //      Clear and cloudy fall through, because "it is fine outside" is
+  //      not worth the only character available.
+  //   3. The hour, which needs no network and is what the sentence
+  //      beside it is already about.
+  //
+  // Tiers 1 and 2 can both be absent, and each falls into the one below,
+  // so the mark is never empty and nothing here can block the reveal.
   const greetingText = document.getElementById('greetingText');
-  if (greetingText) {
-    const hour = new Date().getHours();
-    const timeOfDay = hour < 12 ? 'morning' : hour < 17 ? 'afternoon' : 'evening';
-    const fullName = document.querySelector('.c-search-input-title');
-    const firstName = fullName ? fullName.textContent.trim().split(' ')[0] : '';
-    greetingText.textContent = `Good ${timeOfDay}, ${firstName}`;
+  const greetingMood = document.getElementById('greetingMood');
+
+  // Weather is best-effort and off-by-one-line: set this false and the
+  // mark falls back to status and the hour, with no network call at all.
+  const WEATHER = true;
+  const WEATHER_TTL_MS = 30 * 60 * 1000;
+
+  // Coordinates come from the browser's own timezone, never from the
+  // Geolocation API. There is no permission prompt to answer, and what
+  // leaves the page is a timezone's canonical city rather than where the
+  // reader actually is. Anything unlisted asks about Kuala Lumpur, which
+  // is where this product lives.
+  const ZONE_POINTS = {
+    'Asia/Kuala_Lumpur':   [3.14, 101.69],
+    'Asia/Singapore':      [1.35, 103.82],
+    'Asia/Jakarta':        [-6.21, 106.85],
+    'Asia/Bangkok':        [13.76, 100.50],
+    'Asia/Manila':         [14.60, 120.98],
+    'Asia/Ho_Chi_Minh':    [10.82, 106.63],
+    'Asia/Hong_Kong':      [22.32, 114.17],
+    'Asia/Shanghai':       [31.23, 121.47],
+    'Asia/Tokyo':          [35.68, 139.69],
+    'Asia/Seoul':          [37.57, 126.98],
+    'Asia/Kolkata':        [22.57, 88.36],
+    'Asia/Dubai':          [25.20, 55.27],
+    'Australia/Sydney':    [-33.87, 151.21],
+    'Europe/London':       [51.51, -0.13],
+    'Europe/Berlin':       [52.52, 13.40],
+    'America/New_York':    [40.71, -74.01],
+    'America/Los_Angeles': [34.05, -118.24]
+  };
+
+  // Open-Meteo's WMO codes. Only the ones a person would mention when
+  // they walk in are here; the rest return nothing and let the hour win.
+  function weatherMark(code) {
+    if (code >= 95) return { e: '⛈️', a: 'Thunderstorms outside' };
+    if (code >= 85 || (code >= 71 && code <= 77)) return { e: '❄️', a: 'Snow outside' };
+    if ((code >= 61 && code <= 67) || (code >= 80 && code <= 82)) return { e: '🌧️', a: 'Raining outside' };
+    if (code >= 51 && code <= 57) return { e: '🌦️', a: 'Drizzle outside' };
+    if (code === 45 || code === 48) return { e: '🌫️', a: 'Fog outside' };
+    return null;
   }
+
+  // No label on these on purpose: the sentence next to them already
+  // reads "Good afternoon", so announcing "sun" to a screen reader
+  // would only repeat it. The two tiers above do carry a label, because
+  // what they say appears nowhere else in the line.
+  function hourMark(h) {
+    if (h < 5) return { e: '🌙' };
+    if (h < 8) return { e: '🌅' };
+    if (h < 12) return { e: '🌻' };
+    if (h < 17) return { e: '☀️' };
+    if (h < 20) return { e: '🌇' };
+    return { e: '🌙' };
+  }
+
+  let wx = null;
+  try {
+    const raw = sessionStorage.getItem('cbrm.wx');
+    const c = raw ? JSON.parse(raw) : null;
+    if (c && Date.now() - c.at < WEATHER_TTL_MS) wx = c;
+  } catch (e) { /* private mode, blocked storage: just fetch again */ }
+
+  function paintGreeting() {
+    const now = new Date();
+    const hour = now.getHours();
+    if (greetingText) {
+      const timeOfDay = hour < 12 ? 'morning' : hour < 17 ? 'afternoon' : 'evening';
+      const fullName = document.querySelector('.c-search-input-title');
+      const firstName = fullName ? fullName.textContent.trim().split(' ')[0] : '';
+      const line = `Good ${timeOfDay}, ${firstName}`;
+      if (greetingText.textContent !== line) greetingText.textContent = line;
+    }
+    if (!greetingMood) return;
+    // window.__sliceAhead is written by the board's renderHeroCards() on
+    // every filter pass, so the mark follows the slice the reader is
+    // actually looking at. Reading it through a global rather than a
+    // call in either direction means neither script has to load first.
+    const m = window.__sliceAhead === true
+      ? { e: '🎉', a: 'Forecast is above target on this slice' }
+      : (wx ? weatherMark(wx.code) : null) || hourMark(hour);
+    if (greetingMood.textContent !== m.e) greetingMood.textContent = m.e;
+    if (m.a) {
+      greetingMood.setAttribute('role', 'img');
+      greetingMood.setAttribute('aria-label', m.a);
+      greetingMood.setAttribute('title', m.a);
+      greetingMood.removeAttribute('aria-hidden');
+    } else {
+      greetingMood.setAttribute('aria-hidden', 'true');
+      greetingMood.removeAttribute('role');
+      greetingMood.removeAttribute('aria-label');
+      greetingMood.removeAttribute('title');
+    }
+  }
+  window.__paintGreeting = paintGreeting;
+  paintGreeting();
+
+  if (WEATHER && !wx && window.fetch && navigator.onLine !== false) {
+    let zone = '';
+    try { zone = Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch (e) {}
+    const pt = ZONE_POINTS[zone] || ZONE_POINTS['Asia/Kuala_Lumpur'];
+    fetch('https://api.open-meteo.com/v1/forecast?latitude=' + pt[0] +
+          '&longitude=' + pt[1] + '&current_weather=true')
+      .then((r) => (r.ok ? r.json() : null))
+      .then((j) => {
+        const c = j && j.current_weather;
+        if (!c) return;
+        wx = { code: Number(c.weathercode), at: Date.now() };
+        try { sessionStorage.setItem('cbrm.wx', JSON.stringify(wx)); } catch (e) {}
+        paintGreeting();
+      })
+      .catch(() => { /* no weather is a normal outcome here, not a failure to report */ });
+  }
+
+  // A dashboard gets left open. Without this the line still said "Good
+  // morning" at four in the afternoon, and the mark beside it would have
+  // drifted with it.
+  setInterval(paintGreeting, 5 * 60 * 1000);
 
   // Card slider — drag (pointer events, so it works for mouse and touch
   // alike with one code path) and ArrowLeft/ArrowRight paging by one
@@ -9451,6 +9584,13 @@ function renderHeroCards(){
     put('gap-rate', 'Forecast is at or above target on this slice');
     put('gap-rec', 'Nothing more is required to reach it here.');
   }
+
+  /* The greeting's mood mark reads this. Published as a plain global and
+     then nudged, rather than called directly, because the greeting lives
+     in a module and this does not: whichever runs second still ends up
+     with the right answer. */
+  window.__sliceAhead = (gap <= 0);
+  if (window.__paintGreeting) window.__paintGreeting();
 
   // the deal to land now
   var deals = dealData(true).slice().sort(function(a,b){ return b.d.v - a.d.v; });

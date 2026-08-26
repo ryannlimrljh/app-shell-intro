@@ -3788,9 +3788,37 @@
     -webkit-mask-image:linear-gradient(to right,#000 calc(100% - 28px),transparent);
     mask-image:linear-gradient(to right,#000 calc(100% - 28px),transparent);}
   #salesBoard .frow::-webkit-scrollbar{display:none;}
+  /* At the end of the travel the 28px fade lands on the last filter
+     rather than on the empty space past it, dimming the one chip the
+     reader just scrolled to reach. It means "there is more"; when there
+     is not, it has nothing to say. */
+  #salesBoard .frow.is-end{-webkit-mask-image:none; mask-image:none;}
   /* the small-caps labels cost width the strip does not have; every
      trigger already names itself */
   #salesBoard .flab{display:none;}
+}
+
+/* The line held everywhere except the widths an iPad actually is. The
+   slice strip asked for 320px before it would agree to shrink, so on a
+   1300px screen it found 286 and wrapped underneath the ranges instead,
+   putting the bar back to 113px and leaving the segmented pair floating
+   at the midpoint of two rows. It never needed 320: at every width where
+   the bar is already one line the strip is scrolling anyway, so basis 0
+   is what it meant all along.
+
+   The floor is 1150 rather than 761. Below that, what is left beside the
+   ranges is a window too narrow to be worth the fifty pixels it saves,
+   and two rows is the honest answer. */
+@media (min-width:1150px){
+  #salesBoard .controls.compact .ctl-bars{flex-wrap:nowrap;}
+  #salesBoard .filters{flex:1 1 0%;}
+}
+
+/* Two rows, aligned like two rows. Centring is right for one line and
+   wrong for two: it hangs the segmented pair in the gutter between them,
+   which is what reads as broken even though nothing has moved. */
+@media (min-width:761px) and (max-width:1149px){
+  #salesBoard .controls.compact{align-items:flex-start;}
 }
 
 /* ── Focus, on every interactive surface ─────────────────────── */
@@ -10389,6 +10417,30 @@ sc.addEventListener('wheel', function (e) {
   sc.scrollTop += dy;
   sc.style.scrollBehavior = prev;
 }, {passive: false});
+})();
+
+/* ── The slice strip's fade, only while it is telling the truth ────────
+   Above 761 the strip carries a fixed 28px mask on its right edge, which
+   is the only thing saying more filters exist off-screen. It is also
+   painted at the end of the travel, where the thing under it is the last
+   filter rather than empty track. The class marks "nothing further out
+   there", and the mask stands down for it.
+
+   Width is not the only thing that changes the answer: clearing a slice
+   removes the Clear button and can end the overflow entirely, so a
+   change inside the strip re-asks after the board has finished redrawing. */
+(function () {
+'use strict';
+var frow = document.querySelector('#salesBoard .frow');
+if (!frow) return;
+function mark() {
+  var over = frow.scrollWidth - frow.clientWidth;
+  frow.classList.toggle('is-end', over <= 1 || frow.scrollLeft >= over - 1);
+}
+frow.addEventListener('scroll', mark, {passive: true});
+frow.addEventListener('change', function () { setTimeout(mark, 260); });
+window.addEventListener('resize', mark);
+mark();
 })();
 </script>
 

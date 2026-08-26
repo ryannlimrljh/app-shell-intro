@@ -172,6 +172,14 @@ below roughly ±1.5° the squares read as a slightly sloppy grid rather than
 as paper somebody put up by hand, and past about 6° it stops looking like a
 hand and starts looking like a mistake.
 
+The canvas is watched by a `ResizeObserver` rather than the window,
+because the rail minimising hands the board 168px and never fires a window
+resize — the viewport did not change, only the flex box inside it did. The
+notes used to keep their old places and leave the new space empty. The
+observer ignores height-only changes, since `layout()` writes `--fb-h` and
+watching your own write is a loop, and it debounces past the rail's 360ms
+width transition so the board settles once at the end.
+
 **Rearranging is a move, not a cut.** `render()` rebuilds the canvas from
 scratch, so the notes that come back are different elements with no memory
 of where they were — pressing Cluster changed the board's shape in a single

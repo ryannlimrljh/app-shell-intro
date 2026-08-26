@@ -2248,15 +2248,39 @@ window.addEventListener('resize', function () {
   window.addEventListener('scroll', function () { PEEK.dirty = true; }, true);
 })();
 
-/* The canvas is measured, so a width change has to re-run the pass. A
-   redraw is cheap here and re-running layout() alone would not pick up a
-   note whose text rewrapped to a new height. */
+/* The canvas is measured, so anything that changes its width has to re-run
+   the pass. Watching the canvas itself rather than the window is what
+   makes that "anything": the rail minimising hands the board 168px and
+   never fires a window resize, because the viewport did not change — only
+   the flex box inside it did. The notes used to keep their old places and
+   leave the new space empty.
+
+   Two things this has to get right. It must ignore a height-only change,
+   because layout() writes --fb-h and observing our own write is a loop.
+   And it must wait out the rail's 360ms width transition rather than
+   re-laying out on every frame of it, which is what the debounce is for:
+   the board settles once, at the end, and playMove() walks the notes
+   across to their new spots instead of teleporting them.
+
+   A redraw rather than layout() alone, because a narrower canvas can
+   rewrap a note's text to a new height and only a redraw remeasures. */
 (function () {
-  var t = null;
-  window.addEventListener('resize', function () {
+  var host = document.getElementById('fbBoard');
+  var t = null, lastW = Math.round(host.clientWidth);
+  var again = function () {
     clearTimeout(t);
-    t = setTimeout(function () { PEEK.dirty = true; render(); }, 120);
-  });
+    t = setTimeout(function () { PEEK.dirty = true; render(); }, 90);
+  };
+  if (window.ResizeObserver) {
+    new ResizeObserver(function (entries) {
+      var w = Math.round(entries[0].contentRect.width);
+      if (w === lastW) return;                 // our own --fb-h write; not a move
+      lastW = w;
+      again();
+    }).observe(host);
+  } else {
+    window.addEventListener('resize', again);  // the observer covers this too
+  }
 })();
 
 document.getElementById('fbSort').addEventListener('click', function (e) {

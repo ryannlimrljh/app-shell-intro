@@ -199,7 +199,12 @@ Three rules do the work:
   first. Shipping a request releases the votes on it, so delivering
   something hands everyone their vote back. The budget reads as five dots
   and the word *Votes*: black for a vote you still have, an outlined white
-  circle for one you have spent. Since the count now lives in the shape
+  circle for one you have spent. It carries no fill, border or shadow,
+  because it is an indicator and is not allowed to look like a control —
+  it was previously a hand-drawn copy of `.c-btn-secondary.c-btn-md`, same
+  height, radius, fill, hairline and shadow, sitting beside a real button
+  with nothing behind the click, and people clicked it. On this board only
+  paper is raised, because paper is the thing you can pick up. Since the count now lives in the shape
   alone, the pill carries an `aria-label` that spells it out and
   `renderBudget()` keeps that in step.
 - **Cluster is something you press,** not something the board does behind

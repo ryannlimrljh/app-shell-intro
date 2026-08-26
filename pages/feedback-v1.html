@@ -132,10 +132,19 @@
        objects rather than as a number in a sentence: you can see what you
        have left without reading. Spent dots hollow out; they are real
        state, which is the only reason a dot is allowed to be here. */
+  /* It is an indicator, so it is not allowed to look like a control. It
+     used to be a hand-drawn copy of .c-btn-secondary.c-btn-md — same 40px
+     height, same radius-md, same Neutral-1 fill, same Neutral-3 hairline,
+     same shadow-1 — sitting on the same baseline immediately left of a
+     real primary button, with nothing behind the click. People were not
+     misreading it; they were reading it correctly and it was lying.
+
+     The shadow was the worst of it: on this board only paper is raised,
+     because paper is the thing you can pick up. What is left is the dots
+     and the word, set on the canvas like a legend. */
   .fb-budget{display:flex; align-items:center; gap:var(--spacing-8);
-    height:40px; padding:0 var(--spacing-12); border-radius:var(--radius-md);
-    background:var(--color-neutral-1); border:1px solid var(--color-neutral-3);
-    box-shadow:var(--shadow-1);}
+    height:40px; padding:0 2px; background:none; border:0; box-shadow:none;
+    cursor:default;}
   .fb-budget .pips{display:flex; gap:5px;}
   .fb-budget .pip{width:9px; height:9px; border-radius:var(--radius-pill);
     background:var(--color-neutral-9);
@@ -150,7 +159,9 @@
   .fb-budget .txt{font-size:var(--text-label3-size); font-weight:700;
     letter-spacing:var(--tracking-eyebrow); text-transform:uppercase;
     color:var(--color-neutral-5); white-space:nowrap;}
-  .fb-budget.is-out{border-color:var(--color-orange);}
+  /* Out of votes was carried by the border, which has gone with the rest
+     of the box. The word takes it instead, which is where a reader was
+     already looking. */
   .fb-budget.is-out .txt{color:var(--color-orange);}
 
   /* ══ Controls ════════════════════════════════════════════════════════ */

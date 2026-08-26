@@ -108,8 +108,13 @@
     background-size:22px 22px; background-position:-1px -1px;
     min-height:100%; padding:var(--spacing-32) var(--page-gutter) var(--spacing-60);}
 
-  .fb-inner{max-width:1180px; margin:0 auto; display:flex; flex-direction:column;
-    gap:var(--spacing-24);}
+  /* No measure cap. The dashboard's .c-shell-content spans the shell and
+     caps only the things that need a reading measure, and this page now
+     does the same: a wall of paper has no reason to stop at 1180 and
+     leave a margin of empty canvas either side of it, and every extra
+     100px is roughly another half a note per row. The standfirst keeps
+     its own 76ch, because that one IS prose. */
+  .fb-inner{display:flex; flex-direction:column; gap:var(--spacing-24);}
 
   /* ══ Header ══════════════════════════════════════════════════════════ */
   .fb-head{display:flex; align-items:flex-start; justify-content:space-between;
@@ -2316,20 +2321,25 @@ if (NARROW.matches) setCollapsed(true);
    dashboard does after its intro plays. There is no intro here to wait
    for, so the delay is measured from load: long enough to read the two
    labels and know where you are, short enough that the canvas is not
-   kept waiting behind a rail nobody is using. It stands down the moment
-   anyone touches the rail, because a nav that collapses under the hand
-   is fighting the person using it. */
+   kept waiting behind a rail nobody is using.
+
+   It used to stand down on pointerenter, which was wrong in the one case
+   that matters most. You arrive here by clicking Feedback in the rail, so
+   the pointer is already on the rail when the page loads, and the first
+   small movement fires enter and cancels the collapse — the nav then sits
+   open exactly for the person who came in through it. The dashboard
+   cancels on nothing at all; this cancels on a click, which is the only
+   signal that actually means "I am using this", and leaves a deliberate
+   expand alone rather than undoing it a second and a half later. */
 var AUTO_MIN_MS = 1600;
 (function () {
   if (NARROW.matches || REDUCED) return;
-  var shell = document.getElementById('shellSidebarShell');
   var timer = setTimeout(function () {
     var nav = document.getElementById('shellSidebarNav');
     if (nav && !nav.classList.contains('is-collapsed')) setCollapsed(true);
   }, AUTO_MIN_MS);
-  var cancel = function () { clearTimeout(timer); };
-  shell.addEventListener('pointerenter', cancel, {once: true});
-  shell.addEventListener('focusin', cancel, {once: true});
+  document.getElementById('shellSidebarShell')
+    .addEventListener('click', function () { clearTimeout(timer); }, {once: true});
 })();
 /* Expanded, the box overlays the board, so it needs a way out that is not
    one small button. Only where it actually overlays. Both popovers are

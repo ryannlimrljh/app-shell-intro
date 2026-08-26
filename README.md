@@ -183,8 +183,14 @@ and simply appear. Below two notes wide the overlap
 stops, because a half-hidden note on a phone has no pointer to part it.
 
 The rail minimises itself about a second and a half after load, the way the
-dashboard's does once its intro has played, and stands down the moment
-anyone points at it.
+dashboard's does once its intro has played. It stands down on a click on
+the rail, not on a hover: you arrive here by clicking Feedback in the rail,
+so the pointer is already sitting on it when the page loads, and cancelling
+on pointerenter meant the first small movement kept the nav open for
+exactly the person who came in through it. The canvas below spans the
+shell's full width — there is no reading measure to hold on a wall of
+paper, and every extra hundred pixels is roughly another half a note per
+row.
 
 Three rules do the work:
 

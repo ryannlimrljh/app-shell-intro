@@ -1390,5 +1390,6 @@
   "Jess Ng appears on the master chart only and is absent from the August team tab; verify before relying on it.",
   "East Coast is hiring; interim cover by Joy and Fauzi.",
   "GenNext (Yip Siew Ling) does not appear on the master org chart, so its reporting line into a VP is unconfirmed."
- ]
+ ],
+ "name_conventions": "People are addressed by shortforms. The board and everyday speech use the short name; the org chart uses the full name. Chinese names here are family-name-first, so Boon Suat Wei is called Suat Wei, Teng Siok Chin is called Siok Chin, Yee Yuen Lai is called Yuen Lai. Nicknames in parentheses are what the person actually goes by: Normala (Joy) Ahmad is Joy, Nurshafiqah (Fifi) is Fifi, Nur Izzatul Baizura (Jaja) is Jaja. Common casual forms: Nick or Nic for Nicholas Teh, Jey for Jeyapuvan. Several first names are shared, so a bare Nurul (Huda / Syahirah / Solehah), Joanne (Tan / Chen), or Wong needs disambiguating by team."
 }

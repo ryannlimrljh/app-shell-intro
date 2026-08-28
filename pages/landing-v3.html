@@ -703,6 +703,50 @@
   .c-chat-thread:hover{background:var(--color-neutral-2); color:var(--color-neutral-9);}
   .c-chat-thread.is-active{background:var(--color-neutral-2); color:var(--color-neutral-9); font-weight:700;}
 
+  /* A real thread row is a wrapper, not a lone button: the option dots
+     cannot be a button inside a button. Dots ride hover and focus-within,
+     and stay faintly present on touch, where hover cannot summon them. */
+  .c-chat-titem{position:relative; display:flex; align-items:stretch;}
+  .c-chat-titem .c-chat-thread{flex:1 1 auto; min-width:0; padding-right:34px;}
+  .c-chat-topts{position:absolute; top:50%; right:4px; transform:translateY(-50%);
+    width:28px; height:28px; display:flex; align-items:center; justify-content:center;
+    border:0; border-radius:var(--radius-sm); background:transparent; color:var(--color-neutral-5);
+    font-size:15px; cursor:pointer; opacity:0;
+    transition:opacity var(--duration-fast) var(--ease-standard), background-color var(--duration-fast) var(--ease-standard);}
+  .c-chat-titem:hover .c-chat-topts, .c-chat-titem:focus-within .c-chat-topts,
+  .c-chat-topts[aria-expanded="true"]{opacity:1;}
+  @media (pointer:coarse){ .c-chat-topts{opacity:.55;} }
+  .c-chat-topts:hover{background:var(--color-neutral-3); color:var(--color-neutral-9);}
+  .c-chat-tmenu{position:absolute; z-index:6; top:calc(100% - 4px); right:4px; min-width:136px;
+    padding:var(--spacing-4); border:1px solid var(--color-neutral-3); border-radius:var(--radius-sm);
+    background:var(--color-neutral-1); box-shadow:0 8px 24px rgba(189,189,189,.4);}
+  .c-chat-tmenu button{display:flex; align-items:center; gap:var(--spacing-8); width:100%;
+    padding:var(--spacing-8) var(--spacing-12); border:0; border-radius:var(--radius-sm);
+    background:transparent; font-family:inherit; font-size:var(--text-body2-size); font-weight:600;
+    color:var(--color-red); text-align:left; cursor:pointer;}
+  .c-chat-tmenu button:hover{background:rgba(253,51,67,.10);}
+
+  /* Working indication, in Claude's grammar: three quiet beats while the
+     answer is being thought about, a caret while it is being written, and
+     the send button standing in as Stop for the whole of it. */
+  .c-chat-think{display:inline-flex; gap:5px; align-items:center; height:1em;}
+  .c-chat-think i{width:6px; height:6px; border-radius:50%; background:var(--color-neutral-4);
+    animation:c-chat-beat 1.2s var(--ease-standard) infinite;}
+  .c-chat-think i:nth-child(2){animation-delay:.15s;}
+  .c-chat-think i:nth-child(3){animation-delay:.3s;}
+  @keyframes c-chat-beat{0%,60%,100%{opacity:.35; transform:translateY(0);} 30%{opacity:1; transform:translateY(-3px);}}
+  .c-chat-msg.is-streaming .c-chat-bubble p::after{content:''; display:inline-block; width:3px; height:1em;
+    margin-left:2px; vertical-align:text-bottom; background:var(--color-orange);
+    animation:c-chat-caret 1s steps(1) infinite;}
+  @keyframes c-chat-caret{50%{opacity:0;}}
+  .c-chat-send.is-busy{animation:c-chat-workpulse 1.8s var(--ease-standard) infinite;}
+  @keyframes c-chat-workpulse{0%,100%{box-shadow:0 0 0 0 rgba(20,20,20,.22);} 55%{box-shadow:0 0 0 6px rgba(20,20,20,0);}}
+  @media (prefers-reduced-motion: reduce){
+    .c-chat-think i{animation:none; opacity:.7;}
+    .c-chat-msg.is-streaming .c-chat-bubble p::after{animation:none;}
+    .c-chat-send.is-busy{animation:none;}
+  }
+
   /* Thread column */
   .c-chat-main{display:flex; flex-direction:column; min-width:0; min-height:0;}
   /* space-between with a single child is deliberate: the close button that used
@@ -4330,44 +4374,25 @@
     </div><!-- /.c-shell-main -->
   </div>
 
-  <!-- Assistant overlay. Layout is real; the conversation in it is a fixed
-       placeholder thread (see the answers recorded for this build) so the
-       shape and rhythm can be judged before anything is wired up. -->
+  <!-- Assistant overlay. Live: the composer posts to /api/ask and the rail
+       lists real conversations, kept in this browser's localStorage only. -->
   <div class="c-chat" id="chatOverlay" aria-hidden="true">
     <div class="c-chat-veil" id="chatVeil"></div>
     <div class="c-chat-shell" id="chatShell" role="dialog" aria-modal="true" aria-labelledby="chatTitle">
       <aside class="c-chat-rail">
-        <button class="c-chat-new" type="button"><i class="ph ph-plus" aria-hidden="true"></i>New chat</button>
-        <div class="c-chat-pillars" id="chatPillars" role="radiogroup" aria-labelledby="chatPillarsL">
-          <span class="c-chat-flabel" id="chatPillarsL">Pillar</span>
-          <button class="c-fpill c-chat-fpill" type="button" role="radio" aria-checked="true" tabindex="0" data-pillar="all">All<span class="c-chat-fcount" aria-hidden="true"></span></button>
-            <button class="c-fpill c-chat-fpill" type="button" role="radio" aria-checked="false" tabindex="-1" data-pillar="sales">Sales<span class="c-chat-fcount" aria-hidden="true"></span></button>
-            <button class="c-fpill c-chat-fpill" type="button" role="radio" aria-checked="false" tabindex="-1" data-pillar="influencers">Influencers<span class="c-chat-fcount" aria-hidden="true"></span></button>
-            <button class="c-fpill c-chat-fpill" type="button" role="radio" aria-checked="false" tabindex="-1" data-pillar="studio">Studio<span class="c-chat-fcount" aria-hidden="true"></span></button>
-            <button class="c-fpill c-chat-fpill" type="button" role="radio" aria-checked="false" tabindex="-1" data-pillar="content">Content<span class="c-chat-fcount" aria-hidden="true"></span></button>
-        </div>
-        <div class="c-chat-threads" data-pillar-scope="all">
-          <p class="c-chat-threads-h">Today</p>
-          <button class="c-chat-thread is-active" type="button" data-pillar="sales"><span class="c-chat-thread-t">Where the RM 17.1M gap sits</span><span class="c-chat-thread-p">CollabSales</span></button>
-          <button class="c-chat-thread" type="button" data-pillar="sales"><span class="c-chat-thread-t">Which eight deals would close it</span><span class="c-chat-thread-p">CollabSales</span></button>
-          <button class="c-chat-thread" type="button" data-pillar="influencers"><span class="c-chat-thread-t">Which creators fit the Genting F&amp;B brief</span><span class="c-chat-thread-p">CollabInfluencers</span></button>
-
-          <p class="c-chat-threads-h">Earlier this week</p>
-          <button class="c-chat-thread" type="button" data-pillar="sales"><span class="c-chat-thread-t">Digital inventory against demand</span><span class="c-chat-thread-p">CollabSales</span></button>
-          <button class="c-chat-thread" type="button" data-pillar="studio"><span class="c-chat-thread-t">Turnaround on the AirAsia cutdowns</span><span class="c-chat-thread-p">CollabStudio</span></button>
-          <button class="c-chat-thread" type="button" data-pillar="sales"><span class="c-chat-thread-t">Why RM 4.4M lapsed</span><span class="c-chat-thread-p">CollabSales</span></button>
-          <button class="c-chat-thread" type="button" data-pillar="content"><span class="c-chat-thread-t">What is scheduled for the Raya push</span><span class="c-chat-thread-p">CollabContent</span></button>
-          <button class="c-chat-thread" type="button" data-pillar="sales"><span class="c-chat-thread-t">Which reps are actually at risk</span><span class="c-chat-thread-p">CollabSales</span></button>
-          <button class="c-chat-thread" type="button" data-pillar="sales"><span class="c-chat-thread-t">Petronas budget reset: who owns it</span><span class="c-chat-thread-p">CollabSales</span></button>
-          <p class="c-chat-empty">No conversations in this pillar yet.</p>
-        </div>
+        <button class="c-chat-new" type="button" id="chatNew"><i class="ph ph-plus" aria-hidden="true"></i>New chat</button>
+        <!-- The pillar filter lived here while the rail held scripted threads
+             from four pillars. Real conversations are all with this board, so
+             a filter over them had nothing to filter; it returns if the rail
+             ever holds more than one pillar again. -->
+        <div class="c-chat-threads" id="chatThreads" data-pillar-scope="all"></div>
       </aside>
 
       <div class="c-chat-main">
         <header class="c-chat-hd">
           <div>
-            <h2 id="chatTitle">Where the RM 17.1M gap sits</h2>
-            <p>Collabrium assistant &middot; reading this workspace</p>
+            <h2 id="chatTitle">New conversation</h2>
+            <p id="chatSub" aria-live="polite">Collabrium assistant &middot; reading this workspace</p>
           </div>
         </header>
 
@@ -6293,82 +6318,10 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
   window.showChat = openChat;
   if (veil) veil.addEventListener('click', closeChat);
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && open) closeChat(); });
-  /* Pillar filter over the thread list. Recency stays the reading order and the
-     pillar filters across it, rather than pillars becoming folders — "what was
-     I just doing" is the common re-entry, and a folder structure answers the
-     rarer question at its expense.
-     Radiogroup semantics are the same contract as the Media/Segment filter in
-     Performance Space: click selects, arrows move AND select, Home/End jump to
-     the ends, and tabindex roves so the group is one tab stop rather than five.
-     The code is separate because that one is closed over its own chart. */
-  (function () {
-    const group = document.getElementById('chatPillars');
-    const list = document.querySelector('.c-chat-threads');
-    if (!group || !list) return;
-    const pills = Array.from(group.querySelectorAll('.c-chat-fpill'));
-    const empty = list.querySelector('.c-chat-empty');
+  /* The pillar filter that stood here filtered the scripted rail; the
+     rail is real now and single-pillar, so there is nothing to filter. */
 
-    // Counted from the DOM, never typed into the markup: a typed count is
-    // wrong the first time a thread is added.
-    const threads = Array.from(list.querySelectorAll('.c-chat-thread'));
-    pills.forEach((p) => {
-      const k = p.dataset.pillar;
-      const n = k === 'all' ? threads.length : threads.filter((t) => t.dataset.pillar === k).length;
-      const badge = p.querySelector('.c-chat-fcount');
-      if (badge) badge.textContent = String(n);
-      if (!n) { p.setAttribute('aria-disabled', 'true'); p.tabIndex = -1; }
-    });
-
-    function apply(scope) {
-      list.dataset.pillarScope = scope;
-      threads.forEach((t) => {
-        t.classList.toggle('is-off-pillar', scope !== 'all' && t.dataset.pillar !== scope);
-      });
-      // A heading with nothing left under it goes too, or the rail shows
-      // "EARLIER THIS WEEK" above empty space. Walk forward from each heading
-      // to the next one; DOM order is the grouping, so nothing else is needed.
-      list.querySelectorAll('.c-chat-threads-h').forEach((h) => {
-        let any = false;
-        for (let n = h.nextElementSibling; n && !n.classList.contains('c-chat-threads-h'); n = n.nextElementSibling) {
-          if (n.classList.contains('c-chat-thread') && !n.classList.contains('is-off-pillar')) { any = true; break; }
-        }
-        h.classList.toggle('is-off-pillar', !any);
-      });
-      if (empty) empty.classList.toggle('is-off-pillar', threads.some((t) => !t.classList.contains('is-off-pillar')));
-    }
-
-    function select(pill, focus) {
-      if (pill.getAttribute('aria-disabled') === 'true') return;
-      pills.forEach((p) => {
-        const on = p === pill;
-        p.setAttribute('aria-checked', String(on));
-        p.tabIndex = on ? 0 : -1;
-      });
-      if (focus) pill.focus();
-      apply(pill.dataset.pillar);
-    }
-
-    group.addEventListener('click', (e) => {
-      const pill = e.target.closest('.c-chat-fpill');
-      if (pill) select(pill);
-    });
-    group.addEventListener('keydown', (e) => {
-      const i = pills.indexOf(document.activeElement);
-      if (i < 0) return;
-      let next = null;
-      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') next = pills[(i + 1) % pills.length];
-      else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') next = pills[(i - 1 + pills.length) % pills.length];
-      else if (e.key === 'Home') next = pills[0];
-      else if (e.key === 'End') next = pills[pills.length - 1];
-      if (!next) return;
-      e.preventDefault();
-      select(next, true);
-    });
-
-    apply('all');
-  })();
-
-  // Focus trap: a full takeover that let Tab reach the page behind would put
+    // Focus trap: a full takeover that let Tab reach the page behind would put
   // focus on controls the reader cannot see.
   shell.addEventListener('keydown', (e) => {
     if (e.key !== 'Tab') return;
@@ -10459,83 +10412,241 @@ mark();
 
 <script>
 /* ══ The composer, wired ══
-   The chat window above was a prop with a scripted conversation. This
-   makes it real: Enter or the send button posts the conversation plus
-   the board brief to /api/ask, and the answer streams into the bubble
-   as it is generated. All state is page memory; a refresh is a clean
-   slate, which for a pilot is a feature. */
+   Conversations are real and this browser's own: kept in localStorage,
+   listed in the rail newest first, deletable from a hover menu, never
+   sent anywhere except to /api/ask as context for the next answer.
+
+   The working indication borrows Claude's grammar wholesale, because
+   the people in this pilot already know it: three quiet beats while the
+   model is thinking, a caret while the answer streams, the send button
+   standing in as Stop throughout, and the header line saying which
+   state it is in for anyone who cannot see the motion. */
 (function () {
 'use strict';
 var input = document.getElementById('chatInput');
 var send = document.querySelector('.c-chat-send');
 var scroll = document.getElementById('chatScroll');
 var body = document.getElementById('chatBody');
+var rail = document.getElementById('chatThreads');
+var newBtn = document.getElementById('chatNew');
+var title = document.getElementById('chatTitle');
+var subEl = document.getElementById('chatSub');
 if (!input || !send || !scroll || !body) return;
 
-var history = [];
-var busy = false;
+var KEY = 'cbrm.chats', MAX_THREADS = 50;
+var SUB_IDLE = subEl ? subEl.textContent : '';
+var SEND_ICON = send.innerHTML;
+var WELCOME = 'I\u2019m reading the board exactly as you have it filtered. Ask where the quarter stands, who needs attention first, or which deals close the gap.';
+
+function load() {
+  try { var v = JSON.parse(localStorage.getItem(KEY)); return Array.isArray(v) ? v : []; }
+  catch (e) { return []; }
+}
+function save() {
+  try { localStorage.setItem(KEY, JSON.stringify(threads.slice(0, MAX_THREADS))); } catch (e) {}
+}
+var threads = load();   // [{id, title, at, msgs:[{role, content}]}], newest first
+var cur = null;         // the open thread, or null for a fresh chat
+var busy = false, aborter = null;
 
 function bubble(role) {
-  var m = document.createElement('div');
-  m.className = 'c-chat-msg ' + (role === 'user' ? 'is-me' : 'is-ai');
+  var row = document.createElement('div');
+  row.className = 'c-chat-msg ' + (role === 'user' ? 'is-me' : 'is-ai');
   var bub = document.createElement('div');
   bub.className = 'c-chat-bubble';
   var p = document.createElement('p');
-  /* the model answers in paragraphs; textContent flattens newlines and
-     pre-wrap puts them back without inviting HTML in */
   p.style.whiteSpace = 'pre-wrap';
-  bub.appendChild(p); m.appendChild(bub); scroll.appendChild(m);
-  return p;
+  bub.appendChild(p); row.appendChild(bub); scroll.appendChild(row);
+  return { row: row, p: p };
 }
 function pin() { body.scrollTop = body.scrollHeight; }
+function welcome() { bubble('assistant').p.textContent = WELCOME; }
+
+function paintThread(t) {
+  scroll.innerHTML = '';
+  welcome();
+  t.msgs.forEach(function (m) { bubble(m.role === 'user' ? 'user' : 'assistant').p.textContent = m.content; });
+  if (title) title.textContent = t.title;
+  pin();
+}
+function freshChat() {
+  if (busy) stopNow();
+  cur = null;
+  scroll.innerHTML = '';
+  welcome();
+  if (title) title.textContent = 'New conversation';
+  renderRail();
+}
+
+function stamp(at) {
+  var d = new Date(at);
+  if (d.toDateString() === new Date().toDateString()) {
+    var h = d.getHours(), m = d.getMinutes();
+    return (h % 12 || 12) + ':' + (m < 10 ? '0' : '') + m + (h < 12 ? ' am' : ' pm');
+  }
+  return d.getDate() + ' ' + ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getMonth()];
+}
+
+function closeMenus() {
+  var open = document.querySelectorAll('.c-chat-tmenu');
+  for (var k = 0; k < open.length; k++) open[k].parentNode.removeChild(open[k]);
+  var dots = document.querySelectorAll('.c-chat-topts[aria-expanded="true"]');
+  for (var k2 = 0; k2 < dots.length; k2++) dots[k2].setAttribute('aria-expanded', 'false');
+}
+
+function openMenu(item, dots, t) {
+  var was = item.querySelector('.c-chat-tmenu');
+  closeMenus();
+  if (was) return;                       // second click on the same dots: just close
+  var m = document.createElement('div');
+  m.className = 'c-chat-tmenu';
+  m.setAttribute('role', 'menu');
+  var del = document.createElement('button');
+  del.type = 'button';
+  del.setAttribute('role', 'menuitem');
+  del.innerHTML = '<i class="ph ph-trash" aria-hidden="true"></i>Delete';
+  del.addEventListener('click', function (ev) {
+    ev.stopPropagation();
+    threads = threads.filter(function (x) { return x.id !== t.id; });
+    save();
+    if (cur && cur.id === t.id) freshChat(); else renderRail();
+  });
+  m.appendChild(del);
+  item.appendChild(m);
+  dots.setAttribute('aria-expanded', 'true');
+  del.focus();
+}
+
+function renderRail() {
+  if (!rail) return;
+  rail.innerHTML = '';
+  var today = [], earlier = [], k0 = new Date().toDateString();
+  threads.forEach(function (t) {
+    (new Date(t.at).toDateString() === k0 ? today : earlier).push(t);
+  });
+  [['Today', today], ['Earlier', earlier]].forEach(function (g) {
+    if (!g[1].length) return;
+    var hd = document.createElement('p');
+    hd.className = 'c-chat-threads-h';
+    hd.textContent = g[0];
+    rail.appendChild(hd);
+    g[1].forEach(function (t) {
+      var item = document.createElement('div');
+      item.className = 'c-chat-titem';
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'c-chat-thread' + (cur && cur.id === t.id ? ' is-active' : '');
+      if (cur && cur.id === t.id) b.setAttribute('aria-current', 'true');
+      var tt = document.createElement('span');
+      tt.className = 'c-chat-thread-t';
+      tt.textContent = t.title;
+      var tp = document.createElement('span');
+      tp.className = 'c-chat-thread-p';
+      tp.textContent = stamp(t.at);
+      b.appendChild(tt); b.appendChild(tp);
+      b.addEventListener('click', function () {
+        if (busy) stopNow();
+        cur = t; paintThread(t); renderRail();
+      });
+      var dots = document.createElement('button');
+      dots.type = 'button';
+      dots.className = 'c-chat-topts';
+      dots.setAttribute('aria-label', 'Options for \u201C' + t.title + '\u201D');
+      dots.setAttribute('aria-haspopup', 'menu');
+      dots.setAttribute('aria-expanded', 'false');
+      dots.innerHTML = '<i class="ph ph-dots-three" aria-hidden="true"></i>';
+      dots.addEventListener('click', function (ev) { ev.stopPropagation(); openMenu(item, dots, t); });
+      item.appendChild(b); item.appendChild(dots);
+      rail.appendChild(item);
+    });
+  });
+}
+
+/* menus close on any outside click, and on Escape BEFORE the overlay's own
+   Escape handler can take the whole chat down with them */
+document.addEventListener('click', closeMenus);
+document.addEventListener('keydown', function (e) {
+  if (e.key === 'Escape' && document.querySelector('.c-chat-tmenu')) {
+    e.stopPropagation(); closeMenus();
+  }
+}, true);
+
+function setBusy(on) {
+  busy = on;
+  send.classList.toggle('is-busy', on);
+  send.innerHTML = on ? '<i class="ph-fill ph-stop" aria-hidden="true"></i>' : SEND_ICON;
+  send.setAttribute('aria-label', on ? 'Stop generating' : 'Send');
+  if (subEl) subEl.textContent = on ? 'Collabrium is thinking\u2026' : SUB_IDLE;
+}
+function stopNow() { if (aborter) aborter.abort(); }
 
 function ask() {
-  if (busy) return;
+  if (busy) { stopNow(); return; }       // the send button is the stop button
   var q = input.value.trim();
   if (!q) return;
   input.value = '';
-  busy = true; send.disabled = true;
-  bubble('user').textContent = q;
-  history.push({ role: 'user', content: q });
+
+  if (!cur) {
+    cur = { id: 'c' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+            title: q.length > 64 ? q.slice(0, 63) + '\u2026' : q,
+            at: Date.now(), msgs: [] };
+    threads.unshift(cur);
+    if (title) title.textContent = cur.title;
+  }
+  cur.msgs.push({ role: 'user', content: q });
+  save(); renderRail();
+
+  setBusy(true);
+  bubble('user').p.textContent = q;
   var out = bubble('assistant');
-  out.textContent = '\u2026';
+  out.p.innerHTML = '<span class="c-chat-think" aria-hidden="true"><i></i><i></i><i></i></span>';
   pin();
+
   var acc = '';
+  var mine = cur;
+  aborter = ('AbortController' in window) ? new AbortController() : null;
   fetch('/api/ask', {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
     body: JSON.stringify({
-      messages: history.slice(-20),
+      messages: mine.msgs.slice(-20),
       brief: window.__boardBrief ? window.__boardBrief() : ''
-    })
+    }),
+    signal: aborter && aborter.signal
   }).then(function (res) {
     var ct = res.headers.get('content-type') || '';
     if (ct.indexOf('json') >= 0) {
-      /* the error path: not configured, rate limited, or rejected */
       return res.json().then(function (j) {
-        out.textContent = (j && j.configured === false)
+        out.p.textContent = (j && j.configured === false)
           ? 'The assistant is not connected yet. The server is missing its API key.'
           : 'That did not go through: ' + ((j && j.error) || ('HTTP ' + res.status));
       });
     }
+    out.row.classList.add('is-streaming');
     var reader = res.body.getReader();
     var dec = new TextDecoder();
     function step() {
       return reader.read().then(function (r) {
         if (r.done) return;
         acc += dec.decode(r.value, { stream: true });
-        out.textContent = acc;
+        out.p.textContent = acc;
         pin();
         return step();
       });
     }
-    return step().then(function () {
-      if (acc) history.push({ role: 'assistant', content: acc });
-    });
+    return step();
   }).catch(function (e) {
-    out.textContent = 'The connection failed: ' + (e && e.message ? e.message : e);
+    if (e && e.name === 'AbortError') {
+      if (!acc) out.p.textContent = 'Stopped.';
+    } else {
+      out.p.textContent = 'The connection failed: ' + (e && e.message ? e.message : e);
+    }
   }).then(function () {
-    busy = false; send.disabled = false; pin();
+    out.row.classList.remove('is-streaming');
+    if (acc) { mine.msgs.push({ role: 'assistant', content: acc }); save(); }
+    aborter = null;
+    setBusy(false);
+    pin();
     try { input.focus({ preventScroll: true }); } catch (err) { input.focus(); }
   });
 }
@@ -10544,6 +10655,9 @@ send.addEventListener('click', ask);
 input.addEventListener('keydown', function (e) {
   if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); ask(); }
 });
+if (newBtn) newBtn.addEventListener('click', freshChat);
+
+renderRail();   // past conversations list; the box itself always starts blank
 })();
 </script>
 

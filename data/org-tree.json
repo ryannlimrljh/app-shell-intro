@@ -1,5 +1,5 @@
 {
- "source": "AMS Client Solutions FY27 org chart (master 15 Jul 2026, team tabs wef 1 Aug 2026)",
+ "source": "AMS NEW STRUCTURE ALM FYE 2027 170826.xlsx (master chart 15 Jul 2026, team tabs wef 1 Aug 2026)",
  "boardAlias": {
   "Joy Ahmad": "Normala (Joy) Ahmad",
   "Suat Wei": "Boon Suat Wei",
@@ -1378,5 +1378,17 @@
    "reportsTo": "Teng Siok Chin",
    "line": "b"
   }
- }
+ },
+ "headcount": {
+  "sales": 82,
+  "delivery_client_experience_client_success": 20
+ },
+ "open_questions": [
+  "Kenn carries VP grade but occupies a Head of Client Solutions box on the master chart, reporting into Jeyapuvan.",
+  "Teo Yap Keong is a player-manager and carries his own portfolio.",
+  "Teng Siok Chin's team is taken from the June tab, the most recent in the source file; there is no August version, so her roster may be stale.",
+  "Jess Ng appears on the master chart only and is absent from the August team tab; verify before relying on it.",
+  "East Coast is hiring; interim cover by Joy and Fauzi.",
+  "GenNext (Yip Siew Ling) does not appear on the master org chart, so its reporting line into a VP is unconfirmed."
+ ]
 }

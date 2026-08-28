@@ -84,11 +84,7 @@
   .c-canvas-greeting{text-align:center; padding:0 var(--page-gutter);}
   .c-canvas-greeting h1{margin:0 0 var(--spacing-8); font-family:var(--font-primary); font-size:var(--text-h1-size); font-weight:var(--text-h1-weight); color:var(--color-neutral-9);}
   .c-canvas-greeting p{margin:0; font-family:var(--font-primary); font-size:var(--text-body1-size); font-weight:var(--text-body1-weight); color:var(--color-neutral-5);}
-  /* Every emoji carries more advance width than its glyph, so the full
-     stop after it was floating a clear space away from the name. The
-     nudge is smaller than the narrowest overhang, so no mark in the
-     set can collide with the stop. */
-  #greetingMood{margin-inline-end:-.18em;}
+
 
   /* Greeting entrance — held invisible until the nav has finished its
      own auto-collapse (see revealCanvasContent() in the script below),
@@ -2044,7 +2040,7 @@
           <!-- &nbsp;, not a plain space: at the mobile type size "Good morning, Bryan"
              fills the line almost exactly and an ordinary space let the sunflower
              wrap onto the second line by itself. -->
-        <h1 id="greetingH1"><span id="greetingText"></span>&nbsp;<span id="greetingMood" aria-hidden="true">🌻</span>.</h1>
+        <h1 id="greetingH1"><span id="greetingText"></span>&nbsp;<span id="greetingMood" aria-hidden="true">🌻</span></h1>
           <p id="greetingSubtitle">Here's what needs your eyes today.</p>
         </div>
         <div class="c-card-slider" id="cardSlider" tabindex="0" role="region" aria-roledescription="carousel" aria-label="Highlights">

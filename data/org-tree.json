@@ -1,0 +1,1382 @@
+{
+ "source": "AMS Client Solutions FY27 org chart (master 15 Jul 2026, team tabs wef 1 Aug 2026)",
+ "boardAlias": {
+  "Joy Ahmad": "Normala (Joy) Ahmad",
+  "Suat Wei": "Boon Suat Wei",
+  "Belinda": "Belinda Chin",
+  "Yuen Lai": "Yee Yuen Lai",
+  "Edison": "Edison Lim",
+  "Kavin": "Kavin Mullai Sadasseevan",
+  "Siok Chin": "Teng Siok Chin",
+  "Joanne Tan": "Joanne Tan",
+  "Alvin Wong": "Alvin Wong"
+ },
+ "vps": {
+  "a": {
+   "name": "Jeyapuvan",
+   "role": "VP, Client Solutions"
+  },
+  "b": {
+   "name": "Nicholas Teh",
+   "role": "VP, Client Solutions"
+  },
+  "c": {
+   "name": "Unassigned line",
+   "role": "Not shown on the master chart"
+  }
+ },
+ "heads": [
+  {
+   "name": "Yee Yuen Lai",
+   "grade": "SAVP",
+   "segment": "Agency",
+   "teamCount": 9,
+   "line": "a",
+   "vp": "Jeyapuvan",
+   "pods": [
+    {
+     "direct": false,
+     "lead": "Mandy Seah",
+     "leadGrade": "AVP",
+     "segment": "",
+     "members": [
+      {
+       "name": "Joanne Chen",
+       "grade": "SE",
+       "open": false
+      },
+      {
+       "name": "Jing Yan",
+       "grade": "AM",
+       "open": false
+      },
+      {
+       "name": "Rae Zalani",
+       "grade": "AM",
+       "open": false
+      },
+      {
+       "name": "Siti Sarah",
+       "grade": "AM",
+       "open": false
+      }
+     ]
+    },
+    {
+     "direct": false,
+     "lead": "Stanley Chong",
+     "leadGrade": "AVP",
+     "segment": "",
+     "members": [
+      {
+       "name": "Vernon Ong",
+       "grade": "SE",
+       "open": false
+      },
+      {
+       "name": "Daniel Ravin",
+       "grade": "SE",
+       "open": false
+      },
+      {
+       "name": "Azuin Rahman",
+       "grade": "AM",
+       "open": false
+      }
+     ]
+    }
+   ],
+   "support": [
+    "Doris",
+    "Anies",
+    "Casey Low",
+    "Kalai CE"
+   ]
+  },
+  {
+   "name": "Alvin Wong",
+   "grade": "AVP",
+   "segment": "Agency",
+   "teamCount": 9,
+   "line": "a",
+   "vp": "Jeyapuvan",
+   "pods": [
+    {
+     "direct": false,
+     "lead": "Ling Chen Lee",
+     "leadGrade": "AVP",
+     "segment": "",
+     "members": [
+      {
+       "name": "Fiona Lee",
+       "grade": "SE",
+       "open": false
+      },
+      {
+       "name": "Aisyah Azizi",
+       "grade": "AM",
+       "open": false
+      },
+      {
+       "name": "Lionel Lim",
+       "grade": "AM",
+       "open": false
+      },
+      {
+       "name": "Amanda Lim",
+       "grade": "SA",
+       "open": false
+      }
+     ]
+    },
+    {
+     "direct": false,
+     "lead": "Tan Hui Yee",
+     "leadGrade": "AVP",
+     "segment": "",
+     "members": [
+      {
+       "name": "Crystal Pe",
+       "grade": "SE",
+       "open": false
+      },
+      {
+       "name": "Edward Ham",
+       "grade": "SE",
+       "open": false
+      },
+      {
+       "name": "Svensson Yap",
+       "grade": "SE",
+       "open": false
+      }
+     ]
+    }
+   ],
+   "support": [
+    "Mei Li",
+    "Edwin",
+    "Hidayah"
+   ]
+  },
+  {
+   "name": "Kavin Mullai Sadasseevan",
+   "grade": "SAVP",
+   "segment": "Indian Segment",
+   "teamCount": 5,
+   "line": "a",
+   "vp": "Jeyapuvan",
+   "pods": [
+    {
+     "direct": false,
+     "lead": "Pushpa Nathan",
+     "leadGrade": "AVP",
+     "segment": "",
+     "members": [
+      {
+       "name": "Prravinn",
+       "grade": "A",
+       "open": false
+      },
+      {
+       "name": "Rhesimalar Ravi",
+       "grade": "A",
+       "open": false
+      },
+      {
+       "name": "Yulesha",
+       "grade": "A",
+       "open": false
+      }
+     ]
+    },
+    {
+     "direct": true,
+     "lead": null,
+     "leadGrade": "",
+     "segment": "",
+     "members": [
+      {
+       "name": "Kirabassri",
+       "grade": "A",
+       "open": false
+      }
+     ]
+    }
+   ],
+   "support": []
+  },
+  {
+   "name": "Kenn",
+   "grade": "VP",
+   "segment": "Key Clients",
+   "teamCount": 6,
+   "line": "a",
+   "vp": "Jeyapuvan",
+   "pods": [
+    {
+     "direct": false,
+     "lead": "Amelia",
+     "leadGrade": "SAVP",
+     "segment": "",
+     "members": [
+      {
+       "name": "Gates Wong",
+       "grade": "A",
+       "open": false
+      },
+      {
+       "name": "Lani Low",
+       "grade": "A",
+       "open": false
+      },
+      {
+       "name": "Jarald Wong",
+       "grade": "A",
+       "open": false
+      }
+     ]
+    },
+    {
+     "direct": false,
+     "lead": "Kazman",
+     "leadGrade": "SAVP",
+     "segment": "",
+     "members": [
+      {
+       "name": "Jonis",
+       "grade": "",
+       "open": false
+      }
+     ]
+    }
+   ],
+   "support": []
+  },
+  {
+   "name": "Joanne Tan",
+   "grade": "SAVP",
+   "segment": "Regional",
+   "teamCount": 3,
+   "line": "a",
+   "vp": "Jeyapuvan",
+   "pods": [
+    {
+     "direct": true,
+     "lead": null,
+     "leadGrade": "",
+     "segment": "",
+     "members": [
+      {
+       "name": "Nur Izzatul Baizura (Jaja)",
+       "grade": "SA",
+       "open": false
+      },
+      {
+       "name": "Maznan Mahyuddin",
+       "grade": "SA",
+       "open": false
+      },
+      {
+       "name": "Koo YiTong",
+       "grade": "A",
+       "open": false
+      }
+     ]
+    }
+   ],
+   "support": []
+  },
+  {
+   "name": "Harminder Singh",
+   "grade": "",
+   "segment": "Client Success",
+   "teamCount": 2,
+   "line": "a",
+   "vp": "Jeyapuvan",
+   "pods": [
+    {
+     "direct": true,
+     "lead": null,
+     "leadGrade": "",
+     "segment": "",
+     "members": [
+      {
+       "name": "Rizal",
+       "grade": "",
+       "open": false
+      },
+      {
+       "name": "Nurul Solehah",
+       "grade": "A",
+       "open": false
+      }
+     ]
+    }
+   ],
+   "support": []
+  },
+  {
+   "name": "Belinda Chin",
+   "grade": "SAVP",
+   "segment": "Key Clients",
+   "teamCount": 4,
+   "line": "b",
+   "vp": "Nicholas Teh",
+   "pods": [
+    {
+     "direct": false,
+     "lead": "Elaine Ng",
+     "leadGrade": "AVP",
+     "segment": "",
+     "members": [
+      {
+       "name": "Jessie Hoe",
+       "grade": "A",
+       "open": false
+      }
+     ]
+    },
+    {
+     "direct": true,
+     "lead": null,
+     "leadGrade": "",
+     "segment": "",
+     "members": [
+      {
+       "name": "Josephine Lim",
+       "grade": "SA",
+       "open": false
+      },
+      {
+       "name": "Lee Shih Hsin",
+       "grade": "SA",
+       "open": false
+      }
+     ]
+    }
+   ],
+   "support": [
+    "Mindy",
+    "Nur Manissha",
+    "Sheryl CE"
+   ]
+  },
+  {
+   "name": "Boon Suat Wei",
+   "grade": "AVP",
+   "segment": "Key Clients",
+   "teamCount": 8,
+   "line": "b",
+   "vp": "Nicholas Teh",
+   "pods": [
+    {
+     "direct": false,
+     "lead": "Gai Li Zhan",
+     "leadGrade": "AVP",
+     "segment": "",
+     "members": [
+      {
+       "name": "Melanie Lim",
+       "grade": "A",
+       "open": false
+      },
+      {
+       "name": "Goh Hong Cheng",
+       "grade": "A",
+       "open": false
+      },
+      {
+       "name": "Chew Joe Er",
+       "grade": "SA",
+       "open": false
+      }
+     ]
+    },
+    {
+     "direct": false,
+     "lead": "Voo Poh Chee",
+     "leadGrade": "SA",
+     "segment": "",
+     "members": [
+      {
+       "name": "Ashley",
+       "grade": "A",
+       "open": false
+      },
+      {
+       "name": "Edmund Ng",
+       "grade": "A",
+       "open": false
+      }
+     ]
+    },
+    {
+     "direct": true,
+     "lead": null,
+     "leadGrade": "",
+     "segment": "",
+     "members": [
+      {
+       "name": "Dayang Diana Natasha",
+       "grade": "SA",
+       "open": false
+      }
+     ]
+    }
+   ],
+   "support": [
+    "Anisa",
+    "Peggy",
+    "Adreena"
+   ]
+  },
+  {
+   "name": "Teng Siok Chin",
+   "grade": "SAVP",
+   "segment": "Chinese TV & Digital",
+   "teamCount": 4,
+   "line": "b",
+   "vp": "Nicholas Teh",
+   "pods": [
+    {
+     "direct": true,
+     "lead": null,
+     "leadGrade": "",
+     "segment": "",
+     "members": [
+      {
+       "name": "Teo Yap Keong",
+       "grade": "AVP",
+       "open": false
+      },
+      {
+       "name": "Henry Ong",
+       "grade": "A",
+       "open": false
+      },
+      {
+       "name": "Justin Tan",
+       "grade": "A",
+       "open": false
+      },
+      {
+       "name": "Zenia Teh",
+       "grade": "A",
+       "open": false
+      }
+     ]
+    }
+   ],
+   "support": []
+  },
+  {
+   "name": "Edison Lim",
+   "grade": "",
+   "segment": "SME (Chinese)",
+   "teamCount": 4,
+   "line": "b",
+   "vp": "Nicholas Teh",
+   "pods": [
+    {
+     "direct": true,
+     "lead": null,
+     "leadGrade": "",
+     "segment": "",
+     "members": [
+      {
+       "name": "Yuki Looi",
+       "grade": "AM",
+       "open": false
+      },
+      {
+       "name": "Wong Yoke Saan",
+       "grade": "Exec",
+       "open": false
+      },
+      {
+       "name": "Zack Lim",
+       "grade": "Exec",
+       "open": false
+      },
+      {
+       "name": "Jess Ng",
+       "grade": "A",
+       "open": false
+      }
+     ]
+    }
+   ],
+   "support": [
+    "Boey Wong"
+   ]
+  },
+  {
+   "name": "Normala (Joy) Ahmad",
+   "grade": "SAVP",
+   "segment": "Government & SME",
+   "teamCount": 15,
+   "line": "b",
+   "vp": "Nicholas Teh",
+   "pods": [
+    {
+     "direct": false,
+     "lead": "Nurul Huda",
+     "leadGrade": "SA",
+     "segment": "",
+     "members": [
+      {
+       "name": "Monica Mujah",
+       "grade": "A",
+       "open": false
+      },
+      {
+       "name": "Arif Aminuddin",
+       "grade": "A",
+       "open": false
+      }
+     ]
+    },
+    {
+     "direct": false,
+     "lead": "Sharifah Kuraisha",
+     "leadGrade": "SA",
+     "segment": "",
+     "members": [
+      {
+       "name": "Nurshafiqah (Fifi)",
+       "grade": "A",
+       "open": false
+      },
+      {
+       "name": "Imran",
+       "grade": "SA",
+       "open": false
+      }
+     ]
+    },
+    {
+     "direct": false,
+     "lead": "Nazihah Abdol",
+     "leadGrade": "SA",
+     "segment": "",
+     "members": [
+      {
+       "name": "Nurul Syahirah",
+       "grade": "A",
+       "open": false
+      },
+      {
+       "name": "Nadia Rosli",
+       "grade": "A",
+       "open": false
+      }
+     ]
+    },
+    {
+     "direct": false,
+     "lead": "Nash",
+     "leadGrade": "SA",
+     "segment": "",
+     "members": [
+      {
+       "name": "Reezal",
+       "grade": "A",
+       "open": false
+      },
+      {
+       "name": "Ungku Asif",
+       "grade": "A",
+       "open": false
+      }
+     ]
+    },
+    {
+     "direct": false,
+     "lead": "Wan Syahrul Amry",
+     "leadGrade": "AVP",
+     "segment": "East Coast",
+     "members": [
+      {
+       "name": "Fauzi",
+       "grade": "A",
+       "open": false
+      },
+      {
+       "name": "Open role",
+       "grade": "",
+       "open": true
+      }
+     ]
+    }
+   ],
+   "support": [
+    "Chin See",
+    "Isya",
+    "Syikin Roslan"
+   ]
+  },
+  {
+   "name": "Yip Siew Ling",
+   "grade": "",
+   "segment": "GenNext",
+   "teamCount": 4,
+   "line": "c",
+   "vp": "Unassigned line",
+   "pods": [
+    {
+     "direct": true,
+     "lead": null,
+     "leadGrade": "",
+     "segment": "",
+     "members": [
+      {
+       "name": "Celine Jong Shu Yi",
+       "grade": "",
+       "open": false
+      },
+      {
+       "name": "Khairunniza Arshad",
+       "grade": "",
+       "open": false
+      },
+      {
+       "name": "Nur Syahira Abdul Ghani",
+       "grade": "",
+       "open": false
+      },
+      {
+       "name": "Syed Hadi Syed Othman",
+       "grade": "",
+       "open": false
+      }
+     ]
+    }
+   ],
+   "support": []
+  }
+ ],
+ "index": {
+  "Adreena": {
+   "name": "Adreena",
+   "grade": "Delivery",
+   "team": "Key Clients",
+   "reportsTo": "Boon Suat Wei",
+   "line": "b"
+  },
+  "Aisyah Azizi": {
+   "name": "Aisyah Azizi",
+   "grade": "AM",
+   "team": "Agency",
+   "reportsTo": "Ling Chen Lee",
+   "line": "a"
+  },
+  "Alvin Wong": {
+   "name": "Alvin Wong",
+   "grade": "AVP",
+   "team": "Agency",
+   "reportsTo": "Jeyapuvan",
+   "line": "a"
+  },
+  "Amanda Lim": {
+   "name": "Amanda Lim",
+   "grade": "SA",
+   "team": "Agency",
+   "reportsTo": "Ling Chen Lee",
+   "line": "a"
+  },
+  "Amelia": {
+   "name": "Amelia",
+   "grade": "SAVP",
+   "team": "Key Clients",
+   "reportsTo": "Amelia",
+   "line": "a"
+  },
+  "Anies": {
+   "name": "Anies",
+   "grade": "Delivery",
+   "team": "Agency",
+   "reportsTo": "Yee Yuen Lai",
+   "line": "a"
+  },
+  "Anisa": {
+   "name": "Anisa",
+   "grade": "Delivery",
+   "team": "Key Clients",
+   "reportsTo": "Boon Suat Wei",
+   "line": "b"
+  },
+  "Arif Aminuddin": {
+   "name": "Arif Aminuddin",
+   "grade": "A",
+   "team": "Government & SME",
+   "reportsTo": "Nurul Huda",
+   "line": "b"
+  },
+  "Ashley": {
+   "name": "Ashley",
+   "grade": "A",
+   "team": "Key Clients",
+   "reportsTo": "Voo Poh Chee",
+   "line": "b"
+  },
+  "Azuin Rahman": {
+   "name": "Azuin Rahman",
+   "grade": "AM",
+   "team": "Agency",
+   "reportsTo": "Stanley Chong",
+   "line": "a"
+  },
+  "Belinda Chin": {
+   "name": "Belinda Chin",
+   "grade": "SAVP",
+   "team": "Key Clients",
+   "reportsTo": "Nicholas Teh",
+   "line": "b"
+  },
+  "Boey Wong": {
+   "name": "Boey Wong",
+   "grade": "Delivery",
+   "team": "SME (Chinese)",
+   "reportsTo": "Edison Lim",
+   "line": "b"
+  },
+  "Boon Suat Wei": {
+   "name": "Boon Suat Wei",
+   "grade": "AVP",
+   "team": "Key Clients",
+   "reportsTo": "Nicholas Teh",
+   "line": "b"
+  },
+  "Casey Low": {
+   "name": "Casey Low",
+   "grade": "Delivery",
+   "team": "Agency",
+   "reportsTo": "Yee Yuen Lai",
+   "line": "a"
+  },
+  "Celine Jong Shu Yi": {
+   "name": "Celine Jong Shu Yi",
+   "grade": "—",
+   "team": "GenNext",
+   "reportsTo": "Yip Siew Ling",
+   "line": "c"
+  },
+  "Chew Joe Er": {
+   "name": "Chew Joe Er",
+   "grade": "SA",
+   "team": "Key Clients",
+   "reportsTo": "Gai Li Zhan",
+   "line": "b"
+  },
+  "Chin See": {
+   "name": "Chin See",
+   "grade": "Delivery",
+   "team": "Government & SME",
+   "reportsTo": "Normala (Joy) Ahmad",
+   "line": "b"
+  },
+  "Crystal Pe": {
+   "name": "Crystal Pe",
+   "grade": "SE",
+   "team": "Agency",
+   "reportsTo": "Tan Hui Yee",
+   "line": "a"
+  },
+  "Daniel Ravin": {
+   "name": "Daniel Ravin",
+   "grade": "SE",
+   "team": "Agency",
+   "reportsTo": "Stanley Chong",
+   "line": "a"
+  },
+  "Dayang Diana Natasha": {
+   "name": "Dayang Diana Natasha",
+   "grade": "SA",
+   "team": "Key Clients",
+   "reportsTo": "Boon Suat Wei",
+   "line": "b"
+  },
+  "Doris": {
+   "name": "Doris",
+   "grade": "Delivery",
+   "team": "Agency",
+   "reportsTo": "Yee Yuen Lai",
+   "line": "a"
+  },
+  "Edison Lim": {
+   "name": "Edison Lim",
+   "grade": "—",
+   "team": "SME (Chinese)",
+   "reportsTo": "Nicholas Teh",
+   "line": "b"
+  },
+  "Edmund Ng": {
+   "name": "Edmund Ng",
+   "grade": "A",
+   "team": "Key Clients",
+   "reportsTo": "Voo Poh Chee",
+   "line": "b"
+  },
+  "Edward Ham": {
+   "name": "Edward Ham",
+   "grade": "SE",
+   "team": "Agency",
+   "reportsTo": "Tan Hui Yee",
+   "line": "a"
+  },
+  "Edwin": {
+   "name": "Edwin",
+   "grade": "Delivery",
+   "team": "Agency",
+   "reportsTo": "Alvin Wong",
+   "line": "a"
+  },
+  "Elaine Ng": {
+   "name": "Elaine Ng",
+   "grade": "AVP",
+   "team": "Key Clients",
+   "reportsTo": "Elaine Ng",
+   "line": "b"
+  },
+  "Fauzi": {
+   "name": "Fauzi",
+   "grade": "A",
+   "team": "East Coast",
+   "reportsTo": "Wan Syahrul Amry",
+   "line": "b"
+  },
+  "Fiona Lee": {
+   "name": "Fiona Lee",
+   "grade": "SE",
+   "team": "Agency",
+   "reportsTo": "Ling Chen Lee",
+   "line": "a"
+  },
+  "Gai Li Zhan": {
+   "name": "Gai Li Zhan",
+   "grade": "AVP",
+   "team": "Key Clients",
+   "reportsTo": "Gai Li Zhan",
+   "line": "b"
+  },
+  "Gates Wong": {
+   "name": "Gates Wong",
+   "grade": "A",
+   "team": "Key Clients",
+   "reportsTo": "Amelia",
+   "line": "a"
+  },
+  "Goh Hong Cheng": {
+   "name": "Goh Hong Cheng",
+   "grade": "A",
+   "team": "Key Clients",
+   "reportsTo": "Gai Li Zhan",
+   "line": "b"
+  },
+  "Harminder Singh": {
+   "name": "Harminder Singh",
+   "grade": "—",
+   "team": "Client Success",
+   "reportsTo": "Jeyapuvan",
+   "line": "a"
+  },
+  "Henry Ong": {
+   "name": "Henry Ong",
+   "grade": "A",
+   "team": "Chinese TV & Digital",
+   "reportsTo": "Teng Siok Chin",
+   "line": "b"
+  },
+  "Hidayah": {
+   "name": "Hidayah",
+   "grade": "Delivery",
+   "team": "Agency",
+   "reportsTo": "Alvin Wong",
+   "line": "a"
+  },
+  "Imran": {
+   "name": "Imran",
+   "grade": "SA",
+   "team": "Government & SME",
+   "reportsTo": "Sharifah Kuraisha",
+   "line": "b"
+  },
+  "Isya": {
+   "name": "Isya",
+   "grade": "Delivery",
+   "team": "Government & SME",
+   "reportsTo": "Normala (Joy) Ahmad",
+   "line": "b"
+  },
+  "Jarald Wong": {
+   "name": "Jarald Wong",
+   "grade": "A",
+   "team": "Key Clients",
+   "reportsTo": "Amelia",
+   "line": "a"
+  },
+  "Jess Ng": {
+   "name": "Jess Ng",
+   "grade": "A",
+   "team": "SME (Chinese)",
+   "reportsTo": "Edison Lim",
+   "line": "b"
+  },
+  "Jessie Hoe": {
+   "name": "Jessie Hoe",
+   "grade": "A",
+   "team": "Key Clients",
+   "reportsTo": "Elaine Ng",
+   "line": "b"
+  },
+  "Jeyapuvan": {
+   "name": "Jeyapuvan",
+   "grade": "VP",
+   "team": "Client Solutions",
+   "reportsTo": "—",
+   "line": "a"
+  },
+  "Jing Yan": {
+   "name": "Jing Yan",
+   "grade": "AM",
+   "team": "Agency",
+   "reportsTo": "Mandy Seah",
+   "line": "a"
+  },
+  "Joanne Chen": {
+   "name": "Joanne Chen",
+   "grade": "SE",
+   "team": "Agency",
+   "reportsTo": "Mandy Seah",
+   "line": "a"
+  },
+  "Joanne Tan": {
+   "name": "Joanne Tan",
+   "grade": "SAVP",
+   "team": "Regional",
+   "reportsTo": "Jeyapuvan",
+   "line": "a"
+  },
+  "Jonis": {
+   "name": "Jonis",
+   "grade": "—",
+   "team": "Key Clients",
+   "reportsTo": "Kazman",
+   "line": "a"
+  },
+  "Josephine Lim": {
+   "name": "Josephine Lim",
+   "grade": "SA",
+   "team": "Key Clients",
+   "reportsTo": "Belinda Chin",
+   "line": "b"
+  },
+  "Justin Tan": {
+   "name": "Justin Tan",
+   "grade": "A",
+   "team": "Chinese TV & Digital",
+   "reportsTo": "Teng Siok Chin",
+   "line": "b"
+  },
+  "Kalai": {
+   "name": "Kalai",
+   "grade": "CE",
+   "team": "Agency",
+   "reportsTo": "Yee Yuen Lai",
+   "line": "a"
+  },
+  "Kavin Mullai Sadasseevan": {
+   "name": "Kavin Mullai Sadasseevan",
+   "grade": "SAVP",
+   "team": "Indian Segment",
+   "reportsTo": "Jeyapuvan",
+   "line": "a"
+  },
+  "Kazman": {
+   "name": "Kazman",
+   "grade": "SAVP",
+   "team": "Key Clients",
+   "reportsTo": "Kazman",
+   "line": "a"
+  },
+  "Kenn": {
+   "name": "Kenn",
+   "grade": "VP",
+   "team": "Key Clients",
+   "reportsTo": "Jeyapuvan",
+   "line": "a"
+  },
+  "Khairunniza Arshad": {
+   "name": "Khairunniza Arshad",
+   "grade": "—",
+   "team": "GenNext",
+   "reportsTo": "Yip Siew Ling",
+   "line": "c"
+  },
+  "Kirabassri": {
+   "name": "Kirabassri",
+   "grade": "A",
+   "team": "Indian Segment",
+   "reportsTo": "Kavin Mullai Sadasseevan",
+   "line": "a"
+  },
+  "Koo YiTong": {
+   "name": "Koo YiTong",
+   "grade": "A",
+   "team": "Regional - Northern",
+   "reportsTo": "Joanne Tan",
+   "line": "a"
+  },
+  "Lani Low": {
+   "name": "Lani Low",
+   "grade": "A",
+   "team": "Key Clients",
+   "reportsTo": "Amelia",
+   "line": "a"
+  },
+  "Lee Shih Hsin": {
+   "name": "Lee Shih Hsin",
+   "grade": "SA",
+   "team": "Key Clients",
+   "reportsTo": "Belinda Chin",
+   "line": "b"
+  },
+  "Ling Chen Lee": {
+   "name": "Ling Chen Lee",
+   "grade": "AVP",
+   "team": "Agency",
+   "reportsTo": "Ling Chen Lee",
+   "line": "a"
+  },
+  "Lionel Lim": {
+   "name": "Lionel Lim",
+   "grade": "AM",
+   "team": "Agency",
+   "reportsTo": "Ling Chen Lee",
+   "line": "a"
+  },
+  "Mandy Seah": {
+   "name": "Mandy Seah",
+   "grade": "AVP",
+   "team": "Agency",
+   "reportsTo": "Mandy Seah",
+   "line": "a"
+  },
+  "Maznan Mahyuddin": {
+   "name": "Maznan Mahyuddin",
+   "grade": "SA",
+   "team": "Regional - Northern",
+   "reportsTo": "Joanne Tan",
+   "line": "a"
+  },
+  "Mei Li": {
+   "name": "Mei Li",
+   "grade": "Delivery",
+   "team": "Agency",
+   "reportsTo": "Alvin Wong",
+   "line": "a"
+  },
+  "Melanie Lim": {
+   "name": "Melanie Lim",
+   "grade": "A",
+   "team": "Key Clients",
+   "reportsTo": "Gai Li Zhan",
+   "line": "b"
+  },
+  "Mindy": {
+   "name": "Mindy",
+   "grade": "Delivery",
+   "team": "Key Clients",
+   "reportsTo": "Belinda Chin",
+   "line": "b"
+  },
+  "Monica Mujah": {
+   "name": "Monica Mujah",
+   "grade": "A",
+   "team": "Government & SME",
+   "reportsTo": "Nurul Huda",
+   "line": "b"
+  },
+  "Nadia Rosli": {
+   "name": "Nadia Rosli",
+   "grade": "A",
+   "team": "Government & SME",
+   "reportsTo": "Nazihah Abdol",
+   "line": "b"
+  },
+  "Nash": {
+   "name": "Nash",
+   "grade": "SA",
+   "team": "Government & SME",
+   "reportsTo": "Nash",
+   "line": "b"
+  },
+  "Nazihah Abdol": {
+   "name": "Nazihah Abdol",
+   "grade": "SA",
+   "team": "Government & SME",
+   "reportsTo": "Nazihah Abdol",
+   "line": "b"
+  },
+  "Nicholas Teh": {
+   "name": "Nicholas Teh",
+   "grade": "VP",
+   "team": "Client Solutions",
+   "reportsTo": "—",
+   "line": "b"
+  },
+  "Normala (Joy) Ahmad": {
+   "name": "Normala (Joy) Ahmad",
+   "grade": "SAVP",
+   "team": "Government & SME",
+   "reportsTo": "Nicholas Teh",
+   "line": "b"
+  },
+  "Nur Izzatul Baizura (Jaja)": {
+   "name": "Nur Izzatul Baizura (Jaja)",
+   "grade": "SA",
+   "team": "Regional - Southern",
+   "reportsTo": "Joanne Tan",
+   "line": "a"
+  },
+  "Nur Manissha": {
+   "name": "Nur Manissha",
+   "grade": "Delivery",
+   "team": "Key Clients",
+   "reportsTo": "Belinda Chin",
+   "line": "b"
+  },
+  "Nur Syahira Abdul Ghani": {
+   "name": "Nur Syahira Abdul Ghani",
+   "grade": "—",
+   "team": "GenNext",
+   "reportsTo": "Yip Siew Ling",
+   "line": "c"
+  },
+  "Nurshafiqah (Fifi)": {
+   "name": "Nurshafiqah (Fifi)",
+   "grade": "A",
+   "team": "Government & SME",
+   "reportsTo": "Sharifah Kuraisha",
+   "line": "b"
+  },
+  "Nurul Huda": {
+   "name": "Nurul Huda",
+   "grade": "SA",
+   "team": "Government & SME",
+   "reportsTo": "Nurul Huda",
+   "line": "b"
+  },
+  "Nurul Solehah": {
+   "name": "Nurul Solehah",
+   "grade": "A",
+   "team": "Client Success",
+   "reportsTo": "Harminder Singh",
+   "line": "a"
+  },
+  "Nurul Syahirah": {
+   "name": "Nurul Syahirah",
+   "grade": "A",
+   "team": "Government & SME",
+   "reportsTo": "Nazihah Abdol",
+   "line": "b"
+  },
+  "Peggy": {
+   "name": "Peggy",
+   "grade": "Delivery",
+   "team": "Key Clients",
+   "reportsTo": "Boon Suat Wei",
+   "line": "b"
+  },
+  "Prravinn": {
+   "name": "Prravinn",
+   "grade": "A",
+   "team": "Indian Segment",
+   "reportsTo": "Pushpa Nathan",
+   "line": "a"
+  },
+  "Pushpa Nathan": {
+   "name": "Pushpa Nathan",
+   "grade": "AVP",
+   "team": "Indian Segment",
+   "reportsTo": "Pushpa Nathan",
+   "line": "a"
+  },
+  "Rae Zalani": {
+   "name": "Rae Zalani",
+   "grade": "AM",
+   "team": "Agency",
+   "reportsTo": "Mandy Seah",
+   "line": "a"
+  },
+  "Reezal": {
+   "name": "Reezal",
+   "grade": "A",
+   "team": "Government & SME",
+   "reportsTo": "Nash",
+   "line": "b"
+  },
+  "Rhesimalar Ravi": {
+   "name": "Rhesimalar Ravi",
+   "grade": "A",
+   "team": "Indian Segment",
+   "reportsTo": "Pushpa Nathan",
+   "line": "a"
+  },
+  "Rizal": {
+   "name": "Rizal",
+   "grade": "—",
+   "team": "Client Success",
+   "reportsTo": "Harminder Singh",
+   "line": "a"
+  },
+  "Sharifah Kuraisha": {
+   "name": "Sharifah Kuraisha",
+   "grade": "SA",
+   "team": "Government & SME",
+   "reportsTo": "Sharifah Kuraisha",
+   "line": "b"
+  },
+  "Sheryl": {
+   "name": "Sheryl",
+   "grade": "CE",
+   "team": "Key Clients",
+   "reportsTo": "Belinda Chin",
+   "line": "b"
+  },
+  "Siti Sarah": {
+   "name": "Siti Sarah",
+   "grade": "AM",
+   "team": "Agency",
+   "reportsTo": "Mandy Seah",
+   "line": "a"
+  },
+  "Stanley Chong": {
+   "name": "Stanley Chong",
+   "grade": "AVP",
+   "team": "Agency",
+   "reportsTo": "Stanley Chong",
+   "line": "a"
+  },
+  "Svensson Yap": {
+   "name": "Svensson Yap",
+   "grade": "SE",
+   "team": "Agency",
+   "reportsTo": "Tan Hui Yee",
+   "line": "a"
+  },
+  "Syed Hadi Syed Othman": {
+   "name": "Syed Hadi Syed Othman",
+   "grade": "—",
+   "team": "GenNext",
+   "reportsTo": "Yip Siew Ling",
+   "line": "c"
+  },
+  "Syikin Roslan": {
+   "name": "Syikin Roslan",
+   "grade": "Delivery",
+   "team": "Government & SME",
+   "reportsTo": "Normala (Joy) Ahmad",
+   "line": "b"
+  },
+  "Tan Hui Yee": {
+   "name": "Tan Hui Yee",
+   "grade": "AVP",
+   "team": "Agency",
+   "reportsTo": "Tan Hui Yee",
+   "line": "a"
+  },
+  "Teng Siok Chin": {
+   "name": "Teng Siok Chin",
+   "grade": "SAVP",
+   "team": "Chinese TV & Digital",
+   "reportsTo": "Nicholas Teh",
+   "line": "b"
+  },
+  "Teo Yap Keong": {
+   "name": "Teo Yap Keong",
+   "grade": "AVP",
+   "team": "Chinese TV & Digital",
+   "reportsTo": "Teng Siok Chin",
+   "line": "b"
+  },
+  "Ungku Asif": {
+   "name": "Ungku Asif",
+   "grade": "A",
+   "team": "Government & SME",
+   "reportsTo": "Nash",
+   "line": "b"
+  },
+  "Vernon Ong": {
+   "name": "Vernon Ong",
+   "grade": "SE",
+   "team": "Agency",
+   "reportsTo": "Stanley Chong",
+   "line": "a"
+  },
+  "Voo Poh Chee": {
+   "name": "Voo Poh Chee",
+   "grade": "SA",
+   "team": "Key Clients",
+   "reportsTo": "Voo Poh Chee",
+   "line": "b"
+  },
+  "Wan Syahrul Amry": {
+   "name": "Wan Syahrul Amry",
+   "grade": "AVP",
+   "team": "East Coast",
+   "reportsTo": "Wan Syahrul Amry",
+   "line": "b"
+  },
+  "Wong Yoke Saan": {
+   "name": "Wong Yoke Saan",
+   "grade": "Exec",
+   "team": "SME (Chinese)",
+   "reportsTo": "Edison Lim",
+   "line": "b"
+  },
+  "Yee Yuen Lai": {
+   "name": "Yee Yuen Lai",
+   "grade": "SAVP",
+   "team": "Agency",
+   "reportsTo": "Jeyapuvan",
+   "line": "a"
+  },
+  "Yip Siew Ling": {
+   "name": "Yip Siew Ling",
+   "grade": "—",
+   "team": "GenNext",
+   "reportsTo": "Not stated",
+   "line": "c"
+  },
+  "Yuki Looi": {
+   "name": "Yuki Looi",
+   "grade": "AM",
+   "team": "SME (Chinese)",
+   "reportsTo": "Edison Lim",
+   "line": "b"
+  },
+  "Yulesha": {
+   "name": "Yulesha",
+   "grade": "A",
+   "team": "Indian Segment",
+   "reportsTo": "Pushpa Nathan",
+   "line": "a"
+  },
+  "Zack Lim": {
+   "name": "Zack Lim",
+   "grade": "Exec",
+   "team": "SME (Chinese)",
+   "reportsTo": "Edison Lim",
+   "line": "b"
+  },
+  "Zenia Teh": {
+   "name": "Zenia Teh",
+   "grade": "A",
+   "team": "Chinese TV & Digital",
+   "reportsTo": "Teng Siok Chin",
+   "line": "b"
+  }
+ }
+}

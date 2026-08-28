@@ -30,7 +30,7 @@ const KEY = process.env.ANTHROPIC_API_KEY || '';
 const MAX_OUT = 2048;
 const MAX_TURNS = 20;        // conversation memory sent back each time
 const MAX_MSG = 4000;        // characters per message
-const MAX_BRIEF = 12000;     // characters of board context
+const MAX_BRIEF = 32000;     // characters of board context, org chart included
 
 const SYSTEM = `You are the Collabrium assistant, embedded in the Astro
 sales leadership board. The person talking to you is a sales leader

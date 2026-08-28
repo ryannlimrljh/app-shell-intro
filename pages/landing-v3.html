@@ -7044,6 +7044,18 @@ var TEAMS = [
 ];
 var VPS = ['Jeyapuvan','Nicholas Teh'];
 
+/* The full FY27 org chart, for the assistant's brief. Fetched once and
+   quietly: the board itself never needs it (TEAMS above is its own
+   copy of the nine heads), but the chart also carries the people the
+   board does not show, and the assistant should know the whole team.
+   The `index` is a lookup aid for code and pure weight for a model, so
+   it is dropped before the tree is kept. */
+var ORG_TREE = null;
+fetch('../data/org-tree.json')
+  .then(function(r){ return r.ok ? r.json() : null; })
+  .then(function(j){ if(j){ delete j.index; ORG_TREE = j; } })
+  .catch(function(){ /* no chart is fine; the brief falls back to TEAMS */ });
+
 /* ── Formatting ───────────────────────────────────────────── */
 function rm(v){
   if(v===null||v===undefined) return null;
@@ -9587,6 +9599,21 @@ function renderHeroCards(){
         return { name: r.n, target: r.t, forecast: r.f, status: r.s }; }),
       forward_coverage_pct_of_month_target: HEAT.map(function(r){
         return { name: r[0], sep: r[1], oct: r[2], nov: r[3], dec: r[4] }; }),
+      team_structure: ORG_TREE || {
+        source: 'page copy of the FY27 org chart, board heads only',
+        vp_lines: { A: 'Jeyapuvan', B: 'Nicholas Teh' },
+        heads: TEAMS.map(function(t){
+          return { board_name: t.k, full_name: t.name, grade: t.grade || null,
+                   segment: t.seg, vp: t.vp, team_size: t.team,
+                   support_staff: t.sup && t.sup.length ? t.sup : null,
+                   pods: t.pods.map(function(p){
+                     return { lead: p.lead, lead_grade: p.g || null, segment: p.seg || null,
+                              members: p.m.map(function(m){
+                                return { name: m.n, grade: m.g || null, open_role: m.o ? true : undefined };
+                              }) };
+                   }) };
+        })
+      },
       largest_open_deals_august_this_slice: openDeals,
       largest_forward_deals_this_slice: fwdDeals,
       provenance: 'Sales Leadership Weekly deck of 7 Aug 2026; pipeline export 6 Aug. The export has no head-by-platform crosstab, so platform-sliced head numbers are derived. Anything not present in this object is not in the data.'

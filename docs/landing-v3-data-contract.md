@@ -248,6 +248,12 @@ them precomputed they will be recomputed anyway.
 - **Every bar, tick, rail and shortfall marker.**
 - **The hero cards.** Four of the six rewrite themselves from the filtered
   model on every change.
+- **The assistant.** The chat behind the ask box is live. The page posts
+  the conversation plus a plain-text brief of the current slice (built by
+  `window.__boardBrief()` inside the board script) to `/api/ask`, which
+  holds the `ANTHROPIC_API_KEY` env var, calls Claude, and streams text
+  back. Swap the board's source data and the assistant follows for free,
+  because the brief is assembled from the same model the page draws.
 - **The greeting's mark.** The emoji after the name shows a celebration
   whenever the current slice's forecast has caught its target, so it follows
   the filters like everything else. `renderHeroCards()` publishes that as

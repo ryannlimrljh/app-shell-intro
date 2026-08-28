@@ -4372,30 +4372,10 @@
         </header>
 
         <div class="c-chat-body" id="chatBody">
-          <div class="c-chat-scroll">
-            <div class="c-chat-msg is-me">
-              <div class="c-chat-bubble"><p>We&rsquo;re RM 17.1M short on plan. Is that a pipeline problem or a conversion problem?</p></div>
-            </div>
+          <div class="c-chat-scroll" id="chatScroll">
             <div class="c-chat-msg is-ai">
               <div class="c-chat-bubble">
-                <p>Conversion. There is <b>RM 111.2M</b> of open pipeline against a RM 17.1M gap, 6.5&times; cover, so there is no shortage of deals to work.</p>
-                <p>What is missing is close rate in the back half of the funnel. Negotiation-stage deals have been ageing 41 days on average, and the plan line is only touched by best case.</p>
-                <span class="c-chat-cite"><i class="ph ph-chart-line" aria-hidden="true"></i>Pipeline by stage</span>
-              </div>
-            </div>
-            <div class="c-chat-msg is-me">
-              <div class="c-chat-bubble"><p>So which deals do I actually chase this week?</p></div>
-            </div>
-            <div class="c-chat-msg is-ai">
-              <div class="c-chat-bubble">
-                <p>Eight of them cover the gap on their own. In order of what is at stake:</p>
-                <ul>
-                  <li><b>Petronas</b>: budget reset opens next week, reset undiarised for 7 days</li>
-                  <li><b>MediaCorp</b>: quiet longest at 12 days stalled</li>
-                  <li><b>Genting F&amp;B</b> and <b>AirAsia Retail</b>: both inside the renewal window</li>
-                </ul>
-                <p>The remaining four are smaller and all sit with one rep, which is its own risk.</p>
-                <span class="c-chat-cite"><i class="ph ph-list-checks" aria-hidden="true"></i>Decide now &middot; 3 this week</span>
+                <p>I&rsquo;m reading the board exactly as you have it filtered. Ask where the quarter stands, who needs attention first, or which deals close the gap.</p>
               </div>
             </div>
           </div>
@@ -4421,7 +4401,7 @@
               </div>
             </div>
           </div>
-          <p class="c-chat-foot">Placeholder conversation. The composer is not wired up yet.</p>
+          <p class="c-chat-foot">Answers are read from this board&rsquo;s numbers. Check them before you act.</p>
         </div>
       </div>
     </div>
@@ -9620,6 +9600,39 @@ function renderHeroCards(){
   window.__sliceAhead = (gap <= 0);
   if (window.__paintGreeting) window.__paintGreeting();
 
+  /* The assistant reads this. A plain-text brief of the board as it is
+     currently sliced, assembled here because this function already has
+     every model the page draws from — publishing a closure keeps the
+     assistant's answer tied to the reader's actual filters, and costs
+     nothing until a question is asked. */
+  window.__boardBrief = function(){
+    var Mn = sliceModel('now'), Nx = sliceModel('next');
+    var Wb = windowFor(state.platform);
+    var L = [];
+    var on = ['platform','hos','status','line','mgr','person'].map(function(k){
+      return state[k] ? (k + ' = ' + state[k]) : '';
+    }).filter(Boolean).join(', ');
+    L.push('Filters in force: ' + (on || 'none, whole company'));
+    L.push('Billing window: day ' + Wb.gone + ' of ' + Wb.total + ' in August (' + Math.max(0, Wb.total - Wb.gone) + ' billing days left).');
+    L.push('August month to date, this slice: target ' + rm(Mn.t) + ', booked ' + rm(Mn.b) + ', open weighted pipeline ' + rm(Mn.p) + ', forecast ' + rm(Mn.f) + ', gap to target ' + rmSigned(Mn.f - Mn.t) + '.' + (Mn.modelled ? ' These numbers are DERIVED from the company cut, not sourced directly.' : ''));
+    L.push('September to December projection, this slice: target ' + rm(Nx.t) + ', forecast ' + rm(Nx.f) + ', gap ' + rmSigned(Nx.f - Nx.t) + '.' + (Nx.modelled ? ' DERIVED.' : ''));
+    L.push('');
+    L.push('Heads of Sales, August, whole company (target / forecast / status):');
+    HOS_NOW.forEach(function(r){
+      L.push('  ' + r.n + ': RM' + r.t + 'M / RM' + r.f + 'M / ' + r.s + (r.opp ? ' (save opportunity RM' + r.opp + 'M)' : ''));
+    });
+    L.push('');
+    var ds = dealData(true).slice().sort(function(a,b){ return b.d.v - a.d.v; }).slice(0, 10);
+    L.push('Largest open deals in this slice (' + ds.length + ' shown):');
+    if(!ds.length) L.push('  none in this slice');
+    ds.forEach(function(x){
+      L.push('  ' + x.d.a + ' \u00b7 ' + x.d.c + ' \u00b7 ' + rm(x.d.v) + ' \u00b7 owner ' + x.d.o + (x.d.x ? ' \u00b7 ' + x.d.x : ''));
+    });
+    L.push('');
+    L.push('Source: Sales Leadership Weekly deck of 7 Aug 2026; pipeline export 6 Aug. The export has no head-by-platform crosstab, so platform-sliced head numbers are derived. Anything not listed here is not in the data.');
+    return L.join('\n');
+  };
+
   // the deal to land now
   var deals = dealData(true).slice().sort(function(a,b){ return b.d.v - a.d.v; });
   var top = deals[0];
@@ -10441,6 +10454,96 @@ frow.addEventListener('scroll', mark, {passive: true});
 frow.addEventListener('change', function () { setTimeout(mark, 260); });
 window.addEventListener('resize', mark);
 mark();
+})();
+</script>
+
+<script>
+/* ══ The composer, wired ══
+   The chat window above was a prop with a scripted conversation. This
+   makes it real: Enter or the send button posts the conversation plus
+   the board brief to /api/ask, and the answer streams into the bubble
+   as it is generated. All state is page memory; a refresh is a clean
+   slate, which for a pilot is a feature. */
+(function () {
+'use strict';
+var input = document.getElementById('chatInput');
+var send = document.querySelector('.c-chat-send');
+var scroll = document.getElementById('chatScroll');
+var body = document.getElementById('chatBody');
+if (!input || !send || !scroll || !body) return;
+
+var history = [];
+var busy = false;
+
+function bubble(role) {
+  var m = document.createElement('div');
+  m.className = 'c-chat-msg ' + (role === 'user' ? 'is-me' : 'is-ai');
+  var bub = document.createElement('div');
+  bub.className = 'c-chat-bubble';
+  var p = document.createElement('p');
+  /* the model answers in paragraphs; textContent flattens newlines and
+     pre-wrap puts them back without inviting HTML in */
+  p.style.whiteSpace = 'pre-wrap';
+  bub.appendChild(p); m.appendChild(bub); scroll.appendChild(m);
+  return p;
+}
+function pin() { body.scrollTop = body.scrollHeight; }
+
+function ask() {
+  if (busy) return;
+  var q = input.value.trim();
+  if (!q) return;
+  input.value = '';
+  busy = true; send.disabled = true;
+  bubble('user').textContent = q;
+  history.push({ role: 'user', content: q });
+  var out = bubble('assistant');
+  out.textContent = '\u2026';
+  pin();
+  var acc = '';
+  fetch('/api/ask', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({
+      messages: history.slice(-20),
+      brief: window.__boardBrief ? window.__boardBrief() : ''
+    })
+  }).then(function (res) {
+    var ct = res.headers.get('content-type') || '';
+    if (ct.indexOf('json') >= 0) {
+      /* the error path: not configured, rate limited, or rejected */
+      return res.json().then(function (j) {
+        out.textContent = (j && j.configured === false)
+          ? 'The assistant is not connected yet. The server is missing its API key.'
+          : 'That did not go through: ' + ((j && j.error) || ('HTTP ' + res.status));
+      });
+    }
+    var reader = res.body.getReader();
+    var dec = new TextDecoder();
+    function step() {
+      return reader.read().then(function (r) {
+        if (r.done) return;
+        acc += dec.decode(r.value, { stream: true });
+        out.textContent = acc;
+        pin();
+        return step();
+      });
+    }
+    return step().then(function () {
+      if (acc) history.push({ role: 'assistant', content: acc });
+    });
+  }).catch(function (e) {
+    out.textContent = 'The connection failed: ' + (e && e.message ? e.message : e);
+  }).then(function () {
+    busy = false; send.disabled = false; pin();
+    try { input.focus({ preventScroll: true }); } catch (err) { input.focus(); }
+  });
+}
+
+send.addEventListener('click', ask);
+input.addEventListener('keydown', function (e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); ask(); }
+});
 })();
 </script>
 

@@ -17,6 +17,7 @@
   "type": "commonjs",
   "private": "true",
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.122.0",
     "@neondatabase/serverless": "^1.1.0",
     "@visx/axis": "^4.0.0",
     "@visx/curve": "^4.0.0",

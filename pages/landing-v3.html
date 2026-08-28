@@ -9561,57 +9561,36 @@ function renderHeroCards(){
   window.__boardBrief = function(){
     var Mn = sliceModel('now'), Nx = sliceModel('next');
     var Wb = windowFor(state.platform);
-    var L = [];
-    var on = ['platform','hos','status','line','mgr','person'].map(function(k){
-      return state[k] ? (k + ' = ' + state[k]) : '';
-    }).filter(Boolean).join(', ');
-    L.push('Filters in force: ' + (on || 'none, whole company'));
-    L.push('Billing window: day ' + Wb.gone + ' of ' + Wb.total + ' in August (' + Math.max(0, Wb.total - Wb.gone) + ' billing days left).');
-    L.push('August month to date, this slice: target ' + rm(Mn.t) + ', booked ' + rm(Mn.b) + ', open weighted pipeline ' + rm(Mn.p) + ', forecast ' + rm(Mn.f) + ', gap to target ' + rmSigned(Mn.f - Mn.t) + '.' + (Mn.modelled ? ' These numbers are DERIVED from the company cut, not sourced directly.' : ''));
-    L.push('September to December projection, this slice: target ' + rm(Nx.t) + ', forecast ' + rm(Nx.f) + ', gap ' + rmSigned(Nx.f - Nx.t) + '.' + (Nx.modelled ? ' DERIVED.' : ''));
-    L.push('');
-    L.push('Heads of Sales, August, whole company (target / forecast / status):');
-    HOS_NOW.forEach(function(r){
-      L.push('  ' + r.n + ': RM' + r.t + 'M / RM' + r.f + 'M / ' + r.s + (r.opp ? ' (save opportunity RM' + r.opp + 'M)' : ''));
-    });
-    L.push('');
-    var ds = dealData(true).slice().sort(function(a,b){ return b.d.v - a.d.v; }).slice(0, 10);
-    L.push('Largest open deals in this slice (' + ds.length + ' shown):');
-    if(!ds.length) L.push('  none in this slice');
-    ds.forEach(function(x){
-      L.push('  ' + x.d.a + ' \u00b7 ' + x.d.c + ' \u00b7 ' + rm(x.d.v) + ' \u00b7 owner ' + x.d.o + (x.d.x ? ' \u00b7 ' + x.d.x : ''));
-    });
-    L.push('');
-    L.push('Platforms, August, whole company (target / booked / forecast / % to target / vs last year):');
-    PLATFORMS.forEach(function(r){
-      L.push('  ' + r.n + ': RM' + r.t + 'M / RM' + r.b + 'M / RM' + r.f + 'M / ' + r.pct + '% / ' + (r.ly > 0 ? '+' : '') + r.ly + '% LY' + (r.caveat ? ' (shorter delivery window)' : ''));
-    });
-    L.push('');
-    L.push('Forward months, whole company (target / contracted / weighted pipeline / forecast / coverage):');
-    MONTHS.forEach(function(r){
-      L.push('  ' + r.m + ': RM' + r.t + 'M / RM' + r.c + 'M / RM' + r.p + 'M / RM' + r.f + 'M / ' + r.cov + '% covered');
-    });
-    L.push('  Total ' + MONTHS_TOTAL.m + ': RM' + MONTHS_TOTAL.t + 'M target, RM' + MONTHS_TOTAL.f + 'M forecast, ' + MONTHS_TOTAL.cov + '% covered.');
-    L.push('');
-    L.push('Heads of Sales, September to December, whole company (target / forecast / status):');
-    HOS_NEXT.forEach(function(r){
-      L.push('  ' + r.n + ': RM' + r.t + 'M / RM' + r.f + 'M / ' + r.s);
-    });
-    L.push('');
-    L.push('Forward coverage per head, % of that month\u2019s target (Sep / Oct / Nov / Dec):');
-    HEAT.forEach(function(r){
-      L.push('  ' + r[0] + ': ' + r[1] + '% / ' + r[2] + '% / ' + r[3] + '% / ' + r[4] + '%');
-    });
-    L.push('');
-    var fw = dealData(false).slice().sort(function(a,b){ return b.d.v - a.d.v; }).slice(0, 8);
-    L.push('Largest forward deals in this slice, at 50% or 80% (' + fw.length + ' shown; the platform column carries the run dates):');
-    if(!fw.length) L.push('  none in this slice');
-    fw.forEach(function(x){
-      L.push('  ' + x.d.a + ' \u00b7 ' + x.d.c + ' \u00b7 ' + rm(x.d.v) + ' \u00b7 owner ' + x.d.o + ' \u00b7 ' + x.d.x);
-    });
-    L.push('');
-    L.push('Source: Sales Leadership Weekly deck of 7 Aug 2026; pipeline export 6 Aug. The export has no head-by-platform crosstab, so platform-sliced head numbers are derived. Anything not listed here is not in the data.');
-    return L.join('\n');
+    var on = {};
+    ['platform','hos','status','line','mgr','person'].forEach(function(k){ if(state[k]) on[k] = state[k]; });
+    var openDeals = dealData(true).slice().sort(function(a,b){ return b.d.v - a.d.v; }).slice(0, 10)
+      .map(function(x){ return { account: x.d.a, campaign: x.d.c, value_rm_m: x.d.v, owner: x.d.o, platform: x.d.x || null, ip: x.d.ip || null }; });
+    var fwdDeals = dealData(false).slice().sort(function(a,b){ return b.d.v - a.d.v; }).slice(0, 8)
+      .map(function(x){ return { account: x.d.a, campaign: x.d.c, value_rm_m: x.d.v, owner: x.d.o, run_dates: x.d.x || null, flagged_duplicate: !!x.d.dup }; });
+    return JSON.stringify({
+      units: 'All money values are RM millions unless the key says otherwise.',
+      filters_in_force: Object.keys(on).length ? on : 'none, whole company',
+      billing_window_august: { day: Wb.gone, of_days: Wb.total, days_left: Math.max(0, Wb.total - Wb.gone) },
+      august_mtd_this_slice: { target: Mn.t, booked: Mn.b, open_weighted_pipeline: Mn.p, forecast: Mn.f,
+        gap_to_target: +(Mn.f - Mn.t).toFixed(3), derived_not_sourced: !!Mn.modelled },
+      sep_to_dec_this_slice: { target: Nx.t, forecast: Nx.f,
+        gap_to_target: +(Nx.f - Nx.t).toFixed(3), derived_not_sourced: !!Nx.modelled },
+      platforms_august_company: PLATFORMS.map(function(r){
+        return { platform: r.n, target: r.t, booked: r.b, forecast: r.f, pct_to_target: r.pct,
+                 vs_last_year_pct: r.ly, shorter_delivery_window: !!r.caveat }; }),
+      forward_months_company: MONTHS.map(function(r){
+        return { month: r.m, target: r.t, contracted: r.c, weighted_pipeline: r.p, forecast: r.f, coverage_pct: r.cov }; }),
+      forward_total_company: { period: MONTHS_TOTAL.m, target: MONTHS_TOTAL.t, forecast: MONTHS_TOTAL.f, coverage_pct: MONTHS_TOTAL.cov },
+      heads_august_company: HOS_NOW.map(function(r){
+        return { name: r.n, target: r.t, forecast: r.f, status: r.s, save_opportunity: r.opp || null }; }),
+      heads_sep_to_dec_company: HOS_NEXT.map(function(r){
+        return { name: r.n, target: r.t, forecast: r.f, status: r.s }; }),
+      forward_coverage_pct_of_month_target: HEAT.map(function(r){
+        return { name: r[0], sep: r[1], oct: r[2], nov: r[3], dec: r[4] }; }),
+      largest_open_deals_august_this_slice: openDeals,
+      largest_forward_deals_this_slice: fwdDeals,
+      provenance: 'Sales Leadership Weekly deck of 7 Aug 2026; pipeline export 6 Aug. The export has no head-by-platform crosstab, so platform-sliced head numbers are derived. Anything not present in this object is not in the data.'
+    }, null, 1);
   };
 
   // the deal to land now

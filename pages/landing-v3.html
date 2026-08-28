@@ -9582,6 +9582,34 @@ function renderHeroCards(){
       L.push('  ' + x.d.a + ' \u00b7 ' + x.d.c + ' \u00b7 ' + rm(x.d.v) + ' \u00b7 owner ' + x.d.o + (x.d.x ? ' \u00b7 ' + x.d.x : ''));
     });
     L.push('');
+    L.push('Platforms, August, whole company (target / booked / forecast / % to target / vs last year):');
+    PLATFORMS.forEach(function(r){
+      L.push('  ' + r.n + ': RM' + r.t + 'M / RM' + r.b + 'M / RM' + r.f + 'M / ' + r.pct + '% / ' + (r.ly > 0 ? '+' : '') + r.ly + '% LY' + (r.caveat ? ' (shorter delivery window)' : ''));
+    });
+    L.push('');
+    L.push('Forward months, whole company (target / contracted / weighted pipeline / forecast / coverage):');
+    MONTHS.forEach(function(r){
+      L.push('  ' + r.m + ': RM' + r.t + 'M / RM' + r.c + 'M / RM' + r.p + 'M / RM' + r.f + 'M / ' + r.cov + '% covered');
+    });
+    L.push('  Total ' + MONTHS_TOTAL.m + ': RM' + MONTHS_TOTAL.t + 'M target, RM' + MONTHS_TOTAL.f + 'M forecast, ' + MONTHS_TOTAL.cov + '% covered.');
+    L.push('');
+    L.push('Heads of Sales, September to December, whole company (target / forecast / status):');
+    HOS_NEXT.forEach(function(r){
+      L.push('  ' + r.n + ': RM' + r.t + 'M / RM' + r.f + 'M / ' + r.s);
+    });
+    L.push('');
+    L.push('Forward coverage per head, % of that month\u2019s target (Sep / Oct / Nov / Dec):');
+    HEAT.forEach(function(r){
+      L.push('  ' + r[0] + ': ' + r[1] + '% / ' + r[2] + '% / ' + r[3] + '% / ' + r[4] + '%');
+    });
+    L.push('');
+    var fw = dealData(false).slice().sort(function(a,b){ return b.d.v - a.d.v; }).slice(0, 8);
+    L.push('Largest forward deals in this slice, at 50% or 80% (' + fw.length + ' shown; the platform column carries the run dates):');
+    if(!fw.length) L.push('  none in this slice');
+    fw.forEach(function(x){
+      L.push('  ' + x.d.a + ' \u00b7 ' + x.d.c + ' \u00b7 ' + rm(x.d.v) + ' \u00b7 owner ' + x.d.o + ' \u00b7 ' + x.d.x);
+    });
+    L.push('');
     L.push('Source: Sales Leadership Weekly deck of 7 Aug 2026; pipeline export 6 Aug. The export has no head-by-platform crosstab, so platform-sliced head numbers are derived. Anything not listed here is not in the data.');
     return L.join('\n');
   };

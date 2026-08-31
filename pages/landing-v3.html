@@ -731,15 +731,27 @@
   .c-chat-think i:nth-child(2){animation-delay:.15s;}
   .c-chat-think i:nth-child(3){animation-delay:.3s;}
   @keyframes c-chat-beat{0%,60%,100%{opacity:.35; transform:translateY(0);} 30%{opacity:1; transform:translateY(-3px);}}
-  .c-chat-msg.is-streaming .c-chat-bubble p::after{content:''; display:inline-block; width:3px; height:1em;
+  .c-chat-msg.is-streaming .c-chat-bubble > :last-child::after{content:''; display:inline-block; width:3px; height:1em;
     margin-left:2px; vertical-align:text-bottom; background:var(--color-orange);
     animation:c-chat-caret 1s steps(1) infinite;}
   @keyframes c-chat-caret{50%{opacity:0;}}
+  /* The four reply shapes, in house dress. Tables scroll inside their
+     own box rather than stretching the bubble. */
+  .c-chat-msg.is-ai .c-chat-bubble p{margin:0 0 var(--spacing-8);}
+  .c-chat-msg.is-ai .c-chat-bubble > :last-child{margin-bottom:0;}
+  .c-chat-bubble strong{font-weight:800; color:var(--color-neutral-9);}
+  .c-chat-bubble ul, .c-chat-bubble ol{margin:0 0 var(--spacing-8); padding-left:20px;}
+  .c-chat-bubble li{margin:3px 0;}
+  .c-chat-bubble table{border-collapse:collapse; margin:var(--spacing-4) 0 var(--spacing-8);
+    display:block; overflow-x:auto; max-width:100%; font-size:var(--text-body2-size);}
+  .c-chat-bubble th, .c-chat-bubble td{border:1px solid var(--color-neutral-3);
+    padding:6px 10px; text-align:left; white-space:nowrap;}
+  .c-chat-bubble th{background:var(--color-neutral-2); font-weight:700;}
   .c-chat-send.is-busy{animation:c-chat-workpulse 1.8s var(--ease-standard) infinite;}
   @keyframes c-chat-workpulse{0%,100%{box-shadow:0 0 0 0 rgba(20,20,20,.22);} 55%{box-shadow:0 0 0 6px rgba(20,20,20,0);}}
   @media (prefers-reduced-motion: reduce){
     .c-chat-think i{animation:none; opacity:.7;}
-    .c-chat-msg.is-streaming .c-chat-bubble p::after{animation:none;}
+    .c-chat-msg.is-streaming .c-chat-bubble > :last-child::after{animation:none;}
     .c-chat-send.is-busy{animation:none;}
   }
 
@@ -10487,15 +10499,86 @@ function bubble(role) {
   var p = document.createElement('p');
   p.style.whiteSpace = 'pre-wrap';
   bub.appendChild(p); row.appendChild(bub); scroll.appendChild(row);
-  return { row: row, p: p };
+  return { row: row, bub: bub, p: p };
 }
 function pin() { body.scrollTop = body.scrollHeight; }
-function welcome() { bubble('assistant').p.textContent = WELCOME; }
+
+/* ── The renderer. The model may use exactly four shapes: bold, italic,
+   lists, tables. Everything is HTML-escaped BEFORE any shape is applied,
+   so nothing the model (or anyone upstream of it) writes can become
+   markup. Escape first, decorate second, in that order, always. */
+function escHtml(s) {
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+function inlineMd(s) {
+  return s
+    .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+    .replace(/(^|[\s(])\*([^*\n]+)\*(?=[\s).,;:!?]|$)/g, '$1<em>$2</em>');
+}
+function renderMd(md) {
+  var lines = md.split('\n'), out = [], i = 0;
+  function cells(row) {
+    return row.replace(/^\s*\|/, '').replace(/\|\s*$/, '').split('|')
+      .map(function (c) { return c.trim(); });
+  }
+  function li(t) { return '<li>' + inlineMd(escHtml(t)) + '</li>'; }
+  var isRow = function (L) { return /^\s*\|.*\|\s*$/.test(L); };
+  var isSep = function (L) { return /^\s*\|[\s:|-]+\|\s*$/.test(L); };
+  while (i < lines.length) {
+    var L = lines[i];
+    if (isRow(L) && i + 1 < lines.length && isSep(lines[i + 1])) {
+      var head = cells(L); i += 2; var rows = [];
+      while (i < lines.length && isRow(lines[i])) { rows.push(cells(lines[i])); i++; }
+      out.push('<table><thead><tr>' +
+        head.map(function (c) { return '<th>' + inlineMd(escHtml(c)) + '</th>'; }).join('') +
+        '</tr></thead><tbody>' +
+        rows.map(function (r) {
+          return '<tr>' + r.map(function (c) { return '<td>' + inlineMd(escHtml(c)) + '</td>'; }).join('') + '</tr>';
+        }).join('') + '</tbody></table>');
+      continue;
+    }
+    if (/^\s*[-*]\s+/.test(L)) {
+      var us = [];
+      while (i < lines.length && /^\s*[-*]\s+/.test(lines[i])) { us.push(lines[i].replace(/^\s*[-*]\s+/, '')); i++; }
+      out.push('<ul>' + us.map(li).join('') + '</ul>');
+      continue;
+    }
+    if (/^\s*\d+[.)]\s+/.test(L)) {
+      var os = [];
+      while (i < lines.length && /^\s*\d+[.)]\s+/.test(lines[i])) { os.push(lines[i].replace(/^\s*\d+[.)]\s+/, '')); i++; }
+      out.push('<ol>' + os.map(li).join('') + '</ol>');
+      continue;
+    }
+    if (!L.trim()) { i++; continue; }
+    var para = [L]; i++;
+    while (i < lines.length && lines[i].trim() &&
+           !/^\s*([-*]|\d+[.)])\s+/.test(lines[i]) && !isRow(lines[i])) {
+      para.push(lines[i]); i++;
+    }
+    out.push('<p>' + inlineMd(escHtml(para.join('\n'))) + '</p>');
+  }
+  return out.join('');
+}
+/* plain text into a bubble (user turns, errors): never through the renderer */
+function plain(out, text) {
+  out.bub.innerHTML = '';
+  var p = document.createElement('p');
+  p.style.whiteSpace = 'pre-wrap';
+  p.textContent = text;
+  out.bub.appendChild(p);
+}
+/* rendered markdown into a bubble (assistant turns only) */
+function paint(out, text) { out.bub.innerHTML = renderMd(text); }
+
+function welcome() { plain(bubble('assistant'), WELCOME); }
 
 function paintThread(t) {
   scroll.innerHTML = '';
   welcome();
-  t.msgs.forEach(function (m) { bubble(m.role === 'user' ? 'user' : 'assistant').p.textContent = m.content; });
+  t.msgs.forEach(function (m) {
+    var b = bubble(m.role === 'user' ? 'user' : 'assistant');
+    if (m.role === 'user') plain(b, m.content); else paint(b, m.content);
+  });
   if (title) title.textContent = t.title;
   pin();
 }
@@ -10627,7 +10710,7 @@ function ask() {
   save(); renderRail();
 
   setBusy(true);
-  bubble('user').p.textContent = q;
+  plain(bubble('user'), q);
   var out = bubble('assistant');
   out.p.innerHTML = '<span class="c-chat-think" aria-hidden="true"><i></i><i></i><i></i></span>';
   pin();
@@ -10647,9 +10730,9 @@ function ask() {
     var ct = res.headers.get('content-type') || '';
     if (ct.indexOf('json') >= 0) {
       return res.json().then(function (j) {
-        out.p.textContent = (j && j.configured === false)
+        plain(out, (j && j.configured === false)
           ? 'The assistant is not connected yet. The server is missing its API key.'
-          : 'That did not go through: ' + ((j && j.error) || ('HTTP ' + res.status));
+          : 'That did not go through: ' + ((j && j.error) || ('HTTP ' + res.status)));
       });
     }
     out.row.classList.add('is-streaming');
@@ -10659,7 +10742,7 @@ function ask() {
       return reader.read().then(function (r) {
         if (r.done) return;
         acc += dec.decode(r.value, { stream: true });
-        out.p.textContent = acc;
+        paint(out, acc);
         pin();
         return step();
       });
@@ -10667,9 +10750,9 @@ function ask() {
     return step();
   }).catch(function (e) {
     if (e && e.name === 'AbortError') {
-      if (!acc) out.p.textContent = 'Stopped.';
+      if (!acc) plain(out, 'Stopped.');
     } else {
-      out.p.textContent = 'The connection failed: ' + (e && e.message ? e.message : e);
+      plain(out, 'The connection failed: ' + (e && e.message ? e.message : e));
     }
   }).then(function () {
     out.row.classList.remove('is-streaming');

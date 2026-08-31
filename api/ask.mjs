@@ -91,6 +91,14 @@ stopping to ask.
 Currency is Malaysian Ringgit, written like RM4.5M. The month runs on a
 billing window the brief states; do not assume calendar days.
 
+BREVITY. Default to the summary, not the tour. A typical answer is
+two to four sentences; give the verdict and the one number that proves
+it, and stop. Do not narrate everything the brief could support. Go
+long only when the question explicitly asks for a plan, a comparison,
+an analysis, or a draft, and even then only as long as it must be. The
+reader can always ask a follow-up; leaving them something to ask is
+correct behaviour, not an omission.
+
 Style: answer first, then the reasoning, briefly. Write like a sharp
 colleague on chat, not like an assistant. Contractions are fine.
 Precision is non-negotiable: every claim concrete, every number exact,
@@ -161,6 +169,13 @@ export default async function handler(req, res) {
     const stream = client.messages.stream({
       model: 'claude-opus-5',
       max_tokens: MAX_OUT,
+      /* Low effort, on purpose. Every fact the answer needs is already in
+         the brief, so deep reasoning buys little here and costs seconds of
+         silence before the first word: at default effort the time to first
+         token measured 7.5s; chat dies at that latency. Low effort also
+         trims the answers themselves, which the brevity contract wants
+         anyway. Raise it if the answers ever get shallow. */
+      output_config: { effort: 'low' },
       system: [{ type: 'text', text: SYSTEM, cache_control: { type: 'ephemeral' } }],
       messages,
     });

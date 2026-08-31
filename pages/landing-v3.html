@@ -10715,8 +10715,24 @@ function ask() {
   out.p.innerHTML = '<span class="c-chat-think" aria-hidden="true"><i></i><i></i><i></i></span>';
   pin();
 
-  var acc = '';
+  var acc = '';        // everything received from the stream
+  var shown = 0;       // characters actually painted so far
+  var drainT = null;
   var mine = cur;
+  /* The typewriter. Chunks arrive as slabs of a hundred-plus characters;
+     painting each slab whole reads as lurching, not typing. This drains
+     the backlog a few characters per frame, speeding up in proportion to
+     how far behind it is, so a trickle types and a burst catches up
+     rather than queueing forever. */
+  function drain() {
+    drainT = null;
+    if (shown >= acc.length) return;
+    var lag = acc.length - shown;
+    shown = Math.min(acc.length, shown + Math.max(2, Math.round(lag / 20)));
+    paint(out, acc.slice(0, shown));
+    pin();
+    drainT = requestAnimationFrame(drain);
+  }
   aborter = ('AbortController' in window) ? new AbortController() : null;
   fetch('/api/ask', {
     method: 'POST',
@@ -10742,12 +10758,20 @@ function ask() {
       return reader.read().then(function (r) {
         if (r.done) return;
         acc += dec.decode(r.value, { stream: true });
-        paint(out, acc);
-        pin();
+        if (!drainT) drain();
         return step();
       });
     }
-    return step();
+    /* the stream can close while the typewriter is still mid-word; let it
+       finish typing before the turn is declared over */
+    return step().then(function () {
+      return new Promise(function (fin) {
+        (function wait() {
+          if (shown >= acc.length) return fin();
+          requestAnimationFrame(wait);
+        })();
+      });
+    });
   }).catch(function (e) {
     if (e && e.name === 'AbortError') {
       if (!acc) plain(out, 'Stopped.');
@@ -10755,6 +10779,8 @@ function ask() {
       plain(out, 'The connection failed: ' + (e && e.message ? e.message : e));
     }
   }).then(function () {
+    if (drainT) { cancelAnimationFrame(drainT); drainT = null; }
+    if (acc && shown < acc.length) paint(out, acc);   // a stop or an error: land whatever arrived
     out.row.classList.remove('is-streaming');
     if (acc) { mine.msgs.push({ role: 'assistant', content: acc }); save(); }
     aborter = null;

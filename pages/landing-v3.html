@@ -4778,6 +4778,14 @@
       <span class="c-dept-option-logo"><img src="../collabrium-dls/logo-lockups/collabSales.svg" alt="" /></span>
       <i class="ph ph-check c-dept-check"></i>
     </div>
+    <!-- Media is the one department with somewhere to go: Collab:Media is a
+         deployed product, so picking it opens that app rather than only
+         restyling this shell. data-href is what says so — every other option
+         has none and keeps the original swap-the-lockup behaviour. -->
+    <div class="c-dept-option" role="option" aria-selected="false" aria-label="Media" data-dept="media" data-name="Media" data-logo="../collabrium-dls/logo-lockups/collabMedia.svg" data-element-icon="../collabrium-dls/SVG/water.svg" data-href="https://collab-media.vercel.app">
+      <span class="c-dept-option-logo"><img src="../collabrium-dls/logo-lockups/collabMedia.svg" alt="" /></span>
+      <i class="ph ph-arrow-up-right c-dept-check" aria-hidden="true" style="opacity:1"></i>
+    </div>
     <div class="c-dept-option" role="option" aria-selected="false" aria-label="Influencers" data-dept="influencers" data-name="Influencers" data-logo="../collabrium-dls/logo-lockups/collabInfluencers.svg" data-element-icon="../collabrium-dls/SVG/earth.svg">
       <span class="c-dept-option-logo"><img src="../collabrium-dls/logo-lockups/collabInfluencers.svg" alt="" /></span>
       <i class="ph ph-check c-dept-check"></i>
@@ -5920,6 +5928,16 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
     deptDropdown.addEventListener('click', (e) => {
       const opt = e.target.closest('.c-dept-option');
       if (!opt) return;
+      // A department that owns a deployed product opens it, in a new tab —
+      // the same way this page's own hero CTAs leave for Collab Sales, so
+      // the dashboard behind you survives the trip. The shell is left
+      // untouched: swapping the lockup for a department you are no longer
+      // looking at would misreport where you are.
+      if (opt.dataset.href) {
+        window.open(opt.dataset.href, '_blank', 'noopener');
+        closeDept();
+        return;
+      }
       deptDropdown.querySelectorAll('.c-dept-option').forEach((o) => {
         const on = o === opt;
         o.classList.toggle('is-active', on);

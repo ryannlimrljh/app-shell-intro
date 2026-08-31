@@ -542,11 +542,13 @@ final.
 |---|---|---|---|
 | `logo-lockups/collabContent.svg` | CollabContent | Wood · Salmon Pink `#FF7A90` | The content generation workspace where campaign copy, creative briefs, and content assets get produced, organized, and approved. |
 | `logo-lockups/collabInfluencers.svg` | CollabInfluencers | Earth · Green `#00C26E` | Influencer management system for sourcing, briefing, and measuring creator partnerships from discovery through payout. |
+| `logo-lockups/collabMedia.svg` | CollabMedia | Water · Navy Blue `#1473E6` | Media planning system that recommends digital media space and channel strategy based on a brand's available revenue — turning budget into a data-driven media plan. |
 | `logo-lockups/collabSales.svg` | CollabSales | Gold · Amber `#FFA425` | Manage the sales pipeline, from lead to close, tracking opportunities, quotes, and forecasting through to account handoff. |
 | `logo-lockups/collabStudio.svg` | CollabStudio | Fire · Orange `#FF5825` | Creative studio, hosting creative-output AI agentic tools for visual, video, and design generation for campaigns. |
 
-These four don't cover all five elements (no Water/Data-Logistics
-department product exists yet) and aren't a 1:1 substitute for the
+These five now cover all five elements — CollabMedia, brought over from
+the Collab:Media build on 2026-08-31, closed the Water/Data-Logistics
+gap this section used to record as open — and aren't a substitute for the
 generic per-element lockups in the Default-logo rule table above —
 that table is about recoloring the base Collabrium mark for a
 department-owned surface; this one is about distinct named products

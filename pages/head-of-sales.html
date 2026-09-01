@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" id="siteFavicon" type="image/svg+xml" href="../collabrium-dls/SVG/coin.svg" />
+<script src="assets/favicon.js" defer></script>
+<title>Head of Sales — 7 August 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Mulish:wght@400;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+<style>
+/* ══════════════════════════════════════════════════════════════════
+   Head of Sales view — the same page as the leadership board with the
+   pointer moved down one box. Collabrium DLS tokens, verbatim.
+   ══════════════════════════════════════════════════════════════════ */
+:root{
+  --obsidian:#2B2B2C; --orange:#FF5825; --green:#00C26E; --navy:#1473E6;
+  --amber:#FFA425; --red:#FD3343;
+
+  --canvas:#FCFAF5; --surface:#FFFFFF; --sunk:#F5F2EA; --rail:#EDE8DD;
+  --ink:#080808; --muted:#5A5A5A; --faint:#8E8A80; --rule:#E3DED2;
+
+  --green-ink:#00734D; --amber-ink:#8A5A00; --red-ink:#C4101F; --navy-ink:#0B4FA8;
+  --green-bg:#E6F9F1; --amber-bg:#FFF6E9; --red-bg:#FFE9EB; --navy-bg:#E8F1FD;
+
+  --shadow-1:0 1px 2px rgba(140,130,110,.24);
+  --shadow-2:0 2px 10px rgba(140,130,110,.20);
+  --r-sm:12px; --r-md:16px; --r-lg:20px; --r-pill:999px; --r-bar:22px;
+  --ease:cubic-bezier(.2,.6,.2,1);
+}
+:root[data-theme="dark"]{
+  --canvas:#141310; --surface:#1D1B17; --sunk:#232019; --rail:#2C2822;
+  --ink:#F3F0E9; --muted:#ABA69A; --faint:#807B70; --rule:#36322B;
+  --obsidian:#E8E4DA;
+  --green-ink:#5BE0A2; --amber-ink:#F0C173; --red-ink:#FF8A94; --navy-ink:#8FC0FF;
+  --green-bg:#0E2A20; --amber-bg:#2E2410; --red-bg:#331419; --navy-bg:#132A47;
+  --navy:#5C9BEE;
+  --shadow-1:0 1px 2px rgba(0,0,0,.5); --shadow-2:0 2px 10px rgba(0,0,0,.45);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --canvas:#141310; --surface:#1D1B17; --sunk:#232019; --rail:#2C2822;
+    --ink:#F3F0E9; --muted:#ABA69A; --faint:#807B70; --rule:#36322B;
+    --obsidian:#E8E4DA;
+    --green-ink:#5BE0A2; --amber-ink:#F0C173; --red-ink:#FF8A94; --navy-ink:#8FC0FF;
+    --green-bg:#0E2A20; --amber-bg:#2E2410; --red-bg:#331419; --navy-bg:#132A47;
+    --navy:#5C9BEE;
+    --shadow-1:0 1px 2px rgba(0,0,0,.5); --shadow-2:0 2px 10px rgba(0,0,0,.45);
+  }
+}
+*{box-sizing:border-box;}
+body{margin:0; background:var(--canvas); color:var(--ink);
+  font-family:'Mulish',system-ui,-apple-system,'Segoe UI',sans-serif;
+  font-size:15px; line-height:1.55; -webkit-font-smoothing:antialiased;}
+.wrap{max-width:1320px; margin:0 auto; padding:28px 24px 96px;}
+h1,h2,h3{font-weight:800; letter-spacing:0; margin:0;}
+.num{font-variant-numeric:tabular-nums;}
+.eyebrow{font-size:11px; font-weight:800; letter-spacing:.12em; text-transform:uppercase;
+  color:var(--faint);}
+
+/* ── Masthead ─────────────────────────────────────────────── */
+.mast{display:flex; gap:32px; flex-wrap:wrap; align-items:flex-start;
+  padding-bottom:18px; border-bottom:2px solid var(--ink);}
+.lede{flex:1 1 520px; min-width:0;}
+.mast h1{font-size:clamp(26px,3.4vw,38px); line-height:1.1; margin:6px 0 4px;}
+.who{font-size:14px; color:var(--muted); margin:0 0 12px;}
+.who b{color:var(--ink);}
+.basis{margin-top:12px; padding:10px 14px; border-left:3px solid var(--rule);
+  background:var(--sunk); border-radius:0 10px 10px 0;
+  font-size:12px; color:var(--muted); line-height:1.6; max-width:70ch;}
+.basis b{color:var(--ink); font-weight:800;}
+.stamp{flex:0 1 300px; font-size:12px; color:var(--faint); text-align:right; line-height:1.9;}
+.stamp b{color:var(--ink); font-weight:800;}
+.themebtn{margin-top:12px; border:1px solid var(--rule); background:var(--surface);
+  border-radius:var(--r-pill); padding:7px 15px; font:inherit; font-size:12.5px;
+  font-weight:700; color:var(--muted); cursor:pointer; min-height:36px;}
+.themebtn:hover{background:var(--sunk); color:var(--ink);}
+
+/* ── Who am I: the seat picker ─────────────────────────────── */
+.seat{display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-top:18px;
+  padding:5px; background:var(--surface); border:1px solid var(--rule);
+  border-radius:var(--r-bar); box-shadow:var(--shadow-1);}
+.flab{font-size:10.5px; font-weight:800; letter-spacing:.12em; text-transform:uppercase;
+  color:var(--faint); padding-left:9px;}
+.fsel{border:1px solid var(--rule); background:var(--surface); border-radius:var(--r-pill);
+  padding:5px 13px; font:inherit; font-size:12.5px; font-weight:700; color:var(--ink);
+  min-height:34px; cursor:pointer;}
+.fnote{font-size:11.5px; color:var(--faint); margin-left:auto; padding-right:10px;}
+
+/* ── Section furniture ────────────────────────────────────── */
+section{margin-top:34px;}
+.sechead{display:flex; align-items:baseline; gap:14px; flex-wrap:wrap;
+  padding-bottom:10px; margin-bottom:16px; border-bottom:1px solid var(--rule);}
+.sechead h2{font-size:20px;}
+.sechead .note{font-size:12.5px; color:var(--faint); flex:1 1 260px;}
+.hint{font-size:9.5px; font-weight:800; letter-spacing:.09em; text-transform:uppercase;
+  color:var(--faint); border-bottom:1px dotted currentColor; cursor:help;
+  vertical-align:middle; white-space:nowrap;}
+
+/* ── Stat tiles ───────────────────────────────────────────── */
+.kpis{display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:12px;}
+.kpi{background:var(--surface); border-radius:var(--r-lg); padding:16px 18px;
+  border:1px solid var(--rule); box-shadow:var(--shadow-1);}
+.kpi.lead{background:var(--obsidian); border-color:var(--obsidian);}
+.kpi.lead .k-l{color:rgba(255,255,255,.62);} .kpi.lead .k-v{color:#fff;}
+.kpi.lead .k-s{color:rgba(255,255,255,.62);}
+:root[data-theme="dark"] .kpi.lead .k-l,:root[data-theme="dark"] .kpi.lead .k-v,
+:root[data-theme="dark"] .kpi.lead .k-s{color:#141310;}
+.kpi.warn{border-color:var(--red); }
+.k-l{font-size:10.5px; font-weight:800; letter-spacing:.1em; text-transform:uppercase;
+  color:var(--faint); margin-bottom:6px;}
+.k-v{font-size:27px; font-weight:800; letter-spacing:-.02em; line-height:1.1;}
+.k-s{font-size:11.5px; color:var(--faint); margin-top:4px;}
+.k-v.neg{color:var(--red-ink);} .k-v.pos{color:var(--green-ink);}
+
+/* ── Attainment rail ──────────────────────────────────────── */
+.attn{background:var(--surface); border:1px solid var(--rule); border-radius:var(--r-lg);
+  box-shadow:var(--shadow-1); padding:16px 18px; margin-top:12px;}
+.attn-bar{position:relative; height:34px; background:var(--rail); border-radius:8px;
+  margin:16px 0 10px;}
+.attn-seg{position:absolute; top:0; height:34px;}
+.attn-seg.b{background:var(--obsidian); border-radius:8px 0 0 8px;}
+.attn-seg.p{background:var(--navy);}
+.attn-tick{position:absolute; top:-6px; height:46px; width:2px; background:var(--ink);}
+.attn-tick span{position:absolute; top:-15px; left:6px; font-size:10px; font-weight:800;
+  white-space:nowrap; color:var(--ink);}
+.attn-short{position:absolute; top:0; height:34px; border:1.5px dashed var(--red);
+  border-left:0; border-radius:0 8px 8px 0; opacity:.75;}
+.attn-legend{display:flex; gap:18px; flex-wrap:wrap; font-size:11.5px; color:var(--muted);}
+.attn-legend .sw{display:inline-block; width:11px; height:11px; border-radius:3px;
+  margin-right:6px; vertical-align:-1px;}
+
+/* ── Pace ─────────────────────────────────────────────────── */
+.pace{display:flex; flex-wrap:wrap; margin-top:14px; background:var(--surface);
+  border:1px solid var(--rule); border-radius:var(--r-lg); box-shadow:var(--shadow-1);
+  overflow:hidden;}
+.pace > div{flex:1 1 210px; padding:13px 16px; border-right:1px solid var(--rule); min-width:0;}
+.pace > div:last-child{border-right:0;}
+.p-l{font-size:10.5px; font-weight:800; letter-spacing:.1em; text-transform:uppercase;
+  color:var(--faint); margin-bottom:6px;}
+.p-v{font-size:19px; font-weight:800;}
+.p-v small{font-size:12.5px; font-weight:700; color:var(--muted); margin-left:4px;}
+.p-s{font-size:11.5px; color:var(--faint); margin-top:4px; line-height:1.5;}
+.p-track{height:6px; border-radius:3px; background:var(--sunk); margin-top:10px;
+  position:relative;}
+.p-track i{position:absolute; left:0; top:0; bottom:0; background:var(--faint);
+  border-radius:3px; opacity:.55;}
+.p-track u{position:absolute; top:-3px; bottom:-3px; width:2px; background:var(--navy);}
+.p-key{display:flex; gap:12px; margin-top:7px; font-size:10.5px; color:var(--faint);
+  flex-wrap:wrap;}
+.p-key b{font-weight:800; color:var(--muted);}
+
+/* ── The two facts ────────────────────────────────────────── */
+.facts{display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:14px;
+  margin-top:14px;}
+.fact{background:var(--surface); border:1px solid var(--rule); border-left:4px solid var(--red);
+  border-radius:var(--r-lg); box-shadow:var(--shadow-1); padding:14px 17px;}
+.fact.ok{border-left-color:var(--navy);}
+.fact h3{font-size:14.5px; margin-bottom:5px;}
+.fact p{margin:0; font-size:13px; color:var(--muted); line-height:1.6;}
+.fact p b{color:var(--ink); font-weight:800;}
+
+/* ── Pod leaderboard ──────────────────────────────────────── */
+.lb{background:var(--surface); border:1px solid var(--rule); border-radius:var(--r-lg);
+  box-shadow:var(--shadow-1); overflow:hidden;}
+.lb-head,.lb-row{display:grid; align-items:center;
+  grid-template-columns:26px minmax(150px,1.2fr) minmax(220px,2.4fr) 66px 92px 74px 86px;
+  gap:10px; padding:0 16px;}
+.lb-head{height:40px; background:var(--sunk); border-bottom:1px solid var(--rule);
+  font-size:10.5px; font-weight:800; letter-spacing:.08em; text-transform:uppercase;
+  color:var(--faint);}
+.lb-head span:nth-child(n+4){text-align:right;}
+.lb-row{min-height:62px; border-bottom:1px solid var(--rule);}
+.lb-row:last-child{border-bottom:0;}
+.lb-row:hover{background:var(--sunk);}
+.lb-rank{font-size:12px; font-weight:800; color:var(--faint);}
+.lb-name{font-size:15px; font-weight:800; min-width:0;}
+.lb-name .sub{display:block; font-size:11.5px; font-weight:600; color:var(--faint);
+  margin-top:1px;}
+.r{text-align:right; font-size:14px; font-weight:800; white-space:nowrap;}
+.r .u{display:block; font-size:11px; font-weight:600; color:var(--faint); margin-top:1px;}
+.neg{color:var(--red-ink);} .pos{color:var(--green-ink);}
+.bul{position:relative; height:26px;}
+.bul-rail{position:absolute; inset:6px 0; background:var(--sunk); border-radius:5px;}
+.bul-b{position:absolute; top:6px; height:14px; background:var(--obsidian);
+  border-radius:5px 0 0 5px;}
+.bul-f{position:absolute; top:6px; height:14px; background:var(--navy);
+  box-shadow:-2px 0 0 0 var(--sunk);}
+.bul-t{position:absolute; top:1px; height:24px; width:2px; background:var(--ink);}
+.bul-t::after{content:attr(data-l); position:absolute; top:-2px; left:5px; font-size:9.5px;
+  font-weight:800; color:var(--muted); white-space:nowrap;}
+.bul-t.flip::after{left:auto; right:5px;}
+.pill{display:inline-flex; align-items:center; gap:5px; padding:3px 10px;
+  border-radius:var(--r-pill); font-size:11px; font-weight:800; white-space:nowrap;
+  border:1px solid transparent;}
+.pill.green{background:var(--green-bg); color:var(--green-ink);}
+.pill.amber{background:var(--amber-bg); color:var(--amber-ink);}
+.pill.red{background:var(--red-bg); color:var(--red-ink);}
+.pill .dot{width:7px; height:7px; border-radius:50%; background:currentColor; flex:none;}
+.st{text-align:right;}
+.lb-foot{padding:12px 18px; background:var(--sunk); font-size:12px; color:var(--muted);
+  border-top:1px solid var(--rule); display:flex; gap:18px; flex-wrap:wrap;}
+/* modelled bars carry the house hatch */
+#pods[data-mod="1"] .bul-b,#pods[data-mod="1"] .bul-f{
+  background-image:repeating-linear-gradient(135deg,
+    rgba(255,255,255,.42) 0 4px, transparent 4px 8px);}
+
+/* ── Roster ───────────────────────────────────────────────── */
+.roster{display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:14px;
+  align-items:start;}
+.pod{background:var(--surface); border:1px solid var(--rule); border-radius:var(--r-lg);
+  box-shadow:var(--shadow-1); padding:14px 16px;}
+.pod-hd{display:flex; align-items:baseline; gap:8px; flex-wrap:wrap;
+  padding-bottom:9px; margin-bottom:9px; border-bottom:1px solid var(--rule);}
+.pod-hd h3{font-size:15px;}
+.g{font-size:10px; font-weight:800; letter-spacing:.06em; color:var(--faint);
+  border:1px solid var(--rule); border-radius:4px; padding:1px 5px;}
+.pod-seg{font-size:10.5px; font-weight:800; letter-spacing:.06em; text-transform:uppercase;
+  color:var(--navy-ink); background:var(--navy-bg); border-radius:var(--r-pill);
+  padding:2px 8px;}
+.pod ul{list-style:none; margin:0; padding:0;}
+.pod li{display:flex; align-items:baseline; gap:8px; padding:6px 0; font-size:13.5px;
+  color:var(--muted); border-bottom:1px solid var(--rule);}
+.pod li:last-child{border-bottom:0;}
+.pod li b{color:var(--ink); font-weight:700;}
+.vac{color:var(--amber-ink); font-style:italic;}
+.vac b{color:var(--amber-ink);}
+.sup{margin-top:11px; padding-top:9px; border-top:1px dashed var(--rule);
+  font-size:11.5px; color:var(--faint);}
+.sup b{font-size:10px; font-weight:800; letter-spacing:.1em; text-transform:uppercase;
+  color:var(--faint); margin-right:7px;}
+
+/* ── Deals ────────────────────────────────────────────────── */
+.tbl-wrap{overflow-x:auto; background:var(--surface); border:1px solid var(--rule);
+  border-radius:var(--r-lg); box-shadow:var(--shadow-1);}
+table{border-collapse:collapse; width:100%; min-width:640px; font-size:13.5px;}
+thead th{background:var(--sunk); text-align:left; font-size:10.5px; letter-spacing:.08em;
+  text-transform:uppercase; color:var(--faint); font-weight:800; padding:10px 16px;
+  border-bottom:1px solid var(--rule);}
+td{padding:11px 16px; border-bottom:1px solid var(--rule); color:var(--muted);
+  vertical-align:top;}
+tbody tr:last-child td{border-bottom:0;}
+.adv{display:block; color:var(--ink); font-weight:800; font-size:13.5px;}
+.camp{display:block; font-size:11.5px; color:var(--faint); margin-top:2px;}
+th.n,td.n{text-align:right; padding-right:38px;}
+td.n{color:var(--ink); font-weight:800;}
+.tag{font-size:10px; font-weight:800; letter-spacing:.05em; text-transform:uppercase;
+  padding:2px 8px; border-radius:var(--r-pill); background:var(--navy-bg);
+  color:var(--navy-ink); white-space:nowrap;}
+.tag.ghost{background:transparent; color:var(--faint); border:1px dashed var(--rule);}
+.src{display:inline-block; margin-left:7px; font-size:10px; font-weight:800;
+  letter-spacing:.05em; text-transform:uppercase; color:var(--amber-ink);
+  background:var(--amber-bg); border-radius:var(--r-pill); padding:1px 7px;}
+
+/* ── Peers ────────────────────────────────────────────────── */
+.peers{display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:10px;}
+.peer{background:var(--surface); border:1px solid var(--rule); border-radius:var(--r-md);
+  box-shadow:var(--shadow-1); padding:12px 14px;}
+.peer.me{border-color:var(--navy); box-shadow:0 0 0 1px var(--navy), var(--shadow-1);}
+.peer h3{font-size:13.5px; margin-bottom:2px;}
+.peer .pl{font-size:10.5px; color:var(--faint); margin-bottom:8px;}
+.peer .pv{font-size:18px; font-weight:800;}
+.peer .ps{font-size:11px; color:var(--faint); margin-top:2px;}
+.minibar{position:relative; height:6px; background:var(--sunk); border-radius:3px;
+  margin-top:9px;}
+.minibar i{position:absolute; left:0; top:0; bottom:0; background:var(--obsidian);
+  border-radius:3px;}
+.minibar b{position:absolute; top:-3px; bottom:-3px; width:2px; background:var(--ink);}
+
+/* ── Notes ────────────────────────────────────────────────── */
+.notes{display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:22px;
+  margin-top:44px; padding-top:22px; border-top:2px solid var(--ink);}
+.notes h3{font-size:13px; margin-bottom:8px;}
+.notes p{margin:0 0 10px; font-size:12.5px; color:var(--muted); line-height:1.65;}
+.notes b{color:var(--ink); font-weight:800;}
+
+a:focus-visible,button:focus-visible,select:focus-visible{outline:2px solid var(--navy);
+  outline-offset:2px;}
+@media (max-width:900px){
+  .lb-head,.lb-row{grid-template-columns:24px minmax(120px,1fr) 62px 86px 74px;}
+  .lb-head span:nth-child(3),.lb-row .bul{display:none;}
+  .stamp{text-align:left; flex-basis:100%;}
+}
+</style>
+
+<div class="wrap" id="app">
+
+<!-- ══ Masthead ══════════════════════════════════════════ -->
+<header class="mast">
+  <div class="lede">
+    <div class="eyebrow">Astro Media Sales · Head of Sales · Weekly review</div>
+    <h1 id="hName">Normala (Joy) Ahmad</h1>
+    <p class="who" id="hWho"></p>
+    <p class="basis"><b>Basis:</b> live NeoCRM booking, <b>net</b> of discounts, as at 6 August 2026.
+      Team structure from the <b>FY27 org chart</b>, master dated 15 July, team tabs wef 1 August.
+      Your own totals are transcribed from the weekly deck. <b>The split across your pods is
+      modelled</b>, because the source stops at your level.</p>
+    <button class="themebtn" id="themeBtn" type="button">Switch theme</button>
+  </div>
+  <div class="stamp">
+    Pipeline export &nbsp;<b>6 Aug 2026</b><br>
+    Billing extracts &nbsp;<b>6 Aug 2026</b><br>
+    Org chart &nbsp;<b>15 Jul 2026</b><br>
+    Forecast basis &nbsp;<b>Net, win-rate weighted</b><br>
+    Week on week &nbsp;<b>not available yet</b>
+  </div>
+</header>
+
+<!-- ══ Seat ══════════════════════════════════════════════ -->
+<div class="seat">
+  <span class="flab">Seat</span>
+  <select class="fsel" id="fHead" aria-label="Head of Sales"></select>
+  <span class="fnote" id="seatNote"></span>
+</div>
+
+<!-- ══ Where I stand ═════════════════════════════════════ -->
+<section>
+  <div class="sechead">
+    <h2>Where I stand, August month to date</h2>
+    <span class="note">Every figure in this block is transcribed from the weekly deck. Forecast is
+      booked plus open pipeline weighted by the source Win Rate field.</span>
+  </div>
+  <div class="kpis" id="kpis"></div>
+  <div class="attn">
+    <div class="attn-bar" id="attnBar"></div>
+    <div class="attn-legend" id="attnLegend"></div>
+  </div>
+  <div class="pace" id="pace"></div>
+</section>
+
+<!-- ══ Two facts ═════════════════════════════════════════ -->
+<section>
+  <div class="sechead">
+    <h2>Two things the floor already knows</h2>
+    <span class="note">Both are joins across the deck and the org chart. Neither is modelled.</span>
+  </div>
+  <div class="facts" id="facts"></div>
+</section>
+
+<!-- ══ Pods ══════════════════════════════════════════════ -->
+<section>
+  <div class="sechead">
+    <h2>My pods</h2>
+    <span class="note" id="podNote"></span>
+  </div>
+  <div class="lb">
+    <div class="lb-head" role="row">
+      <span></span><span>Pod</span>
+      <span>Booked → forecast, against target</span>
+      <span>% to tgt</span><span>Gap</span><span>Team</span><span>Status</span>
+    </div>
+    <div id="pods"></div>
+    <div class="lb-foot">
+      <span><i class="sw" style="display:inline-block;width:11px;height:11px;border-radius:3px;background:var(--obsidian);margin-right:6px;vertical-align:-1px"></i>Booked to 6 Aug</span>
+      <span><i class="sw" style="display:inline-block;width:11px;height:11px;border-radius:3px;background:var(--navy);margin-right:6px;vertical-align:-1px"></i>Weighted pipeline added</span>
+      <span><i class="sw" style="display:inline-block;width:2px;height:11px;background:var(--ink);margin-right:6px;vertical-align:-1px"></i>Target</span>
+    </div>
+  </div>
+</section>
+
+<!-- ══ Roster ════════════════════════════════════════════ -->
+<section>
+  <div class="sechead">
+    <h2>My team</h2>
+    <span class="note">Straight from the FY27 org chart. Names, grades and reporting lines are
+      sourced; nothing here is modelled.</span>
+  </div>
+  <div class="roster" id="roster"></div>
+</section>
+
+<!-- ══ Deals ═════════════════════════════════════════════ -->
+<section>
+  <div class="sechead">
+    <h2 id="dealHd">Deals on my book</h2>
+    <span class="note">From the deck's two deal slides, filtered to deals the source attributes
+      to me. <b>The Owner field stops at Head of Sales</b>, so these cannot yet be pointed at a pod
+      or a person.</span>
+  </div>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr>
+        <th>Advertiser and campaign</th><th>Window</th><th class="n">Campaign value</th><th>Pod</th>
+      </tr></thead>
+      <tbody id="dealRows"></tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ══ Peers ═════════════════════════════════════════════ -->
+<section>
+  <div class="sechead">
+    <h2>Where I sit</h2>
+    <span class="note">The other eight books, <b>totals only</b>. You can see how a peer's team is
+      doing; you cannot see the people inside it. That restriction is the whole point.</span>
+  </div>
+  <div class="peers" id="peers"></div>
+</section>
+
+<!-- ══ Notes ═════════════════════════════════════════════ -->
+<div class="notes">
+  <div>
+    <h3>What is real on this page</h3>
+    <p>Your five headline figures, your position among the nine books, your deals, and the whole of
+      <b>My team</b> including the open role. Those come from the 7 August deck and the FY27 org
+      chart, both transcribed.</p>
+    <p>The pace figures are arithmetic on those numbers: days elapsed against days remaining, and
+      the gap divided across them.</p>
+  </div>
+  <div>
+    <h3>What is modelled, and why</h3>
+    <p>The <b>split across your pods</b>. The deck reports target, booked and forecast at Head of
+      Sales level and stops. There is no per-pod or per-person figure anywhere in this cut, so the
+      pod rows hold your real total and invent only the division between them.</p>
+    <p>The division is deterministic, so the same pod always draws the same picture, and the rows
+      always sum back to your stated total.</p>
+  </div>
+  <div>
+    <h3>What would make this real</h3>
+    <p><b>Target, booked and forecast per pod.</b> One more grain of the same fields you already
+      publish per Head of Sales.</p>
+    <p><b>A reports-to field in NeoCRM.</b> The hierarchy on this page comes from a spreadsheet
+      dated 15 July. The first time somebody changes team, this page is quietly wrong.</p>
+    <p><b>Deal ownership at individual grain.</b> Today the Owner column names the head, so a deal
+      cannot be traced to the person working it.</p>
+  </div>
+</div>
+
+</div><!-- /wrap -->
+
+<script>
+/* ══════════════════════════════════════════════════════════════════
+   Head of Sales — 7 August 2026
+   Head-level figures transcribed from Sales_Leadership_Weekly_07AUG26.pptx.
+   Team structure transcribed from the FY27 org chart artifact.
+   The split across pods is modelled; nothing else is.
+   ══════════════════════════════════════════════════════════════════ */
+(function(){
+"use strict";
+
+/* ── Source: heads, August (slide 2) ──────────────────────── */
+var HOS_NOW = [
+  {n:'Joy Ahmad',  t:4.6,   b:1.6,   f:3.3,  gap:-1.3,   pct:71,  opp:1.6,   ly:-9,   s:'red'},
+  {n:'Suat Wei',   t:4.7,   b:2.9,   f:3.6,  gap:-1.1,   pct:76,  opp:null,  ly:-12,  s:'red'},
+  {n:'Belinda',    t:3.1,   b:1.9,   f:1.9,  gap:-1.1,   pct:63,  opp:null,  ly:-27,  s:'red'},
+  {n:'Yuen Lai',   t:4.8,   b:2.0,   f:3.9,  gap:-0.962, pct:80,  opp:1.3,   ly:-2,   s:'red'},
+  {n:'Edison',     t:2.0,   b:0.8,   f:1.2,  gap:-0.748, pct:62,  opp:0.191, ly:-22,  s:'red'},
+  {n:'Kavin',      t:1.1,   b:0.517, f:0.542,gap:-0.526, pct:51,  opp:null,  ly:-48,  s:'red'},
+  {n:'Siok Chin',  t:2.3,   b:1.0,   f:2.5,  gap:+0.162, pct:107, opp:1.8,   ly:-7,   s:'green'},
+  {n:'Joanne Tan', t:0.934, b:0.691, f:1.3,  gap:+0.404, pct:143, opp:0.611, ly:+54,  s:'green'},
+  {n:'Alvin Wong', t:2.9,   b:2.5,   f:3.6,  gap:+0.715, pct:125, opp:0.610, ly:null, s:'green'}
+];
+
+/* ── Source: the deck's two deal slides, owner = head ─────── */
+var DEALS_NOW = [
+  {a:'ZETRIX AI BERHAD', c:'EPL 2026/27 Sponsorship', x:'TV', v:1.2, o:'Siok Chin'},
+  {a:'MEDIAKEY GROUP SDN BHD', c:'KILAUAN EMAS SELEBRITI', x:'TV', v:0.780, o:'Joy Ahmad'},
+  {a:'SINGNAN COMMUNICATIONS SDN BHD', c:'MahSing x CGM 2026', x:'TV', v:0.624, o:'Siok Chin'},
+  {a:'BRANDADS MEDIA SDN BHD', c:'KITA FM 2026 THONG GUAN', x:'Radio', v:0.539, o:'Joanne Tan'},
+  {a:'FYQA MARKETING', c:'SEPAHTU MERDEKA EDITION', x:'TV', v:0.374, o:'Joy Ahmad'},
+  {a:'GRABCAR SDN BHD', c:'Grab_Microdrama 2026', x:'Digital', v:0.359, o:'Alvin Wong'},
+  {a:'CIMB BANK BERHAD', c:'CIMB - SME Biz Contest', x:'Radio', v:0.332, o:'Yuen Lai'},
+  {a:'TRAPPER MEDIA GROUP', c:'UPHAMOL - KITA SONG', x:'Radio', v:0.332, o:'Yuen Lai'},
+  {a:'GRABCAR SDN BHD', c:'Grab_CCC 2026', x:'Digital', v:0.328, o:'Alvin Wong'},
+  {a:'IPG MEDIABRANDS SDN BHD', c:'BYD TikTok Series', x:'Digital', v:0.240, o:'Yuen Lai'}
+];
+var DEALS_NEXT = [
+  {a:'OMNICOM MEDIA GROUP (M) SDN BH', c:'U MOBILE - GOLF & TENNIS TAKEOVE', x:'Jul to Jan 27', v:0.390, o:'Yuen Lai', trunc:true},
+  {a:'GRABCAR SDN BHD', c:'Grab_Microdrama 2026', x:'Aug to Nov 26', v:0.359, o:'Alvin Wong'},
+  {a:'TRAPPER MEDIA GROUP', c:'UPHAMOL - KITA SONG', x:'Aug to Sep 26', v:0.332, o:'Yuen Lai'},
+  {a:'GRABCAR SDN BHD', c:'Grab_CCC 2026', x:'Jul to Sep 26, Nov to Dec 26', v:0.328, o:'Alvin Wong'},
+  {a:'CLEAVE AMITY', c:'TRAVELOGUE 14 PJRM', x:'Nov 26', v:0.312, o:'Joy Ahmad'},
+  {a:'CLEAVE AMITY', c:'TRAVELOGUE 14 PJRM', x:'Nov 26', v:0.312, o:'Joy Ahmad', dup:true},
+  {a:'KEMENTERIAN PEMBANGUNAN WANITA', c:'Keganasan Rumah Tangga (KRT) 202', x:'Oct 26', v:0.249, o:'Joy Ahmad', trunc:true},
+  {a:'NESTLE PRODUCTS SDN BHD', c:'Nescafe SOS', x:'Nov 26', v:0.240, o:'Belinda'},
+  {a:'GRABCAR SDN BHD', c:'Grab_CCC 2026', x:'Jul to Sep 26, Nov to Dec 26', v:0.232, o:'Alvin Wong'},
+  {a:'GRABCAR SDN BHD', c:'Grab_Microdrama 2026', x:'Aug 26, Oct to Nov 26', v:0.230, o:'Alvin Wong'},
+  {a:'AEON CREDIT SERVICE (M) BERHAD', c:'SMEVAGANZA 2025_AEON CREDIT X EM', x:'Aug to Sep 26', v:0.220, o:'Edison'}
+];
+
+/* ── Source: FY27 org chart, the nine heads that carry a book ──
+   `key` joins to the deck's short name; the chart uses full names. */
+var TEAMS = [
+ {key:'Joy Ahmad', name:'Normala (Joy) Ahmad', grade:'SAVP', segment:'Government & SME',
+  vp:'Nicholas Teh', line:'B', team:15, support:['Chin See','Isya','Syikin Roslan'], pods:[
+   {lead:'Nurul Huda', grade:'SA', seg:'', members:[
+     {n:'Monica Mujah', g:'A'},{n:'Arif Aminuddin', g:'A'}]},
+   {lead:'Sharifah Kuraisha', grade:'SA', seg:'', members:[
+     {n:'Nurshafiqah (Fifi)', g:'A'},{n:'Imran', g:'SA'}]},
+   {lead:'Nazihah Abdol', grade:'SA', seg:'', members:[
+     {n:'Nurul Syahirah', g:'A'},{n:'Nadia Rosli', g:'A'}]},
+   {lead:'Nash', grade:'SA', seg:'', members:[
+     {n:'Reezal', g:'A'},{n:'Ungku Asif', g:'A'}]},
+   {lead:'Wan Syahrul Amry', grade:'AVP', seg:'East Coast', members:[
+     {n:'Fauzi', g:'A'},{n:'Open role', g:'', open:true}]}
+ ]},
+ {key:'Yuen Lai', name:'Yee Yuen Lai', grade:'SAVP', segment:'Agency', vp:'Jeyapuvan', line:'A',
+  team:9, support:['Doris','Anies','Casey Low','Kalai'], pods:[
+   {lead:'Mandy Seah', grade:'AVP', seg:'', members:[
+     {n:'Joanne Chen', g:'SE'},{n:'Jing Yan', g:'AM'},{n:'Rae Zalani', g:'AM'},{n:'Siti Sarah', g:'AM'}]},
+   {lead:'Stanley Chong', grade:'AVP', seg:'', members:[
+     {n:'Vernon Ong', g:'SE'},{n:'Daniel Ravin', g:'SE'},{n:'Azuin Rahman', g:'AM'}]}
+ ]},
+ {key:'Alvin Wong', name:'Alvin Wong', grade:'AVP', segment:'Agency', vp:'Jeyapuvan', line:'A',
+  team:9, support:['Mei Li','Edwin','Hidayah'], pods:[
+   {lead:'Ling Chen Lee', grade:'AVP', seg:'', members:[
+     {n:'Fiona Lee', g:'SE'},{n:'Aisyah Azizi', g:'AM'},{n:'Lionel Lim', g:'AM'},{n:'Amanda Lim', g:'SA'}]},
+   {lead:'Tan Hui Yee', grade:'AVP', seg:'', members:[
+     {n:'Crystal Pe', g:'SE'},{n:'Edward Ham', g:'SE'},{n:'Svensson Yap', g:'SE'}]}
+ ]},
+ {key:'Kavin', name:'Kavin Mullai Sadasseevan', grade:'SAVP', segment:'Indian Segment',
+  vp:'Jeyapuvan', line:'A', team:5, support:[], pods:[
+   {lead:'Pushpa Nathan', grade:'AVP', seg:'', members:[
+     {n:'Prravinn', g:'A'},{n:'Rhesimalar Ravi', g:'A'},{n:'Yulesha', g:'A'}]},
+   {lead:null, grade:'', seg:'', members:[{n:'Kirabassri', g:'A'}]}
+ ]},
+ {key:'Joanne Tan', name:'Joanne Tan', grade:'SAVP', segment:'Regional', vp:'Jeyapuvan', line:'A',
+  team:3, support:[], pods:[
+   {lead:null, grade:'', seg:'', members:[
+     {n:'Nur Izzatul Baizura (Jaja)', g:'SA'},{n:'Maznan Mahyuddin', g:'SA'},{n:'Koo YiTong', g:'A'}]}
+ ]},
+ {key:'Belinda', name:'Belinda Chin', grade:'SAVP', segment:'Key Clients', vp:'Nicholas Teh',
+  line:'B', team:4, support:['Mindy','Nur Manissha','Sheryl'], pods:[
+   {lead:'Elaine Ng', grade:'AVP', seg:'', members:[{n:'Jessie Hoe', g:'A'}]},
+   {lead:null, grade:'', seg:'', members:[
+     {n:'Josephine Lim', g:'SA'},{n:'Lee Shih Hsin', g:'SA'}]}
+ ]},
+ {key:'Suat Wei', name:'Boon Suat Wei', grade:'AVP', segment:'Key Clients', vp:'Nicholas Teh',
+  line:'B', team:8, support:['Anisa','Peggy','Adreena'], pods:[
+   {lead:'Gai Li Zhan', grade:'AVP', seg:'', members:[
+     {n:'Melanie Lim', g:'A'},{n:'Goh Hong Cheng', g:'A'},{n:'Chew Joe Er', g:'SA'}]},
+   {lead:'Voo Poh Chee', grade:'SA', seg:'', members:[
+     {n:'Ashley', g:'A'},{n:'Edmund Ng', g:'A'}]},
+   {lead:null, grade:'', seg:'', members:[{n:'Dayang Diana Natasha', g:'SA'}]}
+ ]},
+ {key:'Siok Chin', name:'Teng Siok Chin', grade:'SAVP', segment:'Chinese TV & Digital',
+  vp:'Nicholas Teh', line:'B', team:4, support:[], pods:[
+   {lead:null, grade:'', seg:'', members:[
+     {n:'Teo Yap Keong', g:'AVP', note:'player-manager, carries own portfolio'},
+     {n:'Henry Ong', g:'A'},{n:'Justin Tan', g:'A'},{n:'Zenia Teh', g:'A'}]}
+ ]},
+ {key:'Edison', name:'Edison Lim', grade:'', segment:'SME (Chinese)', vp:'Nicholas Teh', line:'B',
+  team:4, support:['Boey Wong'], pods:[
+   {lead:null, grade:'', seg:'', members:[
+     {n:'Yuki Looi', g:'AM'},{n:'Wong Yoke Saan', g:'Exec'},{n:'Zack Lim', g:'Exec'},
+     {n:'Jess Ng', g:'A', note:'on the master chart, absent from the August tab'}]}
+ ]}
+];
+
+/* ── Formatting ───────────────────────────────────────────── */
+function rm(v){
+  if(v===null||v===undefined) return null;
+  var a=Math.abs(v);
+  if(a<0.0005) return 'RM0';
+  return 'RM'+(a>=1 ? a.toFixed(1)+'M' : Math.round(a*1000)+'K');
+}
+function rmSigned(v){ return (v<0?'−':'+')+rm(v); }
+function esc(s){ return String(s).replace(/[&<>"]/g,function(c){
+  return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+function pctTxt(v){ return v===null?'n/d':(v>0?'+':'')+v+'%'; }
+
+/* ── Modelled pod split ────────────────────────────────────────
+   The deck reports target, booked and forecast at Head of Sales level
+   and stops. There is no per-pod figure anywhere in this cut, so the pod
+   rows hold the head's real total and invent only the division between
+   them, deterministically from a string hash. Same head, same picture,
+   every time, and the rows always sum back to the stated total. */
+function hash01(k){
+  var h=2166136261;
+  for(var i=0;i<k.length;i++){ h^=k.charCodeAt(i); h=Math.imul(h,16777619); }
+  return ((h>>>0)%100000)/100000;
+}
+function reshape(weights, keys, total, spread){
+  var w=weights.map(function(v,i){
+    return Math.max(0.05, v)*(1+(hash01(keys[i])-0.5)*2*spread); });
+  var s=w.reduce(function(a,b){ return a+b; },0)||1;
+  return w.map(function(x){ return total*x/s; });
+}
+var MODEL_WHY = 'Modelled. The 7 August deck reports target, booked and forecast at Head of '+
+  'Sales level and stops there: no pod or person figure exists anywhere in this cut. These rows '+
+  'hold the head’s real stated total and invent only the split between pods. It resolves the '+
+  'moment NeoCRM supplies the same fields one grain finer.';
+function hint(why){
+  return '<span class="hint" title="'+esc(why)+'">illustrative</span>';
+}
+
+/* ── State ────────────────────────────────────────────────── */
+var state = {head:'Joy Ahmad'};
+var DAYS = {gone:6, total:31};
+
+function team(){ return TEAMS.filter(function(t){ return t.key===state.head; })[0]; }
+function row(){ return HOS_NOW.filter(function(r){ return r.n===state.head; })[0]; }
+function podCount(t){ return t.pods.length; }
+
+/* ── Masthead + seat ──────────────────────────────────────── */
+function renderSeat(){
+  var t=team(), r=row();
+  document.getElementById('hName').textContent = t.name;
+  document.getElementById('hWho').innerHTML =
+    (t.grade ? '<b>'+esc(t.grade)+'</b> · ' : '') + esc(t.segment) +
+    ' · reports to <b>'+esc(t.vp)+'</b> (line '+t.line+')' +
+    ' · <b>'+t.team+'</b> on team across <b>'+podCount(t)+'</b> '+
+    (podCount(t)===1?'group':'pods');
+  document.getElementById('seatNote').innerHTML =
+    'This page shows one head’s own patch. Switch the seat to see any of the nine.';
+}
+
+/* ── Where I stand ────────────────────────────────────────── */
+function renderKpis(){
+  var r=row(), pipe=Math.max(0, r.f-r.b);
+  document.getElementById('kpis').innerHTML =
+    '<div class="kpi"><div class="k-l">My target</div><div class="k-v num">'+rm(r.t)+'</div>'+
+      '<div class="k-s">August</div></div>'+
+    '<div class="kpi lead"><div class="k-l">Booked to 6 Aug</div><div class="k-v num">'+rm(r.b)+'</div>'+
+      '<div class="k-s">'+Math.round(r.b/r.t*100)+'% of target</div></div>'+
+    '<div class="kpi"><div class="k-l">Open pipeline</div><div class="k-v num">'+rm(pipe)+'</div>'+
+      '<div class="k-s">weighted, net</div></div>'+
+    '<div class="kpi"><div class="k-l">Forecast</div><div class="k-v num">'+rm(r.f)+'</div>'+
+      '<div class="k-s">'+r.pct+'% of target</div></div>'+
+    '<div class="kpi'+(r.gap<0?' warn':'')+'"><div class="k-l">Gap to target</div>'+
+      '<div class="k-v num '+(r.gap<0?'neg':'pos')+'">'+rmSigned(r.gap)+'</div>'+
+      '<div class="k-s">'+(r.gap<0?'behind':'ahead')+' · vs LY '+pctTxt(r.ly)+'</div></div>';
+
+  var max=r.t*1.12, X=function(v){ return (Math.max(0,v)/max*100).toFixed(2)+'%'; };
+  var gap=r.t-r.f;
+  document.getElementById('attnBar').innerHTML =
+    '<div class="attn-seg b" style="width:'+X(r.b)+'"></div>'+
+    '<div class="attn-seg p" style="left:'+X(r.b)+'; width:'+X(r.f-r.b)+'"></div>'+
+    '<div class="attn-tick" style="left:'+X(r.t)+'"><span>Target '+rm(r.t)+'</span></div>'+
+    (gap>0 ? '<div class="attn-short" style="left:'+X(r.f)+'; width:'+X(gap)+'"></div>' : '');
+  document.getElementById('attnLegend').innerHTML =
+    '<span><i class="sw" style="background:var(--obsidian)"></i>Booked '+rm(r.b)+'</span>'+
+    '<span><i class="sw" style="background:var(--navy)"></i>Weighted pipeline '+rm(r.f-r.b)+'</span>'+
+    '<span><i class="sw" style="width:2px;border-radius:0;background:var(--ink)"></i>Target '+rm(r.t)+'</span>'+
+    (gap>0 ? '<span style="color:var(--red-ink);font-weight:800">Shortfall '+rm(gap)+'</span>' : '');
+}
+
+/* ── Pace ─────────────────────────────────────────────────── */
+function renderPace(){
+  var r=row(), left=DAYS.total-DAYS.gone;
+  var toBook=Math.max(0, r.t-r.b), gap=r.t-r.f;
+  var elapsed=DAYS.gone/DAYS.total*100, booked=r.b/r.t*100;
+  document.getElementById('pace').innerHTML =
+    '<div><div class="p-l">Where the month is</div>'+
+      '<div class="p-v">Day '+DAYS.gone+'<small>of '+DAYS.total+'</small></div>'+
+      '<div class="p-track"><i style="width:'+elapsed.toFixed(1)+'%"></i>'+
+        '<u style="left:'+Math.min(100,booked).toFixed(1)+'%"></u></div>'+
+      '<div class="p-key"><span><b>'+Math.round(elapsed)+'%</b> of the month gone</span>'+
+        '<span><b>'+Math.round(booked)+'%</b> of target booked</span></div>'+
+      '<div class="p-s">Calendar August, '+left+' days left.</div></div>'+
+    '<div><div class="p-l">Still to book</div>'+
+      '<div class="p-v">'+rm(toBook/left)+'<small>a day</small></div>'+
+      '<div class="p-s"><b>'+rm(toBook)+'</b> between now and month end across '+left+' days, '+
+        'including everything the weighted pipeline already implies.</div></div>'+
+    (gap>0
+      ? '<div><div class="p-l">New business to close the gap</div>'+
+          '<div class="p-v">'+rm(gap/left)+'<small>a day</small></div>'+
+          '<div class="p-s"><b>'+rm(gap)+'</b> on top of your current forecast. Split across '+
+          podCount(team())+' pods that is about <b>'+rm(gap/left/podCount(team()))+
+          '</b> a day each.</div></div>'
+      : '<div><div class="p-l">Gap to target</div>'+
+          '<div class="p-v">'+rmSigned(gap)+'</div>'+
+          '<div class="p-s">Forecast is at or above target. Nothing more is required to reach it.</div></div>');
+}
+
+/* ── Two facts ─────────────────────────────────────────────
+   Both are joins the deck never makes: rank across the nine books, and
+   team size across the org chart. Neither is modelled. */
+function renderFacts(){
+  var t=team(), r=row();
+  var byGap=HOS_NOW.slice().sort(function(a,b){ return a.gap-b.gap; });
+  var rank=byGap.map(function(x){ return x.n; }).indexOf(state.head)+1;
+  var sizes=TEAMS.map(function(x){ return x.team; }).sort(function(a,b){ return b-a; });
+  var sizeRank=sizes.indexOf(t.team)+1;
+  var openRoles=t.pods.reduce(function(a,p){
+    return a + p.members.filter(function(m){ return m.open; }).length; }, 0);
+
+  var out='';
+  out += '<div class="fact'+(r.gap>=0?' ok':'')+'"><h3>'+
+    (r.gap<0
+      ? 'Your gap is '+(rank===1?'the largest':'the '+rank+(rank===2?'nd':rank===3?'rd':'th')+' largest')+' of the nine'
+      : 'You are ahead of target')+
+    '</h3><p>'+
+    (r.gap<0
+      ? '<b>'+rmSigned(r.gap)+'</b> against a <b>'+rm(r.t)+'</b> target. '+
+        'Four of the nine books are ahead; you are not one of them.'
+      : '<b>'+rmSigned(r.gap)+'</b> against a <b>'+rm(r.t)+'</b> target, on a forecast of '+
+        rm(r.f)+'.')+
+    ' Sourced from slide 2.</p></div>';
+
+  out += '<div class="fact ok"><h3>'+
+    (sizeRank===1 ? 'You carry the largest team on the floor' :
+     'You carry the '+sizeRank+(sizeRank===2?'nd':sizeRank===3?'rd':'th')+' largest team')+
+    '</h3><p><b>'+t.team+'</b> people across <b>'+podCount(t)+'</b> '+
+    (podCount(t)===1?'group':'pods')+', against a '+rm(r.t)+' target. That is '+
+    '<b>'+rm(r.t/t.team)+'</b> of target per head. Sourced from the FY27 org chart.</p></div>';
+
+  if(openRoles){
+    out += '<div class="fact"><h3>'+openRoles+' open '+(openRoles===1?'role':'roles')+
+      ' in your team</h3><p>The chart shows the seat empty and marks interim cover. '+
+      'An empty seat inside a pod carrying a share of a '+rm(r.t)+' target is the one thing '+
+      'on this page you can fix without selling anything.</p></div>';
+  }
+  document.getElementById('facts').innerHTML = out;
+}
+
+/* ── Pods ─────────────────────────────────────────────────── */
+function renderPods(){
+  var t=team(), r=row();
+  var keys=t.pods.map(function(p,i){ return (p.lead||'direct')+'|'+t.key+'|'+i; });
+  // weight by headcount so a five-person pod does not read like a one-person pod
+  var heads=t.pods.map(function(p){ return p.members.length + (p.lead?1:0); });
+  var T=reshape(heads, keys, r.t, 0.28);
+  var B=reshape(heads, keys.map(function(k){ return k+'~b'; }), r.b, 0.5);
+  var F=reshape(heads, keys.map(function(k){ return k+'~f'; }), r.f, 0.42);
+
+  var rows=t.pods.map(function(p,i){
+    var pct=Math.round(F[i]/T[i]*100);
+    return {name:p.lead||'Reports direct', grade:p.leadGrade||p.grade, seg:p.seg,
+            n:heads[i], t:T[i], b:B[i], f:F[i], gap:F[i]-T[i], pct:pct,
+            s: pct>=100 ? 'green' : (pct>=80 ? 'amber' : 'red')};
+  }).sort(function(a,b){ return a.gap-b.gap; });
+
+  var max=Math.max.apply(null, rows.map(function(x){ return Math.max(x.t,x.f); }))*1.06;
+  var X=function(v){ return (Math.min(Math.max(0,v),max)/max*100).toFixed(2)+'%'; };
+
+  document.getElementById('pods').innerHTML = rows.map(function(x,i){
+    var bW=X(x.b), fW=X(x.f-x.b), tPos=x.t/max*100;
+    return '<div class="lb-row">'+
+      '<span class="lb-rank num">'+(i+1)+'</span>'+
+      '<span class="lb-name">'+esc(x.name)+
+        '<span class="sub">'+(x.grade?esc(x.grade)+' · ':'')+
+        (x.seg?esc(x.seg)+' · ':'')+x.n+' '+(x.n===1?'person':'people')+'</span></span>'+
+      '<span class="bul">'+
+        '<span class="bul-rail"></span>'+
+        '<span class="bul-b" style="width:'+bW+'"></span>'+
+        '<span class="bul-f" style="left:'+bW+'; width:'+fW+'"></span>'+
+        '<span class="bul-t'+(tPos>76?' flip':'')+'" style="left:'+tPos.toFixed(2)+'%" '+
+          'data-l="'+rm(x.t)+'"></span>'+
+      '</span>'+
+      '<span class="r num">'+x.pct+'%<span class="u">booked '+rm(x.b)+'</span></span>'+
+      '<span class="r num '+(x.gap<0?'neg':'pos')+'">'+rmSigned(x.gap)+
+        '<span class="u">of '+rm(x.t)+'</span></span>'+
+      '<span class="r num">'+x.n+'<span class="u">people</span></span>'+
+      '<span class="st"><span class="pill '+x.s+'"><i class="dot"></i>'+
+        (x.s==='green'?'Green':x.s==='amber'?'Amber':'Red')+'</span></span>'+
+      '</div>';
+  }).join('');
+  document.getElementById('pods').dataset.mod='1';
+  document.getElementById('podNote').innerHTML =
+    'Your real total, split across your pods. The split is weighted by headcount and is '+
+    hint(MODEL_WHY)+'. The rows sum back to '+rm(r.t)+' target and '+rm(r.b)+' booked.';
+}
+
+/* ── Roster ───────────────────────────────────────────────── */
+function renderRoster(){
+  var t=team();
+  document.getElementById('roster').innerHTML = t.pods.map(function(p){
+    return '<div class="pod">'+
+      '<div class="pod-hd"><h3>'+esc(p.lead||'Reports direct')+'</h3>'+
+        (p.grade?'<em class="g">'+esc(p.grade)+'</em>':'')+
+        (p.seg?'<span class="pod-seg">'+esc(p.seg)+'</span>':'')+'</div>'+
+      '<ul>'+p.members.map(function(m){
+        return '<li'+(m.open?' class="vac"':'')+'><b>'+esc(m.n)+'</b>'+
+          (m.g?'<em class="g">'+esc(m.g)+'</em>':'')+
+          (m.note?'<span style="font-size:11px">'+esc(m.note)+'</span>':'')+'</li>';
+      }).join('')+'</ul>'+
+      '</div>';
+  }).join('') +
+  (t.support.length
+    ? '<div class="pod"><div class="pod-hd"><h3>Support</h3></div>'+
+      '<ul>'+t.support.map(function(s){ return '<li><b>'+esc(s)+'</b></li>'; }).join('')+'</ul>'+
+      '<div class="sup"><b>Note</b>Delivery and client experience. They do not carry a number.</div>'+
+      '</div>'
+    : '');
+}
+
+/* ── Deals ────────────────────────────────────────────────── */
+function renderDeals(){
+  var mine=DEALS_NOW.filter(function(d){ return d.o===state.head; })
+    .map(function(d){ return {d:d, w:'August, open at 80%'}; })
+    .concat(DEALS_NEXT.filter(function(d){ return d.o===state.head; })
+    .map(function(d){ return {d:d, w:'Forward · '+d.x}; }));
+
+  document.getElementById('dealHd').textContent = 'Deals on my book';
+  if(!mine.length){
+    document.getElementById('dealRows').innerHTML =
+      '<tr><td colspan="4" style="padding:22px 18px"><b style="color:var(--ink)">No deal on '+
+      'either list is attributed to you.</b><br>Both slides show only the ten or eleven largest. '+
+      'That is not the same as having none.</td></tr>';
+    return;
+  }
+  document.getElementById('dealRows').innerHTML = mine.map(function(x){
+    var d=x.d;
+    return '<tr>'+
+      '<td><span class="adv">'+esc(d.a)+'</span><span class="camp">'+esc(d.c)+
+        (d.trunc?'<span class="src" title="Cut off at this length in the source export, not here.">truncated in source</span>':'')+
+        (d.dup?'<span class="src" title="The source export carries this campaign twice, at the same value.">duplicate row in source</span>':'')+
+        '</span></td>'+
+      '<td>'+esc(x.w)+'</td>'+
+      '<td class="n num">'+rm(d.v)+'</td>'+
+      '<td><span class="tag ghost">not attributed</span></td>'+
+      '</tr>';
+  }).join('');
+}
+
+/* ── Peers ─────────────────────────────────────────────────
+   Totals only. A head can see how a peer's book is doing and cannot see
+   the people inside it, which is the rule the whole role model rests on. */
+function renderPeers(){
+  var max=Math.max.apply(null, HOS_NOW.map(function(r){ return Math.max(r.t,r.f); }));
+  document.getElementById('peers').innerHTML = HOS_NOW.slice()
+    .sort(function(a,b){ return a.gap-b.gap; })
+    .map(function(r){
+      var me=r.n===state.head;
+      var t=TEAMS.filter(function(x){ return x.key===r.n; })[0];
+      return '<div class="peer'+(me?' me':'')+'">'+
+        '<h3>'+esc(me ? 'You' : r.n)+'</h3>'+
+        '<div class="pl">'+esc(t?t.segment:'')+' · line '+(t?t.line:'?')+'</div>'+
+        '<div class="pv num '+(r.gap<0?'neg':'pos')+'">'+rmSigned(r.gap)+'</div>'+
+        '<div class="ps">'+r.pct+'% to target · '+(t?t.team:'?')+' on team</div>'+
+        '<div class="minibar"><i style="width:'+(r.b/max*100).toFixed(1)+'%"></i>'+
+          '<b style="left:'+(r.t/max*100).toFixed(1)+'%"></b></div>'+
+        '</div>';
+    }).join('');
+}
+
+/* ── Go ───────────────────────────────────────────────────── */
+function render(){
+  renderSeat(); renderKpis(); renderPace(); renderFacts();
+  renderPods(); renderRoster(); renderDeals(); renderPeers();
+  var q = state.head==='Joy Ahmad' ? '' : '#head='+encodeURIComponent(state.head);
+  try{ history.replaceState(null,'', q || location.pathname); }catch(e){}
+}
+
+var sel=document.getElementById('fHead');
+sel.innerHTML = TEAMS.map(function(t){
+  return '<option value="'+esc(t.key)+'">'+esc(t.name)+' · '+esc(t.segment)+'</option>'; }).join('');
+sel.addEventListener('change', function(){ state.head=sel.value; render(); });
+
+(function(){
+  var m=/head=([^&]+)/.exec(location.hash);
+  if(m){
+    var v=decodeURIComponent(m[1]);
+    if(TEAMS.some(function(t){ return t.key===v; })) state.head=v;
+  }
+  sel.value=state.head;
+})();
+
+document.getElementById('themeBtn').addEventListener('click', function(){
+  var r=document.documentElement;
+  var dark = r.dataset.theme==='dark' ||
+    (!r.dataset.theme && matchMedia('(prefers-color-scheme:dark)').matches);
+  r.dataset.theme = dark ? 'light' : 'dark';
+});
+
+render();
+})();
+</script>
+</body>
+</html>

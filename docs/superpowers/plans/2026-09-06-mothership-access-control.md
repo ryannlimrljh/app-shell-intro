@@ -1300,6 +1300,13 @@ git commit -m "shell: the app shell's styles and behaviour, shared by the new pa
     <span class="c-dept-option-logo"><img src="../collabrium-dls/logo-lockups/collabSales.svg" alt="" /></span>
     <i class="ph ph-check c-dept-check"></i>
   </div>
+  <!-- Media is the one department with somewhere to go: Collab:Media is a
+       deployed product, so picking it opens that app rather than restyling
+       this shell. data-href is what says so; shell.js opens it in a new tab. -->
+  <div class="c-dept-option" role="option" aria-selected="false" aria-label="Media" data-dept="media" data-name="Media" data-logo="../collabrium-dls/logo-lockups/collabMedia.svg" data-element-icon="../collabrium-dls/SVG/water.svg" data-href="https://collab-media.vercel.app">
+    <span class="c-dept-option-logo"><img src="../collabrium-dls/logo-lockups/collabMedia.svg" alt="" /></span>
+    <i class="ph ph-arrow-up-right c-dept-check" aria-hidden="true" style="opacity:1"></i>
+  </div>
   <div class="c-dept-option" role="option" aria-selected="false" aria-label="Influencers" data-dept="influencers" data-name="Influencers" data-logo="../collabrium-dls/logo-lockups/collabInfluencers.svg" data-element-icon="../collabrium-dls/SVG/earth.svg">
     <span class="c-dept-option-logo"><img src="../collabrium-dls/logo-lockups/collabInfluencers.svg" alt="" /></span>
     <i class="ph ph-check c-dept-check"></i>
@@ -1597,6 +1604,13 @@ This task builds the page with the toolbar, filters, sorting, pagination and the
   <div class="c-dept-option" role="option" aria-selected="false" aria-label="Sales" data-dept="sales" data-name="Sales" data-logo="../collabrium-dls/logo-lockups/collabSales.svg" data-element-icon="../collabrium-dls/SVG/gold.svg">
     <span class="c-dept-option-logo"><img src="../collabrium-dls/logo-lockups/collabSales.svg" alt="" /></span>
     <i class="ph ph-check c-dept-check"></i>
+  </div>
+  <!-- Media is the one department with somewhere to go: Collab:Media is a
+       deployed product, so picking it opens that app rather than restyling
+       this shell. data-href is what says so; shell.js opens it in a new tab. -->
+  <div class="c-dept-option" role="option" aria-selected="false" aria-label="Media" data-dept="media" data-name="Media" data-logo="../collabrium-dls/logo-lockups/collabMedia.svg" data-element-icon="../collabrium-dls/SVG/water.svg" data-href="https://collab-media.vercel.app">
+    <span class="c-dept-option-logo"><img src="../collabrium-dls/logo-lockups/collabMedia.svg" alt="" /></span>
+    <i class="ph ph-arrow-up-right c-dept-check" aria-hidden="true" style="opacity:1"></i>
   </div>
   <div class="c-dept-option" role="option" aria-selected="false" aria-label="Influencers" data-dept="influencers" data-name="Influencers" data-logo="../collabrium-dls/logo-lockups/collabInfluencers.svg" data-element-icon="../collabrium-dls/SVG/earth.svg">
     <span class="c-dept-option-logo"><img src="../collabrium-dls/logo-lockups/collabInfluencers.svg" alt="" /></span>

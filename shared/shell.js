@@ -123,6 +123,13 @@
     panel.addEventListener('click', function (e) {
       var opt = e.target.closest('.c-dept-option');
       if (!opt) return;
+      /* A department that owns a deployed product opens it in a new tab,
+         as the dashboard does, and leaves this shell's lockup alone. */
+      if (opt.dataset.href) {
+        window.open(opt.dataset.href, '_blank', 'noopener');
+        close();
+        return;
+      }
       var all = panel.querySelectorAll('.c-dept-option');
       for (var i = 0; i < all.length; i++) {
         var on = all[i] === opt;

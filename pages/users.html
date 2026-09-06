@@ -89,26 +89,66 @@
   .us-denied{max-width:420px; margin:var(--spacing-60) auto;}
   .us-denied a{text-decoration:none;}
 
-  /* ── The sheet: folds out from the right edge, the table stays behind it.
-     The overlay is always in the DOM so the slide can animate; is-open turns
-     it visible and pulls the panel in. Reduced motion skips the slide. ── */
-  .us-overlay{position:fixed; inset:0; z-index:80; background:rgba(20,20,20,.38);
-    display:flex; align-items:stretch; justify-content:flex-end;
-    visibility:hidden; opacity:0; pointer-events:none;
-    transition:opacity var(--duration-base) var(--ease-standard), visibility 0s linear var(--duration-base);}
-  .us-overlay.is-open{visibility:visible; opacity:1; pointer-events:auto; transition-delay:0s;}
-  .us-modal{max-width:none; width:min(540px, 100%); height:100%; border-radius:0;
-    display:flex; flex-direction:column; box-shadow:var(--shadow-overlay, var(--shadow-modal));
-    transform:translateX(100%); transition:transform var(--duration-base) var(--ease-settle);}
-  .us-overlay.is-open .us-modal{transform:none;}
+  /* ── The modal: the Influencers page's card modal, ported. A warm-canvas
+     backdrop at .88 rather than a black veil, and the panel swings open out
+     of the element you clicked (the pencil, or Add new user) via the same
+     parameterised FLIP keyframes (--sw-dx/-dy/-sx/-sy/-dir set from JS at
+     open and close), folding back into it on close. ── */
+  .us-cardmodal{position:fixed; inset:0; z-index:80; display:none;
+    align-items:center; justify-content:center; perspective:1200px;}
+  .us-cardmodal.is-open{display:flex;}
+  .us-cardmodal-backdrop{position:absolute; inset:0;
+    background:var(--color-canvas-warm); opacity:0;
+    transition:opacity .32s var(--ease-standard);}
+  .us-cardmodal.is-shown .us-cardmodal-backdrop{opacity:.88; transition-duration:.5s;}
+  .us-modal{position:relative; display:flex; flex-direction:column; max-width:none;
+    width:min(520px, calc(100vw - var(--spacing-32)));
+    max-height:min(780px, calc(100dvh - var(--spacing-60)));
+    background:var(--color-neutral-1); border:1px solid var(--color-neutral-3);
+    border-radius:var(--radius-lg); box-shadow:0 25px 50px -12px rgba(0,0,0,.25);
+    transform-origin:top left; opacity:0; transition:opacity .3s var(--ease-standard);}
+  .us-cardmodal.is-shown .us-modal{opacity:1;}
+  .us-modal.is-swinging-open{animation:us-swing-open .8s cubic-bezier(.25,.9,.35,1) both;}
+  .us-modal.is-swinging-closed{animation:us-swing-close .55s cubic-bezier(.3,.6,.35,1) both;}
+  @keyframes us-swing-open{
+    0%{transform:translate(var(--sw-dx, 0px), var(--sw-dy, 0px)) scale(var(--sw-sx, 1), var(--sw-sy, 1)); opacity:.4;}
+    45%{transform:translate(calc(var(--sw-dx, 0px) * .5), calc(var(--sw-dy, 0px) * .5)) scale(.7) rotateY(calc(48deg * var(--sw-dir, 1))) rotateZ(calc(-7deg * var(--sw-dir, 1))); opacity:1;}
+    78%{transform:translate(0px, 0px) scale(1) rotateY(calc(-7deg * var(--sw-dir, 1))) rotateZ(calc(1deg * var(--sw-dir, 1)));}
+    100%{transform:none; opacity:1;}
+  }
+  @keyframes us-swing-close{
+    0%{transform:none; opacity:1;}
+    50%{transform:translate(calc(var(--sw-dx, 0px) * .5), calc(var(--sw-dy, 0px) * .5)) scale(.7) rotateY(calc(45deg * var(--sw-dir, 1))) rotateZ(calc(-6deg * var(--sw-dir, 1))); opacity:1;}
+    100%{transform:translate(var(--sw-dx, 0px), var(--sw-dy, 0px)) scale(var(--sw-sx, 1), var(--sw-sy, 1)); opacity:.35;}
+  }
+  @media (prefers-reduced-motion:reduce){
+    .us-modal.is-swinging-open, .us-modal.is-swinging-closed{animation:none;}
+  }
   .us-modal .c-modal-head{flex:none; align-items:flex-start; padding:var(--spacing-20) var(--spacing-24) var(--spacing-12); border-bottom:1px solid var(--color-neutral-3);}
   .us-modal .c-modal-head .sub{margin:2px 0 0; font-size:var(--text-body2-size); color:var(--color-neutral-5); font-weight:400;}
-  .us-modal .c-modal-body{flex:1; overflow-y:auto; padding:var(--spacing-20) var(--spacing-24); display:flex; flex-direction:column; gap:var(--spacing-16);}
+  .us-modal .c-modal-body{flex:1; min-height:0; overflow-y:auto; padding:var(--spacing-20) var(--spacing-24); display:flex; flex-direction:column; gap:var(--spacing-16);}
   .us-modal .c-modal-body > *{flex:none;} /* a column child with overflow set would otherwise shrink to fit */
   .us-modal .c-modal-foot{flex:none; align-items:center; padding:var(--spacing-16) var(--spacing-24); background:var(--color-neutral-1);}
-  @media (prefers-reduced-motion:reduce){
-    .us-overlay, .us-modal{transition:none;}
-  }
+
+  /* ── A–Z rail, the Influencers page's, ported: small grey letters, the
+     current one in ink, letters with nothing to jump to faded near-out. It
+     takes the strip the scrollbar used, so the scrollbar goes. ── */
+  .c-shell .c-shell-content{scrollbar-width:none; -ms-overflow-style:none;}
+  .c-shell .c-shell-content::-webkit-scrollbar{width:0; height:0;}
+  .us-rail{position:fixed; right:6px; top:50%; transform:translateY(-50%);
+    width:24px; z-index:20; display:flex; flex-direction:column; align-items:center; gap:7px;}
+  .us-rail-row{display:flex; align-items:center; justify-content:center;
+    border:0; background:none; padding:0; cursor:pointer; font-family:inherit; line-height:1;}
+  .us-rail-letter{width:22px; text-align:center; font-size:12px; font-weight:600; color:var(--color-neutral-4);
+    transition:color var(--duration-fast) var(--ease-standard), transform var(--duration-fast) var(--ease-settle);}
+  .us-rail-row:hover .us-rail-letter{color:var(--color-neutral-9); transform:translateX(-2px) scale(1.15);}
+  .us-rail-row.is-active .us-rail-letter{color:var(--color-neutral-9); font-weight:800;}
+  .us-rail-row.is-empty{cursor:default; pointer-events:none;}
+  .us-rail-row.is-empty .us-rail-letter{color:var(--color-neutral-3);}
+  .us-rail-row:focus-visible{outline:2px solid var(--color-obsidian); outline-offset:1px; border-radius:var(--radius-sm);}
+  @media (max-height:760px){ .us-rail{gap:4px;} .us-rail-letter{font-size:11px;} }
+  @media (max-height:620px){ .us-rail{gap:2px;} .us-rail-letter{font-size:10px;} }
+  @media (max-width:640px){ .us-rail{display:none;} }
   /* What the role can do: the artifact's activity matrix, read-only, folded
      under the description so the sheet stays short until someone asks. */
   .us-acts{border:1px solid var(--color-neutral-3); border-radius:var(--radius-md); overflow:hidden;}
@@ -272,7 +312,10 @@
   </div>
 </div>
 
-<div class="us-overlay" id="overlay" role="presentation">
+<nav class="us-rail" id="rail" aria-label="Jump to letter" hidden></nav>
+
+<div class="us-cardmodal" id="overlay" aria-hidden="true">
+  <div class="us-cardmodal-backdrop"></div>
   <div class="c-modal us-modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle"></div>
 </div>
 
@@ -362,6 +405,8 @@
     var mayEdit = A.holds(viewer.role, EDIT_GATE);
     document.getElementById('newUser').hidden = !mayOpen;
     if (!mayOpen) {
+      lastRows = [];
+      renderRail();
       content.innerHTML =
         '<div class="c-empty us-denied"><i class="ph ph-lock-simple"></i><h4>Admin only</h4>' +
         '<p>' + esc(A.DENIED) + '</p>' +
@@ -405,7 +450,7 @@
     }
     page.forEach(function (r) {
       var mgr = r.reportsTo && byId[r.reportsTo] ? byId[r.reportsTo] : null;
-      h += '<tr class="' + (r.access === 'inactive' ? 'is-off' : '') + '" data-id="' + esc(r.id) + '">' +
+      h += '<tr class="' + (r.access === 'inactive' ? 'is-off' : '') + '" data-id="' + esc(r.id) + '" data-letter="' + letterOf(r.name) + '">' +
         '<td><div class="us-name">' + esc(r.name) + (r.access === 'inactive' ? ' <span class="c-badge c-badge-neutral">Deactivated</span>' : '') + '</div><div class="us-sub">' + esc(r.email) + '</div></td>' +
         '<td><div class="us-hubs">' + r.hubs.map(function (k) { return '<span class="c-badge c-badge-neutral">' + esc(A.hubShort(k)) + '</span>'; }).join('') + '</div></td>' +
         '<td>' + esc(A.roleLabel(r.role)) + (r.influencerRole ? '<div class="us-sub">Influencer: ' + esc(A.influencerRoleLabel(r.influencerRole)) + '</div>' : '') + '</td>' +
@@ -421,6 +466,9 @@
     h += '</tbody></table></div>';
     content.innerHTML = h;
     wire(byId);
+    lastRows = rows;
+    renderRail();
+    spy();
   }
 
   function filterChip(key, label, options) {
@@ -511,22 +559,121 @@
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape') { closePops(); closeModal(); } });
 
   /* ── Modals ───────────────────────────────────────────────────────── */
+  /* ── A–Z rail: the Influencers page's jump-and-spy, on a paged table.
+     Letter counts come from the whole filtered list, so the rail describes
+     the directory, not the page; a jump to a letter on another page turns
+     to that page first, then scrolls the shell's own scroll container. ── */
+  var LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ#'.split('');
+  var railEl = document.getElementById('rail');
+  var scroller = document.querySelector('.c-shell-content');
+  var lastRows = [];
+  function letterOf(name) {
+    var c = String(name || '').trim().charAt(0).toUpperCase();
+    return /[A-Z]/.test(c) ? c : '#';
+  }
+  function renderRail() {
+    var counts = {};
+    LETTERS.forEach(function (L) { counts[L] = 0; });
+    lastRows.forEach(function (r) { counts[letterOf(r.name)] += 1; });
+    railEl.hidden = !lastRows.length;
+    railEl.innerHTML = LETTERS.map(function (L) {
+      var n = counts[L];
+      return '<button class="us-rail-row' + (n ? '' : ' is-empty') + '" type="button" data-letter="' + L + '"' +
+        (n ? ' title="' + n + '" aria-label="Jump to ' + (L === '#' ? 'symbols' : L) + ', ' + n + ' people"' : ' tabindex="-1" aria-hidden="true"') + '>' +
+        '<span class="us-rail-letter">' + L + '</span></button>';
+    }).join('');
+  }
+  railEl.addEventListener('click', function (e) {
+    var row = e.target.closest('.us-rail-row');
+    if (!row || row.classList.contains('is-empty')) return;
+    var L = row.dataset.letter, idx = -1;
+    for (var i = 0; i < lastRows.length; i++) if (letterOf(lastRows[i].name) === L) { idx = i; break; }
+    if (idx < 0) return;
+    var pg = Math.floor(idx / state.rows) + 1;
+    if (pg !== state.page) { state.page = pg; render(); }
+    var target = content.querySelector('tr[data-letter="' + L + '"]');
+    if (!target || !scroller) return;
+    var top = target.getBoundingClientRect().top - scroller.getBoundingClientRect().top + scroller.scrollTop - 16;
+    /* Smooth only when the tab is actually being painted: a hidden pane
+       stalls the animation clock and the glide never lands. */
+    var glide = !REDUCED_RAIL && document.visibilityState === 'visible';
+    scroller.scrollTo({ top: Math.max(0, top), behavior: glide ? 'smooth' : 'auto' });
+    /* The spy normally follows the scroll event; an instant jump in a hidden
+       pane fires none, so mark the letter directly. */
+    if (!glide) spy();
+  });
+  var REDUCED_RAIL = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  /* Scroll-spy: the letter of the row that owns the viewport top. */
+  var spyTick = false;
+  function spy() {
+    if (!scroller || railEl.hidden) return;
+    var rows = content.querySelectorAll('tr[data-letter]');
+    var topEdge = scroller.getBoundingClientRect().top + 90;
+    var current = null;
+    rows.forEach(function (tr) { if (tr.getBoundingClientRect().top <= topEdge) current = tr.dataset.letter; });
+    if (!current && rows.length) current = rows[0].dataset.letter;
+    railEl.querySelectorAll('.us-rail-row').forEach(function (b) { b.classList.toggle('is-active', b.dataset.letter === current); });
+  }
+  if (scroller) scroller.addEventListener('scroll', function () {
+    if (spyTick) return;
+    spyTick = true;
+    setTimeout(function () { spyTick = false; spy(); }, 80);
+  });
+
   var overlay = document.getElementById('overlay');
   var modal = document.getElementById('modal');
   var form = null;   // { mode:'add'|'edit', before, next, picked }
   var opener = null;
 
+  /* The swing: the panel flies out of the element that opened it and folds
+     back into it on close. The source rect is frozen at open time in case a
+     re-render swaps the button out from under the modal. Same math as the
+     Influencers page, so the two read as one behaviour. */
+  var REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var swingSrcEl = null, swingSrcRect = null, hideTimer = null;
+  function swingVars() {
+    modal.classList.remove('is-swinging-open', 'is-swinging-closed');
+    void modal.offsetWidth;
+    var from = (swingSrcEl && swingSrcEl.isConnected) ? swingSrcEl.getBoundingClientRect() : swingSrcRect;
+    if (!from) return false;
+    var to = modal.getBoundingClientRect();
+    modal.style.setProperty('--sw-dx', (from.left - to.left).toFixed(1) + 'px');
+    modal.style.setProperty('--sw-dy', (from.top - to.top).toFixed(1) + 'px');
+    modal.style.setProperty('--sw-sx', (from.width / to.width).toFixed(4));
+    modal.style.setProperty('--sw-sy', (from.height / to.height).toFixed(4));
+    modal.style.setProperty('--sw-dir', (from.left + from.width / 2) <= window.innerWidth / 2 ? '1' : '-1');
+    return true;
+  }
+  function showModal(srcEl) {
+    clearTimeout(hideTimer);
+    swingSrcEl = srcEl || null;
+    swingSrcRect = srcEl ? srcEl.getBoundingClientRect() : null;
+    overlay.classList.add('is-open');
+    overlay.setAttribute('aria-hidden', 'false');
+    if (!REDUCED && swingVars()) modal.classList.add('is-swinging-open');
+    overlay.classList.add('is-shown');
+  }
   function closeModal() {
-    overlay.classList.remove('is-open');
+    if (!overlay.classList.contains('is-open')) return;
+    if (!REDUCED && swingVars()) modal.classList.add('is-swinging-closed');
+    overlay.classList.remove('is-shown');
     form = null;
-    /* Empty the panel once it has slid out, not while it is still visible. */
-    setTimeout(function () { if (!overlay.classList.contains('is-open')) modal.innerHTML = ''; }, 260);
     if (opener && opener.focus) opener.focus();
     opener = null;
+    clearTimeout(hideTimer);
+    hideTimer = setTimeout(function () {
+      overlay.classList.remove('is-open');
+      overlay.setAttribute('aria-hidden', 'true');
+      modal.classList.remove('is-swinging-open', 'is-swinging-closed');
+      modal.innerHTML = '';
+      swingSrcEl = null; swingSrcRect = null;
+    }, REDUCED ? 320 : 600);
   }
+  /* Backdrop closes, but only when the press started on it too, so a drag
+     that ends outside the panel does not throw the edits away. */
   var downOnBackdrop = false;
-  overlay.addEventListener('mousedown', function (e) { downOnBackdrop = e.target === overlay; });
-  overlay.addEventListener('click', function (e) { if (downOnBackdrop && e.target === overlay) closeModal(); downOnBackdrop = false; });
+  overlay.addEventListener('mousedown', function (e) { downOnBackdrop = !!e.target.closest('.us-cardmodal-backdrop'); });
+  overlay.addEventListener('click', function (e) { if (downOnBackdrop && e.target.closest('.us-cardmodal-backdrop')) closeModal(); downOnBackdrop = false; });
 
   function blank() {
     return { id: '', name: '', email: '', networkId: '', role: A.DEFAULT_ROLE, hubs: ['sales'],
@@ -536,7 +683,7 @@
     opener = document.activeElement;
     form = { mode: 'add', before: null, next: blank(), picked: null };
     paintModal();
-    overlay.classList.add('is-open');
+    showModal(document.getElementById('newUser'));
     var p = document.getElementById('person');
     if (p) p.focus();
   }
@@ -546,7 +693,7 @@
     opener = document.activeElement;
     form = { mode: 'edit', before: rec, next: JSON.parse(JSON.stringify(rec)), picked: rec };
     paintModal();
-    overlay.classList.add('is-open');
+    showModal(content.querySelector('[data-edit="' + id + '"]'));
     var first = modal.querySelector('input:not([disabled]), select, button[data-close]');
     if (first) first.focus();
   }

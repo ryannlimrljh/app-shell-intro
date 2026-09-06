@@ -192,10 +192,20 @@ with the same rows selector (25, 50, 100, 250) and pager.
 | Last sign-in | Date and time, or Never |
 | Edit | Pencil, hidden for business roles |
 
-Add and Edit open in a sheet that folds out from the right edge, about
-540px wide, over a dimmed backdrop; the table stays in place behind it.
-Backdrop click and Escape close it, focus moves into the sheet on open and
-back to the opener on close, and the slide honours reduced motion.
+Add and Edit open in a centred modal that folds out the way the Influencers
+page's card modal does: the panel swings open out of the element that was
+clicked (the row's pencil, or the Add new user button) over a warm-canvas
+backdrop, and folds back into it on close. Backdrop click and Escape close
+it, focus moves into the modal on open and back to the opener on close, and
+reduced motion skips the swing.
+
+**A–Z rail.** The Influencers page's rail, on the right edge where the
+scrollbar was: 27 letters, the current one in ink, letters with nobody to
+jump to faded and unfocusable. Counts come from the whole filtered list, so
+a jump to a letter on another page turns to that page first, then scrolls
+the shell's content to the first row with that letter. A scroll-spy keeps
+the current letter marked. Hidden on narrow screens and in the Admin-only
+state.
 
 **Add a user.** Title "Add a user", subtitle "Search Azure AD, then give
 them a role."

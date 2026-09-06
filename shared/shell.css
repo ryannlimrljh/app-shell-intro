@@ -9,6 +9,11 @@ html,body{margin:0; height:100%;}
 body{font-family:var(--font-primary); color:var(--color-neutral-9);
   background:var(--color-canvas-warm); -webkit-font-smoothing:antialiased;}
 
+/* The design system sets display on buttons, choices and notes, which
+   outranks the browser's own [hidden]{display:none}. One rule here, so no
+   page has to remember it per element. */
+[hidden]{display:none !important;}
+
 /* The DS ships .c-shell at a fixed 480px; every real screen has to say so. */
 .c-shell{height:100dvh;}
 .c-shell-content{padding:0;}
@@ -70,9 +75,6 @@ a.c-sidebar-item{text-decoration:none;}
 .va-seg button:hover{background:var(--color-neutral-2);}
 .va-seg button[aria-pressed="true"]{background:var(--color-obsidian); color:var(--color-neutral-1);}
 .va-seg button:focus-visible{outline:2px solid var(--color-obsidian); outline-offset:2px;}
-
-/* Toasts sit bottom-right, the DS host. */
-.c-toast-host{pointer-events:none;}
 
 /* Narrow: the rail becomes a box in the corner, as the dashboard does. */
 @media (max-width:640px){

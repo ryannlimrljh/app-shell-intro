@@ -69,6 +69,8 @@
   .us-table th{background:var(--color-canvas-warm-card); white-space:nowrap; cursor:pointer; user-select:none;}
   .us-table th .arr{font-size:10px; margin-left:4px; color:var(--color-neutral-4);}
   .us-table th.is-sorted .arr{color:var(--color-neutral-9);}
+  .us-sort{border:none; background:transparent; padding:0; font:inherit; color:inherit; text-transform:inherit; letter-spacing:inherit; cursor:pointer; display:inline-flex; align-items:center;}
+  .us-sort:focus-visible{outline:2px solid var(--color-obsidian); outline-offset:2px;}
   .us-table th:first-child, .us-table td:first-child{padding-left:var(--spacing-16);}
   .us-table tbody tr{cursor:default;}
   .us-table td{vertical-align:top;}
@@ -86,12 +88,8 @@
   /* ── Admin-only state ────────────────────────────────────────────── */
   .us-denied{max-width:420px; margin:var(--spacing-60) auto;}
   .us-denied a{text-decoration:none;}
-  /* .c-btn sets display:inline-flex in the design system, which otherwise
-     beats the browser's own [hidden]{display:none} rule — same fix as the
-     [hidden] overrides below, applied to the New user button. */
-  #newUser[hidden]{display:none;}
 
-  /* ── Modals (Task 8 fills these) ─────────────────────────────────── */
+  /* ── Modals ──────────────────────────────────────────────────────── */
   .us-overlay{position:fixed; inset:0; z-index:80; background:rgba(20,20,20,.38);
     display:none; align-items:flex-start; justify-content:center; padding:var(--spacing-40) var(--spacing-16); overflow:auto;}
   .us-overlay.is-open{display:flex;}
@@ -259,16 +257,20 @@
   var viewer, store, seedAll;
   var state = { q: '', role: [], hub: [], st: [], sort: { key: 'name', dir: 1 }, page: 1, rows: 50 };
 
-  /* ── Boot: the org chart, then the store, then the page ───────────── */
-  fetch('../data/org-tree.json').then(function (r) { return r.json(); }).then(function (tree) {
+  /* ── Boot: the shell, then the org chart, then the store, then the page ── */
+  viewer = Sh.init({ onViewerChange: function (v) { viewer = v; state.page = 1; if (store) render(); } });
+  fetch('../data/org-tree.json').then(function (r) {
+    if (!r.ok) throw new Error('org-tree.json ' + r.status);
+    return r.json();
+  }).then(function (tree) {
     seedAll = A.buildSeed(tree);
     store = A.createStore({ seed: seedAll, storage: S });
-    viewer = Sh.init({ onViewerChange: function (v) { viewer = v; state.page = 1; render(); } });
     document.getElementById('newUser').addEventListener('click', function () { openAdd(); });
     render();
   }).catch(function (e) {
     document.getElementById('content').innerHTML =
       '<div class="c-empty"><i class="ph ph-warning-circle"></i><h4>The org chart did not load</h4><p>' + esc(String(e)) + '</p></div>';
+    document.getElementById('newUser').hidden = true;
   });
 
   /* ── Formatting ───────────────────────────────────────────────────── */
@@ -363,7 +365,7 @@
       COLS.map(function (c) {
         var on = state.sort.key === c.key;
         return '<th data-sort="' + c.key + '" class="' + (on ? 'is-sorted' : '') + '" aria-sort="' + (on ? (state.sort.dir > 0 ? 'ascending' : 'descending') : 'none') + '">' +
-          esc(c.label) + '<span class="arr">' + (on ? (state.sort.dir > 0 ? '↑' : '↓') : '↕') + '</span></th>';
+          '<button type="button" class="us-sort">' + esc(c.label) + '<span class="arr">' + (on ? (state.sort.dir > 0 ? '↑' : '↓') : '↕') + '</span></button></th>';
       }).join('') + '<th aria-label="Edit"></th></tr></thead><tbody>';
     if (!page.length) {
       h += '<tr><td colspan="8"><div class="c-empty us-empty"><i class="ph ph-users"></i><h4>No one matches</h4><p>Clear a filter or change the search.</p></div></td></tr>';
@@ -475,23 +477,29 @@
   document.addEventListener('click', function (e) { if (!e.target.closest('.us-filter')) closePops(); });
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape') { closePops(); closeModal(); } });
 
-  /* ── Modals: Task 8 ───────────────────────────────────────────────── */
+  /* ── Modals ───────────────────────────────────────────────────────── */
   var overlay = document.getElementById('overlay');
   var modal = document.getElementById('modal');
   var form = null;   // { mode:'add'|'edit', before, next, picked }
+  var opener = null;
 
   function closeModal() {
     overlay.classList.remove('is-open');
     modal.innerHTML = '';
     form = null;
+    if (opener && opener.focus) opener.focus();
+    opener = null;
   }
-  overlay.addEventListener('click', function (e) { if (e.target === overlay) closeModal(); });
+  var downOnBackdrop = false;
+  overlay.addEventListener('mousedown', function (e) { downOnBackdrop = e.target === overlay; });
+  overlay.addEventListener('click', function (e) { if (downOnBackdrop && e.target === overlay) closeModal(); downOnBackdrop = false; });
 
   function blank() {
     return { id: '', name: '', email: '', networkId: '', role: A.DEFAULT_ROLE, hubs: ['sales'],
              influencerRole: null, reportsTo: null, reportsToEmail: null, access: 'active', lastSignIn: null };
   }
   function openAdd() {
+    opener = document.activeElement;
     form = { mode: 'add', before: null, next: blank(), picked: null };
     paintModal();
     overlay.classList.add('is-open');
@@ -501,14 +509,19 @@
   function openEdit(id) {
     var rec = store.get(id);
     if (!rec) return;
+    opener = document.activeElement;
     form = { mode: 'edit', before: rec, next: JSON.parse(JSON.stringify(rec)), picked: rec };
     paintModal();
     overlay.classList.add('is-open');
+    var first = modal.querySelector('input:not([disabled]), select, button[data-close]');
+    if (first) first.focus();
   }
 
   /* One paint per change. The inputs are rebuilt, so focus is restored to
-     whichever control was active by id. */
+     whichever control was active, by id or by hub key. */
   function paintModal() {
+    var active = document.activeElement, activeId = active && active.id,
+        activeHub = active && active.dataset ? active.dataset.hub : null;
     var f = form, n = f.next, isAdd = f.mode === 'add';
     var mayRole = A.holds(viewer.role, "Assign or change a user's role");
     var hasInfl = n.hubs.indexOf('influencer') !== -1;
@@ -562,7 +575,7 @@
     }
 
     h += '<div class="us-desc">' + A.describe(n).map(function (line, i) {
-      return '<div>' + (i === 0 ? line.replace(/^Sees ([^.]+)\./, 'Sees <b>$1</b>.') : esc(line)) + '</div>';
+      return '<div>' + (i === 0 ? esc(line).replace(/^Sees ([^.]+)\./, 'Sees <b>$1</b>.') : esc(line)) + '</div>';
     }).join('') + '</div>';
 
     if (!isAdd) {
@@ -595,6 +608,13 @@
 
     modal.innerHTML = h;
     wireModal();
+    if (activeHub) {
+      var hb = modal.querySelector('input[data-hub="' + activeHub + '"]');
+      if (hb && !hb.disabled) hb.focus();
+    } else if (activeId) {
+      var ae = document.getElementById(activeId);
+      if (ae && modal.contains(ae)) ae.focus();
+    }
   }
   function strip(r) {
     if (!r) return null;
@@ -628,8 +648,8 @@
             var c = store.candidates().filter(function (x) { return x.id === b.dataset.pick; })[0];
             if (!c) return;
             f.picked = c;
-            f.next = Object.assign(blank(), { id: c.id, name: c.name, email: c.email, networkId: c.networkId,
-                                              reportsTo: c.reportsTo, reportsToEmail: c.reportsToEmail });
+            Object.assign(f.next, { id: c.id, name: c.name, email: c.email, networkId: c.networkId,
+                                     reportsTo: c.reportsTo, reportsToEmail: c.reportsToEmail });
             paintModal();
           });
         });
@@ -651,11 +671,11 @@
       });
     });
     var role = document.getElementById('role');
-    if (role) role.addEventListener('change', function () { n.role = role.value; paintModal(); document.getElementById('role').focus(); });
+    if (role) role.addEventListener('change', function () { n.role = role.value; paintModal(); });
     var irole = document.getElementById('irole');
-    if (irole) irole.addEventListener('change', function () { n.influencerRole = irole.value; paintModal(); document.getElementById('irole').focus(); });
+    if (irole) irole.addEventListener('change', function () { n.influencerRole = irole.value; paintModal(); });
     var access = document.getElementById('access');
-    if (access) access.addEventListener('change', function () { n.access = access.value; paintModal(); document.getElementById('access').focus(); });
+    if (access) access.addEventListener('change', function () { n.access = access.value; paintModal(); });
 
     var rm = modal.querySelector('[data-remove]');
     if (rm) rm.addEventListener('click', function () { f.confirm = true; paintModal(); });
@@ -689,8 +709,6 @@
     g.hidden = false;
     g.querySelector('span').textContent = msg;
   }
-
-  /* MODALS-END */
 })();
 </script>
 </body>

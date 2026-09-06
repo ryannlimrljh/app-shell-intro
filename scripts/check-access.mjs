@@ -245,5 +245,29 @@ section('Overrides');
   ok(!A.isModified('mothership', 'leadership') && A.lastChange('mothership', 'leadership') === null, 'garbage in storage is ignored');
 }
 
+
+section('The ceiling holds');
+{
+  const st = memStorage();
+  st.setItem(A.OVERRIDES_KEY, JSON.stringify({ o: { mothership: { super_admin: { [ROLE]: false }, admin: { [ROLE]: true } }, sales: { admin: { [LOGRM]: true } } }, log: [] }));
+  A.loadOverrides(st);
+  ok(A.holdsIn('mothership', 'super_admin', ROLE), 'a stored override cannot lower Super Admin');
+  ok(!A.holdsIn('mothership', 'admin', ROLE), 'a stored override cannot hand Admin the edit gate');
+  ok(!A.holdsIn('sales', 'admin', LOGRM), 'a stored override cannot grant a Super Admin only item');
+  ok(A.mayEditRoles({ role: 'super_admin' }) && !A.mayEditRoles({ role: 'admin' }), 'the edit gate is Super Admin\'s whatever storage says');
+  ok(A.lockReason('mothership', 'admin', ROLE) !== null, 'the edit gate is locked for every other role');
+  ok(A.lockReason('mothership', 'leadership', 'View audit log') !== null, 'audit log is locked for business roles');
+  const SA = { id: 'bryan-wong', name: 'Bryan Wong', role: 'super_admin' };
+  ok(/Super Admin only/.test(A.setOverride(st, SA, 'mothership', 'admin', ROLE, true) || ''), 'setOverride refuses to widen the gate');
+  ok(/does not exist/.test(A.setOverride(st, SA, 'influencer', 'sales_rep', 'Manage brands', true) || ''), 'a role outside the matrix is refused');
+  ok(/does not exist/.test(A.resetRole(st, SA, 'sales', 'viewer') || ''), 'reset of a role outside the matrix is refused');
+  st.setItem(A.OVERRIDES_KEY, JSON.stringify({ o: {}, log: 'x' }));
+  A.loadOverrides(st);
+  ok(A.setOverride(st, SA, 'mothership', 'sales_rep', REPORTS, true) === null && A.lastChange('mothership', 'sales_rep') !== null, 'a wrongly shaped log is replaced, not crashed on');
+  st.setItem(A.OVERRIDES_KEY, JSON.stringify({ o: [], log: [null, 3, { matrix: 'mothership', role: 'sales_rep', label: REPORTS, value: true, at: 'x', by: 'y' }] }));
+  A.loadOverrides(st);
+  ok(!A.isModified('mothership', 'sales_rep') && A.lastChange('mothership', 'sales_rep') !== null && A.lastChange('mothership', 'sales_rep').by === 'y', 'an array where the overrides should be is ignored, non-object log entries dropped');
+}
+
 console.log(failed ? `\n${failed} check(s) failed` : '\nAll checks passed');
 process.exit(failed ? 1 : 0);

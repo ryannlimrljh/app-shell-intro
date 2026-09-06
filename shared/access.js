@@ -65,19 +65,20 @@
      `roles` lists the business roles holding the item, plus 'admin' where
      Admin holds it on its own. Super Admin holds everything. Admin also
      holds whatever Leadership holds, which is the artifact's "Admin mirrors
-     Leadership" rule. An empty list means Super Admin only. */
+     Leadership" rule. superOnly marks what the artifact reserves for Super
+     Admin: never granted to anyone else, by default or by override. */
   var ACTIVITIES = [
     { title: 'Manage workspace', items: [
-      { label: 'Enable or disable hubs (Collab: Sales, Collab: Influencer, Collab: Planning)', roles: [] },
-      { label: 'Manage integrations (Similarweb, Brandwatch, CRM, booking/finance feeds)', roles: [] },
-      { label: 'Manage data source connections', roles: [] }
+      { label: 'Enable or disable hubs (Collab: Sales, Collab: Influencer, Collab: Planning)', roles: [], superOnly: true },
+      { label: 'Manage integrations (Similarweb, Brandwatch, CRM, booking/finance feeds)', roles: [], superOnly: true },
+      { label: 'Manage data source connections', roles: [], superOnly: true }
     ]},
     { title: 'Manage user access', items: [
       { label: 'Invite / add a user to the workspace', roles: ['admin'] },
       { label: 'Assign which hub(s) a user can open (Collab: Sales, Collab: Influencer, Collab: Planning)', roles: ['admin'] },
-      { label: "Assign or change a user's role", roles: [] },
+      { label: "Assign or change a user's role", roles: [], superOnly: true },
       { label: 'Deactivate or remove a user', roles: ['admin'] },
-      { label: 'Manage team / reporting-line structure', roles: [] }
+      { label: 'Manage team / reporting-line structure', roles: [], superOnly: true }
     ]},
     { title: 'Sales Board data & targets', items: [
       { label: 'Bulk import / replace Sales Board data (Excel upload or JSON ingest)', roles: ['admin'] },
@@ -88,11 +89,11 @@
       { label: 'Edit prior-year revenue baseline (monthly)', roles: ['admin'] }
     ]},
     { title: 'Manage external access', items: [
-      { label: 'Manage guest or external partner access', roles: [] }
+      { label: 'Manage guest or external partner access', roles: [], superOnly: true }
     ]},
     { title: 'Audit & compliance', items: [
-      { label: 'View audit log', roles: [] },
-      { label: 'Export audit log', roles: [] },
+      { label: 'View audit log', roles: [], superOnly: true },
+      { label: 'Export audit log', roles: [], superOnly: true },
       { label: 'View data access reports', roles: ['leadership'] }
     ]},
     { title: 'Export', items: [
@@ -115,10 +116,7 @@
   }
   /* Does this role hold this activity? Throws on an unknown label, so a
      typo in a page fails loudly instead of quietly denying. */
-  function holds(role, label) {
-    if (!findActivity(label)) throw new Error('Unknown activity: ' + label);
-    return holdsIn('mothership', role, label);
-  }
+  function holds(role, label) { return holdsIn('mothership', role, label); }
 
   /* The Sales Board scope a role sees, in the artifact's own words. */
   var SCOPE = {
@@ -541,12 +539,18 @@
 
   var OVERRIDES_KEY = 'collabrium.access.overrides';
   var OVERRIDES = {}, CHANGE_LOG = [], overridesStorage = null;
+  function isPlainObject(x) { return !!x && typeof x === 'object' && !Array.isArray(x); }
+  /* Whatever is in storage, the page runs: a string that is not JSON, or
+     JSON of the wrong shape, both fall back to the defaults. */
   function loadOverrides(storage) {
     overridesStorage = storage;
     OVERRIDES = {}; CHANGE_LOG = [];
     try {
-      var v = JSON.parse(storage.getItem(OVERRIDES_KEY) || '{}') || {};
-      if (v && typeof v === 'object') { OVERRIDES = v.o || {}; CHANGE_LOG = v.log || []; }
+      var v = JSON.parse(storage.getItem(OVERRIDES_KEY) || '{}');
+      if (isPlainObject(v)) {
+        if (isPlainObject(v.o)) OVERRIDES = v.o;
+        if (Array.isArray(v.log)) CHANGE_LOG = v.log.filter(isPlainObject);
+      }
     } catch (e) { /* garbage: run on the defaults */ }
   }
   function saveOverrides() {
@@ -556,8 +560,11 @@
   function explicit(matrix, role) {
     return OVERRIDES[matrix] && OVERRIDES[matrix][role] ? OVERRIDES[matrix][role] : null;
   }
-  /* Override if set, else the artifact's default. */
+  /* Override if set, else the artifact's default. A locked cell never reads
+     an override, whatever storage says: the ceiling cannot be lowered and a
+     Super Admin only item cannot be granted through the back door. */
   function holdsIn(matrix, role, label) {
+    if (lockReason(matrix, role, label)) return defaultHolds(matrix, role, label);
     var o = explicit(matrix, role);
     if (o && Object.prototype.hasOwnProperty.call(o, label)) return !!o[label];
     return defaultHolds(matrix, role, label);
@@ -587,12 +594,14 @@
   function logChange(viewer, matrix, role, label, value) {
     CHANGE_LOG.push({ at: new Date().toISOString(), by: viewer.name, matrix: matrix, role: role, label: label, value: value });
   }
+  function roleInMatrix(m, role) { return m.roles.some(function (r) { return r.key === role; }); }
   function setOverride(storage, viewer, matrix, role, label, value) {
     if (storage !== overridesStorage) loadOverrides(storage);
     if (!mayEditRoles(viewer)) return ROLES_ARE_SUPER;
+    var m = matrixOf(matrix);
+    if (!roleInMatrix(m, role)) return 'That role does not exist in ' + m.title + '.';
     var lock = lockReason(matrix, role, label);
     if (lock) return lock;
-    var m = matrixOf(matrix);
     if (m.mirror && (m.mirror[role] || Object.keys(m.mirror).some(function (r) { return m.mirror[r] === role; }))) materialiseMirror(matrix);
     OVERRIDES[matrix] = OVERRIDES[matrix] || {};
     OVERRIDES[matrix][role] = OVERRIDES[matrix][role] || {};
@@ -604,7 +613,8 @@
   function resetRole(storage, viewer, matrix, role) {
     if (storage !== overridesStorage) loadOverrides(storage);
     if (!mayEditRoles(viewer)) return ROLES_ARE_SUPER;
-    matrixOf(matrix);
+    var m = matrixOf(matrix);
+    if (!roleInMatrix(m, role)) return 'That role does not exist in ' + m.title + '.';
     if (OVERRIDES[matrix]) delete OVERRIDES[matrix][role];
     logChange(viewer, matrix, role, null, null);
     saveOverrides();

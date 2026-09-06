@@ -83,5 +83,69 @@ ok(seed.every(r => /^[a-z.]+@astro\.com\.my$/.test(r.email)), 'emails are in the
 ok(bryan.teamDirect >= 2 && bryan.teamTotal > bryan.teamDirect, 'team counts roll up');
 ok(seed.slice(1).every((r, i) => seed[i].name.localeCompare(r.name) <= 0), 'sorted by name');
 
+section('Store');
+{
+  const st = memStorage();
+  const store = A.createStore({ seed, storage: st });
+  ok(store.list().length === seed.length, 'list returns the seed');
+  ok(store.syncedAt() === null, 'no sync stamp yet');
+  const joy = store.list().find(r => r.name.indexOf('Ahmad') !== -1);
+  ok(!!joy, 'a seeded person can be found');
+  store.save(Object.assign({}, joy, { hubs: ['sales', 'influencer'], influencerRole: 'infl_manager' }));
+  ok(store.get(joy.id).hubs.length === 2, 'a saved change is read back');
+  ok(store.list().length === seed.length, 'saving does not duplicate');
+  store.save({ id: 'new-person', name: 'New Person', email: 'new.person@astro.com.my', networkId: 'NEWPERSO',
+               role: 'sales_rep', hubs: ['planning'], influencerRole: null,
+               reportsTo: joy.id, reportsToEmail: null, access: 'active', lastSignIn: null });
+  ok(store.list().length === seed.length + 1, 'an added person appears');
+  ok(store.get(joy.id).teamDirect === joy.teamDirect + 1, "the manager's direct count grew");
+  store.remove('new-person');
+  ok(store.get('new-person') === null && store.list().length === seed.length, 'a removed person is gone');
+  store.remove(joy.id);
+  ok(store.get(joy.id) === null, 'a seeded person can be removed');
+  store.save(joy);
+  ok(store.get(joy.id) !== null, 'saving again un-removes');
+  store.stampSync('2026-09-06T10:18:00.000Z');
+  ok(store.syncedAt() === '2026-09-06T10:18:00.000Z', 'sync stamp is kept');
+  store.reset();
+  ok(store.get(joy.id).hubs.length === 1 && store.syncedAt() === null, 'reset restores the seed');
+  ok(store.candidates().length === 0, 'no candidates while everyone is in');
+  store.remove(joy.id);
+  ok(store.candidates().length === 1 && store.candidates()[0].id === joy.id, 'a removed person is a candidate again');
+  store.reset();
+}
+
+section('Guards');
+{
+  const all = A.withTeams(seed.map(r => Object.assign({}, r)));
+  const SA = { id: 'bryan-wong', role: 'super_admin' };
+  const AD = { id: 'bryan-wong', role: 'admin' };
+  const LD = { id: 'bryan-wong', role: 'leadership' };
+  const joy = all.find(r => r.name.indexOf('Ahmad') !== -1);
+  const bryan = all.find(r => r.id === 'bryan-wong');
+  const edit = (rec, patch) => Object.assign({}, rec, patch);
+  ok(A.check(SA, joy, edit(joy, { role: 'sales_manager' }), all) === null, 'Super Admin may change a role');
+  ok(/Super Admin sets the role/.test(A.check(AD, joy, edit(joy, { role: 'sales_manager' }), all)), 'Admin may not change a role');
+  ok(A.check(AD, joy, edit(joy, { hubs: ['sales', 'planning'] }), all) === null, 'Admin may assign hubs');
+  ok(A.check(AD, joy, edit(joy, { access: 'inactive' }), all) === null, 'Admin may deactivate');
+  ok(A.check(AD, joy, null, all) === null, 'Admin may remove');
+  ok(/Admin or Super Admin/.test(A.check(LD, joy, edit(joy, { access: 'inactive' }), all)), 'a business role may do nothing');
+  ok(/at least one hub/.test(A.check(SA, joy, edit(joy, { hubs: [] }), all)), 'a record cannot lose its last hub');
+  ok(/Influencer role/.test(A.check(SA, joy, edit(joy, { hubs: ['sales', 'influencer'], influencerRole: null }), all)), 'Influencer needs an Influencer role');
+  ok(A.check(SA, joy, edit(joy, { hubs: ['sales', 'influencer'], influencerRole: 'viewer' }), all) === null, 'Influencer with a role is fine');
+  ok(/last active Super Admin/.test(A.check(SA, bryan, edit(bryan, { access: 'inactive' }), all)), 'the last Super Admin cannot be deactivated');
+  ok(/last active Super Admin/.test(A.check(SA, bryan, edit(bryan, { role: 'admin' }), all)), 'the last Super Admin cannot be demoted');
+  ok(/last active Super Admin/.test(A.check(SA, bryan, null, all)), 'the last Super Admin cannot be removed');
+  const withSecond = all.concat([edit(joy, { id: 'second-sa', role: 'super_admin' })]);
+  ok(/own admin tier/.test(A.check(SA, bryan, edit(bryan, { role: 'leadership' }), withSecond)), 'the viewer cannot change their own tier');
+  ok(A.check(SA, joy, edit(joy, { role: 'super_admin' }), all) === null, 'someone else can be promoted');
+  const add = { id: 'x', name: 'X', email: 'x@astro.com.my', networkId: 'X', role: 'sales_rep', hubs: ['sales'],
+                influencerRole: null, reportsTo: null, reportsToEmail: null, access: 'active', lastSignIn: null };
+  ok(A.check(AD, null, add, all) === null, 'Admin may add with the default role');
+  ok(/Super Admin sets the role/.test(A.check(AD, null, edit(add, { role: 'leadership' }), all)), 'Admin may not add with another role');
+  ok(A.check(AD, null, edit(add, { hubs: ['sales', 'influencer'], influencerRole: 'viewer' }), all) === null, 'Admin may add with the default Influencer role');
+  ok(/Super Admin sets the role/.test(A.check(AD, null, edit(add, { hubs: ['influencer'], influencerRole: 'infl_admin' }), all)), 'Admin may not pick an Influencer role');
+}
+
 console.log(failed ? `\n${failed} check(s) failed` : '\nAll checks passed');
 process.exit(failed ? 1 : 0);

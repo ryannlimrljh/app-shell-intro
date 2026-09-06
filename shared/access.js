@@ -261,5 +261,109 @@
   api.buildSeed = buildSeed;
   api.withTeams = withTeams;
 
+  /* ── The overlay store ──────────────────────────────────────────────── */
+
+  /* Seed plus a browser-only overlay. The overlay holds full records for
+     anyone added or changed, keyed by id, a list of removed ids, and the
+     Azure AD sync stamp. Reading is seed, then overlay on top, then removals
+     dropped. Clearing the key restores the seed exactly. */
+  var DIRECTORY_KEY = 'collabrium.access.directory';
+
+  function clone(o) { return JSON.parse(JSON.stringify(o)); }
+  function strip(rec) {
+    var r = clone(rec);
+    delete r.teamDirect;
+    delete r.teamTotal;
+    return r;
+  }
+
+  function createStore(opts) {
+    var seed = opts.seed, storage = opts.storage, KEY = opts.key || DIRECTORY_KEY;
+    function read() {
+      try {
+        var v = JSON.parse(storage.getItem(KEY) || '{}') || {};
+        return { changed: v.changed || {}, removed: v.removed || [], syncedAt: v.syncedAt || null };
+      } catch (e) { return { changed: {}, removed: [], syncedAt: null }; }
+    }
+    function write(o) { try { storage.setItem(KEY, JSON.stringify(o)); } catch (e) { /* quota or private mode: the page still works on the seed */ } }
+    function list() {
+      var o = read(), inSeed = {};
+      var out = seed.map(function (r) { inSeed[r.id] = true; return o.changed[r.id] ? clone(o.changed[r.id]) : strip(r); });
+      Object.keys(o.changed).forEach(function (id) { if (!inSeed[id]) out.push(clone(o.changed[id])); });
+      out = out.filter(function (r) { return o.removed.indexOf(r.id) === -1; });
+      return withTeams(out.sort(byNameOrder));
+    }
+    function get(id) {
+      var all = list();
+      for (var i = 0; i < all.length; i++) if (all[i].id === id) return all[i];
+      return null;
+    }
+    function save(rec) {
+      var o = read();
+      o.changed[rec.id] = strip(rec);
+      o.removed = o.removed.filter(function (x) { return x !== rec.id; });
+      write(o);
+    }
+    function remove(id) {
+      var o = read();
+      delete o.changed[id];
+      if (o.removed.indexOf(id) === -1) o.removed.push(id);
+      write(o);
+    }
+    function reset() { try { storage.removeItem(KEY); } catch (e) {} }
+    function syncedAt() { return read().syncedAt; }
+    function stampSync(t) { var o = read(); o.syncedAt = t || new Date().toISOString(); write(o); }
+    /* Org-chart people not currently in the directory: what Add a user
+       searches over. A removed person comes back as a candidate. */
+    function candidates() {
+      var present = {};
+      list().forEach(function (r) { present[r.id] = true; });
+      return seed.filter(function (r) { return !present[r.id]; }).map(strip);
+    }
+    return { list: list, get: get, save: save, remove: remove, reset: reset,
+             syncedAt: syncedAt, stampSync: stampSync, candidates: candidates };
+  }
+
+  /* ── The guards ─────────────────────────────────────────────────────── */
+
+  /* Every rule the pages enforce, in one place. `before` is null for an
+     add, `next` is null for a remove. Returns null when the change is
+     allowed, otherwise the sentence the page shows next to the control. */
+  var DENIED = 'Users & permissions is managed by an Admin or Super Admin.';
+  var ROLE_IS_SUPER = 'A Super Admin sets the role.';
+
+  function check(viewer, before, next, all) {
+    if (tierOf(viewer.role) !== 'admin') return DENIED;
+    if (next) {
+      if (!next.hubs || !next.hubs.length) return 'Every user needs at least one hub. Deactivate them instead.';
+      var hasInfl = next.hubs.indexOf('influencer') !== -1;
+      if (hasInfl && !next.influencerRole) return 'Choose an Influencer role for Collab: Influencer.';
+      if (!hasInfl && next.influencerRole) return 'An Influencer role needs Collab: Influencer granted.';
+      var roleChanged = before
+        ? (before.role !== next.role || (before.influencerRole || null) !== (next.influencerRole || null))
+        : (next.role !== DEFAULT_ROLE || (hasInfl && next.influencerRole !== DEFAULT_INFLUENCER_ROLE));
+      if (viewer.role === 'admin' && roleChanged) return ROLE_IS_SUPER;
+      if (before && before.id === viewer.id && tierOf(before.role) !== tierOf(next.role))
+        return 'You cannot change your own admin tier.';
+    }
+    if (before && before.role === 'super_admin' && before.access === 'active') {
+      var stillSuper = next && next.role === 'super_admin' && next.access === 'active';
+      if (!stillSuper) {
+        var others = all.filter(function (r) {
+          return r.id !== before.id && r.role === 'super_admin' && r.access === 'active';
+        }).length;
+        if (!others) return 'This is the last active Super Admin. Promote someone else first.';
+      }
+    }
+    if (!next && before && before.id === viewer.id) return 'You cannot remove yourself.';
+    return null;
+  }
+
+  api.DIRECTORY_KEY = DIRECTORY_KEY;
+  api.DENIED = DENIED;
+  api.ROLE_IS_SUPER = ROLE_IS_SUPER;
+  api.createStore = createStore;
+  api.check = check;
+
   return api;
 });

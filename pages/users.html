@@ -89,15 +89,45 @@
   .us-denied{max-width:420px; margin:var(--spacing-60) auto;}
   .us-denied a{text-decoration:none;}
 
-  /* ── Modals ──────────────────────────────────────────────────────── */
+  /* ── The sheet: folds out from the right edge, the table stays behind it.
+     The overlay is always in the DOM so the slide can animate; is-open turns
+     it visible and pulls the panel in. Reduced motion skips the slide. ── */
   .us-overlay{position:fixed; inset:0; z-index:80; background:rgba(20,20,20,.38);
-    display:none; align-items:flex-start; justify-content:center; padding:var(--spacing-40) var(--spacing-16); overflow:auto;}
-  .us-overlay.is-open{display:flex;}
-  .us-modal{max-width:480px;}
-  .us-modal .c-modal-head{align-items:flex-start; padding-bottom:var(--spacing-12); border-bottom:1px solid var(--color-neutral-3);}
+    display:flex; align-items:stretch; justify-content:flex-end;
+    visibility:hidden; opacity:0; pointer-events:none;
+    transition:opacity var(--duration-base) var(--ease-standard), visibility 0s linear var(--duration-base);}
+  .us-overlay.is-open{visibility:visible; opacity:1; pointer-events:auto; transition-delay:0s;}
+  .us-modal{max-width:none; width:min(540px, 100%); height:100%; border-radius:0;
+    display:flex; flex-direction:column; box-shadow:var(--shadow-overlay, var(--shadow-modal));
+    transform:translateX(100%); transition:transform var(--duration-base) var(--ease-settle);}
+  .us-overlay.is-open .us-modal{transform:none;}
+  .us-modal .c-modal-head{flex:none; align-items:flex-start; padding:var(--spacing-20) var(--spacing-24) var(--spacing-12); border-bottom:1px solid var(--color-neutral-3);}
   .us-modal .c-modal-head .sub{margin:2px 0 0; font-size:var(--text-body2-size); color:var(--color-neutral-5); font-weight:400;}
-  .us-modal .c-modal-body{padding-top:var(--spacing-16); display:flex; flex-direction:column; gap:var(--spacing-16);}
-  .us-modal .c-modal-foot{align-items:center;}
+  .us-modal .c-modal-body{flex:1; overflow-y:auto; padding:var(--spacing-20) var(--spacing-24); display:flex; flex-direction:column; gap:var(--spacing-16);}
+  .us-modal .c-modal-body > *{flex:none;} /* a column child with overflow set would otherwise shrink to fit */
+  .us-modal .c-modal-foot{flex:none; align-items:center; padding:var(--spacing-16) var(--spacing-24); background:var(--color-neutral-1);}
+  @media (prefers-reduced-motion:reduce){
+    .us-overlay, .us-modal{transition:none;}
+  }
+  /* What the role can do: the artifact's activity matrix, read-only, folded
+     under the description so the sheet stays short until someone asks. */
+  .us-acts{border:1px solid var(--color-neutral-3); border-radius:var(--radius-md); overflow:hidden;}
+  .us-acts-toggle{display:flex; align-items:center; justify-content:space-between; gap:var(--spacing-8); width:100%;
+    padding:var(--spacing-12); border:none; background:var(--color-neutral-1); font-family:inherit; font-size:var(--text-body2-size);
+    font-weight:700; color:var(--color-neutral-9); cursor:pointer; text-align:left;}
+  .us-acts-toggle:hover{background:var(--color-neutral-2);}
+  .us-acts-toggle:focus-visible{outline:2px solid var(--color-obsidian); outline-offset:-2px;}
+  .us-acts-toggle .n{font-weight:500; color:var(--color-neutral-5);}
+  .us-acts-toggle i{color:var(--color-neutral-5); transition:transform var(--duration-fast) var(--ease-standard);}
+  .us-acts-toggle[aria-expanded="true"] i{transform:rotate(180deg);}
+  .us-acts-body{padding:var(--spacing-4) var(--spacing-12) var(--spacing-12); border-top:1px solid var(--color-neutral-3);}
+  .us-acts-body[hidden]{display:none;}
+  .us-act-cat{font-size:var(--text-label3-size); font-weight:700; letter-spacing:var(--tracking-eyebrow); text-transform:uppercase;
+    color:var(--color-neutral-5); margin:var(--spacing-12) 0 var(--spacing-4); padding-bottom:4px; border-bottom:1px solid var(--color-neutral-3);}
+  .us-act{display:flex; align-items:flex-start; gap:var(--spacing-8); padding:4px 0; font-size:var(--text-caption-size); color:var(--color-neutral-9); line-height:1.4;}
+  .us-act.off{color:var(--color-neutral-4);}
+  .us-act .c-checkbox-box{width:16px; height:16px; margin-top:1px; border-radius:4px; font-size:11px;}
+  .us-act.off .c-checkbox-box{background:var(--color-neutral-1); border-color:var(--color-neutral-3);}
   .us-x{border:none; background:transparent; width:32px; height:32px; border-radius:var(--radius-sm);
     cursor:pointer; color:var(--color-neutral-5); display:inline-flex; align-items:center; justify-content:center;}
   .us-x:hover{background:var(--color-neutral-2); color:var(--color-neutral-9);}
@@ -185,13 +215,16 @@
     <div class="c-shell-content">
       <div class="pg-wrap">
         <header class="pg-head">
-          <div>
-            <h1>Users &amp; roles</h1>
-            <p class="sub">Who may sign in, which hubs they can open, and what they may do there.</p>
+          <div class="pg-title">
+            <a class="pg-back" href="settings.html" aria-label="Back to Settings"><i class="ph ph-arrow-left"></i></a>
+            <div>
+              <h1>Users &amp; roles</h1>
+              <p class="sub">Who may sign in, which hubs they can open, and what they may do there.</p>
+            </div>
           </div>
           <div class="pg-head-right">
             <div class="va" id="viewingAs"></div>
-            <button class="c-btn c-btn-primary c-btn-md" type="button" id="newUser">New user</button>
+            <button class="c-btn c-btn-primary c-btn-md" type="button" id="newUser"><i class="ph ph-plus"></i> Add new user</button>
           </div>
           <hr class="pg-rule" />
         </header>
@@ -485,8 +518,9 @@
 
   function closeModal() {
     overlay.classList.remove('is-open');
-    modal.innerHTML = '';
     form = null;
+    /* Empty the panel once it has slid out, not while it is still visible. */
+    setTimeout(function () { if (!overlay.classList.contains('is-open')) modal.innerHTML = ''; }, 260);
     if (opener && opener.focus) opener.focus();
     opener = null;
   }
@@ -578,6 +612,21 @@
       return '<div>' + (i === 0 ? esc(line).replace(/^Sees ([^.]+)\./, 'Sees <b>$1</b>.') : esc(line)) + '</div>';
     }).join('') + '</div>';
 
+    /* The activity matrix for the chosen role, read-only: the role decides
+       it, nobody edits it per person. Folded until asked for. */
+    var held = 0, totalActs = 0;
+    var actsHtml = A.ACTIVITIES.map(function (cat) {
+      return '<div class="us-act-cat">' + esc(cat.title) + '</div>' + cat.items.map(function (item) {
+        var on = A.holds(n.role, item.label);
+        totalActs++; if (on) held++;
+        return '<div class="us-act' + (on ? '' : ' off') + '"><span class="c-checkbox-box' + (on ? ' on' : '') + '" aria-hidden="true">' +
+          (on ? '<i class="ph-bold ph-check"></i>' : '') + '</span><span>' + esc(item.label) + '</span></div>';
+      }).join('');
+    }).join('');
+    h += '<div class="us-acts"><button class="us-acts-toggle" type="button" id="actsToggle" aria-expanded="' + (f.showActs ? 'true' : 'false') + '" aria-controls="actsBody">' +
+      '<span>What ' + esc(A.roleLabel(n.role)) + ' can do on Mothership <span class="n">· ' + held + ' of ' + totalActs + '</span></span><i class="ph ph-caret-down"></i></button>' +
+      '<div class="us-acts-body" id="actsBody" role="list" aria-label="Activities held by this role"' + (f.showActs ? '' : ' hidden') + '>' + actsHtml + '</div></div>';
+
     if (!isAdd) {
       h += '<div class="us-f"><label for="access">Access</label><select id="access">' +
         '<option value="active"' + (n.access === 'active' ? ' selected' : '') + '>Active</option>' +
@@ -657,6 +706,9 @@
     }
     var unpick = modal.querySelector('[data-unpick]');
     if (unpick) unpick.addEventListener('click', function () { f.picked = null; f.q = ''; f.next = blank(); paintModal(); });
+
+    var actsToggle = document.getElementById('actsToggle');
+    if (actsToggle) actsToggle.addEventListener('click', function () { f.showActs = !f.showActs; paintModal(); });
 
     modal.querySelectorAll('input[data-hub]').forEach(function (cb) {
       cb.addEventListener('change', function () {

@@ -51,9 +51,16 @@ body{font-family:var(--font-primary); color:var(--color-neutral-9);
 .c-dept-dropdown{position:fixed; z-index:60;}
 a.c-sidebar-item{text-decoration:none;}
 
-/* The page: a centred column, the pod's own width. */
-.pg-wrap{max-width:1180px; margin:0 auto;
-  padding:var(--spacing-32) var(--spacing-24) var(--spacing-60);}
+/* The page: the full canvas, as the hub apps use it. */
+.pg-wrap{padding:var(--spacing-32) var(--spacing-24) var(--spacing-60);}
+/* Title block with the back arrow, the way a hub's sub-page carries one. */
+.pg-title{display:flex; align-items:flex-start; gap:var(--spacing-12);}
+.pg-back{flex:none; width:36px; height:36px; margin-top:2px; border-radius:var(--radius-sm);
+  display:inline-flex; align-items:center; justify-content:center; color:var(--color-neutral-5);
+  text-decoration:none; transition:background-color var(--duration-fast) var(--ease-standard);}
+.pg-back:hover{background:var(--color-neutral-2); color:var(--color-neutral-9);}
+.pg-back:focus-visible{outline:2px solid var(--color-obsidian); outline-offset:2px;}
+.pg-back i{font-size:20px;}
 .pg-head{display:flex; align-items:flex-start; justify-content:space-between;
   gap:var(--spacing-16); flex-wrap:wrap; margin-bottom:var(--spacing-24);}
 .pg-head h1{margin:0; font-size:var(--text-h2-size); font-weight:800; line-height:1.15;}
@@ -63,9 +70,11 @@ a.c-sidebar-item{text-decoration:none;}
 .pg-rule{width:100%; border:none; border-top:1px solid var(--color-neutral-3);
   margin:var(--spacing-16) 0 0;}
 
-/* "Viewing as": one person trying on three views. */
-.va{display:inline-flex; align-items:center; gap:var(--spacing-8);
+/* "Viewing as": one person trying on three views. A prototype control,
+   labelled as such, that the real build drops once sign-in is real. */
+.va{display:inline-flex; align-items:center; gap:var(--spacing-8); flex-wrap:wrap;
   font-size:var(--text-caption-size); color:var(--color-neutral-5);}
+.va-note{font-style:normal; color:var(--color-neutral-4);}
 .va-seg{display:inline-flex; border:1px solid var(--color-neutral-3);
   border-radius:var(--radius-pill); background:var(--color-neutral-1); padding:2px;}
 .va-seg button{height:28px; padding:0 var(--spacing-12); border:none;

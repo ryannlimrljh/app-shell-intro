@@ -144,8 +144,13 @@ today closes the menu and does nothing. That item becomes a link.
 - Header mirrors the pod: title "Settings", subtitle "Your account, and who
   may sign in."
 - The "Viewing as" control sits on the right of the page header: a small
-  segmented control offering Super Admin, Admin, Leadership. It writes the
-  viewer state, and the account row and Account card update with it.
+  segmented control offering Super Admin, Admin, Leadership, labelled
+  "Viewing as (remove in actual implementation)" since the real build drops
+  it once sign-in is real. It writes the viewer state, and the account row
+  and Account card update with it.
+- A back arrow sits before the title and returns to the dashboard. The
+  directory page carries the same arrow, returning to Settings.
+- Both pages use the full canvas width, as the hub apps do.
 - Two cards in the pod's grid, on the design system card component:
   - **Account.** The viewer's email, "Signed in through Astro ID · Super
     Admin" or whichever role is active, and a Sign out button to the login
@@ -162,8 +167,9 @@ today closes the menu and does nothing. That item becomes a link.
 additions.
 
 **Header.** "Users & roles", subtitle "Who may sign in, which hubs they can
-open, and what they may do there." A "New user" button on the right, hidden
-for business roles. The same "Viewing as" control as Settings.
+open, and what they may do there." An "Add new user" button with a plus
+icon on the right, hidden for business roles. The same "Viewing as" control
+as Settings.
 
 **Toolbar.** Search across name, email and role. Three filters, each a
 checkbox popover with Clear and Done like the pod: Role, Hub (Sales,
@@ -186,8 +192,13 @@ with the same rows selector (25, 50, 100, 250) and pager.
 | Last sign-in | Date and time, or Never |
 | Edit | Pencil, hidden for business roles |
 
-**Add a user.** A modal like the pod's, title "Add a user", subtitle "Search
-Azure AD, then give them a role."
+Add and Edit open in a sheet that folds out from the right edge, about
+540px wide, over a dimmed backdrop; the table stays in place behind it.
+Backdrop click and Escape close it, focus moves into the sheet on open and
+back to the opener on close, and the slide honours reduced motion.
+
+**Add a user.** Title "Add a user", subtitle "Search Azure AD, then give
+them a role."
 
 - Person: search over org-chart people not yet in the directory, with the
   pod's note that only Astro staff appear and a guest account cannot sign
@@ -196,8 +207,11 @@ Azure AD, then give them a role."
 - Role select. Influencer role select appears only when Influencer is
   ticked.
 - Under the role, the same plain-language box the pod uses, describing the
-  Mothership scope and what the role can do in each ticked hub, pulled from
-  the activity matrix.
+  Mothership scope and what the role can do in each ticked hub.
+- Under that, "What <role> can do on Mothership · n of 24": the artifact's
+  activity matrix for the chosen role as a read-only checklist, grouped by
+  the seven categories, folded until opened. The role decides it; nobody
+  edits it per person.
 - For an Admin viewer the role selects are read-only at their defaults with
   the note "A Super Admin sets the role."
 - Footer note: "Their reporting line comes from Azure AD and appears after

@@ -230,7 +230,7 @@
     var A = window.CollabAccess;
     var host = document.getElementById('viewingAs');
     if (!host) return;
-    host.innerHTML = '<span>Viewing as</span><div class="va-seg" role="group" aria-label="Viewing as">' +
+    host.innerHTML = '<span>Viewing as <em class="va-note">(remove in actual implementation)</em></span><div class="va-seg" role="group" aria-label="Viewing as">' +
       A.VIEWER_ROLES.map(function (r) {
         return '<button type="button" data-role="' + r + '" aria-pressed="' + (r === viewer.role) + '">' +
           esc(A.roleLabel(r)) + '</button>';

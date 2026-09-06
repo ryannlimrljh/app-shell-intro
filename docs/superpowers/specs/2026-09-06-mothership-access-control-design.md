@@ -178,7 +178,9 @@ Deactivated, Never signed in). Every option carries its count across the
 directory, and every toggle applies at once: no Done button, the panel stays
 open, the trigger's badge updates in place, and the rows travel to their
 new places with a FLIP move while arrivals fade in. Clear empties one
-facet. Reduced motion skips the move. On the
+facet; a red Clear all after the pills empties every facet. A tray opens
+under the bar the moment anything is selected, with one removable chip per
+applied option labelled "Facet: Value". Reduced motion skips the move. On the
 right, "Synced 6 Sept, 10:18" from the store's stamp and a "Sync from Azure
 AD" button that restamps the time and shows a toast. A one-line note counts
 people who have never signed in, with the pod's wording.

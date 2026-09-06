@@ -476,6 +476,7 @@
     var synced = store.syncedAt();
     document.getElementById('synced').textContent = synced ? 'Synced ' + fmtWhen(synced) : 'Not yet synced';
     FACETS.forEach(function (f) { updateTrigger(f.key); });
+    renderTray();
 
     var before = snapshotRects();
     var h = '';
@@ -546,10 +547,33 @@
             '<div class="c-filter-footer"><button class="c-btn c-btn-ghost c-btn-sm" type="button" data-clear="' + f.key + '">Clear</button></div>' +
           '</div></div>';
       }).join('') +
+      '<button class="c-btn c-btn-ghost c-btn-sm c-filter-clear-bar" type="button" id="clearAll" hidden>Clear all</button>' +
       '</div><div class="us-bar-right">' +
       '<span id="synced"></span>' +
       '<button class="c-btn c-btn-secondary c-btn-sm" type="button" id="sync">Sync from Azure AD</button>' +
-      '</div></div>';
+      '</div></div>' +
+      '<div class="c-filter-tray" id="tray" hidden aria-label="Applied filters"></div>';
+  }
+  /* The tray under the bar: one chip per applied option, "Facet: Value",
+     each removable on its own, plus Clear all at the end of the pills. Opens
+     the moment anything is selected, as on the roster and the media plans. */
+  function labelFor(f, key) {
+    var o = f.options().filter(function (x) { return x.key === key; })[0];
+    return o ? o.label : key;
+  }
+  function renderTray() {
+    var tray = document.getElementById('tray'), clearAll = document.getElementById('clearAll');
+    if (!tray) return;
+    var n = FACETS.reduce(function (m, f) { return m + state[f.key].length; }, 0);
+    tray.hidden = !n;
+    clearAll.hidden = !n;
+    tray.innerHTML = FACETS.map(function (f) {
+      return state[f.key].map(function (key) {
+        var text = f.label + ': ' + labelFor(f, key);
+        return '<span class="c-chip c-chip-input">' + esc(text) +
+          '<button class="c-chip-remove" type="button" data-facet="' + f.key + '" data-remove="' + esc(key) + '" aria-label="Remove ' + esc(text) + '"><i class="ph ph-x"></i></button></span>';
+      }).join('');
+    }).join('');
   }
   /* Option rows carry the count across the whole directory, as the roster
      does, so a choice says how many people it will keep before it is made. */
@@ -589,6 +613,22 @@
       store.stampSync();
       render();
       Sh.toast('success', 'Synced from Azure AD', 'The directory is up to date.');
+    });
+    document.getElementById('clearAll').addEventListener('click', function () {
+      FACETS.forEach(function (f) { state[f.key] = []; });
+      state.page = 1;
+      closePops();
+      render();
+    });
+    document.getElementById('tray').addEventListener('click', function (e) {
+      var b = e.target.closest('[data-remove]');
+      if (!b) return;
+      var k = b.dataset.facet;
+      state[k] = state[k].filter(function (v) { return v !== b.dataset.remove; });
+      state.page = 1;
+      var opts = document.querySelector('[data-options="' + k + '"]');
+      if (opts && opts.innerHTML) opts.innerHTML = optionRows(facetByKey(k));
+      render();
     });
     document.getElementById('bar').addEventListener('click', function (e) {
       var trig = e.target.closest('.c-filter-trigger');

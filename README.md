@@ -43,6 +43,7 @@ test runner.
 | `pages/feedback-v1.html` | the feedback board for the 30-day pioneer group. Second item in the sidebar, on `api/feedback.mjs` |
 | `pages/settings.html` | Settings, from the account menu: Account, and the Users & roles card. Carries the "Viewing as" control that drives the access gating |
 | `pages/users.html` | Users & roles: who may sign in, which hubs they can open, what role they carry. Seeded from `data/org-tree.json`, changes kept in this browser's localStorage |
+| `pages/roles.html` | Roles & permissions: the activity matrix behind every role, per hub, editable by a Super Admin. Overrides kept in this browser's localStorage; Reset returns a role to the artifact's allocation |
 | `shared/access.js` | The access model: roles, hubs, the Mothership activity matrix, the seed, the overlay store, the guards. `node scripts/check-access.mjs` checks its rules |
 | `shared/shell.css`, `shared/shell.js` | The app shell's styles and behaviour, shared by the two pages above |
 | `pages/landing-v2.html` | **the working version. New implementation goes here.** The by-value reference v3 is diffed against |

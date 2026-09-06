@@ -325,7 +325,7 @@
 
 <div class="c-toast-host" id="toasts"></div>
 
-<script src="../shared/access.js?v=1"></script>
+<script src="../shared/access.js?v=2"></script>
 <script src="../shared/shell.js?v=1"></script>
 <script>
 (function () {
@@ -338,6 +338,7 @@
   var state = { q: '', role: [], hub: [], st: [], sort: { key: 'name', dir: 1 }, page: 1, rows: 50 };
 
   /* ── Boot: the shell, then the org chart, then the store, then the page ── */
+  A.loadOverrides(S);   /* a Super Admin's edits on Roles & permissions reach the checklist here */
   viewer = Sh.init({ onViewerChange: function (v) { viewer = v; state.page = 1; if (store) render(); } });
   /* Bones first. The chart is one local fetch, so the beat is staged
      rather than real: the roster page's own 1000ms, long enough for the

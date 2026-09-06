@@ -16,7 +16,8 @@
 <link rel="stylesheet" href="../shared/shell.css?v=1" />
 <style>
   /* The pod's Settings grid: two cards side by side, one column when narrow. */
-  .st-grid{display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:var(--spacing-16);}
+  .st-grid{display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:var(--spacing-16);}
+  @media (max-width:1100px){ .st-grid{grid-template-columns:repeat(2, minmax(0, 1fr));} }
   .st-card{padding:var(--spacing-20); gap:var(--spacing-12); min-height:168px;}
   .st-kicker{font-size:var(--text-label3-size); font-weight:700; letter-spacing:var(--tracking-eyebrow);
     text-transform:uppercase; color:var(--color-neutral-5);}
@@ -104,6 +105,15 @@
               <span class="st-note" id="dirNote" hidden><i class="ph ph-lock-simple"></i> Admin only</span>
             </div>
           </section>
+
+          <section class="c-card st-card" id="rolesCard" aria-labelledby="rolesK">
+            <div class="st-kicker" id="rolesK">Roles &amp; permissions</div>
+            <p>What each role may do, in Mothership and in every hub. Super Admin edits, Admin views.</p>
+            <div class="st-actions">
+              <a class="c-btn c-btn-secondary c-btn-md" id="rolesLink" href="roles.html">Open roles <i class="ph ph-arrow-right"></i></a>
+              <span class="st-note" id="rolesNote" hidden><i class="ph ph-lock-simple"></i> Admin only</span>
+            </div>
+          </section>
         </div>
       </div>
     </div>
@@ -149,7 +159,7 @@
 
 <div class="c-toast-host" id="toasts"></div>
 
-<script src="../shared/access.js?v=1"></script>
+<script src="../shared/access.js?v=2"></script>
 <script src="../shared/shell.js?v=1"></script>
 <script>
 (function () {
@@ -169,8 +179,16 @@
     link.setAttribute('aria-disabled', String(!allowed));
     link.tabIndex = allowed ? 0 : -1;
     note.hidden = allowed;
+    /* Roles is gated the same way: whoever can open the directory can see
+       what roles hold; only a Super Admin can change it, on the page itself. */
+    var rc = document.getElementById('rolesCard'), rl = document.getElementById('rolesLink'), rn = document.getElementById('rolesNote');
+    rc.classList.toggle('is-off', !allowed);
+    rl.setAttribute('aria-disabled', String(!allowed));
+    rl.tabIndex = allowed ? 0 : -1;
+    rn.hidden = allowed;
   }
 
+  A.loadOverrides(localStorage);
   var viewer = window.CollabShell.init({ onViewerChange: paint });
   paint(viewer);
 })();

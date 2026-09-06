@@ -187,5 +187,63 @@ section('Describe');
   ok(A.initials('Bryan Wong') === 'BW' && A.initials('Normala (Joy) Ahmad') === 'NA' && A.initials('Adreena') === 'A', 'initials skip nicknames and single names get one letter');
 }
 
+
+section('Matrices');
+ok(Object.keys(A.MATRICES).join() === 'mothership,sales,influencer', 'three matrices');
+ok(A.holdsIn('mothership', 'admin', INVITE) && !A.holdsIn('mothership', 'admin', ROLE), 'holdsIn matches holds on Mothership');
+const EDIT_INV = 'Edit inventory (create, update, delete)';
+ok(A.holdsIn('sales', 'marketing_services', EDIT_INV) && !A.holdsIn('sales', 'sales_rep', EDIT_INV), 'Marketing Services alone edits inventory in Sales');
+ok(A.holdsIn('sales', 'admin', 'Manage users & permissions') && A.holdsIn('sales', 'super_admin', 'Manage users & permissions'), 'Admin equals Super Admin in Sales');
+const LOGRM = 'Remove / archive an activity log entry (Super Admin only)';
+ok(A.holdsIn('sales', 'super_admin', LOGRM) && !A.holdsIn('sales', 'admin', LOGRM), 'only Super Admin removes a log entry');
+ok(A.holdsIn('sales', 'head_of_sales', "Edit team's campaigns") && !A.holdsIn('sales', 'sales_rep', "Edit team's campaigns"), 'team-scoped roles edit team campaigns');
+ok(A.holdsIn('sales', 'creative_strategist', 'View own activity log') && A.holdsIn('sales', 'sales_rep', 'Create a campaign'), 'Sales role keys map from the artifact');
+ok(!A.holdsIn('influencer', 'infl_manager', 'Manage users & permissions') && A.holdsIn('influencer', 'infl_manager', 'View users & permissions'), 'Influencer Manager views but does not manage users');
+ok(A.holdsIn('influencer', 'infl_admin', 'Manage users & permissions'), 'Head of Influencer manages users');
+{
+  const held = A.MATRICES.influencer.groups.flatMap(g => g.items).filter(i => A.holdsIn('influencer', 'viewer', i.label)).map(i => i.label);
+  ok(held.length === 2 && held.every(l => /Respond to own/.test(l)), 'Viewer holds only the two respond items');
+}
+{
+  let t = false; try { A.holdsIn('nope', 'admin', INVITE); } catch (e) { t = true; }
+  ok(t, 'unknown matrix throws');
+}
+
+section('Overrides');
+{
+  const st = memStorage();
+  A.loadOverrides(st);
+  const SA = { id: 'bryan-wong', name: 'Bryan Wong', role: 'super_admin' };
+  const AD = { id: 'bryan-wong', name: 'Bryan Wong', role: 'admin' };
+  ok(!A.isModified('mothership', 'sales_rep'), 'unmodified by default');
+  ok(A.setOverride(st, SA, 'mothership', 'sales_rep', REPORTS, true) === null, 'Super Admin may set an override');
+  ok(A.holdsIn('mothership', 'sales_rep', REPORTS), 'override read back');
+  ok(A.isModified('mothership', 'sales_rep'), 'role is modified');
+  const lc = A.lastChange('mothership', 'sales_rep');
+  ok(lc && lc.by === 'Bryan Wong' && lc.label === REPORTS && lc.value === true && lc.at, 'change logged with who and when');
+  A.loadOverrides(st);
+  ok(A.holdsIn('mothership', 'sales_rep', REPORTS), 'override persists across a reload');
+  ok(A.setOverride(st, SA, 'mothership', 'sales_rep', REPORTS, false) === null && !A.isModified('mothership', 'sales_rep'), 'setting a value back to its default is not a modification');
+  A.setOverride(st, SA, 'mothership', 'sales_rep', REPORTS, true);
+  ok(A.resetRole(st, SA, 'mothership', 'sales_rep') === null && !A.holdsIn('mothership', 'sales_rep', REPORTS) && !A.isModified('mothership', 'sales_rep'), 'reset restores the default');
+  ok(/ceiling/i.test(A.lockReason('mothership', 'super_admin', INVITE)), 'Super Admin row is locked');
+  ok(/Super Admin only/.test(A.lockReason('sales', 'admin', LOGRM)), 'superOnly is locked for others');
+  ok(A.lockReason('mothership', 'admin', INVITE) === null, 'an ordinary item is unlocked');
+  ok(/ceiling/i.test(A.setOverride(st, SA, 'mothership', 'super_admin', INVITE, false) || ''), 'setOverride refuses a locked item');
+  ok(A.holdsIn('mothership', 'super_admin', INVITE), 'the refused edit changed nothing');
+  ok(/Super Admin sets/.test(A.setOverride(st, AD, 'mothership', 'sales_rep', REPORTS, true) || ''), 'Admin cannot edit');
+  ok(/Super Admin sets/.test(A.resetRole(st, AD, 'mothership', 'sales_rep') || ''), 'Admin cannot reset');
+  ok(A.holdsIn('mothership', 'admin', REPORTS) && !A.isModified('mothership', 'admin'), 'Admin mirrors Leadership before any edit');
+  A.setOverride(st, SA, 'mothership', 'leadership', REPORTS, false);
+  ok(!A.holdsIn('mothership', 'leadership', REPORTS), 'Leadership lost the item');
+  ok(A.holdsIn('mothership', 'admin', REPORTS), 'Admin kept it: the mirror was materialised on first edit');
+  ok(!A.isModified('mothership', 'admin'), 'the materialised Admin still equals its default');
+  A.resetRole(st, SA, 'mothership', 'leadership');
+  ok(A.holdsIn('mothership', 'leadership', REPORTS) && A.holdsIn('mothership', 'admin', REPORTS), 'reset of Leadership leaves Admin explicit and intact');
+  st.setItem(A.OVERRIDES_KEY, 'garbage');
+  A.loadOverrides(st);
+  ok(!A.isModified('mothership', 'leadership') && A.lastChange('mothership', 'leadership') === null, 'garbage in storage is ignored');
+}
+
 console.log(failed ? `\n${failed} check(s) failed` : '\nAll checks passed');
 process.exit(failed ? 1 : 0);

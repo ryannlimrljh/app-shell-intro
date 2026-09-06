@@ -116,12 +116,8 @@
   /* Does this role hold this activity? Throws on an unknown label, so a
      typo in a page fails loudly instead of quietly denying. */
   function holds(role, label) {
-    var item = findActivity(label);
-    if (!item) throw new Error('Unknown activity: ' + label);
-    if (role === 'super_admin') return true;
-    if (item.roles.indexOf(role) !== -1) return true;
-    if (role === 'admin' && item.roles.indexOf('leadership') !== -1) return true;
-    return false;
+    if (!findActivity(label)) throw new Error('Unknown activity: ' + label);
+    return holdsIn('mothership', role, label);
   }
 
   /* The Sales Board scope a role sees, in the artifact's own words. */
@@ -439,6 +435,210 @@
   api.can = can;
   api.describe = describe;
   api.initials = initials;
+
+
+  /* ── The hub matrices, and every matrix in one place ────────────────── */
+
+  /* Collab: Sales and Collab: Influencer, from the artifact's Activities
+     page, labels verbatim, role keys mapped onto this module's. In a hub
+     Super Admin and Admin (Head of Influencer, in that hub) hold everything
+     except the items marked superOnly. */
+  var TEAM_FULL = ['head_of_sales', 'sales_manager', 'sales_vp'];
+  var SALES_ACTIVITIES = [
+    { title: 'Tools', items: [
+      { label: 'Create a campaign', roles: BUSINESS.slice() },
+      { label: 'Edit own campaign', roles: BUSINESS.slice() },
+      { label: "Edit team's campaigns", roles: TEAM_FULL.slice() },
+      { label: 'Log the client brief', roles: BUSINESS.slice() },
+      { label: 'Create a proposal', roles: BUSINESS.slice() },
+      { label: 'Build a deck', roles: BUSINESS.slice() },
+      { label: 'Add people to a campaign', roles: BUSINESS.slice() },
+      { label: 'Share a campaign', roles: BUSINESS.slice() },
+      { label: 'Archive own campaign', roles: BUSINESS.slice() },
+      { label: "Archive team's campaigns", roles: TEAM_FULL.slice() },
+      { label: 'Delete own campaign (creator only)', roles: BUSINESS.slice() },
+      { label: 'Query client intelligence (search & run)', roles: BUSINESS.slice() },
+      { label: 'View client profile & performance', roles: BUSINESS.slice() }
+    ]},
+    { title: 'Browse', items: [
+      { label: 'View inventory', roles: BUSINESS.slice() },
+      { label: 'Edit inventory (create, update, delete)', roles: ['marketing_services'] },
+      { label: 'View bundles', roles: BUSINESS.slice() },
+      { label: 'Edit bundles (create, update, delete)', roles: ['marketing_services'] },
+      { label: 'View brand profiles', roles: BUSINESS.slice() },
+      { label: 'Edit brand profiles', roles: ['marketing_services'] },
+      { label: 'View performance data', roles: BUSINESS.slice() }
+    ]},
+    { title: 'Administration', items: [
+      { label: 'Manage users & permissions', roles: [] },
+      { label: 'View own activity log', roles: ['leadership', 'sales_rep', 'marketing_services', 'creative_strategist'] },
+      { label: "View own team's activity log", roles: TEAM_FULL.slice() },
+      { label: 'View all activity logs', roles: [] },
+      { label: 'Remove / archive an activity log entry (Super Admin only)', roles: [], superOnly: true }
+    ]}
+  ];
+  var INFLUENCER_ACTIVITIES = [
+    { title: 'Tools', items: [
+      { label: 'Manage influencer roster', roles: ['infl_manager'] },
+      { label: 'Bulk upload influencers', roles: ['infl_manager'] },
+      { label: 'Manage campaigns', roles: ['infl_manager'] },
+      { label: 'Select KOLs', roles: ['infl_manager'] },
+      { label: 'Respond to own KOL preview', roles: ['infl_manager', 'viewer'] },
+      { label: 'Manage client preview links', roles: ['infl_manager'] },
+      { label: 'Manage documents', roles: ['infl_manager'] },
+      { label: 'Manage drafts', roles: ['infl_manager'] },
+      { label: 'Respond to own draft', roles: ['infl_manager', 'viewer'] },
+      { label: 'Manage agencies', roles: ['infl_manager'] }
+    ]},
+    { title: 'Reference Data', items: [
+      { label: 'Manage brands', roles: ['infl_manager'] },
+      { label: 'Manage niches', roles: ['infl_manager'] },
+      { label: 'Manage cost centres', roles: ['infl_manager'] },
+      { label: 'Manage Astro signatories', roles: ['infl_manager'] },
+      { label: 'Manage report templates', roles: ['infl_manager'] }
+    ]},
+    { title: 'Insight', items: [
+      { label: 'View dashboard', roles: ['infl_manager'] },
+      { label: 'View campaign financials (quote, cost, split)', roles: ['infl_manager'] }
+    ]},
+    { title: 'Administration', items: [
+      { label: 'Manage users & permissions', roles: [] },
+      { label: 'View users & permissions', roles: ['infl_manager'] },
+      { label: 'View activity log', roles: ['infl_manager'] },
+      { label: 'Remove / archive an activity log entry (Super Admin only)', roles: [], superOnly: true }
+    ]}
+  ];
+  var INFLUENCER_MATRIX_ROLES = [{ key: 'super_admin', label: 'Super Admin' }].concat(INFLUENCER_ROLES);
+  var MATRICES = {
+    mothership: { key: 'mothership', title: 'Mothership', sub: 'Platform-wide actions, not specific to any one hub.', roles: ROLES, groups: ACTIVITIES, full: ['super_admin'], mirror: { admin: 'leadership' } },
+    sales:      { key: 'sales', title: 'Collab: Sales', sub: 'Tools, Browse and Administration, the hub\'s own side-nav groups.', roles: ROLES, groups: SALES_ACTIVITIES, full: ['super_admin', 'admin'] },
+    influencer: { key: 'influencer', title: 'Collab: Influencer', sub: 'Tools, Reference Data, Insight and Administration.', roles: INFLUENCER_MATRIX_ROLES, groups: INFLUENCER_ACTIVITIES, full: ['super_admin', 'infl_admin'] }
+  };
+  function matrixOf(key) {
+    var m = MATRICES[key];
+    if (!m) throw new Error('Unknown matrix: ' + key);
+    return m;
+  }
+  function findIn(matrix, label) {
+    var m = matrixOf(matrix);
+    for (var g = 0; g < m.groups.length; g++)
+      for (var i = 0; i < m.groups[g].items.length; i++)
+        if (m.groups[g].items[i].label === label) return m.groups[g].items[i];
+    throw new Error('Unknown activity in ' + matrix + ': ' + label);
+  }
+  /* The artifact's allocation, untouched by any override. */
+  function defaultHolds(matrix, role, label) {
+    var m = matrixOf(matrix), item = findIn(matrix, label);
+    if (role === 'super_admin') return true;
+    if (item.superOnly) return false;
+    if (m.full.indexOf(role) !== -1) return true;
+    if (item.roles.indexOf(role) !== -1) return true;
+    if (m.mirror && m.mirror[role] && item.roles.indexOf(m.mirror[role]) !== -1) return true;
+    return false;
+  }
+
+  /* ── Overrides: what a Super Admin has changed, in this browser ─────── */
+
+  var OVERRIDES_KEY = 'collabrium.access.overrides';
+  var OVERRIDES = {}, CHANGE_LOG = [], overridesStorage = null;
+  function loadOverrides(storage) {
+    overridesStorage = storage;
+    OVERRIDES = {}; CHANGE_LOG = [];
+    try {
+      var v = JSON.parse(storage.getItem(OVERRIDES_KEY) || '{}') || {};
+      if (v && typeof v === 'object') { OVERRIDES = v.o || {}; CHANGE_LOG = v.log || []; }
+    } catch (e) { /* garbage: run on the defaults */ }
+  }
+  function saveOverrides() {
+    if (!overridesStorage) return;
+    try { overridesStorage.setItem(OVERRIDES_KEY, JSON.stringify({ o: OVERRIDES, log: CHANGE_LOG.slice(-500) })); } catch (e) {}
+  }
+  function explicit(matrix, role) {
+    return OVERRIDES[matrix] && OVERRIDES[matrix][role] ? OVERRIDES[matrix][role] : null;
+  }
+  /* Override if set, else the artifact's default. */
+  function holdsIn(matrix, role, label) {
+    var o = explicit(matrix, role);
+    if (o && Object.prototype.hasOwnProperty.call(o, label)) return !!o[label];
+    return defaultHolds(matrix, role, label);
+  }
+  /* Why a switch cannot move, or null. */
+  function lockReason(matrix, role, label) {
+    var item = findIn(matrix, label);
+    if (role === 'super_admin') return 'Super Admin is the platform ceiling. Its access cannot be lowered.';
+    if (item.superOnly) return 'Super Admin only, by design.';
+    return null;
+  }
+  var ROLES_ARE_SUPER = 'A Super Admin sets roles.';
+  function mayEditRoles(viewer) { return holdsIn('mothership', viewer.role, "Assign or change a user's role"); }
+  /* Admin mirrors Leadership by rule until the first edit touches either;
+     then Admin's current set is written out so the two part company. */
+  function materialiseMirror(matrix) {
+    var m = matrixOf(matrix);
+    if (!m.mirror) return;
+    Object.keys(m.mirror).forEach(function (role) {
+      OVERRIDES[matrix] = OVERRIDES[matrix] || {};
+      var o = OVERRIDES[matrix][role] = OVERRIDES[matrix][role] || {};
+      m.groups.forEach(function (g) { g.items.forEach(function (item) {
+        if (!Object.prototype.hasOwnProperty.call(o, item.label)) o[item.label] = holdsIn(matrix, role, item.label);
+      }); });
+    });
+  }
+  function logChange(viewer, matrix, role, label, value) {
+    CHANGE_LOG.push({ at: new Date().toISOString(), by: viewer.name, matrix: matrix, role: role, label: label, value: value });
+  }
+  function setOverride(storage, viewer, matrix, role, label, value) {
+    if (storage !== overridesStorage) loadOverrides(storage);
+    if (!mayEditRoles(viewer)) return ROLES_ARE_SUPER;
+    var lock = lockReason(matrix, role, label);
+    if (lock) return lock;
+    var m = matrixOf(matrix);
+    if (m.mirror && (m.mirror[role] || Object.keys(m.mirror).some(function (r) { return m.mirror[r] === role; }))) materialiseMirror(matrix);
+    OVERRIDES[matrix] = OVERRIDES[matrix] || {};
+    OVERRIDES[matrix][role] = OVERRIDES[matrix][role] || {};
+    OVERRIDES[matrix][role][label] = !!value;
+    logChange(viewer, matrix, role, label, !!value);
+    saveOverrides();
+    return null;
+  }
+  function resetRole(storage, viewer, matrix, role) {
+    if (storage !== overridesStorage) loadOverrides(storage);
+    if (!mayEditRoles(viewer)) return ROLES_ARE_SUPER;
+    matrixOf(matrix);
+    if (OVERRIDES[matrix]) delete OVERRIDES[matrix][role];
+    logChange(viewer, matrix, role, null, null);
+    saveOverrides();
+    return null;
+  }
+  /* Modified means an explicit value that differs from the default; a
+     materialised mirror that still equals its default is not modified. */
+  function isModified(matrix, role) {
+    var o = explicit(matrix, role);
+    if (!o) return false;
+    return Object.keys(o).some(function (label) {
+      try { return !!o[label] !== defaultHolds(matrix, role, label); } catch (e) { return false; }
+    });
+  }
+  function lastChange(matrix, role) {
+    for (var i = CHANGE_LOG.length - 1; i >= 0; i--)
+      if (CHANGE_LOG[i].matrix === matrix && CHANGE_LOG[i].role === role) return CHANGE_LOG[i];
+    return null;
+  }
+
+  api.SALES_ACTIVITIES = SALES_ACTIVITIES;
+  api.INFLUENCER_ACTIVITIES = INFLUENCER_ACTIVITIES;
+  api.MATRICES = MATRICES;
+  api.OVERRIDES_KEY = OVERRIDES_KEY;
+  api.ROLES_ARE_SUPER = ROLES_ARE_SUPER;
+  api.defaultHolds = defaultHolds;
+  api.holdsIn = holdsIn;
+  api.loadOverrides = loadOverrides;
+  api.setOverride = setOverride;
+  api.resetRole = resetRole;
+  api.isModified = isModified;
+  api.lastChange = lastChange;
+  api.lockReason = lockReason;
+  api.mayEditRoles = mayEditRoles;
 
   return api;
 });

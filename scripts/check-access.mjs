@@ -82,6 +82,10 @@ ok(!seed.some(r => /^open role/i.test(r.name)), 'open seats are skipped');
 ok(seed.every(r => /^[a-z.]+@astro\.com\.my$/.test(r.email)), 'emails are in the astro.com.my pattern');
 ok(bryan.teamDirect >= 2 && bryan.teamTotal > bryan.teamDirect, 'team counts roll up');
 ok(seed.slice(1).every((r, i) => seed[i].name.localeCompare(r.name) <= 0), 'sorted by name');
+ok(seed.every(r => r.reportsTo !== r.id), 'nobody reports to themselves');
+{ const cyc = A.withTeams([{ id: 'a', name: 'A', reportsTo: 'b' }, { id: 'b', name: 'B', reportsTo: 'a' }]); ok(cyc.every(r => r.teamTotal === 1 && r.teamDirect === 1), 'a cycle never counts a person in their own team'); }
+ok(seed.every(r => !r.reportsToEmail || /^[a-z]+(\.[a-z]+)*@astro\.com\.my$/.test(r.reportsToEmail)), 'external manager addresses are well formed');
+ok(!seed.some(r => r.reportsToEmail && /not\.stated|^@/.test(r.reportsToEmail)), 'placeholders do not become addresses');
 
 section('Store');
 {
@@ -112,6 +116,7 @@ section('Store');
   ok(store.candidates().length === 0, 'no candidates while everyone is in');
   store.remove(joy.id);
   ok(store.candidates().length === 1 && store.candidates()[0].id === joy.id, 'a removed person is a candidate again');
+  { let threwNoId = false; try { store.save({}); } catch (e) { threwNoId = true; } ok(threwNoId, 'save without an id throws'); }
   store.reset();
 }
 
@@ -138,6 +143,8 @@ section('Guards');
   ok(/last active Super Admin/.test(A.check(SA, bryan, null, all)), 'the last Super Admin cannot be removed');
   const withSecond = all.concat([edit(joy, { id: 'second-sa', role: 'super_admin' })]);
   ok(/own admin tier/.test(A.check(SA, bryan, edit(bryan, { role: 'leadership' }), withSecond)), 'the viewer cannot change their own tier');
+  ok(/deactivate yourself/.test(A.check(SA, bryan, edit(bryan, { access: 'inactive' }), withSecond)), 'the viewer cannot deactivate themselves');
+  ok(/remove yourself/.test(A.check(SA, bryan, null, withSecond)), 'the viewer cannot remove themselves');
   ok(A.check(SA, joy, edit(joy, { role: 'super_admin' }), all) === null, 'someone else can be promoted');
   const add = { id: 'x', name: 'X', email: 'x@astro.com.my', networkId: 'X', role: 'sales_rep', hubs: ['sales'],
                 influencerRole: null, reportsTo: null, reportsToEmail: null, access: 'active', lastSignIn: null };
@@ -145,6 +152,7 @@ section('Guards');
   ok(/Super Admin sets the role/.test(A.check(AD, null, edit(add, { role: 'leadership' }), all)), 'Admin may not add with another role');
   ok(A.check(AD, null, edit(add, { hubs: ['sales', 'influencer'], influencerRole: 'viewer' }), all) === null, 'Admin may add with the default Influencer role');
   ok(/Super Admin sets the role/.test(A.check(AD, null, edit(add, { hubs: ['influencer'], influencerRole: 'infl_admin' }), all)), 'Admin may not pick an Influencer role');
+  { const joyInfl = edit(joy, { hubs: ['sales', 'influencer'], influencerRole: 'viewer' }); ok(/Super Admin sets the role/.test(A.check(AD, joyInfl, edit(joyInfl, { influencerRole: 'infl_manager' }), all)), 'Admin may not change the Influencer role on edit'); }
 }
 
 section('Viewer');
@@ -176,7 +184,7 @@ section('Describe');
   ok(/Collab: Planning/.test(lines[3]), 'Planning line');
   ok(A.describe({ role: 'super_admin', hubs: ['sales'] })[0].indexOf('Platform ceiling') !== -1, 'Super Admin line');
   ok(A.describe({ role: 'admin', hubs: ['sales'] })[0].indexOf('A Super Admin sets roles') !== -1, 'Admin line');
-  ok(A.initials('Bryan Wong') === 'BW' && A.initials('Normala (Joy) Ahmad') === 'NA', 'initials skip nicknames');
+  ok(A.initials('Bryan Wong') === 'BW' && A.initials('Normala (Joy) Ahmad') === 'NA' && A.initials('Adreena') === 'A', 'initials skip nicknames and single names get one letter');
 }
 
 console.log(failed ? `\n${failed} check(s) failed` : '\nAll checks passed');

@@ -100,10 +100,10 @@
       { label: 'Export performance reports', roles: ['leadership', 'sales_vp', 'head_of_sales', 'sales_manager', 'marketing_services'] }
     ]},
     { title: 'Collaborate', items: [
-      { label: 'View dashboard (home)', roles: BUSINESS },
-      { label: 'Customize own dashboard layout', roles: BUSINESS },
+      { label: 'View dashboard (home)', roles: BUSINESS.slice() },
+      { label: 'Customize own dashboard layout', roles: BUSINESS.slice() },
       { label: 'View cross-pillar leadership overview', roles: ['leadership'] },
-      { label: 'Receive notifications & alerts', roles: BUSINESS }
+      { label: 'Receive notifications & alerts', roles: BUSINESS.slice() }
     ]}
   ];
 
@@ -157,13 +157,19 @@
     return String(name).toLowerCase().replace(/\(.*?\)/g, '')
       .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
   }
-  /* The chart has no addresses. first.last@astro.com.my from the name,
-     nicknames in parentheses dropped, is the pattern the pod's own
-     directory shows. */
+  /* The chart has no addresses. The name's words joined by dots, at
+     astro.com.my, nicknames in parentheses dropped, is the pattern the
+     pod's own directory shows. */
   function emailFor(name) {
     var local = String(name).toLowerCase().replace(/\(.*?\)/g, '')
       .replace(/[^a-z\s]/g, '').trim().split(/\s+/).join('.');
     return local + '@astro.com.my';
+  }
+  /* A manager name that is really a placeholder ("Not stated", "TBC",
+     "-") rather than a real person. Treated as no manager at all. */
+  function isPlaceholder(name) {
+    var s = String(name || '').trim().toLowerCase();
+    return !/[a-z]/.test(s) || ['not stated', 'n/a', 'none', 'tbc', 'tbd', 'unassigned'].indexOf(s) !== -1;
   }
   function networkIdFor(email) {
     return email.split('@')[0].replace(/\./g, '').slice(0, 8).toUpperCase();
@@ -189,14 +195,16 @@
     }
     recs.forEach(function (r) {
       r.teamDirect = (kids[r.id] || []).length;
-      r.teamTotal = total(r.id, {});
+      var seen = {}; seen[r.id] = 1;
+      r.teamTotal = total(r.id, seen);
     });
     return recs;
   }
 
   /* One record per person in the chart's flat index, plus Bryan Wong on
-     top. Role from grade: VP → Sales VP, a head → Head of Sales, a pod lead
-     or AVP → Sales Manager, everyone else → Sales (E/SE). */
+     top. Role from the chart's own lists: a name in `vps` → Sales VP, a
+     name in `heads` → Head of Sales, a pod lead or AVP grade → Sales
+     Manager, everyone else → Sales (E/SE). */
   function buildSeed(tree, now) {
     now = now || Date.now();
     var DAY = 86400000;
@@ -241,9 +249,10 @@
        directory shows with the pod's "Not a Collabrium user" note. */
     recs.forEach(function (r) {
       var m = r._mgr ? canon(r._mgr) : null;
+      if (m && isPlaceholder(m)) m = null;
       if (r.id === VIEWER_ID) { /* top of the tree */ }
       else if (r.role === 'sales_vp') r.reportsTo = VIEWER_ID;
-      else if (m && byName[m]) r.reportsTo = byName[m].id;
+      else if (m && byName[m]) { if (byName[m].id !== r.id) r.reportsTo = byName[m].id; }
       else if (m) r.reportsToEmail = emailFor(m);
       delete r._mgr;
     });
@@ -266,7 +275,13 @@
   /* Seed plus a browser-only overlay. The overlay holds full records for
      anyone added or changed, keyed by id, a list of removed ids, and the
      Azure AD sync stamp. Reading is seed, then overlay on top, then removals
-     dropped. Clearing the key restores the seed exactly. */
+     dropped. Clearing the key restores the seed exactly.
+
+     The interface is synchronous by design for this round. A later
+     API-backed store should keep synchronous reads off a local cache and
+     add an async refresh() plus an onChange callback, the pattern
+     pages/feedback-v1.html already uses for /api/feedback, so the pages
+     keep calling list(). */
   var DIRECTORY_KEY = 'collabrium.access.directory';
 
   function clone(o) { return JSON.parse(JSON.stringify(o)); }
@@ -299,6 +314,7 @@
       return null;
     }
     function save(rec) {
+      if (!rec || !rec.id) throw new Error('save needs a record with an id');
       var o = read();
       o.changed[rec.id] = strip(rec);
       o.removed = o.removed.filter(function (x) { return x !== rec.id; });
@@ -355,6 +371,7 @@
         if (!others) return 'This is the last active Super Admin. Promote someone else first.';
       }
     }
+    if (next && before && before.id === viewer.id && next.access === 'inactive') return 'You cannot deactivate yourself.';
     if (!next && before && before.id === viewer.id) return 'You cannot remove yourself.';
     return null;
   }
@@ -411,6 +428,7 @@
 
   function initials(name) {
     var parts = String(name).replace(/\(.*?\)/g, '').trim().split(/\s+/);
+    if (parts.length === 1) return ((parts[0] || '')[0] || '').toUpperCase();
     return ((parts[0] || '')[0] || '').toUpperCase() + ((parts[parts.length - 1] || '')[0] || '').toUpperCase();
   }
 

@@ -126,7 +126,8 @@ Two helpers read it:
   Viewer / Client in Influencer if that hub is ticked.
 - Business roles: the directory page refuses with an Admin-only state, and
   the Settings card is shown as unavailable.
-- Nobody can raise or lower their own record to or from an admin tier.
+- Nobody can raise or lower their own record to or from an admin tier,
+  deactivate themselves, or remove themselves.
 - The last active Super Admin cannot be deactivated, demoted or removed.
 - At least one hub always. The last ticked hub's checkbox is disabled.
 - Guards show an inline message next to the control that explains why,

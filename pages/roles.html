@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Collabrium · Roles &amp; permissions</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="icon" id="siteFavicon" type="image/svg+xml" href="../collabrium-dls/SVG/coin.svg" />
+<script src="assets/favicon.js" defer></script>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Mulish:wght@400;500;600;700;800;900&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css" />
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css" />
+<link rel="stylesheet" href="../collabrium-dls/tokens.css?v=f278e40" />
+<link rel="stylesheet" href="../collabrium-dls/components.css?v=f278e40" />
+<link rel="stylesheet" href="../shared/shell.css?v=1" />
+<style>
+  .rp-tabs{margin-bottom:var(--spacing-24);}
+  .rp-layout{display:grid; grid-template-columns:320px minmax(0,1fr); gap:var(--spacing-32); align-items:start;}
+  .rp-roles h2, .rp-pane h2{margin:0; font-size:var(--text-h4-size); font-weight:800;}
+  .rp-roles .sub{margin:var(--spacing-4) 0 var(--spacing-16); font-size:var(--text-caption-size); color:var(--color-neutral-5);}
+  .rp-role{display:flex; align-items:flex-start; justify-content:space-between; gap:var(--spacing-12); width:100%;
+    padding:var(--spacing-16); margin-bottom:var(--spacing-12); text-align:left; cursor:pointer; font-family:inherit;
+    background:var(--color-neutral-1); border:1px solid var(--color-neutral-3); border-radius:var(--radius-md);
+    transition:border-color var(--duration-fast) var(--ease-standard), box-shadow var(--duration-fast) var(--ease-standard);}
+  .rp-role:hover{border-color:var(--color-neutral-4);}
+  .rp-role[aria-pressed="true"]{border-color:var(--color-obsidian); box-shadow:inset 0 0 0 1px var(--color-obsidian);}
+  .rp-role:focus-visible{outline:2px solid var(--color-obsidian); outline-offset:2px;}
+  .rp-role .name{font-size:var(--text-body1-size); font-weight:700; color:var(--color-neutral-9); display:flex; align-items:center; gap:var(--spacing-8); flex-wrap:wrap;}
+  .rp-role .meaning{font-size:var(--text-caption-size); color:var(--color-neutral-5); margin-top:4px; line-height:1.4;}
+  .rp-role .c-radio-circle{margin-top:2px;}
+  .rp-role .n{font-size:var(--text-caption-size); font-weight:500; color:var(--color-neutral-5);}
+
+  .rp-pane-head{display:flex; align-items:flex-start; justify-content:space-between; gap:var(--spacing-16); flex-wrap:wrap; margin-bottom:var(--spacing-8);}
+  .rp-pane-head .meta{display:flex; align-items:center; gap:var(--spacing-8); flex-wrap:wrap; margin-top:var(--spacing-8);}
+  .rp-pane-head .last{font-size:var(--text-caption-size); color:var(--color-neutral-5);}
+  .rp-note{display:flex; align-items:flex-start; gap:var(--spacing-8); padding:var(--spacing-12); margin:var(--spacing-12) 0 var(--spacing-8);
+    border:1px solid var(--color-neutral-3); border-radius:var(--radius-md); background:var(--color-neutral-1);
+    font-size:var(--text-caption-size); color:var(--color-neutral-5); line-height:1.45;}
+  .rp-note i{flex:none; font-size:16px; margin-top:1px; color:var(--color-neutral-5);}
+  .rp-group{margin-top:var(--spacing-24);}
+  .rp-group h3{margin:0 0 var(--spacing-8); padding-bottom:var(--spacing-8); border-bottom:1px solid var(--color-neutral-3);
+    font-size:var(--text-body1-size); font-weight:700;}
+  .rp-row{display:flex; align-items:center; justify-content:space-between; gap:var(--spacing-16); padding:var(--spacing-12) var(--spacing-8);
+    border-radius:var(--radius-sm);}
+  .rp-row:hover{background:var(--color-neutral-2);}
+  .rp-row .t{min-width:0;}
+  .rp-row .lab{font-size:var(--text-body1-size); color:var(--color-neutral-9);}
+  .rp-row .help{font-size:var(--text-caption-size); color:var(--color-neutral-5); margin-top:2px;}
+  .rp-row.off .lab{color:var(--color-neutral-5);}
+  .rp-row .ctl{display:flex; align-items:center; gap:var(--spacing-8); flex:none;}
+  .rp-row .lock{font-size:14px; color:var(--color-neutral-4);}
+  .rp-switch{border:0; padding:0; cursor:pointer; font:inherit;}
+  .rp-switch:focus-visible{outline:2px solid var(--color-obsidian); outline-offset:2px;}
+  .rp-switch:disabled{cursor:not-allowed; opacity:.5;}
+  .rp-denied{max-width:420px; margin:var(--spacing-60) auto;}
+  .rp-denied a{text-decoration:none;}
+  @media (max-width:900px){ .rp-layout{grid-template-columns:1fr;} }
+</style>
+</head>
+<body>
+
+<div class="c-shell">
+  <div class="c-sidebar-shell" id="shellSidebarShell">
+    <nav class="c-sidebar" id="shellSidebarNav">
+      <div class="c-sidebar-header">
+        <button class="c-dept-trigger js-dept-trigger" type="button" aria-haspopup="listbox"
+                aria-expanded="false" aria-label="Switch department" aria-controls="deptDropdown">
+          <span class="c-sidebar-logo-live-wrap js-dept-logo-live"><iframe src="../collabrium-dls/logo.html" title="Collabrium" scrolling="no"></iframe></span>
+          <img class="c-dept-logo-static js-dept-logo-static" alt="" style="display:none" />
+          <i class="ph ph-caret-down js-dept-chevron c-dept-chevron"></i>
+        </button>
+        <img class="c-sidebar-logo-collapsed js-dept-logo-collapsed" src="../collabrium-dls/SVG/coin.svg" alt="Collabrium" />
+      </div>
+      <div class="c-sidebar-section">Overview</div>
+      <a class="c-sidebar-item" href="landing-v3.html"><i class="ph-fill ph-house"></i><span class="label">Dashboard</span><span class="c-sidebar-hover-text">Dashboard</span></a>
+      <a class="c-sidebar-item" href="feedback-v1.html"><i class="ph-fill ph-lightbulb-filament"></i><span class="label">Feedback</span><span class="c-sidebar-hover-text">Feedback</span></a>
+      <div class="c-sidebar-footer">
+        <button class="c-sidebar-account" type="button" id="accountMenuTrigger"
+                aria-haspopup="menu" aria-expanded="false" aria-controls="accountMenu">
+          <span class="c-search-input-avatar">BW</span>
+          <span class="c-search-input-text">
+            <span class="c-search-input-title">Bryan Wong</span>
+            <span class="c-search-input-subtitle">Super Admin</span>
+          </span>
+        </button>
+      </div>
+    </nav>
+    <button class="c-sidebar-toggle" type="button" aria-label="Collapse sidebar" id="sidebarToggle">
+      <svg viewBox="0 0 20 20" fill="none">
+        <rect x="2.5" y="3.5" width="15" height="13" rx="2" stroke="currentColor" stroke-width="1.4"/>
+        <line x1="9" y1="3.5" x2="9" y2="16.5" stroke="currentColor" stroke-width="1.4"/>
+        <path id="sidebarArrow" d="M13.5 7 11 10l2.5 3" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+  </div>
+
+  <div class="c-shell-main">
+    <div class="c-shell-content">
+      <div class="pg-wrap">
+        <header class="pg-head">
+          <div class="pg-title">
+            <a class="pg-back" href="settings.html" aria-label="Back to Settings"><i class="ph ph-arrow-left"></i></a>
+            <div>
+              <h1>Roles &amp; permissions</h1>
+              <p class="sub">What each role may do, in Mothership and in every hub. Super Admin edits, Admin views.</p>
+            </div>
+          </div>
+          <div class="pg-head-right">
+            <div class="va" id="viewingAs"></div>
+          </div>
+          <hr class="pg-rule" />
+        </header>
+
+        <div id="content"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="c-sidebar-hover-label" id="shellSidebarHoverLabel" role="tooltip"></div>
+
+<div class="c-account-menu" id="accountMenu" role="menu" aria-hidden="true">
+  <a class="c-account-menu-item" href="settings.html" role="menuitem"><i class="ph-fill ph-gear"></i><span>Settings</span></a>
+  <a class="c-account-menu-item" href="login-v1.html" role="menuitem"><i class="ph-fill ph-sign-out"></i><span>Log out</span></a>
+</div>
+
+<div class="c-dept-dropdown" id="deptDropdown" role="listbox" aria-label="Departments" hidden>
+  <div class="c-dept-option is-active" role="option" aria-selected="true" aria-label="Collabrium (Default)" data-dept="default" data-name="Collabrium (Default)" data-element-icon="../collabrium-dls/SVG/coin.svg">
+    <span class="c-dept-option-logo"><img src="../collabrium-dls/logo-lockups/collabrium-default-logo.svg" alt="" style="--logo-scale:0.6" /></span>
+    <i class="ph ph-check c-dept-check"></i>
+  </div>
+  <div class="c-dept-option" role="option" aria-selected="false" aria-label="Studio" data-dept="studio" data-name="Studio" data-logo="../collabrium-dls/logo-lockups/collabStudio.svg" data-element-icon="../collabrium-dls/SVG/fire.svg">
+    <span class="c-dept-option-logo"><img src="../collabrium-dls/logo-lockups/collabStudio.svg" alt="" /></span>
+    <i class="ph ph-check c-dept-check"></i>
+  </div>
+  <div class="c-dept-option" role="option" aria-selected="false" aria-label="Sales" data-dept="sales" data-name="Sales" data-logo="../collabrium-dls/logo-lockups/collabSales.svg" data-element-icon="../collabrium-dls/SVG/gold.svg">
+    <span class="c-dept-option-logo"><img src="../collabrium-dls/logo-lockups/collabSales.svg" alt="" /></span>
+    <i class="ph ph-check c-dept-check"></i>
+  </div>
+  <!-- Media is the one department with somewhere to go: Collab:Media is a
+       deployed product, so picking it opens that app rather than restyling
+       this shell. data-href is what says so; shell.js opens it in a new tab. -->
+  <div class="c-dept-option" role="option" aria-selected="false" aria-label="Media" data-dept="media" data-name="Media" data-logo="../collabrium-dls/logo-lockups/collabMedia.svg" data-element-icon="../collabrium-dls/SVG/water.svg" data-href="https://collab-media.vercel.app">
+    <span class="c-dept-option-logo"><img src="../collabrium-dls/logo-lockups/collabMedia.svg" alt="" /></span>
+    <i class="ph ph-arrow-up-right c-dept-check" aria-hidden="true" style="opacity:1"></i>
+  </div>
+  <div class="c-dept-option" role="option" aria-selected="false" aria-label="Influencers" data-dept="influencers" data-name="Influencers" data-logo="../collabrium-dls/logo-lockups/collabInfluencers.svg" data-element-icon="../collabrium-dls/SVG/earth.svg">
+    <span class="c-dept-option-logo"><img src="../collabrium-dls/logo-lockups/collabInfluencers.svg" alt="" /></span>
+    <i class="ph ph-check c-dept-check"></i>
+  </div>
+  <div class="c-dept-option" role="option" aria-selected="false" aria-label="Content" data-dept="content" data-name="Content" data-logo="../collabrium-dls/logo-lockups/collabContent.svg" data-element-icon="../collabrium-dls/SVG/wood.svg">
+    <span class="c-dept-option-logo"><img src="../collabrium-dls/logo-lockups/collabContent.svg" alt="" /></span>
+    <i class="ph ph-check c-dept-check"></i>
+  </div>
+</div>
+
+<div class="c-toast-host" id="toasts"></div>
+
+<script src="../shared/access.js?v=2"></script>
+<script src="../shared/shell.js?v=1"></script>
+<script>
+(function () {
+  var A = window.CollabAccess, Sh = window.CollabShell, esc = Sh.esc;
+  var S = localStorage;
+  var VIEW_GATE = 'Invite / add a user to the workspace';
+  var MEANING = {
+    super_admin: 'Platform ceiling: every activity, everywhere.',
+    admin: 'Hub administrator. On Mothership, mirrors Leadership plus the console items.',
+    leadership: 'Company-wide view of the Sales Board.',
+    sales_vp: 'Own org: the line they run.',
+    head_of_sales: 'Own team: the book they head.',
+    sales_manager: 'Own pod.',
+    sales_rep: 'Own quota and own campaigns.',
+    marketing_services: 'Owns Inventory, Bundles and Brand Profiles.',
+    creative_strategist: 'Own campaigns; intelligence and case studies.',
+    infl_admin: 'Hub administrator for Collab: Influencer.',
+    infl_manager: 'Full access; views Users & Permissions, cannot manage it.',
+    viewer: 'No standing access; responds to their own preview or draft.'
+  };
+  var viewer, store;
+  var state = { matrix: 'mothership', role: 'admin' };
+
+  A.loadOverrides(S);
+  viewer = Sh.init({ onViewerChange: function (v) { viewer = v; render(); } });
+  fetch('../data/org-tree.json').then(function (r) {
+    if (!r.ok) throw new Error('org-tree.json ' + r.status);
+    return r.json();
+  }).then(function (tree) {
+    store = A.createStore({ seed: A.buildSeed(tree), storage: S });
+    render();
+  }).catch(function () { store = null; render(); });
+
+  var MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'June', 'July', 'Aug', 'Sept', 'Oct', 'Nov', 'Dec'];
+  function fmtWhen(iso) {
+    var d = new Date(iso);
+    return d.getDate() + ' ' + MON[d.getMonth()] + ', ' + String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+  }
+  /* How many directory users carry this role, on this matrix. The
+     Influencer tab counts by Influencer role among those with that hub. */
+  function countFor(matrixKey, roleKey) {
+    if (!store) return null;
+    var all = store.list();
+    if (matrixKey === 'influencer' && roleKey !== 'super_admin') {
+      return all.filter(function (r) { return r.hubs.indexOf('influencer') !== -1 && r.influencerRole === roleKey; }).length;
+    }
+    return all.filter(function (r) { return r.role === roleKey; }).length;
+  }
+  function firstRole(m) { return m.roles.filter(function (r) { return r.key !== 'super_admin'; })[0].key; }
+
+  function render() {
+    var content = document.getElementById('content');
+    if (!A.holds(viewer.role, VIEW_GATE)) {
+      content.innerHTML = '<div class="c-empty rp-denied"><i class="ph ph-lock-simple"></i><h4>Admin only</h4>' +
+        '<p>' + esc(A.DENIED) + '</p><a class="c-btn c-btn-secondary c-btn-md" href="settings.html">Back to Settings</a></div>';
+      return;
+    }
+    var m = A.MATRICES[state.matrix];
+    if (!m.roles.some(function (r) { return r.key === state.role; })) state.role = firstRole(m);
+    var canEdit = A.mayEditRoles(viewer);
+    var role = m.roles.filter(function (r) { return r.key === state.role; })[0];
+    var n = countFor(m.key, role.key);
+    var modified = A.isModified(m.key, role.key);
+    var last = A.lastChange(m.key, role.key);
+
+    var h = '<div class="c-tabs rp-tabs" role="tablist">' + Object.keys(A.MATRICES).map(function (k) {
+      return '<button class="c-tab' + (k === m.key ? ' active' : '') + '" type="button" role="tab" aria-selected="' + (k === m.key) + '" data-matrix="' + k + '">' + esc(A.MATRICES[k].title) + '</button>';
+    }).join('') + '</div>';
+
+    h += '<div class="rp-layout"><aside class="rp-roles"><h2>Roles</h2><p class="sub">Select a role to view' + (canEdit ? ' and edit' : '') + ' permissions</p>';
+    h += m.roles.map(function (r) {
+      var c = countFor(m.key, r.key), on = r.key === role.key;
+      return '<button class="rp-role" type="button" data-role="' + r.key + '" aria-pressed="' + on + '">' +
+        '<span><span class="name">' + esc(r.label) + (c === null ? '' : '<span class="n">· ' + c + (c === 1 ? ' user' : ' users') + '</span>') +
+        (A.isModified(m.key, r.key) ? '<span class="c-badge c-badge-warning">Modified</span>' : '') + '</span>' +
+        '<span class="meaning">' + esc(MEANING[r.key] || '') + '</span></span>' +
+        '<span class="c-radio-circle' + (on ? ' on' : '') + '" aria-hidden="true">' + (on ? '<span class="dot"></span>' : '') + '</span></button>';
+    }).join('');
+    h += '</aside><section class="rp-pane" aria-live="polite">';
+    h += '<div class="rp-pane-head"><div><h2>' + esc(role.label) + (n === null ? '' : ' (' + n + (n === 1 ? ' user' : ' users') + ')') + '</h2>' +
+      '<div class="meta">' + (modified ? '<span class="c-badge c-badge-warning">Modified from default</span>' : '<span class="c-badge c-badge-neutral">Artifact default</span>') +
+      (last ? '<span class="last">Last change ' + esc(fmtWhen(last.at)) + ' by ' + esc(last.by) + (last.label === null ? ', reset to default' : '') + '</span>' : '') + '</div></div>' +
+      (canEdit && modified ? '<button class="c-btn c-btn-secondary c-btn-sm" type="button" id="reset">Reset to default</button>' : '') + '</div>';
+    if (role.key === 'super_admin') {
+      h += '<div class="rp-note"><i class="ph ph-lock-simple"></i><span>Super Admin is the platform ceiling: every activity, everywhere. The ceiling cannot lower itself, so these switches are locked.</span></div>';
+    } else if (!canEdit) {
+      h += '<div class="rp-note"><i class="ph ph-eye"></i><span>' + esc(A.ROLES_ARE_SUPER) + ' You can see what this role holds; only a Super Admin can change it.</span></div>';
+    }
+    h += m.groups.map(function (g) {
+      return '<div class="rp-group"><h3>' + esc(g.title) + '</h3>' + g.items.map(function (item) {
+        var on = A.holdsIn(m.key, role.key, item.label);
+        var lock = A.lockReason(m.key, role.key, item.label);
+        var disabled = !canEdit || !!lock;
+        return '<div class="rp-row' + (on ? '' : ' off') + '"><div class="t"><div class="lab">' + esc(item.label) + '</div>' +
+          (lock && role.key !== 'super_admin' ? '<div class="help">' + esc(lock) + '</div>' : '') + '</div>' +
+          '<div class="ctl">' + (lock ? '<i class="ph ph-lock-simple lock" title="' + esc(lock) + '" aria-hidden="true"></i>' : '') +
+          '<button class="c-switch-track rp-switch' + (on ? ' on' : '') + '" type="button" role="switch" aria-checked="' + on + '" aria-label="' + esc(item.label) + '" data-label="' + esc(item.label) + '"' +
+          (disabled ? ' disabled' : '') + (lock ? ' title="' + esc(lock) + '"' : '') + '><span class="c-switch-thumb"></span></button></div></div>';
+      }).join('') + '</div>';
+    }).join('');
+    h += '</section></div>';
+    content.innerHTML = h;
+    wire();
+  }
+
+  function wire() {
+    document.querySelectorAll('[data-matrix]').forEach(function (b) {
+      b.addEventListener('click', function () { state.matrix = b.dataset.matrix; render(); });
+    });
+    document.querySelectorAll('.rp-role').forEach(function (b) {
+      b.addEventListener('click', function () { state.role = b.dataset.role; render(); });
+    });
+    document.querySelectorAll('.rp-switch').forEach(function (sw) {
+      sw.addEventListener('click', function () {
+        var on = sw.getAttribute('aria-checked') === 'true';
+        var err = A.setOverride(S, viewer, state.matrix, state.role, sw.dataset.label, !on);
+        if (err) { Sh.toast('warning', 'Not changed', err); return; }
+        var id = sw.dataset.label;
+        render();
+        var again = document.querySelector('.rp-switch[data-label="' + CSS.escape(id) + '"]');
+        if (again) again.focus();
+      });
+    });
+    var reset = document.getElementById('reset');
+    if (reset) reset.addEventListener('click', function () {
+      var err = A.resetRole(S, viewer, state.matrix, state.role);
+      if (err) { Sh.toast('warning', 'Not reset', err); return; }
+      render();
+      Sh.toast('success', 'Reset to default', A.MATRICES[state.matrix].title + ' · ' + esc(A.roleLabel(state.role) || state.role));
+    });
+  }
+})();
+</script>
+</body>
+</html>

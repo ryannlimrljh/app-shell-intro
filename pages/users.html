@@ -149,6 +149,23 @@
   @media (max-height:760px){ .us-rail{gap:4px;} .us-rail-letter{font-size:11px;} }
   @media (max-height:620px){ .us-rail{gap:2px;} .us-rail-letter{font-size:10px;} }
   @media (max-width:640px){ .us-rail{display:none;} }
+  /* The rail takes the right edge, so the page keeps clear of it. */
+  @media (min-width:641px){ .pg-wrap{padding-right:var(--spacing-60);} }
+
+  /* ── Skeleton first paint: bones in the shape of the toolbar and the
+     table, swapped for the real thing after a short beat so the page lands
+     in place instead of popping. Same pulse as the roster and campaigns
+     pages. ── */
+  .us-sk{display:block; height:12px; border-radius:var(--radius-sm); background:var(--color-neutral-2);}
+  .us-sk-pill{height:20px; border-radius:var(--radius-pill);}
+  .us-sk-box{height:36px; border-radius:var(--radius-sm); border:1px solid var(--color-neutral-3); background:var(--color-neutral-1);}
+  .us-sk-btn{height:32px; width:150px; border-radius:var(--radius-sm); background:var(--color-neutral-2);}
+  .us-sk-dot{width:24px; height:24px; border-radius:var(--radius-pill); background:var(--color-neutral-2);}
+  .us-sk-row td{padding-top:14px; padding-bottom:14px;}
+  @media (prefers-reduced-motion:no-preference){
+    .us-sk, .us-sk-btn, .us-sk-dot{animation:us-sk-pulse 1.4s var(--ease-standard) infinite;}
+    @keyframes us-sk-pulse{0%,100%{opacity:1;} 50%{opacity:.45;}}
+  }
   /* What the role can do: the artifact's activity matrix, read-only, folded
      under the description so the sheet stays short until someone asks. */
   .us-acts{border:1px solid var(--color-neutral-3); border-radius:var(--radius-md); overflow:hidden;}
@@ -335,6 +352,34 @@
 
   /* ── Boot: the shell, then the org chart, then the store, then the page ── */
   viewer = Sh.init({ onViewerChange: function (v) { viewer = v; state.page = 1; if (store) render(); } });
+  /* Bones first. The chart is one local fetch, so the beat is staged
+     rather than real: the roster page's own 1000ms, long enough for the
+     bones to register as a considered loading state instead of a flicker. */
+  function skeleton() {
+    var sk = function (w, extra) { return '<span class="us-sk' + (extra ? ' ' + extra : '') + '" style="width:' + w + '"></span>'; };
+    var rows = '';
+    for (var i = 0; i < 8; i++) {
+      rows += '<tr class="us-sk-row"><td>' + sk('58%') + '<span class="us-sk" style="width:42%; height:9px; margin-top:6px"></span></td>' +
+        '<td>' + sk('44px', 'us-sk-pill') + '</td><td>' + sk('70%') + '</td><td>' + sk('60%') + '</td>' +
+        '<td>' + sk('56%') + '<span class="us-sk" style="width:48%; height:9px; margin-top:6px"></span></td>' +
+        '<td>' + sk('18px') + '</td><td>' + sk('40px') + '</td><td><span class="us-sk-dot"></span></td></tr>';
+    }
+    document.getElementById('content').innerHTML =
+      '<div class="us-bar" aria-hidden="true"><div class="us-bar-left">' +
+        '<span class="us-sk us-sk-box" style="width:260px"></span><span class="us-sep"></span>' +
+        sk('72px', 'us-sk-pill') + sk('68px', 'us-sk-pill') + sk('76px', 'us-sk-pill') +
+      '</div><div class="us-bar-right">' + sk('90px') + '<span class="us-sk-btn"></span></div></div>' +
+      '<p class="us-note"><span class="us-sk" style="width:520px; max-width:100%"></span></p>' +
+      '<div class="us-count"><span class="us-sk" style="width:150px"></span><span class="us-sk" style="width:180px"></span></div>' +
+      '<div class="us-tablewrap"><table class="c-table us-table" aria-hidden="true"><thead><tr>' +
+        ['54px','36px','34px','52px','66px','36px','70px',''].map(function (w) { return '<th>' + (w ? '<span class="us-sk" style="width:' + w + '; height:9px"></span>' : '') + '</th>'; }).join('') +
+      '</tr></thead><tbody>' + rows + '</tbody></table></div>';
+    document.getElementById('content').setAttribute('aria-busy', 'true');
+  }
+  var SK_HOLD = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 1000;
+  var skeletonUntil = Date.now() + SK_HOLD;
+  skeleton();
+
   fetch('../data/org-tree.json').then(function (r) {
     if (!r.ok) throw new Error('org-tree.json ' + r.status);
     return r.json();
@@ -342,8 +387,12 @@
     seedAll = A.buildSeed(tree);
     store = A.createStore({ seed: seedAll, storage: S });
     document.getElementById('newUser').addEventListener('click', function () { openAdd(); });
-    render();
+    setTimeout(function () {
+      document.getElementById('content').removeAttribute('aria-busy');
+      render();
+    }, Math.max(0, skeletonUntil - Date.now()));
   }).catch(function (e) {
+    document.getElementById('content').removeAttribute('aria-busy');
     document.getElementById('content').innerHTML =
       '<div class="c-empty"><i class="ph ph-warning-circle"></i><h4>The org chart did not load</h4><p>' + esc(String(e)) + '</p></div>';
     document.getElementById('newUser').hidden = true;

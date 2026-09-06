@@ -62,5 +62,26 @@ ok(A.scopeWord('sales_vp') === 'Own org', 'Sales VP: Own org');
 ok(A.scopeWord('head_of_sales') === 'Own team' && A.scopeWord('sales_manager') === 'Own team', 'HOS and Manager: Own team');
 ok(A.scopeWord('sales_rep') === 'Own quota', 'Sales: Own quota');
 
+section('Seed');
+const seed = A.buildSeed(tree, Date.parse('2026-09-06T10:00:00Z'));
+ok(seed.length > 50, `seed has ${seed.length} people`);
+const ids = new Set(seed.map(r => r.id));
+ok(ids.size === seed.length, 'ids are unique');
+ok(new Set(seed.map(r => r.email)).size === seed.length, 'emails are unique');
+const bryan = seed.find(r => r.id === 'bryan-wong');
+ok(bryan && bryan.role === 'super_admin' && bryan.reportsTo === null, 'Bryan Wong is Super Admin at the top');
+ok(seed.filter(r => r.role === 'sales_vp').every(r => r.reportsTo === 'bryan-wong'), 'VPs report to Bryan');
+ok(seed.filter(r => r.role === 'sales_vp').length >= 2, 'the two VPs became Sales VP');
+ok(seed.filter(r => r.role === 'head_of_sales').length >= 10, 'heads became Head of Sales');
+ok(seed.some(r => r.role === 'sales_manager'), 'pod leads became Sales Manager');
+ok(seed.every(r => r.hubs.length === 1 && r.hubs[0] === 'sales'), 'everyone starts with Sales only');
+ok(seed.every(r => r.access === 'active'), 'everyone starts active');
+ok(seed.every(r => r.reportsTo === null || ids.has(r.reportsTo)), 'every reportsTo resolves');
+ok(seed.every(r => !(r.reportsTo && r.reportsToEmail)), 'resolved managers carry no external email');
+ok(!seed.some(r => /^open role/i.test(r.name)), 'open seats are skipped');
+ok(seed.every(r => /^[a-z.]+@astro\.com\.my$/.test(r.email)), 'emails are in the astro.com.my pattern');
+ok(bryan.teamDirect >= 2 && bryan.teamTotal > bryan.teamDirect, 'team counts roll up');
+ok(seed.slice(1).every((r, i) => seed[i].name.localeCompare(r.name) <= 0), 'sorted by name');
+
 console.log(failed ? `\n${failed} check(s) failed` : '\nAll checks passed');
 process.exit(failed ? 1 : 0);

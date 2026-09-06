@@ -149,5 +149,117 @@
   api.holds = holds;
   api.scopeWord = scopeWord;
 
+  /* ── Seed from the org chart ────────────────────────────────────────── */
+
+  var VIEWER_ID = 'bryan-wong';
+
+  function slug(name) {
+    return String(name).toLowerCase().replace(/\(.*?\)/g, '')
+      .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+  }
+  /* The chart has no addresses. first.last@astro.com.my from the name,
+     nicknames in parentheses dropped, is the pattern the pod's own
+     directory shows. */
+  function emailFor(name) {
+    var local = String(name).toLowerCase().replace(/\(.*?\)/g, '')
+      .replace(/[^a-z\s]/g, '').trim().split(/\s+/).join('.');
+    return local + '@astro.com.my';
+  }
+  function networkIdFor(email) {
+    return email.split('@')[0].replace(/\./g, '').slice(0, 8).toUpperCase();
+  }
+  function iso(ms) { return new Date(ms).toISOString(); }
+  function byNameOrder(a, b) { return a.name.localeCompare(b.name); }
+
+  /* Direct and total team sizes, from reportsTo. Recomputed on every read
+     so an added or removed person changes their manager's count. */
+  function withTeams(recs) {
+    var kids = {};
+    recs.forEach(function (r) {
+      if (r.reportsTo) (kids[r.reportsTo] = kids[r.reportsTo] || []).push(r.id);
+    });
+    function total(id, seen) {
+      var n = 0;
+      (kids[id] || []).forEach(function (c) {
+        if (seen[c]) return;
+        seen[c] = 1;
+        n += 1 + total(c, seen);
+      });
+      return n;
+    }
+    recs.forEach(function (r) {
+      r.teamDirect = (kids[r.id] || []).length;
+      r.teamTotal = total(r.id, {});
+    });
+    return recs;
+  }
+
+  /* One record per person in the chart's flat index, plus Bryan Wong on
+     top. Role from grade: VP → Sales VP, a head → Head of Sales, a pod lead
+     or AVP → Sales Manager, everyone else → Sales (E/SE). */
+  function buildSeed(tree, now) {
+    now = now || Date.now();
+    var DAY = 86400000;
+    var alias = tree.boardAlias || {};
+    function canon(n) { return alias[n] || n; }
+    var vps = {}, heads = {}, leads = {};
+    Object.keys(tree.vps || {}).forEach(function (k) { vps[canon(tree.vps[k].name)] = true; });
+    (tree.heads || []).forEach(function (h) {
+      heads[canon(h.name)] = true;
+      (h.pods || []).forEach(function (p) { if (p.lead) leads[canon(p.lead)] = true; });
+    });
+    var recs = [], byName = {}, ids = {};
+    function push(rec) {
+      var base = rec.id, n = 2;
+      while (ids[rec.id]) rec.id = base + '-' + (n++);
+      ids[rec.id] = true;
+      byName[rec.name] = rec;
+      recs.push(rec);
+    }
+    push({ id: VIEWER_ID, name: 'Bryan Wong', email: 'bryan.wong@astro.com.my', networkId: 'BRYANWON',
+           role: 'super_admin', hubs: ['sales'], influencerRole: null,
+           reportsTo: null, reportsToEmail: null, access: 'active',
+           lastSignIn: iso(now - 2 * 3600000), _mgr: null });
+    var index = tree.index || {};
+    Object.keys(index).forEach(function (key) {
+      var p = index[key] || {};
+      var name = canon(p.name || key);
+      if (/^open role/i.test(name) || p.open || byName[name]) return;
+      var role = vps[name] ? 'sales_vp'
+               : heads[name] ? 'head_of_sales'
+               : (leads[name] || p.grade === 'AVP') ? 'sales_manager'
+               : 'sales_rep';
+      var email = emailFor(name);
+      push({ id: slug(name), name: name, email: email, networkId: networkIdFor(email),
+             role: role, hubs: ['sales'], influencerRole: null,
+             reportsTo: null, reportsToEmail: null, access: 'active',
+             lastSignIn: role === 'sales_vp' ? iso(now - 3 * DAY) : null,
+             _mgr: p.reportsTo || null });
+    });
+    /* Managers resolve by name, through the board aliases. A manager the
+       chart names but does not list is kept as an address, which the
+       directory shows with the pod's "Not a Collabrium user" note. */
+    recs.forEach(function (r) {
+      var m = r._mgr ? canon(r._mgr) : null;
+      if (r.id === VIEWER_ID) { /* top of the tree */ }
+      else if (r.role === 'sales_vp') r.reportsTo = VIEWER_ID;
+      else if (m && byName[m]) r.reportsTo = byName[m].id;
+      else if (m) r.reportsToEmail = emailFor(m);
+      delete r._mgr;
+    });
+    /* Duplicate addresses can only come from two names collapsing to the
+       same local part; disambiguate with the id, which is already unique. */
+    var seenEmail = {};
+    recs.forEach(function (r) {
+      if (seenEmail[r.email]) { r.email = r.id.replace(/-/g, '.') + '@astro.com.my'; r.networkId = networkIdFor(r.email); }
+      seenEmail[r.email] = true;
+    });
+    return withTeams(recs.sort(byNameOrder));
+  }
+
+  api.VIEWER_ID = VIEWER_ID;
+  api.buildSeed = buildSeed;
+  api.withTeams = withTeams;
+
   return api;
 });

@@ -171,9 +171,14 @@ open, and what they may do there." An "Add new user" button with a plus
 icon on the right, hidden for business roles. The same "Viewing as" control
 as Settings.
 
-**Toolbar.** Search across name, email and role. Three filters, each a
-checkbox popover with Clear and Done like the pod: Role, Hub (Sales,
-Influencer, Planning), State (Active, Deactivated, Never signed in). On the
+**Toolbar.** Search across name, email and role. Three filters on the
+design system's filter pill and panel, as the Influencers and Media plans
+pages use them: Role, Hub (Sales, Influencer, Planning), State (Active,
+Deactivated, Never signed in). Every option carries its count across the
+directory, and every toggle applies at once: no Done button, the panel stays
+open, the trigger's badge updates in place, and the rows travel to their
+new places with a FLIP move while arrivals fade in. Clear empties one
+facet. Reduced motion skips the move. On the
 right, "Synced 6 Sept, 10:18" from the store's stamp and a "Sync from Azure
 AD" button that restamps the time and shows a toast. A one-line note counts
 people who have never signed in, with the pod's wording.

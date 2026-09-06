@@ -29,25 +29,12 @@
     font-family:inherit; font-size:var(--text-body2-size); background:var(--color-neutral-1);}
   .us-search input:focus{outline:none; border:2px solid var(--color-obsidian); padding:0 11px 0 33px;}
   .us-sep{width:1px; height:24px; background:var(--color-neutral-3); margin:0 var(--spacing-4);}
-  /* A filter chip and its popover. */
-  .us-filter{position:relative;}
-  .us-filter > button{height:36px; padding:0 var(--spacing-12); border:1px solid var(--color-neutral-3);
-    border-radius:var(--radius-pill); background:var(--color-neutral-1); font-family:inherit;
-    font-size:var(--text-body2-size); font-weight:600; color:var(--color-neutral-9); cursor:pointer;
-    display:inline-flex; align-items:center; gap:var(--spacing-4);}
-  .us-filter > button:hover, .us-filter > button[aria-expanded="true"]{background:var(--color-neutral-2);}
-  .us-filter > button.is-on{border-color:var(--color-obsidian);}
-  .us-filter > button i{font-size:12px; color:var(--color-neutral-5);}
-  .us-pop{position:absolute; top:calc(100% + 8px); left:0; z-index:40; min-width:240px;
-    background:var(--color-neutral-1); border:1px solid var(--color-neutral-3);
-    border-radius:var(--radius-md); box-shadow:var(--shadow-3); padding:var(--spacing-12);}
-  .us-pop[hidden]{display:none;}
-  .us-pop .h{font-size:var(--text-label3-size); font-weight:700; letter-spacing:var(--tracking-eyebrow);
-    text-transform:uppercase; color:var(--color-neutral-5); margin-bottom:var(--spacing-8);}
-  .us-pop .row{display:flex; align-items:center; gap:var(--spacing-8); padding:6px 0; cursor:pointer;
-    font-size:var(--text-body2-size);}
-  .us-pop .foot{display:flex; justify-content:space-between; gap:var(--spacing-8);
-    margin-top:var(--spacing-8); padding-top:var(--spacing-8); border-top:1px solid var(--color-neutral-3);}
+  /* A filter pill: the design system's filter trigger and panel. Every
+     toggle applies at once; the panel stays open while the rows move. */
+  .us-pill{position:relative;}
+  .us-pill .c-filter-panel{z-index:40;}
+  .us-pill .c-filter-option .n{color:var(--color-neutral-4); margin-left:4px;}
+  .us-pill .c-filter-option input{position:absolute; opacity:0; width:0; height:0;}
   .us-note{font-size:var(--text-caption-size); color:var(--color-neutral-5); margin:0 0 var(--spacing-16);}
   .us-count{display:flex; align-items:center; justify-content:space-between; gap:var(--spacing-12);
     flex-wrap:wrap; font-size:var(--text-caption-size); color:var(--color-neutral-5); margin-bottom:var(--spacing-8);}
@@ -448,6 +435,16 @@
     { key: 'team', label: 'Team' }, { key: 'lastSignIn', label: 'Last sign-in' }
   ];
 
+  var FACETS = [
+    { key: 'role', label: 'Role', options: function () { return A.ROLES.map(function (r) { return { key: r.key, label: r.label }; }); },
+      of: function (r) { return [r.role]; } },
+    { key: 'hub', label: 'Hub', options: function () { return A.HUBS.map(function (x) { return { key: x.key, label: x.label }; }); },
+      of: function (r) { return r.hubs; } },
+    { key: 'st', label: 'State', options: function () { return [{ key: 'active', label: 'Active' }, { key: 'inactive', label: 'Deactivated' }, { key: 'never', label: 'Never signed in' }]; },
+      of: function (r) { return [stateOf(r)]; } }
+  ];
+  function facetByKey(k) { return FACETS.filter(function (f) { return f.key === k; })[0]; }
+
   function render() {
     var content = document.getElementById('content');
     var mayOpen = A.holds(viewer.role, GATE);
@@ -456,6 +453,7 @@
     if (!mayOpen) {
       lastRows = [];
       renderRail();
+      closePops();
       content.innerHTML =
         '<div class="c-empty us-denied"><i class="ph ph-lock-simple"></i><h4>Admin only</h4>' +
         '<p>' + esc(A.DENIED) + '</p>' +
@@ -468,20 +466,19 @@
     var total = rows.length, pages = Math.max(1, Math.ceil(total / state.rows));
     if (state.page > pages) state.page = pages;
     var from = (state.page - 1) * state.rows, page = rows.slice(from, from + state.rows);
-    var synced = store.syncedAt();
 
+    /* The bar is built once and never rebuilt: an open filter panel and a
+       focused search box both survive every re-render that way. */
+    if (!document.getElementById('bar')) {
+      content.innerHTML = renderBar() + '<div id="list"></div>';
+      wireBar();
+    }
+    var synced = store.syncedAt();
+    document.getElementById('synced').textContent = synced ? 'Synced ' + fmtWhen(synced) : 'Not yet synced';
+    FACETS.forEach(function (f) { updateTrigger(f.key); });
+
+    var before = snapshotRects();
     var h = '';
-    h += '<div class="us-bar"><div class="us-bar-left">' +
-      '<div class="us-search"><i class="ph ph-magnifying-glass"></i>' +
-      '<input type="text" id="q" placeholder="Search name, address, role…" value="' + esc(state.q) + '" aria-label="Search" /></div>' +
-      '<span class="us-sep"></span>' +
-      filterChip('role', 'Role', A.ROLES.map(function (r) { return { key: r.key, label: r.label }; })) +
-      filterChip('hub', 'Hub', A.HUBS.map(function (x) { return { key: x.key, label: x.label }; })) +
-      filterChip('st', 'State', [{ key: 'active', label: 'Active' }, { key: 'inactive', label: 'Deactivated' }, { key: 'never', label: 'Never signed in' }]) +
-      '</div><div class="us-bar-right">' +
-      '<span>' + (synced ? 'Synced ' + esc(fmtWhen(synced)) : 'Not yet synced') + '</span>' +
-      '<button class="c-btn c-btn-secondary c-btn-sm" type="button" id="sync">Sync from Azure AD</button>' +
-      '</div></div>';
     h += '<p class="us-note">' + never + ' of ' + all.length + ' have never signed in. Until they do, nothing has confirmed the address we hold is one they can use.</p>';
     h += '<div class="us-count"><span>Showing <b>' + (total ? from + 1 : 0) + '–' + Math.min(from + state.rows, total) + '</b> of <b>' + total + '</b> items</span>' +
       '<div class="us-pager"><span>Rows</span><select id="rows" aria-label="Rows per page">' +
@@ -513,25 +510,12 @@
         '</tr>';
     });
     h += '</tbody></table></div>';
-    content.innerHTML = h;
-    wire(byId);
+    document.getElementById('list').innerHTML = h;
+    wireList();
+    playMove(before);
     lastRows = rows;
     renderRail();
     spy();
-  }
-
-  function filterChip(key, label, options) {
-    var on = state[key].length;
-    return '<div class="us-filter" data-filter="' + key + '">' +
-      '<button type="button" class="' + (on ? 'is-on' : '') + '" aria-expanded="false" aria-haspopup="true">' + esc(label) + (on ? ' · ' + on : '') + ' <i class="ph ph-caret-down"></i></button>' +
-      '<div class="us-pop" hidden><div class="h">' + esc(label) + '</div>' +
-      options.map(function (o) {
-        var c = state[key].indexOf(o.key) !== -1;
-        return '<label class="row"><span class="c-checkbox-box' + (c ? ' on' : '') + '">' + (c ? '<i class="ph-bold ph-check" style="font-size:12px"></i>' : '') + '</span>' +
-          '<input type="checkbox" value="' + esc(o.key) + '"' + (c ? ' checked' : '') + ' style="position:absolute;opacity:0;width:0;height:0" />' + esc(o.label) + '</label>';
-      }).join('') +
-      '<div class="foot"><button class="c-btn c-btn-ghost c-btn-sm" type="button" data-clear>Clear</button><button class="c-btn c-btn-primary c-btn-sm" type="button" data-done>Done</button></div>' +
-      '</div></div>';
   }
 
   function pager(pages) {
@@ -547,15 +531,106 @@
     return h;
   }
 
-  /* ── Wiring, after every render ───────────────────────────────────── */
-  function wire(byId) {
-    var q = document.getElementById('q');
-    q.addEventListener('input', function () {
-      state.q = q.value; state.page = 1;
-      var pos = q.selectionStart;
-      render();
-      var nq = document.getElementById('q'); nq.focus(); nq.setSelectionRange(pos, pos);
+  /* ── The bar: search, one pill per facet, the sync stamp ──────────── */
+  function renderBar() {
+    return '<div class="us-bar" id="bar"><div class="us-bar-left">' +
+      '<div class="us-search"><i class="ph ph-magnifying-glass"></i>' +
+      '<input type="text" id="q" placeholder="Search name, address, role…" value="' + esc(state.q) + '" aria-label="Search" /></div>' +
+      '<span class="us-sep"></span>' +
+      FACETS.map(function (f) {
+        return '<div class="us-pill" data-facet="' + f.key + '">' +
+          '<button class="c-filter-trigger" type="button" data-facet="' + f.key + '" aria-haspopup="true" aria-expanded="false">' +
+            esc(f.label) + '<i class="ph ph-caret-down chev"></i></button>' +
+          '<div class="c-filter-panel" data-panel="' + f.key + '">' +
+            '<div data-options="' + f.key + '"></div>' +
+            '<div class="c-filter-footer"><button class="c-btn c-btn-ghost c-btn-sm" type="button" data-clear="' + f.key + '">Clear</button></div>' +
+          '</div></div>';
+      }).join('') +
+      '</div><div class="us-bar-right">' +
+      '<span id="synced"></span>' +
+      '<button class="c-btn c-btn-secondary c-btn-sm" type="button" id="sync">Sync from Azure AD</button>' +
+      '</div></div>';
+  }
+  /* Option rows carry the count across the whole directory, as the roster
+     does, so a choice says how many people it will keep before it is made. */
+  function optionRows(f) {
+    var counts = {};
+    store.list().forEach(function (r) { f.of(r).forEach(function (k) { counts[k] = (counts[k] || 0) + 1; }); });
+    return f.options().map(function (o) {
+      var on = state[f.key].indexOf(o.key) !== -1;
+      return '<label class="c-filter-option" data-facet="' + f.key + '" data-v="' + esc(o.key) + '">' +
+        '<span class="c-checkbox-box' + (on ? ' on' : '') + '">' + (on ? '<i class="ph-bold ph-check" style="font-size:12px"></i>' : '') + '</span>' +
+        '<input type="checkbox"' + (on ? ' checked' : '') + ' aria-label="' + esc(o.label) + '" />' +
+        '<span class="label">' + esc(o.label) + '<span class="n">' + (counts[o.key] || 0) + '</span></span></label>';
+    }).join('');
+  }
+  /* The trigger's count badge, updated in place so an open panel never has
+     to be rebuilt, which would close it mid-selection. */
+  function updateTrigger(k) {
+    var trig = document.querySelector('.c-filter-trigger[data-facet="' + k + '"]');
+    if (!trig) return;
+    var n = state[k].length;
+    trig.classList.toggle('active', !!n);
+    trig.innerHTML = esc(facetByKey(k).label) + (n ? '<span class="count">' + n + '</span>' : '') + '<i class="ph ph-caret-down chev"></i>';
+  }
+  var openFacet = null;
+  function closePops() {
+    openFacet = null;
+    document.querySelectorAll('.c-filter-panel.is-open').forEach(function (p) { p.classList.remove('is-open'); });
+    document.querySelectorAll('.c-filter-trigger.is-open').forEach(function (t) {
+      t.classList.remove('is-open');
+      t.setAttribute('aria-expanded', 'false');
     });
+  }
+  function wireBar() {
+    var q = document.getElementById('q');
+    q.addEventListener('input', function () { state.q = q.value; state.page = 1; render(); });
+    document.getElementById('sync').addEventListener('click', function () {
+      store.stampSync();
+      render();
+      Sh.toast('success', 'Synced from Azure AD', 'The directory is up to date.');
+    });
+    document.getElementById('bar').addEventListener('click', function (e) {
+      var trig = e.target.closest('.c-filter-trigger');
+      if (trig) {
+        e.stopPropagation();
+        var k = trig.dataset.facet, was = openFacet === k;
+        closePops();
+        if (!was) {
+          openFacet = k;
+          document.querySelector('[data-options="' + k + '"]').innerHTML = optionRows(facetByKey(k));
+          document.querySelector('[data-panel="' + k + '"]').classList.add('is-open');
+          trig.classList.add('is-open');
+          trig.setAttribute('aria-expanded', 'true');
+        }
+        return;
+      }
+      var clr = e.target.closest('[data-clear]');
+      if (clr) {
+        e.stopPropagation();
+        var ck = clr.dataset.clear;
+        state[ck] = []; state.page = 1;
+        document.querySelector('[data-options="' + ck + '"]').innerHTML = optionRows(facetByKey(ck));
+        render();
+        return;
+      }
+      if (e.target.closest('.c-filter-panel')) e.stopPropagation();
+    });
+    /* A toggle applies the moment it is made: state, the option rows, the
+       trigger's badge, then the list moves underneath the open panel. */
+    document.getElementById('bar').addEventListener('change', function (e) {
+      var opt = e.target.closest('.c-filter-option');
+      if (!opt) return;
+      var k = opt.dataset.facet, val = opt.dataset.v, i = state[k].indexOf(val);
+      if (i > -1) state[k].splice(i, 1); else state[k].push(val);
+      state.page = 1;
+      document.querySelector('[data-options="' + k + '"]').innerHTML = optionRows(facetByKey(k));
+      render();
+    });
+  }
+
+  /* ── The list's own controls, rebound after every render ──────────── */
+  function wireList() {
     document.getElementById('rows').addEventListener('change', function (e) {
       state.rows = Number(e.target.value); state.page = 1; render();
     });
@@ -569,42 +644,55 @@
         render();
       });
     });
-    document.querySelectorAll('.us-filter').forEach(function (f) {
-      var key = f.dataset.filter, btn = f.querySelector(':scope > button'), pop = f.querySelector('.us-pop');
-      var draft = state[key].slice();
-      btn.addEventListener('click', function (e) {
-        e.stopPropagation();
-        var open = pop.hidden;
-        closePops();
-        if (open) { pop.hidden = false; btn.setAttribute('aria-expanded', 'true'); }
-      });
-      pop.addEventListener('change', function (e) {
-        var cb = e.target;
-        if (cb.type !== 'checkbox') return;
-        var i = draft.indexOf(cb.value);
-        if (cb.checked && i === -1) draft.push(cb.value);
-        if (!cb.checked && i !== -1) draft.splice(i, 1);
-        var box = cb.previousElementSibling;
-        box.classList.toggle('on', cb.checked);
-        box.innerHTML = cb.checked ? '<i class="ph-bold ph-check" style="font-size:12px"></i>' : '';
-      });
-      pop.querySelector('[data-clear]').addEventListener('click', function () { state[key] = []; state.page = 1; render(); });
-      pop.querySelector('[data-done]').addEventListener('click', function () { state[key] = draft.slice(); state.page = 1; render(); });
-    });
-    document.getElementById('sync').addEventListener('click', function () {
-      store.stampSync();
-      render();
-      Sh.toast('success', 'Synced from Azure AD', 'The directory is up to date.');
-    });
     document.querySelectorAll('[data-edit]').forEach(function (b) {
       b.addEventListener('click', function () { openEdit(b.dataset.edit); });
     });
   }
-  function closePops() {
-    document.querySelectorAll('.us-pop').forEach(function (p) { p.hidden = true; });
-    document.querySelectorAll('.us-filter > button').forEach(function (b) { b.setAttribute('aria-expanded', 'false'); });
+
+  /* ── FLIP: rows that survive a filter, sort or page change travel from
+     where they were to where they are; rows that arrive fade in. The
+     roster page's move, on table rows. Off-screen rows are skipped, and so
+     is the whole pass under reduced motion. ── */
+  var FLIP_PAD = 240;
+  var REDUCED_MOVE = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function snapshotRects() {
+    var map = {}, vh = window.innerHeight;
+    var els = document.querySelectorAll('#list tr[data-id]');
+    for (var i = 0; i < els.length; i++) {
+      var rc = els[i].getBoundingClientRect();
+      if (rc.top > vh + FLIP_PAD) break;
+      if (rc.bottom < -FLIP_PAD) continue;
+      map[els[i].dataset.id] = rc;
+    }
+    return map;
   }
-  document.addEventListener('click', function (e) { if (!e.target.closest('.us-filter')) closePops(); });
+  function playMove(before) {
+    if (REDUCED_MOVE || !before || !('animate' in Element.prototype)) return;
+    var hadAny = false;
+    for (var k in before) { hadAny = true; break; }
+    if (!hadAny) return; /* first real paint: the skeleton hands over, nothing to travel from */
+    var moved = 0, appeared = 0, vh = window.innerHeight;
+    var els = document.querySelectorAll('#list tr[data-id]');
+    for (var i = 0; i < els.length; i++) {
+      var el = els[i];
+      var now = el.getBoundingClientRect();
+      if (now.top > vh + FLIP_PAD) break;
+      if (now.bottom < -FLIP_PAD) continue;
+      var was = before[el.dataset.id];
+      if (!was) {
+        el.animate([{ opacity: 0, transform: 'translateY(10px)' }, { opacity: 1, transform: 'none' }],
+          { duration: 300, delay: Math.min(appeared * 14, 180), easing: 'cubic-bezier(.32,.72,.3,1)', fill: 'backwards' });
+        appeared++;
+        continue;
+      }
+      var dy = was.top - now.top;
+      if (Math.abs(dy) < 1) continue;
+      el.animate([{ transform: 'translateY(' + dy.toFixed(1) + 'px)' }, { transform: 'translateY(0)' }],
+        { duration: 520, delay: Math.min(moved * 22, 220), easing: 'cubic-bezier(.32,.72,.3,1)', fill: 'backwards' });
+      moved++;
+    }
+  }
+  document.addEventListener('click', function (e) { if (!e.target.closest('.us-pill')) closePops(); });
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape') { closePops(); closeModal(); } });
 
   /* ── Modals ───────────────────────────────────────────────────────── */

@@ -1,0 +1,88 @@
+/* Collabrium app shell, page-level rules shared by settings.html and
+   users.html. Every rule here is either ported from feedback-v1.html, where
+   its reasoning is written up, or belongs to the page header and the
+   "Viewing as" control those two pages share. The design system itself is
+   linked separately and never edited. */
+
+*{box-sizing:border-box;}
+html,body{margin:0; height:100%;}
+body{font-family:var(--font-primary); color:var(--color-neutral-9);
+  background:var(--color-canvas-warm); -webkit-font-smoothing:antialiased;}
+
+/* The DS ships .c-shell at a fixed 480px; every real screen has to say so. */
+.c-shell{height:100dvh;}
+.c-shell-content{padding:0;}
+.c-sidebar-footer{margin-top:auto;}
+
+/* The account row, composed from UserPicker's avatar/name/role classes. */
+.c-sidebar-account{display:flex; align-items:center; gap:var(--spacing-12);
+  width:100%; padding:var(--spacing-8) var(--spacing-12);
+  margin-bottom:var(--spacing-4); border:none; background:transparent;
+  border-radius:var(--radius-sm); font-family:inherit; text-align:left;
+  cursor:pointer;
+  transition:background-color var(--duration-fast) var(--ease-standard);}
+.c-sidebar-account:hover{background:var(--color-neutral-2);}
+.c-sidebar.is-collapsed .c-sidebar-item span.label{display:none;}
+.c-sidebar.is-collapsed .c-sidebar-account{justify-content:center; padding:var(--spacing-8) 0;}
+.c-sidebar.is-collapsed .c-sidebar-account .c-search-input-text{display:none;}
+
+/* The account menu: Settings and Log out, opening above the row. Fixed and
+   outside .c-sidebar because the rail clips. */
+.c-account-menu{display:none; position:fixed; width:200px; z-index:60;
+  background:var(--color-neutral-1); border:1px solid var(--color-neutral-3);
+  border-radius:var(--radius-md); box-shadow:var(--shadow-3);
+  padding:var(--spacing-4); overflow:hidden;}
+.c-account-menu.is-open{display:block;}
+.c-account-menu-item{display:flex; align-items:center; gap:var(--spacing-12);
+  width:100%; height:36px; padding:0 var(--spacing-8); border:none;
+  background:transparent; border-radius:var(--radius-sm);
+  font-family:var(--font-primary); font-size:var(--text-body1-size);
+  font-weight:500; color:var(--color-neutral-9); text-decoration:none;
+  text-align:left; cursor:pointer;
+  transition:background-color var(--duration-fast) var(--ease-standard);}
+.c-account-menu-item:hover{background:var(--color-neutral-2);}
+.c-account-menu-item i{flex:none; font-size:16px; color:var(--color-neutral-5);}
+.c-sidebar-hover-label{z-index:60;}
+.c-dept-dropdown{position:fixed; z-index:60;}
+a.c-sidebar-item{text-decoration:none;}
+
+/* The page: a centred column, the pod's own width. */
+.pg-wrap{max-width:1180px; margin:0 auto;
+  padding:var(--spacing-32) var(--spacing-24) var(--spacing-60);}
+.pg-head{display:flex; align-items:flex-start; justify-content:space-between;
+  gap:var(--spacing-16); flex-wrap:wrap; margin-bottom:var(--spacing-24);}
+.pg-head h1{margin:0; font-size:var(--text-h2-size); font-weight:800; line-height:1.15;}
+.pg-head .sub{margin:var(--spacing-4) 0 0; color:var(--color-neutral-5);
+  font-size:var(--text-body1-size);}
+.pg-head-right{display:flex; align-items:center; gap:var(--spacing-12); flex-wrap:wrap;}
+.pg-rule{width:100%; border:none; border-top:1px solid var(--color-neutral-3);
+  margin:var(--spacing-16) 0 0;}
+
+/* "Viewing as": one person trying on three views. */
+.va{display:inline-flex; align-items:center; gap:var(--spacing-8);
+  font-size:var(--text-caption-size); color:var(--color-neutral-5);}
+.va-seg{display:inline-flex; border:1px solid var(--color-neutral-3);
+  border-radius:var(--radius-pill); background:var(--color-neutral-1); padding:2px;}
+.va-seg button{height:28px; padding:0 var(--spacing-12); border:none;
+  border-radius:var(--radius-pill); background:transparent; font-family:inherit;
+  font-size:var(--text-caption-size); font-weight:700; color:var(--color-neutral-9);
+  cursor:pointer; transition:background-color var(--duration-fast) var(--ease-standard);}
+.va-seg button:hover{background:var(--color-neutral-2);}
+.va-seg button[aria-pressed="true"]{background:var(--color-obsidian); color:var(--color-neutral-1);}
+.va-seg button:focus-visible{outline:2px solid var(--color-obsidian); outline-offset:2px;}
+
+/* Toasts sit bottom-right, the DS host. */
+.c-toast-host{pointer-events:none;}
+
+/* Narrow: the rail becomes a box in the corner, as the dashboard does. */
+@media (max-width:640px){
+  .c-shell{position:relative;}
+  .c-shell .c-sidebar-shell{position:absolute; top:var(--spacing-16);
+    left:var(--spacing-16); margin:0; z-index:50;}
+  .c-shell-main{padding-top:74px;}
+  .c-sidebar.is-collapsed .c-sidebar-header{padding:var(--spacing-8);}
+  .c-sidebar.is-collapsed .c-sidebar-item,
+  .c-sidebar.is-collapsed .c-sidebar-footer{display:none;}
+  .pg-wrap{padding:var(--spacing-20) var(--spacing-16) var(--spacing-48);}
+  .pg-head h1{font-size:26px;}
+}

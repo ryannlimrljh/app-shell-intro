@@ -31,6 +31,9 @@ only the design system's two stylesheets.
 **If a change does not appear, add a cache-buster** (`?v=2`). The dev server
 serves `Last-Modified` and browsers hold onto this page.
 
+`node scripts/check-access.mjs` runs the access model's checks; there is no other
+test runner.
+
 ## Layout
 
 | Path | What it is |
@@ -38,6 +41,10 @@ serves `Last-Modified` and browsers hold onto this page.
 | `pages/login-v1.html` | the login screen, and what `/` serves. Signs into v3 |
 | `pages/landing-v3.html` | what the login signs into. The variant whose board consumes real `collabrium-dls` component classes rather than restating their values |
 | `pages/feedback-v1.html` | the feedback board for the 30-day pioneer group. Second item in the sidebar, on `api/feedback.mjs` |
+| `pages/settings.html` | Settings, from the account menu: Account, and the Users & roles card. Carries the "Viewing as" control that drives the access gating |
+| `pages/users.html` | Users & roles: who may sign in, which hubs they can open, what role they carry. Seeded from `data/org-tree.json`, changes kept in this browser's localStorage |
+| `shared/access.js` | The access model: roles, hubs, the Mothership activity matrix, the seed, the overlay store, the guards. `node scripts/check-access.mjs` checks its rules |
+| `shared/shell.css`, `shared/shell.js` | The app shell's styles and behaviour, shared by the two pages above |
 | `pages/landing-v2.html` | **the working version. New implementation goes here.** The by-value reference v3 is diffed against |
 | `pages/landing-v1.html` | the previous version, frozen. Kept so v2 can be diffed against it |
 | `pages/assets/charts.bundle.js` | committed chart bundle — built, not hand-edited |

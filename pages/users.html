@@ -476,9 +476,219 @@
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape') { closePops(); closeModal(); } });
 
   /* ── Modals: Task 8 ───────────────────────────────────────────────── */
-  function openAdd() {}
-  function openEdit(id) {}
-  function closeModal() {}
+  var overlay = document.getElementById('overlay');
+  var modal = document.getElementById('modal');
+  var form = null;   // { mode:'add'|'edit', before, next, picked }
+
+  function closeModal() {
+    overlay.classList.remove('is-open');
+    modal.innerHTML = '';
+    form = null;
+  }
+  overlay.addEventListener('click', function (e) { if (e.target === overlay) closeModal(); });
+
+  function blank() {
+    return { id: '', name: '', email: '', networkId: '', role: A.DEFAULT_ROLE, hubs: ['sales'],
+             influencerRole: null, reportsTo: null, reportsToEmail: null, access: 'active', lastSignIn: null };
+  }
+  function openAdd() {
+    form = { mode: 'add', before: null, next: blank(), picked: null };
+    paintModal();
+    overlay.classList.add('is-open');
+    var p = document.getElementById('person');
+    if (p) p.focus();
+  }
+  function openEdit(id) {
+    var rec = store.get(id);
+    if (!rec) return;
+    form = { mode: 'edit', before: rec, next: JSON.parse(JSON.stringify(rec)), picked: rec };
+    paintModal();
+    overlay.classList.add('is-open');
+  }
+
+  /* One paint per change. The inputs are rebuilt, so focus is restored to
+     whichever control was active by id. */
+  function paintModal() {
+    var f = form, n = f.next, isAdd = f.mode === 'add';
+    var mayRole = A.holds(viewer.role, "Assign or change a user's role");
+    var hasInfl = n.hubs.indexOf('influencer') !== -1;
+    var all = store.list();
+    var byId = {};
+    all.forEach(function (r) { byId[r.id] = r; });
+    var guard = isAdd && !f.picked ? null : A.check(viewer, f.before, n, all);
+    var dirty = isAdd ? !!f.picked : JSON.stringify(strip(n)) !== JSON.stringify(strip(f.before));
+    var canSave = dirty && !guard;
+
+    var h = '<div class="c-modal-head"><div><h4 id="modalTitle">' + (isAdd ? 'Add a user' : esc(n.name)) + '</h4>' +
+      '<p class="sub">' + (isAdd ? 'Search Azure AD, then give them a role.' : esc(n.email)) + '</p></div>' +
+      '<button class="us-x" type="button" data-close aria-label="Close"><i class="ph ph-x"></i></button></div>';
+    h += '<div class="c-modal-body">';
+
+    if (isAdd) {
+      h += '<div class="us-f"><label for="person">Person</label>';
+      if (f.picked) {
+        h += '<div class="us-picked"><span class="c-search-input-avatar">' + esc(A.initials(f.picked.name)) + '</span>' +
+          '<span><div>' + esc(f.picked.name) + '</div><div class="us-sub">' + esc(f.picked.email) + '</div></span>' +
+          '<button class="us-x" type="button" data-unpick aria-label="Choose someone else"><i class="ph ph-x"></i></button></div>';
+      } else {
+        h += '<input type="text" id="person" placeholder="e.g. bryan, or bryan.wong@astro.com.my" autocomplete="off" value="' + esc(f.q || '') + '" />' +
+          '<div class="us-cands" id="cands" hidden></div>';
+      }
+      h += '<div class="help">Search the company directory by name or address. Only Astro staff appear — a guest account cannot sign in.</div></div>';
+    }
+
+    h += '<div class="us-f"><div class="lab">Hubs</div><div class="us-hubgrid">' +
+      A.HUBS.map(function (x) {
+        var on = n.hubs.indexOf(x.key) !== -1, last = on && n.hubs.length === 1;
+        return '<label class="c-choice' + (last ? ' disabled' : '') + '"><span class="c-checkbox-box' + (on ? ' on' : '') + '">' + (on ? '<i class="ph-bold ph-check" style="font-size:12px"></i>' : '') + '</span>' +
+          '<input type="checkbox" data-hub="' + x.key + '"' + (on ? ' checked' : '') + (last ? ' disabled' : '') + ' />' +
+          '<span class="text"><span class="label">' + esc(x.label) + '</span>' + (last ? '<span class="desc">The last hub stays. Deactivate them instead.</span>' : '') + '</span></label>';
+      }).join('') + '</div><div class="help">Which hubs they can open. The switcher only ever offers what is ticked here.</div></div>';
+
+    h += '<div class="us-f"><label for="role">Role</label>' +
+      (mayRole
+        ? '<select id="role">' + A.ROLES.map(function (r) { return '<option value="' + r.key + '"' + (r.key === n.role ? ' selected' : '') + '>' + esc(r.label) + '</option>'; }).join('') + '</select>' +
+          '<div class="help">Decides what they can see and edit. Change it any time.</div>'
+        : '<div class="ro">' + esc(A.roleLabel(n.role)) + '</div><div class="help">' + esc(A.ROLE_IS_SUPER) + '</div>') +
+      '</div>';
+
+    if (hasInfl) {
+      h += '<div class="us-f"><label for="irole">Influencer role</label>' +
+        (mayRole
+          ? '<select id="irole">' + A.INFLUENCER_ROLES.map(function (r) { return '<option value="' + r.key + '"' + (r.key === n.influencerRole ? ' selected' : '') + '>' + esc(r.label) + '</option>'; }).join('') + '</select>' +
+            '<div class="help">Collab: Influencer runs its own role set.</div>'
+          : '<div class="ro">' + esc(A.influencerRoleLabel(n.influencerRole)) + '</div><div class="help">' + esc(A.ROLE_IS_SUPER) + '</div>') +
+        '</div>';
+    }
+
+    h += '<div class="us-desc">' + A.describe(n).map(function (line, i) {
+      return '<div>' + (i === 0 ? line.replace(/^Sees ([^.]+)\./, 'Sees <b>$1</b>.') : esc(line)) + '</div>';
+    }).join('') + '</div>';
+
+    if (!isAdd) {
+      h += '<div class="us-f"><label for="access">Access</label><select id="access">' +
+        '<option value="active"' + (n.access === 'active' ? ' selected' : '') + '>Active</option>' +
+        '<option value="inactive"' + (n.access === 'inactive' ? ' selected' : '') + '>Deactivated</option></select>' +
+        '<div class="help">Deactivating keeps their place in the reporting tree; they simply cannot sign in.</div></div>';
+      var mgr = n.reportsTo && byId[n.reportsTo] ? byId[n.reportsTo].name : (n.reportsToEmail || '—');
+      h += '<div class="us-ad"><span class="k">Reports to</span><span>' + esc(mgr) + '</span>' +
+        '<span class="k">Network ID</span><span>' + esc(n.networkId) + '</span>' +
+        '<span class="k">Team</span><span>' + n.teamDirect + ' direct, ' + n.teamTotal + ' in total</span>' +
+        '<span class="note">From Azure AD. Fix a wrong reporting line there — it is not editable here.</span></div>';
+    } else {
+      h += '<div class="help">Their reporting line comes from Azure AD and appears after the next sync — it is not set here.</div>';
+    }
+
+    h += '<div class="us-guard" id="guard"' + (guard ? '' : ' hidden') + '><i class="ph-fill ph-warning-circle"></i><span>' + esc(guard || '') + '</span></div>';
+    h += '</div>';
+
+    h += '<div class="c-modal-foot">';
+    if (!isAdd) {
+      h += '<button class="us-remove" type="button" data-remove' + (f.confirm ? ' hidden' : '') + '>Remove from workspace</button>' +
+        '<div class="us-confirm"' + (f.confirm ? '' : ' hidden') + '><span>Remove ' + esc(n.name) + '? They lose every hub.</span>' +
+        '<button class="c-btn us-btn-danger c-btn-sm" type="button" data-remove-yes>Remove</button>' +
+        '<button class="c-btn c-btn-ghost c-btn-sm" type="button" data-remove-no>Keep</button></div>';
+    }
+    h += '<button class="c-btn c-btn-secondary c-btn-md" type="button" data-close>Cancel</button>' +
+      '<button class="c-btn c-btn-primary c-btn-md" type="button" data-save' + (canSave ? '' : ' disabled') + '>' + (isAdd ? 'Add user' : 'Save changes') + '</button>';
+    h += '</div>';
+
+    modal.innerHTML = h;
+    wireModal();
+  }
+  function strip(r) {
+    if (!r) return null;
+    var c = JSON.parse(JSON.stringify(r));
+    delete c.teamDirect; delete c.teamTotal;
+    return c;
+  }
+
+  function wireModal() {
+    var f = form, n = f.next;
+    modal.querySelectorAll('[data-close]').forEach(function (b) { b.addEventListener('click', closeModal); });
+
+    var person = document.getElementById('person');
+    if (person) {
+      person.addEventListener('input', function () {
+        f.q = person.value;
+        var q = f.q.trim().toLowerCase();
+        var box = document.getElementById('cands');
+        if (!q) { box.hidden = true; box.innerHTML = ''; return; }
+        var hits = store.candidates().filter(function (c) {
+          return (c.name + ' ' + c.email).toLowerCase().indexOf(q) !== -1;
+        }).slice(0, 8);
+        box.hidden = false;
+        box.innerHTML = hits.length
+          ? hits.map(function (c) {
+              return '<button class="us-cand" type="button" data-pick="' + esc(c.id) + '">' + esc(c.name) + '<div class="us-sub">' + esc(c.email) + '</div></button>';
+            }).join('')
+          : '<div class="us-cand" style="cursor:default;color:var(--color-neutral-5)">No one in Azure AD matches, or they are already in the directory.</div>';
+        box.querySelectorAll('[data-pick]').forEach(function (b) {
+          b.addEventListener('click', function () {
+            var c = store.candidates().filter(function (x) { return x.id === b.dataset.pick; })[0];
+            if (!c) return;
+            f.picked = c;
+            f.next = Object.assign(blank(), { id: c.id, name: c.name, email: c.email, networkId: c.networkId,
+                                              reportsTo: c.reportsTo, reportsToEmail: c.reportsToEmail });
+            paintModal();
+          });
+        });
+      });
+    }
+    var unpick = modal.querySelector('[data-unpick]');
+    if (unpick) unpick.addEventListener('click', function () { f.picked = null; f.q = ''; f.next = blank(); paintModal(); });
+
+    modal.querySelectorAll('input[data-hub]').forEach(function (cb) {
+      cb.addEventListener('change', function () {
+        var k = cb.dataset.hub, i = n.hubs.indexOf(k);
+        if (cb.checked && i === -1) n.hubs.push(k);
+        if (!cb.checked && i !== -1) n.hubs.splice(i, 1);
+        n.hubs = A.HUBS.map(function (x) { return x.key; }).filter(function (x) { return n.hubs.indexOf(x) !== -1; });
+        var hasInfl = n.hubs.indexOf('influencer') !== -1;
+        if (hasInfl && !n.influencerRole) n.influencerRole = A.DEFAULT_INFLUENCER_ROLE;
+        if (!hasInfl) n.influencerRole = null;
+        paintModal();
+      });
+    });
+    var role = document.getElementById('role');
+    if (role) role.addEventListener('change', function () { n.role = role.value; paintModal(); document.getElementById('role').focus(); });
+    var irole = document.getElementById('irole');
+    if (irole) irole.addEventListener('change', function () { n.influencerRole = irole.value; paintModal(); document.getElementById('irole').focus(); });
+    var access = document.getElementById('access');
+    if (access) access.addEventListener('change', function () { n.access = access.value; paintModal(); document.getElementById('access').focus(); });
+
+    var rm = modal.querySelector('[data-remove]');
+    if (rm) rm.addEventListener('click', function () { f.confirm = true; paintModal(); });
+    var no = modal.querySelector('[data-remove-no]');
+    if (no) no.addEventListener('click', function () { f.confirm = false; paintModal(); });
+    var yes = modal.querySelector('[data-remove-yes]');
+    if (yes) yes.addEventListener('click', function () {
+      var err = A.check(viewer, f.before, null, store.list());
+      if (err) { f.confirm = false; paintModal(); showGuard(err); return; }
+      store.remove(f.before.id);
+      closeModal();
+      render();
+      Sh.toast('neutral', 'Removed from the workspace', f.before.name + ' no longer has access to any hub.');
+    });
+
+    var save = modal.querySelector('[data-save]');
+    if (save) save.addEventListener('click', function () {
+      var err = A.check(viewer, f.before, n, store.list());
+      if (err) { showGuard(err); return; }
+      store.save(n);
+      var isAdd = f.mode === 'add';
+      closeModal();
+      render();
+      Sh.toast('success', isAdd ? 'User added' : 'Changes saved',
+        n.name + (isAdd ? ' can open ' + n.hubs.map(A.hubLabel).join(', ') + '.' : ' is updated.'));
+    });
+  }
+  function showGuard(msg) {
+    var g = document.getElementById('guard');
+    if (!g) return;
+    g.hidden = false;
+    g.querySelector('span').textContent = msg;
+  }
 
   /* MODALS-END */
 })();

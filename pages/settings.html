@@ -29,6 +29,8 @@
   .st-card.is-off .c-btn{pointer-events:none; background:var(--color-neutral-2); color:var(--color-neutral-4); border-color:var(--color-neutral-3); box-shadow:none;}
   .st-note{display:inline-flex; align-items:center; gap:var(--spacing-4); font-size:var(--text-caption-size); color:var(--color-neutral-5);}
   .st-note i{font-size:14px;}
+  /* The DS gives the note display:inline-flex, which outranks the UA's [hidden]. */
+  .st-note[hidden]{display:none;}
   @media (max-width:760px){ .st-grid{grid-template-columns:1fr;} }
 </style>
 </head>

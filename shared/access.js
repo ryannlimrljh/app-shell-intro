@@ -365,5 +365,62 @@
   api.createStore = createStore;
   api.check = check;
 
+  /* ── The viewer ─────────────────────────────────────────────────────── */
+
+  /* Always Bryan Wong; only the role line changes. That keeps the demo
+     honest about it being one person trying on three views. */
+  var VIEWER_KEY = 'collabrium.access.viewer';
+  var VIEWER_ROLES = ['super_admin', 'admin', 'leadership'];
+
+  function getViewer(storage) {
+    var role = null;
+    try { role = storage.getItem(VIEWER_KEY); } catch (e) {}
+    if (VIEWER_ROLES.indexOf(role) === -1) role = 'super_admin';
+    return { id: VIEWER_ID, name: 'Bryan Wong', email: 'bryan.wong@astro.com.my', role: role };
+  }
+  function setViewer(storage, role) {
+    if (VIEWER_ROLES.indexOf(role) === -1) return;
+    try { storage.setItem(VIEWER_KEY, role); } catch (e) {}
+  }
+  /* The one question a page asks before showing a control. */
+  function can(storage, label) { return holds(getViewer(storage).role, label); }
+
+  /* ── Plain-language summary for the forms ───────────────────────────── */
+
+  function salesLine(role) {
+    if (tierOf(role) === 'admin') return 'full access to all campaigns, manages Users & Permissions, reads every Activity Log entry.';
+    if (TEAM_SCOPED.indexOf(role) !== -1) return "own + their team's campaigns, and can edit their team's work. Activity log: own team.";
+    if (role === 'marketing_services') return 'own campaigns only, and the sole editor of Inventory, Bundles and Brand Profiles. Activity log: own only.';
+    return "own campaigns only, cannot edit anyone else's work. Activity log: own only.";
+  }
+  function influencerLine(r) {
+    if (r === 'infl_admin') return 'full access across Tools, Reference Data and Insight, manages Users & Permissions.';
+    if (r === 'infl_manager') return 'full access across Tools, Reference Data and Insight, can view Users & Permissions but not manage it.';
+    return 'no standing access, can respond to their own KOL preview or draft.';
+  }
+  function describe(rec) {
+    var lines = [], hubs = rec.hubs || [];
+    if (rec.role === 'super_admin') lines.push('Sees everything on the Sales Board. Platform ceiling: every activity, everywhere.');
+    else if (rec.role === 'admin') lines.push('Sees everything on the Sales Board. Adds users, assigns hubs, deactivates. A Super Admin sets roles.');
+    else lines.push('Sees ' + scopeWord(rec.role).toLowerCase() + ' on the Sales Board.');
+    if (hubs.indexOf('sales') !== -1) lines.push('Collab: Sales: ' + salesLine(rec.role));
+    if (hubs.indexOf('influencer') !== -1) lines.push('Collab: Influencer: ' + influencerLine(rec.influencerRole));
+    if (hubs.indexOf('planning') !== -1) lines.push('Collab: Planning: opens Plans, Campaign performances, and Inventory availability & forecast.');
+    return lines;
+  }
+
+  function initials(name) {
+    var parts = String(name).replace(/\(.*?\)/g, '').trim().split(/\s+/);
+    return ((parts[0] || '')[0] || '').toUpperCase() + ((parts[parts.length - 1] || '')[0] || '').toUpperCase();
+  }
+
+  api.VIEWER_KEY = VIEWER_KEY;
+  api.VIEWER_ROLES = VIEWER_ROLES;
+  api.getViewer = getViewer;
+  api.setViewer = setViewer;
+  api.can = can;
+  api.describe = describe;
+  api.initials = initials;
+
   return api;
 });

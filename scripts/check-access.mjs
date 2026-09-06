@@ -147,5 +147,37 @@ section('Guards');
   ok(/Super Admin sets the role/.test(A.check(AD, null, edit(add, { hubs: ['influencer'], influencerRole: 'infl_admin' }), all)), 'Admin may not pick an Influencer role');
 }
 
+section('Viewer');
+{
+  const st = memStorage();
+  const v = A.getViewer(st);
+  ok(v.id === 'bryan-wong' && v.name === 'Bryan Wong' && v.role === 'super_admin', 'default viewer is Bryan as Super Admin');
+  A.setViewer(st, 'admin');
+  ok(A.getViewer(st).role === 'admin', 'viewer role is stored');
+  A.setViewer(st, 'sales_rep');
+  ok(A.getViewer(st).role === 'admin', 'a role outside the three is ignored');
+  st.setItem('collabrium.access.viewer', 'garbage');
+  ok(A.getViewer(st).role === 'super_admin', 'garbage falls back to Super Admin');
+  A.setViewer(st, 'leadership');
+  ok(!A.can(st, 'Invite / add a user to the workspace'), 'can() reads the stored viewer');
+  A.setViewer(st, 'admin');
+  ok(A.can(st, 'Invite / add a user to the workspace'), 'can() for Admin');
+  ok(A.VIEWER_ROLES.join() === 'super_admin,admin,leadership', 'three viewer roles');
+}
+
+section('Describe');
+{
+  const rec = { role: 'head_of_sales', hubs: ['sales', 'influencer', 'planning'], influencerRole: 'infl_manager' };
+  const lines = A.describe(rec);
+  ok(lines.length === 4, 'one line for scope plus one per hub');
+  ok(/own team/i.test(lines[0]), 'scope line names the scope');
+  ok(/Collab: Sales/.test(lines[1]) && /team/.test(lines[1]), 'Sales line is team-scoped');
+  ok(/Collab: Influencer/.test(lines[2]) && /view Users & Permissions/.test(lines[2]), 'Influencer Manager line');
+  ok(/Collab: Planning/.test(lines[3]), 'Planning line');
+  ok(A.describe({ role: 'super_admin', hubs: ['sales'] })[0].indexOf('Platform ceiling') !== -1, 'Super Admin line');
+  ok(A.describe({ role: 'admin', hubs: ['sales'] })[0].indexOf('A Super Admin sets roles') !== -1, 'Admin line');
+  ok(A.initials('Bryan Wong') === 'BW' && A.initials('Normala (Joy) Ahmad') === 'NA', 'initials skip nicknames');
+}
+
 console.log(failed ? `\n${failed} check(s) failed` : '\nAll checks passed');
 process.exit(failed ? 1 : 0);

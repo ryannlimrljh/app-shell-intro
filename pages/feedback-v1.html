@@ -760,7 +760,7 @@
 <div class="c-sidebar-hover-label" id="shellSidebarHoverLabel" role="tooltip"></div>
 
 <div class="c-account-menu" id="accountMenu" role="menu" aria-hidden="true">
-  <button class="c-account-menu-item" type="button" role="menuitem"><i class="ph-fill ph-gear"></i><span>Settings</span></button>
+  <a class="c-account-menu-item" href="settings.html" role="menuitem"><i class="ph-fill ph-gear"></i><span>Settings</span></a>
   <!-- An anchor, not a button: this row has a destination, so cmd-click
        opens a tab, the URL previews on hover, and it works without JS.
        The close handler matches the class, not the tag, so the menu still
@@ -2396,7 +2396,7 @@ document.getElementById('sidebarToggle').addEventListener('click', function () {
      which is pinned to the bottom and has nothing under it. The panel is
      position:fixed and lives outside the rail, so it is placed against the
      trigger's own rect rather than by CSS. Ported from the dashboard;
-     Settings is inert on both, Log out is the only way off either page. */
+     Settings opens settings.html on both, Log out the login screen. */
 (function () {
   var trigger = document.getElementById('accountMenuTrigger');
   var menu = document.getElementById('accountMenu');

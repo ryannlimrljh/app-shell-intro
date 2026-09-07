@@ -598,7 +598,7 @@ window.addEventListener('error', function (e) {
     return f.options().map(function (o) {
       var on = state[f.key].indexOf(o.key) !== -1;
       return '<label class="c-filter-option" data-facet="' + f.key + '" data-v="' + esc(o.key) + '">' +
-        '<span class="c-checkbox-box' + (on ? ' on' : '') + '">' + (on ? '<i class="ph-bold ph-check" style="font-size:12px"></i>' : '') + '</span>' +
+        '<span class="c-checkbox-box' + (on ? ' on' : '') + '">' + (on ? '<i class="ph ph-check" style="font-size:12px"></i>' : '') + '</span>' +
         '<input type="checkbox"' + (on ? ' checked' : '') + ' aria-label="' + esc(o.label) + '" />' +
         '<span class="label">' + esc(o.label) + '<span class="n">' + (counts[o.key] || 0) + '</span></span></label>';
     }).join('');
@@ -926,7 +926,7 @@ window.addEventListener('error', function (e) {
     h += '<div class="us-f"><div class="lab">Hubs</div><div class="us-hubgrid">' +
       A.HUBS.map(function (x) {
         var on = n.hubs.indexOf(x.key) !== -1, last = on && n.hubs.length === 1;
-        return '<label class="c-choice' + (last ? ' disabled' : '') + '"><span class="c-checkbox-box' + (on ? ' on' : '') + '">' + (on ? '<i class="ph-bold ph-check" style="font-size:12px"></i>' : '') + '</span>' +
+        return '<label class="c-choice' + (last ? ' disabled' : '') + '"><span class="c-checkbox-box' + (on ? ' on' : '') + '">' + (on ? '<i class="ph ph-check" style="font-size:12px"></i>' : '') + '</span>' +
           '<input type="checkbox" data-hub="' + x.key + '"' + (on ? ' checked' : '') + (last ? ' disabled' : '') + ' />' +
           '<span class="text"><span class="label">' + esc(x.label) + '</span>' + (last ? '<span class="desc">The last hub stays. Deactivate them instead.</span>' : '') + '</span></label>';
       }).join('') + '</div><div class="help">Which hubs they can open. The switcher only ever offers what is ticked here.</div></div>';
@@ -959,7 +959,7 @@ window.addEventListener('error', function (e) {
         var on = A.holds(n.role, item.label);
         totalActs++; if (on) held++;
         return '<div class="us-act' + (on ? '' : ' off') + '"><span class="c-checkbox-box' + (on ? ' on' : '') + '" aria-hidden="true">' +
-          (on ? '<i class="ph-bold ph-check"></i>' : '') + '</span><span>' + esc(item.label) + '</span></div>';
+          (on ? '<i class="ph ph-check"></i>' : '') + '</span><span>' + esc(item.label) + '</span></div>';
       }).join('');
     }).join('');
     h += '<div class="us-acts"><button class="us-acts-toggle" type="button" id="actsToggle" aria-expanded="' + (f.showActs ? 'true' : 'false') + '" aria-controls="actsBody">' +

@@ -15,47 +15,76 @@
 <link rel="stylesheet" href="../collabrium-dls/components.css?v=f278e40" />
 <link rel="stylesheet" href="../shared/shell.css?v=3" />
 <style>
-  /* The artifact's Activities page, made live: role chips across the top,
-     the matrix title, then the groups in two columns with a checkbox row
-     per activity. Held rows in ink, the rest faded. */
+  /* The artifact's Activities page, made live and given surfaces: role chips
+     across the top, a summary card for the chosen role, then the groups as
+     cards in two columns with a checkbox row per activity. Held rows in ink,
+     the rest faded. */
   .rp-tabs{margin-bottom:var(--spacing-24);}
-  .rp-chips{display:flex; flex-wrap:wrap; gap:var(--spacing-8); margin-bottom:var(--spacing-32);}
-  .rp-chip{height:40px; padding:0 var(--spacing-20); border-radius:var(--radius-pill); border:1px solid var(--color-neutral-3);
-    background:var(--color-neutral-1); font-family:inherit; font-size:var(--text-body1-size); font-weight:600; color:var(--color-neutral-5);
-    cursor:pointer; display:inline-flex; align-items:center; gap:var(--spacing-8);
-    transition:background-color var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard), border-color var(--duration-fast) var(--ease-standard);}
-  .rp-chip:hover{background:var(--color-neutral-2); color:var(--color-neutral-9);}
-  .rp-chip[aria-pressed="true"]{background:var(--color-obsidian); border-color:var(--color-obsidian); color:var(--color-neutral-1);}
+  .rp-chips{display:flex; flex-wrap:wrap; gap:var(--spacing-8); margin-bottom:var(--spacing-24);}
+  .rp-chip{height:40px; padding:0 var(--spacing-16) 0 var(--spacing-20); border-radius:var(--radius-pill); border:1px solid var(--color-neutral-3);
+    background:var(--color-neutral-1); font-family:inherit; font-size:var(--text-body2-size); font-weight:700; color:var(--color-neutral-5);
+    cursor:pointer; display:inline-flex; align-items:center; gap:var(--spacing-8); box-shadow:var(--shadow-1);
+    transition:background-color var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard),
+      border-color var(--duration-fast) var(--ease-standard), transform var(--duration-fast) var(--ease-settle);}
+  .rp-chip:hover{background:var(--color-neutral-2); color:var(--color-neutral-9); transform:translateY(-1px);}
+  .rp-chip[aria-pressed="true"]{background:var(--color-obsidian); border-color:var(--color-obsidian); color:var(--color-neutral-1); box-shadow:none;}
   .rp-chip:focus-visible{outline:2px solid var(--color-obsidian); outline-offset:2px;}
+  .rp-chip .n{font-weight:600; font-size:var(--text-caption-size); color:var(--color-neutral-4); padding:1px 7px; border-radius:var(--radius-pill); background:var(--color-neutral-2);}
+  .rp-chip[aria-pressed="true"] .n{background:rgba(255,255,255,.16); color:var(--color-neutral-1);}
   .rp-chip .dot{width:6px; height:6px; border-radius:var(--radius-pill); background:var(--color-amber);}
-  .rp-chip[aria-pressed="true"] .dot{background:var(--color-neutral-1);}
 
-  .rp-head{display:flex; align-items:flex-end; justify-content:space-between; gap:var(--spacing-16); flex-wrap:wrap; margin-bottom:var(--spacing-24);}
-  .rp-head h2{margin:0; font-size:var(--text-h3-size); font-weight:800;}
-  .rp-head .sub{margin:var(--spacing-4) 0 0; font-size:var(--text-body1-size); color:var(--color-neutral-5);}
-  .rp-head .meta{display:flex; align-items:center; gap:var(--spacing-8); flex-wrap:wrap; font-size:var(--text-caption-size); color:var(--color-neutral-5);}
-  .rp-note{display:flex; align-items:flex-start; gap:var(--spacing-8); padding:var(--spacing-12); margin:0 0 var(--spacing-24);
-    border:1px solid var(--color-neutral-3); border-radius:var(--radius-md); background:var(--color-neutral-1);
+  /* The summary card: who this role is, how many carry it, how much it holds. */
+  .rp-summary{display:grid; grid-template-columns:minmax(0,1.4fr) repeat(3, minmax(0,1fr)); gap:var(--spacing-24); align-items:start;
+    padding:var(--spacing-20) var(--spacing-24); margin-bottom:var(--spacing-24);
+    background:var(--color-neutral-1); border:1px solid var(--color-neutral-3); border-radius:var(--radius-lg); box-shadow:var(--shadow-1);}
+  .rp-summary h2{margin:0; font-size:var(--text-h3-size); font-weight:800; line-height:1.15;}
+  .rp-summary .meaning{margin:var(--spacing-4) 0 0; font-size:var(--text-body2-size); color:var(--color-neutral-5); line-height:1.45;}
+  .rp-summary .who{display:flex; align-items:flex-start; gap:var(--spacing-12);}
+  .rp-summary .who .c-search-input-avatar{width:40px; height:40px; font-size:14px; font-weight:800; background:var(--color-obsidian); color:var(--color-neutral-1);}
+  .rp-stat .k{font-size:var(--text-label3-size); font-weight:700; letter-spacing:var(--tracking-eyebrow); text-transform:uppercase; color:var(--color-neutral-5);}
+  .rp-stat .v{margin-top:4px; font-size:var(--text-h4-size); font-weight:800; font-variant-numeric:tabular-nums;}
+  .rp-stat .s{font-size:var(--text-caption-size); color:var(--color-neutral-5); margin-top:2px;}
+  .rp-bar{height:4px; border-radius:var(--radius-pill); background:var(--color-neutral-2); margin-top:var(--spacing-8); overflow:hidden;}
+  .rp-bar i{display:block; height:100%; background:var(--color-obsidian); border-radius:var(--radius-pill); transition:width var(--duration-slow) var(--ease-settle);}
+  .rp-summary .actions{display:flex; flex-direction:column; align-items:flex-end; gap:var(--spacing-8); text-align:right;}
+  .rp-summary .actions .last{font-size:var(--text-caption-size); color:var(--color-neutral-5);}
+
+  .rp-note{display:flex; align-items:flex-start; gap:var(--spacing-8); padding:var(--spacing-12) var(--spacing-16); margin:0 0 var(--spacing-24);
+    border-radius:var(--radius-md); background:var(--color-canvas-warm-card, var(--color-neutral-2));
     font-size:var(--text-caption-size); color:var(--color-neutral-5); line-height:1.45;}
-  .rp-note i{flex:none; font-size:16px; margin-top:1px;}
+  .rp-note i{flex:none; font-size:16px; margin-top:1px; color:var(--color-neutral-9);}
 
-  .rp-grid{display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); column-gap:var(--spacing-60); row-gap:var(--spacing-32); align-items:start;}
-  .rp-group h3{margin:0 0 var(--spacing-8); padding-bottom:var(--spacing-8); border-bottom:1px solid var(--color-neutral-3);
-    font-size:var(--text-label3-size); font-weight:700; letter-spacing:var(--tracking-eyebrow); text-transform:uppercase; color:var(--color-neutral-9);}
-  .rp-row{display:flex; align-items:flex-start; gap:var(--spacing-12); width:100%; padding:var(--spacing-8) var(--spacing-8); margin:0 calc(var(--spacing-8) * -1);
-    border:0; border-radius:var(--radius-sm); background:transparent; font-family:inherit; font-size:var(--text-body1-size); color:var(--color-neutral-9);
-    text-align:left; cursor:pointer; line-height:1.4; transition:background-color var(--duration-fast) var(--ease-standard);}
+  /* Group cards. */
+  .rp-grid{display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:var(--spacing-20); align-items:start;}
+  .rp-group{background:var(--color-neutral-1); border:1px solid var(--color-neutral-3); border-radius:var(--radius-lg); box-shadow:var(--shadow-1); overflow:hidden;
+    animation:rp-arrive .38s var(--ease-settle) both;}
+  @keyframes rp-arrive{from{opacity:0; transform:translateY(8px);} to{opacity:1; transform:none;}}
+  @media (prefers-reduced-motion:reduce){ .rp-group{animation:none;} }
+  .rp-group-head{display:flex; align-items:center; gap:var(--spacing-12); padding:var(--spacing-12) var(--spacing-16);
+    border-bottom:1px solid var(--color-neutral-3); background:var(--color-canvas-warm-card, var(--color-neutral-2));}
+  .rp-group-head .ic{flex:none; width:32px; height:32px; border-radius:var(--radius-sm); display:inline-flex; align-items:center; justify-content:center;
+    background:var(--color-neutral-1); border:1px solid var(--color-neutral-3); color:var(--color-neutral-9); font-size:16px;}
+  .rp-group-head h3{margin:0; flex:1; font-size:var(--text-body1-size); font-weight:800;}
+  .rp-group-head .held{font-size:var(--text-caption-size); font-weight:700; color:var(--color-neutral-5); font-variant-numeric:tabular-nums;}
+  .rp-group-head .held b{color:var(--color-neutral-9);}
+  .rp-rows{padding:var(--spacing-4) var(--spacing-8);}
+  .rp-row{display:flex; align-items:flex-start; gap:var(--spacing-12); width:100%; padding:10px var(--spacing-8);
+    border:0; border-bottom:1px solid var(--color-neutral-2); border-radius:0; background:transparent; font-family:inherit; font-size:var(--text-body2-size); color:var(--color-neutral-9);
+    text-align:left; cursor:pointer; line-height:1.45; transition:background-color var(--duration-fast) var(--ease-standard);}
+  .rp-row:last-child{border-bottom:0;}
   .rp-row:hover{background:var(--color-neutral-2);}
   .rp-row:focus-visible{outline:2px solid var(--color-obsidian); outline-offset:-2px;}
-  .rp-row.off{color:var(--color-neutral-4);}
-  .rp-row .c-checkbox-box{margin-top:2px; font-size:12px;}
+  .rp-row.off{color:var(--color-neutral-5);}
+  .rp-row .c-checkbox-box{margin-top:2px; font-size:12px; transition:background-color var(--duration-fast) var(--ease-standard), border-color var(--duration-fast) var(--ease-standard), transform var(--duration-fast) var(--ease-settle);}
+  .rp-row:active .c-checkbox-box{transform:scale(.9);}
   .rp-row.off .c-checkbox-box{border-color:var(--color-neutral-3); background:var(--color-neutral-1);}
   .rp-row .lock{margin-left:auto; flex:none; font-size:14px; color:var(--color-neutral-4); margin-top:3px;}
   .rp-row.is-static{cursor:default;}
   .rp-row.is-static:hover{background:transparent;}
   .rp-denied{max-width:420px; margin:var(--spacing-60) auto;}
   .rp-denied a{text-decoration:none;}
-  @media (max-width:900px){ .rp-grid{grid-template-columns:1fr;} }
+  @media (max-width:1100px){ .rp-summary{grid-template-columns:1fr 1fr;} .rp-summary .actions{align-items:flex-start; text-align:left;} }
+  @media (max-width:900px){ .rp-grid{grid-template-columns:1fr;} .rp-summary{grid-template-columns:1fr;} }
 </style>
 </head>
 <body>
@@ -192,6 +221,11 @@ window.addEventListener('error', function (e) {
     infl_manager: 'Full access; views Users & Permissions, cannot manage it.',
     viewer: 'No standing access; responds to their own preview or draft.'
   };
+  var GROUP_ICON = {
+    'Manage workspace': 'ph-sliders-horizontal', 'Manage user access': 'ph-users-three', 'Sales Board data & targets': 'ph-chart-bar',
+    'Manage external access': 'ph-globe-hemisphere-west', 'Audit & compliance': 'ph-shield-check', 'Export': 'ph-export', 'Collaborate': 'ph-chats-circle',
+    'Tools': 'ph-wrench', 'Browse': 'ph-books', 'Administration': 'ph-gear-six', 'Reference Data': 'ph-database', 'Insight': 'ph-chart-line-up'
+  };
   var viewer, store;
   var state = { matrix: 'mothership', role: 'admin' };
 
@@ -242,39 +276,54 @@ window.addEventListener('error', function (e) {
       return '<button class="c-tab' + (k === m.key ? ' active' : '') + '" type="button" aria-pressed="' + (k === m.key) + '" data-matrix="' + k + '">' + esc(A.MATRICES[k].title) + '</button>';
     }).join('') + '</div>';
 
-    /* Role chips: the artifact's own row. A dot marks a role with edits. */
+    /* Role chips: the artifact's own row, each with its user count. A dot
+       marks a role with edits. */
     h += '<div class="rp-chips" role="group" aria-label="Role">' + m.roles.map(function (r) {
       var on = r.key === role.key, c = countFor(m.key, r.key);
-      return '<button class="rp-chip" type="button" data-role="' + r.key + '" aria-pressed="' + on + '"' +
-        (c === null ? '' : ' title="' + c + (c === 1 ? ' user' : ' users') + '"') + '>' + esc(r.label) +
+      return '<button class="rp-chip" type="button" data-role="' + r.key + '" aria-pressed="' + on + '">' + esc(r.label) +
+        (c === null ? '' : '<span class="n" aria-label="' + c + (c === 1 ? ' user' : ' users') + '">' + c + '</span>') +
         (A.isModified(m.key, r.key) ? '<span class="dot" aria-label="modified"></span>' : '') + '</button>';
     }).join('') + '</div>';
 
-    h += '<div class="rp-head"><div><h2 id="paneTitle" tabindex="-1">' + esc(m.title) + '</h2><p class="sub">' + esc(m.sub) + '</p></div>' +
-      '<div class="meta"><span><b>' + esc(role.label) + '</b>' + (n === null ? '' : ' · ' + n + (n === 1 ? ' user' : ' users')) + '</span>' +
-      (modified ? '<span class="c-badge c-badge-warning">Modified from default</span>' : '<span class="c-badge c-badge-neutral">Artifact default</span>') +
-      (last ? '<span>Last change ' + esc(fmtWhen(last.at)) + ' by ' + esc(last.by) + (last.label === null ? ', reset' : '') + '</span>' : '') +
-      (canEdit && modified ? '<button class="c-btn c-btn-secondary c-btn-sm" type="button" id="reset">Reset to default</button>' : '') +
+    /* What this role holds, in numbers. */
+    var totalActs = 0, heldActs = 0;
+    m.groups.forEach(function (g) { g.items.forEach(function (item) { totalActs++; if (A.holdsIn(m.key, role.key, item.label)) heldActs++; }); });
+    var pct = totalActs ? Math.round(heldActs / totalActs * 100) : 0;
+    h += '<div class="rp-summary">' +
+      '<div class="who"><span class="c-search-input-avatar" aria-hidden="true">' + esc(A.initials(role.label)) + '</span><div>' +
+        '<h2 id="paneTitle" tabindex="-1">' + esc(role.label) + '</h2><p class="meaning">' + esc(MEANING[role.key] || '') + '</p></div></div>' +
+      '<div class="rp-stat"><div class="k">Users</div><div class="v">' + (n === null ? '—' : n) + '</div><div class="s">carry this role' + (m.key === 'influencer' && role.key !== 'super_admin' ? ' in Collab: Influencer' : '') + '</div></div>' +
+      '<div class="rp-stat"><div class="k">Activities</div><div class="v">' + heldActs + ' <span style="font-weight:500;color:var(--color-neutral-5)">of ' + totalActs + '</span></div>' +
+        '<div class="rp-bar" aria-hidden="true"><i style="width:' + pct + '%"></i></div><div class="s">' + esc(m.title) + '</div></div>' +
+      '<div class="actions">' +
+        (modified ? '<span class="c-badge c-badge-warning">Modified from default</span>' : '<span class="c-badge c-badge-neutral">Artifact default</span>') +
+        (last ? '<span class="last">Last change ' + esc(fmtWhen(last.at)) + ' by ' + esc(last.by) + (last.label === null ? ', reset' : '') + '</span>' : '') +
+        (canEdit && modified ? '<button class="c-btn c-btn-secondary c-btn-sm" type="button" id="reset"><i class="ph ph-arrow-counter-clockwise"></i> Reset to default</button>' : '') +
       '</div></div>';
+
     if (role.key === 'super_admin') {
-      h += '<div class="rp-note"><i class="ph ph-lock-simple"></i><span>Super Admin is the platform ceiling: every activity, everywhere. The ceiling cannot lower itself, so nothing here can be unticked.</span></div>';
+      h += '<div class="rp-note"><i class="ph-fill ph-lock-simple"></i><span>Super Admin is the platform ceiling: every activity, everywhere. The ceiling cannot lower itself, so nothing here can be unticked.</span></div>';
     } else if (!canEdit) {
-      h += '<div class="rp-note"><i class="ph ph-eye"></i><span>' + esc(A.ROLES_ARE_SUPER) + ' You can see what this role holds; only a Super Admin can change it.</span></div>';
+      h += '<div class="rp-note"><i class="ph-fill ph-eye"></i><span>' + esc(A.ROLES_ARE_SUPER) + ' You can see what this role holds; only a Super Admin can change it.</span></div>';
     } else {
-      h += '<div class="rp-note"><i class="ph ph-cursor-click"></i><span>Tick or untick an activity to change what ' + esc(role.label) + ' can do. Changes apply at once and show in the directory\'s role checklist. Items marked with a lock are Super Admin only, by design.</span></div>';
+      h += '<div class="rp-note"><i class="ph-fill ph-cursor-click"></i><span>Tick or untick an activity to change what ' + esc(role.label) + ' can do in ' + esc(m.title) + '. Changes apply at once and show in the directory\'s role checklist. Locked items are Super Admin only, by design.</span></div>';
     }
 
-    h += '<div class="rp-grid">' + m.groups.map(function (g) {
-      return '<section class="rp-group"><h3>' + esc(g.title) + '</h3>' + g.items.map(function (item) {
-        var on = A.holdsIn(m.key, role.key, item.label);
-        var lock = A.lockReason(m.key, role.key, item.label);
-        var isStatic = !canEdit || !!lock;
-        return '<button class="rp-row' + (on ? '' : ' off') + (isStatic ? ' is-static' : '') + '" type="button" role="checkbox" aria-checked="' + on + '"' +
-          (isStatic ? ' aria-disabled="true"' : '') + ' data-label="' + esc(item.label) + '"' + (lock ? ' title="' + esc(lock) + '"' : '') + '>' +
-          '<span class="c-checkbox-box' + (on ? ' on' : '') + '" aria-hidden="true">' + (on ? '<i class="ph ph-check"></i>' : '') + '</span>' +
-          '<span>' + esc(item.label) + '</span>' +
-          (lock && role.key !== 'super_admin' ? '<i class="ph ph-lock-simple lock" aria-hidden="true"></i>' : '') + '</button>';
-      }).join('') + '</section>';
+    h += '<div class="rp-grid">' + m.groups.map(function (g, gi) {
+      var held = g.items.filter(function (item) { return A.holdsIn(m.key, role.key, item.label); }).length;
+      return '<section class="rp-group" style="animation-delay:' + (gi * 40) + 'ms">' +
+        '<div class="rp-group-head"><span class="ic" aria-hidden="true"><i class="ph ' + (GROUP_ICON[g.title] || 'ph-list-checks') + '"></i></span>' +
+        '<h3>' + esc(g.title) + '</h3><span class="held"><b>' + held + '</b> of ' + g.items.length + '</span></div><div class="rp-rows">' +
+        g.items.map(function (item) {
+          var on = A.holdsIn(m.key, role.key, item.label);
+          var lock = A.lockReason(m.key, role.key, item.label);
+          var isStatic = !canEdit || !!lock;
+          return '<button class="rp-row' + (on ? '' : ' off') + (isStatic ? ' is-static' : '') + '" type="button" role="checkbox" aria-checked="' + on + '"' +
+            (isStatic ? ' aria-disabled="true"' : '') + ' data-label="' + esc(item.label) + '"' + (lock ? ' title="' + esc(lock) + '"' : '') + '>' +
+            '<span class="c-checkbox-box' + (on ? ' on' : '') + '" aria-hidden="true">' + (on ? '<i class="ph ph-check"></i>' : '') + '</span>' +
+            '<span>' + esc(item.label) + '</span>' +
+            (lock && role.key !== 'super_admin' ? '<i class="ph ph-lock-simple lock" aria-hidden="true"></i>' : '') + '</button>';
+        }).join('') + '</div></section>';
     }).join('') + '</div>';
     content.innerHTML = h;
     wire();

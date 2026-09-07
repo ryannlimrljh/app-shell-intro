@@ -20,7 +20,17 @@
   }
 
   /* ── Sidebar collapse ─────────────────────────────────────────────── */
-  function setCollapsed(on) {
+  /* The rail remembers how you left it. The first visit keeps the
+     dashboard's habit of minimising itself once the page has settled; from
+     then on, every page opens the rail the way the last page left it. */
+  var RAIL_KEY = 'collabrium.shell.rail';
+  function storedRail() {
+    try { return localStorage.getItem(RAIL_KEY); } catch (e) { return null; }
+  }
+  function rememberRail(on) {
+    try { localStorage.setItem(RAIL_KEY, on ? 'collapsed' : 'expanded'); } catch (e) {}
+  }
+  function setCollapsed(on, remember) {
     var nav = document.getElementById('shellSidebarNav');
     if (!nav) return;
     nav.classList.toggle('is-collapsed', on);
@@ -28,18 +38,25 @@
     if (t) t.setAttribute('aria-label', on ? 'Expand sidebar' : 'Collapse sidebar');
     var arrow = document.getElementById('sidebarArrow');
     if (arrow) arrow.setAttribute('d', on ? 'M11.5 7 14 10l-2.5 3' : 'M13.5 7 11 10l2.5 3');
+    if (remember) rememberRail(on);
   }
   function initSidebar() {
+    var remembered = storedRail();
     if (NARROW.matches) setCollapsed(true);
-    /* The rail minimises itself once the page has settled, cancelled by a
-       click on it, which is the one signal that means "I am using this". */
-    if (!NARROW.matches && !REDUCED) {
-      var timer = setTimeout(function () {
-        var nav = document.getElementById('shellSidebarNav');
-        if (nav && !nav.classList.contains('is-collapsed')) setCollapsed(true);
-      }, 1600);
-      var shell = document.getElementById('shellSidebarShell');
-      if (shell) shell.addEventListener('click', function () { clearTimeout(timer); }, { once: true });
+    else if (remembered === 'collapsed') setCollapsed(true);
+    else if (remembered === 'expanded') setCollapsed(false);
+    /* No memory yet: the rail minimises itself once the page has settled,
+       cancelled by a click on it, and whichever way it ends up is kept. */
+    if (!NARROW.matches && !remembered) {
+      if (REDUCED) { rememberRail(false); }
+      else {
+        var timer = setTimeout(function () {
+          var nav = document.getElementById('shellSidebarNav');
+          if (nav && !nav.classList.contains('is-collapsed')) setCollapsed(true, true);
+        }, 1600);
+        var shell = document.getElementById('shellSidebarShell');
+        if (shell) shell.addEventListener('click', function () { clearTimeout(timer); rememberRail(false); }, { once: true });
+      }
     }
     document.addEventListener('click', function (e) {
       if (!NARROW.matches || e.target.closest('#shellSidebarShell') ||
@@ -48,7 +65,46 @@
     });
     var toggle = document.getElementById('sidebarToggle');
     if (toggle) toggle.addEventListener('click', function () {
-      setCollapsed(!document.getElementById('shellSidebarNav').classList.contains('is-collapsed'));
+      setCollapsed(!document.getElementById('shellSidebarNav').classList.contains('is-collapsed'), true);
+    });
+  }
+
+  /* ── Page to page: a soft leave and arrive, not a hard cut ─────────── */
+  /* A same-folder page link fades the main column out under a thin
+     progress bar, then navigates; the next page arrives faded in. The
+     browser's own history and new-tab behaviours are left alone: only a
+     plain left click on a local .html link takes this path. */
+  function initTransitions() {
+    var main = document.querySelector('.c-shell-main');
+    if (!main) return;
+    var bar = document.createElement('div');
+    bar.className = 'pg-progress';
+    bar.setAttribute('aria-hidden', 'true');
+    document.body.appendChild(bar);
+    /* Only a page that is actually being painted fades in; a hidden tab
+       would stall the animation clock and sit invisible. A timer backstops
+       the frame callbacks for the same reason. */
+    if (!REDUCED && document.visibilityState === 'visible') {
+      main.classList.add('is-arriving');
+      var arrive = function () { main.classList.remove('is-arriving'); };
+      requestAnimationFrame(function () { requestAnimationFrame(arrive); });
+      setTimeout(arrive, 400);
+    }
+    document.addEventListener('click', function (e) {
+      if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      var a = e.target.closest('a[href]');
+      if (!a || a.target || a.hasAttribute('download') || a.getAttribute('aria-disabled') === 'true') return;
+      var href = a.getAttribute('href') || '';
+      if (!/^[a-z0-9-]+\.html(\?[^#]*)?(#.*)?$/i.test(href)) return;
+      e.preventDefault();
+      bar.classList.add('is-on');
+      if (REDUCED) { location.href = a.href; return; }
+      main.classList.add('is-leaving');
+      setTimeout(function () { location.href = a.href; }, 170);
+    });
+    /* Back-forward cache restores the page mid-leave; undo that. */
+    window.addEventListener('pageshow', function (ev) {
+      if (ev.persisted) { main.classList.remove('is-leaving'); bar.classList.remove('is-on'); }
     });
   }
 
@@ -251,6 +307,7 @@
   function init(opts) {
     opts = opts || {};
     initSidebar();
+    initTransitions();
     initAccountMenu();
     initDeptSwitcher();
     initHoverLabel();

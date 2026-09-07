@@ -51,6 +51,21 @@ body{font-family:var(--font-primary); color:var(--color-neutral-9);
 .c-dept-dropdown{position:fixed; z-index:60;}
 a.c-sidebar-item{text-decoration:none;}
 
+/* Page to page: the main column fades and settles rather than cutting,
+   and a hairline progress bar runs along the top while the next page
+   loads. Reduced motion gets the cut. */
+.c-shell-main{transition:opacity 180ms var(--ease-standard), transform 220ms var(--ease-settle);}
+.c-shell-main.is-arriving{opacity:0; transform:translateY(6px);}
+.c-shell-main.is-leaving{opacity:0; transform:translateY(-4px); pointer-events:none;}
+.pg-progress{position:fixed; top:0; left:0; height:2px; width:0; z-index:120; background:var(--color-obsidian);
+  opacity:0; transition:width 900ms cubic-bezier(.1,.7,.2,1), opacity 120ms linear;}
+.pg-progress.is-on{width:78%; opacity:1;}
+@media (prefers-reduced-motion:reduce){
+  .c-shell-main{transition:none;}
+  .c-shell-main.is-arriving, .c-shell-main.is-leaving{opacity:1; transform:none;}
+  .pg-progress{transition:none;}
+}
+
 /* The page: the full canvas, as the hub apps use it. */
 .pg-wrap{padding:var(--spacing-32) var(--spacing-24) var(--spacing-60);}
 /* Title block with the back arrow, the way a hub's sub-page carries one. */

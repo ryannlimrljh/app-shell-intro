@@ -380,6 +380,14 @@ window.addEventListener('error', function (e) {
 
   var viewer, store, seedAll;
   var state = { q: '', role: [], hub: [], st: [], sort: { key: 'name', dir: 1 } };
+  /* Opened from a role's user count on Roles & permissions, the list arrives
+     already filtered to that role; a hub key does the same for the Hub filter. */
+  (function () {
+    var qs; try { qs = new URLSearchParams(location.search); } catch (e) { return; }
+    var role = qs.get('role'), hub = qs.get('hub');
+    if (role && A.ROLES.some(function (r) { return r.key === role; })) state.role = [role];
+    if (hub && A.HUBS.some(function (h) { return h.key === hub; })) state.hub = [hub];
+  })();
 
   /* ── Boot: the shell, then the org chart, then the store, then the page ── */
   A.loadOverrides(S);   /* a Super Admin's edits on Roles & permissions reach the checklist here */

@@ -88,7 +88,7 @@
     background:var(--color-canvas-warm); opacity:0;
     transition:opacity .32s var(--ease-standard);}
   .us-cardmodal.is-shown .us-cardmodal-backdrop{opacity:.88; transition-duration:.5s;}
-  .us-modal{position:relative; display:flex; flex-direction:column; max-width:none;
+  .us-modal{position:relative; display:flex; flex-direction:column; max-width:none; overflow:hidden;
     width:min(520px, calc(100vw - var(--spacing-32)));
     max-height:min(780px, calc(100dvh - var(--spacing-60)));
     background:var(--color-neutral-1); border:1px solid var(--color-neutral-3);
@@ -162,7 +162,7 @@
   .us-acts-toggle:hover{background:var(--color-neutral-2);}
   .us-acts-toggle:focus-visible{outline:2px solid var(--color-obsidian); outline-offset:-2px;}
   .us-acts-toggle .n{font-weight:500; color:var(--color-neutral-5);}
-  .us-acts-toggle i{color:var(--color-neutral-5); transition:transform var(--duration-fast) var(--ease-standard);}
+  .us-acts-toggle i{flex:none; font-size:16px; line-height:1; color:var(--color-neutral-5); transition:transform var(--duration-fast) var(--ease-standard);}
   .us-acts-toggle[aria-expanded="true"] i{transform:rotate(180deg);}
   .us-acts-body{padding:var(--spacing-4) var(--spacing-12) var(--spacing-12); border-top:1px solid var(--color-neutral-3);}
   .us-acts-body[hidden]{display:none;}
@@ -183,6 +183,12 @@
   .us-f input[type="text"], .us-f select{height:40px; border:1px solid var(--color-neutral-3); border-radius:var(--radius-sm);
     padding:0 var(--spacing-12); font-family:inherit; font-size:var(--text-body2-size); background:var(--color-neutral-1); width:100%;}
   .us-f input[type="text"]:focus, .us-f select:focus{outline:none; border:2px solid var(--color-obsidian); padding:0 11px;}
+  /* One chevron for every dropdown in the sheet: the same 16px caret at
+     the same 12px inset as the checklist toggle's, not the browser's own. */
+  .us-f select{-webkit-appearance:none; appearance:none; padding-right:40px;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 256' width='16' height='16'><path fill='none' stroke='%23525252' stroke-width='16' stroke-linecap='round' stroke-linejoin='round' d='M208 96l-80 80-80-80'/></svg>");
+    background-repeat:no-repeat; background-position:right 12px center; background-size:16px 16px;}
+  .us-f select:focus{padding-right:39px; background-position:right 11px center;}
   .us-f .help{font-size:var(--text-caption-size); color:var(--color-neutral-5); line-height:1.4;}
   .us-f .ro{height:40px; display:flex; align-items:center; padding:0 var(--spacing-12);
     border:1px solid var(--color-neutral-3); border-radius:var(--radius-sm); background:var(--color-neutral-2);

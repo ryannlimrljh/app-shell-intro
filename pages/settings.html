@@ -13,7 +13,7 @@
 <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css" />
 <link rel="stylesheet" href="../collabrium-dls/tokens.css?v=f278e40" />
 <link rel="stylesheet" href="../collabrium-dls/components.css?v=f278e40" />
-<link rel="stylesheet" href="../shared/shell.css?v=1" />
+<link rel="stylesheet" href="../shared/shell.css?v=3" />
 <style>
   /* The pod's Settings grid: three cards across, two, then one as it narrows. */
   .st-grid{display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:var(--spacing-16);}
@@ -159,8 +159,22 @@
 
 <div class="c-toast-host" id="toasts"></div>
 
-<script src="../shared/access.js?v=2"></script>
-<script src="../shared/shell.js?v=1"></script>
+<script>
+/* A blank page tells nobody anything. If the page's own script fails before
+   it paints, say so where the content would be, with a way to clear this
+   browser's stored data, which is the usual cause after a stale load. */
+window.addEventListener('error', function (e) {
+  var c = document.getElementById('content');
+  if (!c || c.children.length) return;
+  var msg = (e && e.message) || 'Unknown error';
+  c.innerHTML = '<div class="c-empty" style="max-width:520px;margin:48px auto"><i class="ph ph-warning-circle"></i>' +
+    '<h4>This page could not load</h4><p>' + String(msg).replace(/[&<>]/g, function (ch) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;' }[ch]; }) +
+    '</p><p>Reload with a fresh copy, or clear this browser\'s stored data for the prototype and reload.</p>' +
+    '<button class="c-btn c-btn-secondary c-btn-md" type="button" onclick="[\'collabrium.access.directory\',\'collabrium.access.overrides\',\'collabrium.access.viewer\'].forEach(function(k){try{localStorage.removeItem(k)}catch(e){}});location.reload(true)">Clear stored data and reload</button></div>';
+});
+</script>
+<script src="../shared/access.js?v=3"></script>
+<script src="../shared/shell.js?v=3"></script>
 <script>
 (function () {
   var A = window.CollabAccess;

@@ -50,17 +50,38 @@
   .us-pager button:disabled{color:var(--color-neutral-4); cursor:default;}
 
   /* ── Table ───────────────────────────────────────────────────────── */
+  /* The table, styled as the roster and the campaigns list style theirs:
+     a neutral-2 header that pins to the top of the shell's scroll as the
+     rows run under it, rounded top corners on the header cells and bottom
+     corners on the last row, 12/16 cell padding with a 20px first gutter,
+     cells centred on their row. The wrapper stays unclipped so the header
+     can stick; it only becomes a horizontal scroller when the width runs
+     out. */
   .us-tablewrap{background:var(--color-neutral-1); border:1px solid var(--color-neutral-3);
-    border-radius:var(--radius-lg); overflow:auto;}
-  .us-table{min-width:960px;}
-  .us-table th{background:var(--color-canvas-warm-card); white-space:nowrap; cursor:pointer; user-select:none;}
-  .us-table th .arr{font-size:10px; margin-left:4px; color:var(--color-neutral-4);}
-  .us-table th.is-sorted .arr{color:var(--color-neutral-9);}
+    border-radius:var(--radius-lg); overflow:visible;}
+  .us-table{width:100%;}
+  .us-table th, .us-table td{padding:var(--spacing-12) var(--spacing-16);}
+  .us-table th:first-child, .us-table td:first-child{padding-left:var(--spacing-20);}
+  .us-table th:last-child, .us-table td:last-child{padding-right:var(--spacing-12);}
+  .us-table thead th{position:sticky; top:0; z-index:4; background:var(--color-neutral-2);
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis; cursor:pointer; user-select:none;}
+  .us-table thead th:first-child{border-top-left-radius:var(--radius-lg);}
+  .us-table thead th:last-child{border-top-right-radius:var(--radius-lg);}
+  /* Once pinned, the header spans a hard edge against the rows scrolling
+     under it; rounded corners there would leave two notches showing. */
+  .us-table.is-stuck thead th:first-child, .us-table.is-stuck thead th:last-child{border-radius:0;}
+  .us-table thead th{transition:border-radius var(--duration-fast) var(--ease-standard);}
+  .us-table tbody tr:last-child td{border-bottom:0;}
+  .us-table tbody tr:last-child td:first-child{border-bottom-left-radius:var(--radius-lg);}
+  .us-table tbody tr:last-child td:last-child{border-bottom-right-radius:var(--radius-lg);}
+  .us-sorticon{font-size:var(--icon-micro); color:var(--color-neutral-4); vertical-align:middle; margin-left:4px;}
+  .us-sorticon.is-on{color:var(--color-neutral-9);}
+  .us-table th:hover .us-sorticon{color:var(--color-neutral-9);}
   .us-sort{border:none; background:transparent; padding:0; font:inherit; color:inherit; text-transform:inherit; letter-spacing:inherit; cursor:pointer; display:inline-flex; align-items:center;}
   .us-sort:focus-visible{outline:2px solid var(--color-obsidian); outline-offset:2px;}
-  .us-table th:first-child, .us-table td:first-child{padding-left:var(--spacing-16);}
   .us-table tbody tr{cursor:default;}
-  .us-table td{vertical-align:top;}
+  .us-table td{vertical-align:middle;}
+  @media (max-width:1100px){ .us-tablewrap{overflow:auto;} .us-table{min-width:960px;} }
   .us-name{font-weight:600; color:var(--color-neutral-9); display:flex; align-items:center; gap:var(--spacing-8);}
   .us-sub{font-size:var(--text-caption-size); color:var(--color-neutral-5); margin-top:2px;}
   .us-sub.warn{color:var(--color-neutral-5); font-style:italic;}
@@ -523,7 +544,7 @@ window.addEventListener('error', function (e) {
       COLS.map(function (c) {
         var on = state.sort.key === c.key;
         return '<th data-sort="' + c.key + '" class="' + (on ? 'is-sorted' : '') + '" aria-sort="' + (on ? (state.sort.dir > 0 ? 'ascending' : 'descending') : 'none') + '">' +
-          '<button type="button" class="us-sort">' + esc(c.label) + '<span class="arr">' + (on ? (state.sort.dir > 0 ? '↑' : '↓') : '↕') + '</span></button></th>';
+          '<button type="button" class="us-sort">' + esc(c.label) + '<i class="ph ' + (on ? (state.sort.dir > 0 ? 'ph-caret-up' : 'ph-caret-down') : 'ph-caret-up-down') + ' us-sorticon' + (on ? ' is-on' : '') + '" aria-hidden="true"></i></button></th>';
       }).join('') + '<th aria-label="Edit"></th></tr></thead><tbody>';
     if (!page.length) {
       h += '<tr><td colspan="8"><div class="c-empty us-empty"><i class="ph ph-users"></i><h4>No one matches</h4><p>Clear a filter or change the search.</p></div></td></tr>';
@@ -814,9 +835,19 @@ window.addEventListener('error', function (e) {
     if (!glide) spy();
   });
   var REDUCED_RAIL = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  /* Squares the pinned header's corners. Measured off the rects rather
+     than an observer, which never fires in a painted-but-not-composited
+     pane; one cheap read, always right. */
+  function syncStick() {
+    var table = document.querySelector('#list .us-table');
+    if (!table || !scroller) return;
+    var head = table.querySelector('thead');
+    table.classList.toggle('is-stuck', head.getBoundingClientRect().top <= scroller.getBoundingClientRect().top + 0.5);
+  }
   /* Scroll-spy: the letter of the row that owns the viewport top. */
   var spyTick = false;
   function spy() {
+    syncStick();
     if (!scroller || railEl.hidden) return;
     var rows = content.querySelectorAll('tr[data-letter]');
     var topEdge = scroller.getBoundingClientRect().top + 90;

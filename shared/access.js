@@ -34,10 +34,12 @@
     { key: 'infl_manager', label: 'Influencer Manager' },
     { key: 'viewer',       label: 'Viewer / Client' }
   ];
+  /* element: the design system's department colour, the same mapping the
+     department switcher uses (Sales is Gold, Influencers Earth, Media Water). */
   var HUBS = [
-    { key: 'sales',      label: 'Collab: Sales',      short: 'Sales' },
-    { key: 'influencer', label: 'Collab: Influencer', short: 'Influencer' },
-    { key: 'media',      label: 'Collab: Media',      short: 'Media' }
+    { key: 'sales',      label: 'Collab: Sales',      short: 'Sales',      element: 'gold' },
+    { key: 'influencer', label: 'Collab: Influencer', short: 'Influencer', element: 'earth' },
+    { key: 'media',      label: 'Collab: Media',      short: 'Media',      element: 'water' }
   ];
   var ADMIN_TIERS = ['super_admin', 'admin'];
   var BUSINESS = ['leadership', 'sales_vp', 'head_of_sales', 'sales_manager',
@@ -56,6 +58,10 @@
   function hubShort(k) {
     for (var i = 0; i < HUBS.length; i++) if (HUBS[i].key === k) return HUBS[i].short;
     return k || '';
+  }
+  function hubElement(k) {
+    for (var i = 0; i < HUBS.length; i++) if (HUBS[i].key === k) return HUBS[i].element;
+    return null;
   }
   function tierOf(role) { return ADMIN_TIERS.indexOf(role) !== -1 ? 'admin' : 'business'; }
 
@@ -139,6 +145,7 @@
   api.influencerRoleLabel = influencerRoleLabel;
   api.hubLabel = hubLabel;
   api.hubShort = hubShort;
+  api.hubElement = hubElement;
   api.tierOf = tierOf;
   api.holds = holds;
   api.scopeWord = scopeWord;

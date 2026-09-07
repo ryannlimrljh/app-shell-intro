@@ -65,6 +65,14 @@
   .us-sub{font-size:var(--text-caption-size); color:var(--color-neutral-5); margin-top:2px;}
   .us-sub.warn{color:var(--color-neutral-5); font-style:italic;}
   .us-hubs{display:flex; gap:4px; flex-wrap:wrap;}
+  /* The element dot on its own, for places the full tag would be too loud:
+     filter options, applied chips, the sheet's hub checkboxes. */
+  .us-dot{display:inline-block; width:8px; height:8px; border-radius:var(--radius-pill); margin-right:8px; vertical-align:middle; position:relative; top:-1px;}
+  .us-dot-gold{background:var(--color-amber);} .us-dot-earth{background:var(--color-green);} .us-dot-water{background:var(--color-navy);}
+  .us-chip-gold{background:var(--color-gold-bg); border-color:transparent; color:var(--color-amber);}
+  .us-chip-earth{background:var(--color-earth-bg); border-color:transparent; color:var(--color-green);}
+  .us-chip-water{background:var(--color-water-bg); border-color:transparent; color:var(--color-navy);}
+  .us-chip-gold .c-chip-remove, .us-chip-earth .c-chip-remove, .us-chip-water .c-chip-remove{color:inherit; opacity:.7;}
   .us-ext{color:var(--color-neutral-5);}
   tr.is-off td{opacity:.55;}
   .us-edit{width:32px; height:32px; border:none; background:transparent; border-radius:var(--radius-sm);
@@ -349,7 +357,7 @@ window.addEventListener('error', function (e) {
     '<button class="c-btn c-btn-secondary c-btn-md" type="button" onclick="[\'collabrium.access.directory\',\'collabrium.access.overrides\',\'collabrium.access.viewer\'].forEach(function(k){try{localStorage.removeItem(k)}catch(e){}});location.reload(true)">Clear stored data and reload</button></div>';
 });
 </script>
-<script src="../shared/access.js?v=4"></script>
+<script src="../shared/access.js?v=5"></script>
 <script src="../shared/shell.js?v=4"></script>
 <script>
 (function () {
@@ -524,7 +532,7 @@ window.addEventListener('error', function (e) {
       var mgr = r.reportsTo && byId[r.reportsTo] ? byId[r.reportsTo] : null;
       h += '<tr class="' + (r.access === 'inactive' ? 'is-off' : '') + '" data-id="' + esc(r.id) + '" data-letter="' + letterOf(r.name) + '">' +
         '<td><div class="us-name">' + esc(r.name) + (r.access === 'inactive' ? ' <span class="c-badge c-badge-neutral">Deactivated</span>' : '') + '</div><div class="us-sub">' + esc(r.email) + '</div></td>' +
-        '<td><div class="us-hubs">' + r.hubs.map(function (k) { return '<span class="c-badge c-badge-neutral">' + esc(A.hubShort(k)) + '</span>'; }).join('') + '</div></td>' +
+        '<td><div class="us-hubs">' + r.hubs.map(function (k) { return '<span class="c-tag c-tag-' + A.hubElement(k) + '"><span class="dot"></span>' + esc(A.hubShort(k)) + '</span>'; }).join('') + '</div></td>' +
         '<td>' + esc(A.roleLabel(r.role)) + (r.influencerRole ? '<div class="us-sub">Influencer: ' + esc(A.influencerRoleLabel(r.influencerRole)) + '</div>' : '') + '</td>' +
         '<td>' + esc(A.scopeWord(r.role)) + '</td>' +
         '<td>' + (mgr ? esc(mgr.name) + '<div class="us-sub">' + esc(mgr.email) + '</div>'
@@ -595,7 +603,8 @@ window.addEventListener('error', function (e) {
     tray.innerHTML = FACETS.map(function (f) {
       return state[f.key].map(function (key) {
         var text = f.label + ': ' + labelFor(f, key);
-        return '<span class="c-chip c-chip-input">' + esc(text) +
+        var el = f.key === 'hub' ? A.hubElement(key) : null;
+        return '<span class="c-chip c-chip-input' + (el ? ' us-chip-' + el : '') + '">' + (el ? '<span class="us-dot us-dot-' + el + '"></span>' : '') + esc(text) +
           '<button class="c-chip-remove" type="button" data-facet="' + f.key + '" data-remove="' + esc(key) + '" aria-label="Remove ' + esc(text) + '"><i class="ph ph-x"></i></button></span>';
       }).join('');
     }).join('');
@@ -610,7 +619,7 @@ window.addEventListener('error', function (e) {
       return '<label class="c-filter-option" data-facet="' + f.key + '" data-v="' + esc(o.key) + '">' +
         '<span class="c-checkbox-box' + (on ? ' on' : '') + '">' + (on ? '<i class="ph ph-check" style="font-size:12px"></i>' : '') + '</span>' +
         '<input type="checkbox"' + (on ? ' checked' : '') + ' aria-label="' + esc(o.label) + '" />' +
-        '<span class="label">' + esc(o.label) + '<span class="n">' + (counts[o.key] || 0) + '</span></span></label>';
+        '<span class="label">' + (f.key === 'hub' ? '<span class="us-dot us-dot-' + A.hubElement(o.key) + '"></span>' : '') + esc(o.label) + '<span class="n">' + (counts[o.key] || 0) + '</span></span></label>';
     }).join('');
   }
   /* The trigger's count badge, updated in place so an open panel never has
@@ -938,7 +947,7 @@ window.addEventListener('error', function (e) {
         var on = n.hubs.indexOf(x.key) !== -1, last = on && n.hubs.length === 1;
         return '<label class="c-choice' + (last ? ' disabled' : '') + '"><span class="c-checkbox-box' + (on ? ' on' : '') + '">' + (on ? '<i class="ph ph-check" style="font-size:12px"></i>' : '') + '</span>' +
           '<input type="checkbox" data-hub="' + x.key + '"' + (on ? ' checked' : '') + (last ? ' disabled' : '') + ' />' +
-          '<span class="text"><span class="label">' + esc(x.label) + '</span>' + (last ? '<span class="desc">The last hub stays. Deactivate them instead.</span>' : '') + '</span></label>';
+          '<span class="text"><span class="label"><span class="us-dot us-dot-' + x.element + '"></span>' + esc(x.label) + '</span>' + (last ? '<span class="desc">The last hub stays. Deactivate them instead.</span>' : '') + '</span></label>';
       }).join('') + '</div><div class="help">Which hubs they can open. The switcher only ever offers what is ticked here.</div></div>';
 
     h += '<div class="us-f"><label for="role">Role</label>' +

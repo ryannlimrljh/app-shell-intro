@@ -108,7 +108,7 @@
 
           <section class="c-card st-card" id="rolesCard" aria-labelledby="rolesK">
             <div class="st-kicker" id="rolesK">Roles &amp; permissions</div>
-            <p>What each role may do, in Mothership and in every hub. Super Admin edits, Admin views.</p>
+            <p>What each role may do in Mothership. Super Admin edits, Admin views. Each hub sets its own inside the pod.</p>
             <div class="st-actions">
               <a class="c-btn c-btn-secondary c-btn-md" id="rolesLink" href="roles.html">Open roles <i class="ph ph-arrow-right"></i></a>
               <span class="st-note" id="rolesNote" hidden><i class="ph ph-lock-simple"></i> Admin only</span>
@@ -173,7 +173,7 @@ window.addEventListener('error', function (e) {
     '<button class="c-btn c-btn-secondary c-btn-md" type="button" onclick="[\'collabrium.access.directory\',\'collabrium.access.overrides\',\'collabrium.access.viewer\'].forEach(function(k){try{localStorage.removeItem(k)}catch(e){}});location.reload(true)">Clear stored data and reload</button></div>';
 });
 </script>
-<script src="../shared/access.js?v=3"></script>
+<script src="../shared/access.js?v=4"></script>
 <script src="../shared/shell.js?v=4"></script>
 <script>
 (function () {

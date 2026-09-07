@@ -37,7 +37,7 @@
   var HUBS = [
     { key: 'sales',      label: 'Collab: Sales',      short: 'Sales' },
     { key: 'influencer', label: 'Collab: Influencer', short: 'Influencer' },
-    { key: 'planning',   label: 'Collab: Planning',   short: 'Planning' }
+    { key: 'media',      label: 'Collab: Media',      short: 'Media' }
   ];
   var ADMIN_TIERS = ['super_admin', 'admin'];
   var BUSINESS = ['leadership', 'sales_vp', 'head_of_sales', 'sales_manager',
@@ -69,13 +69,13 @@
      Admin: never granted to anyone else, by default or by override. */
   var ACTIVITIES = [
     { title: 'Manage workspace', items: [
-      { label: 'Enable or disable hubs (Collab: Sales, Collab: Influencer, Collab: Planning)', roles: [], superOnly: true },
+      { label: 'Enable or disable hubs (Collab: Sales, Collab: Influencer, Collab: Media)', roles: [], superOnly: true },
       { label: 'Manage integrations (Similarweb, Brandwatch, CRM, booking/finance feeds)', roles: [], superOnly: true },
       { label: 'Manage data source connections', roles: [], superOnly: true }
     ]},
     { title: 'Manage user access', items: [
       { label: 'Invite / add a user to the workspace', roles: ['admin'] },
-      { label: 'Assign which hub(s) a user can open (Collab: Sales, Collab: Influencer, Collab: Planning)', roles: ['admin'] },
+      { label: 'Assign which hub(s) a user can open (Collab: Sales, Collab: Influencer, Collab: Media)', roles: ['admin'] },
       { label: "Assign or change a user's role", roles: [], superOnly: true },
       { label: 'Deactivate or remove a user', roles: ['admin'] },
       { label: 'Manage team / reporting-line structure', roles: [], superOnly: true }
@@ -295,10 +295,16 @@
       } catch (e) { return { changed: {}, removed: [], syncedAt: null }; }
     }
     function write(o) { try { storage.setItem(KEY, JSON.stringify(o)); } catch (e) { /* quota or private mode: the page still works on the seed */ } }
+    /* The hub once called Planning is Collab: Media; a record saved under
+       the old key reads back under the new one. */
+    function migrate(r) {
+      if (r.hubs) r.hubs = r.hubs.map(function (h) { return h === 'planning' ? 'media' : h; });
+      return r;
+    }
     function list() {
       var o = read(), inSeed = {};
-      var out = seed.map(function (r) { inSeed[r.id] = true; return o.changed[r.id] ? clone(o.changed[r.id]) : strip(r); });
-      Object.keys(o.changed).forEach(function (id) { if (!inSeed[id]) out.push(clone(o.changed[id])); });
+      var out = seed.map(function (r) { inSeed[r.id] = true; return migrate(o.changed[r.id] ? clone(o.changed[r.id]) : strip(r)); });
+      Object.keys(o.changed).forEach(function (id) { if (!inSeed[id]) out.push(migrate(clone(o.changed[id]))); });
       out = out.filter(function (r) { return o.removed.indexOf(r.id) === -1; });
       return withTeams(out.sort(byNameOrder));
     }
@@ -416,7 +422,7 @@
     else lines.push('Sees ' + scopeWord(rec.role).toLowerCase() + ' on the Sales Board.');
     if (hubs.indexOf('sales') !== -1) lines.push('Collab: Sales: ' + salesLine(rec.role));
     if (hubs.indexOf('influencer') !== -1) lines.push('Collab: Influencer: ' + influencerLine(rec.influencerRole));
-    if (hubs.indexOf('planning') !== -1) lines.push('Collab: Planning: opens Plans, Campaign performances, and Inventory availability & forecast.');
+    if (hubs.indexOf('media') !== -1) lines.push('Collab: Media: opens Plans, Campaign performances, and Inventory availability & forecast.');
     return lines;
   }
 

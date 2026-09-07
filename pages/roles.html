@@ -19,7 +19,6 @@
      across the top, a summary card for the chosen role, then the groups as
      cards in two columns with a checkbox row per activity. Held rows in ink,
      the rest faded. */
-  .rp-tabs{margin-bottom:var(--spacing-24);}
   .rp-chips{display:flex; flex-wrap:wrap; gap:var(--spacing-8); margin-bottom:var(--spacing-24);}
   .rp-chip{height:40px; padding:0 var(--spacing-16) 0 var(--spacing-20); border-radius:var(--radius-pill); border:1px solid var(--color-neutral-3);
     background:var(--color-neutral-1); font-family:inherit; font-size:var(--text-body2-size); font-weight:700; color:var(--color-neutral-5);
@@ -134,7 +133,7 @@
             <a class="pg-back" href="settings.html" aria-label="Back to Settings"><i class="ph ph-arrow-left"></i></a>
             <div>
               <h1>Roles &amp; permissions</h1>
-              <p class="sub">What each role may do, in Mothership and in every hub. Super Admin edits, Admin views.</p>
+              <p class="sub">What each role may do in Mothership. Super Admin edits, Admin views. Each hub's own permissions are set inside that hub.</p>
             </div>
           </div>
           <div class="pg-head-right">
@@ -202,7 +201,7 @@ window.addEventListener('error', function (e) {
     '<button class="c-btn c-btn-secondary c-btn-md" type="button" onclick="[\'collabrium.access.directory\',\'collabrium.access.overrides\',\'collabrium.access.viewer\'].forEach(function(k){try{localStorage.removeItem(k)}catch(e){}});location.reload(true)">Clear stored data and reload</button></div>';
 });
 </script>
-<script src="../shared/access.js?v=3"></script>
+<script src="../shared/access.js?v=4"></script>
 <script src="../shared/shell.js?v=4"></script>
 <script>
 (function () {
@@ -274,9 +273,8 @@ window.addEventListener('error', function (e) {
     var modified = A.isModified(m.key, role.key);
     var last = A.lastChange(m.key, role.key);
 
-    var h = '<div class="c-tabs rp-tabs" role="group" aria-label="Matrix">' + Object.keys(A.MATRICES).map(function (k) {
-      return '<button class="c-tab' + (k === m.key ? ' active' : '') + '" type="button" aria-pressed="' + (k === m.key) + '" data-matrix="' + k + '">' + esc(A.MATRICES[k].title) + '</button>';
-    }).join('') + '</div>';
+    /* Mothership only: each hub's own matrix is set inside that hub's pod. */
+    var h = '';
 
     /* Role chips: the artifact's own row, each with its user count. A dot
        marks a role with edits. */
@@ -294,7 +292,7 @@ window.addEventListener('error', function (e) {
     h += '<div class="rp-summary">' +
       '<div class="who"><span class="c-search-input-avatar" aria-hidden="true">' + esc(A.initials(role.label)) + '</span><div>' +
         '<h2 id="paneTitle" tabindex="-1">' + esc(role.label) + '</h2><p class="meaning">' + esc(MEANING[role.key] || '') + '</p></div></div>' +
-      '<div class="rp-stat"><div class="k">Users</div><div class="v">' + (n === null ? '—' : n) + '</div><div class="s">carry this role' + (m.key === 'influencer' && role.key !== 'super_admin' ? ' in Collab: Influencer' : '') + '</div></div>' +
+      '<div class="rp-stat"><div class="k">Users</div><div class="v">' + (n === null ? '—' : n) + '</div><div class="s">carry this role</div></div>' +
       '<div class="rp-stat"><div class="k">Activities</div><div class="v">' + heldActs + ' <span style="font-weight:500;color:var(--color-neutral-5)">of ' + totalActs + '</span></div>' +
         '<div class="rp-bar" aria-hidden="true"><i style="width:' + pct + '%"></i></div><div class="s">' + esc(m.title) + '</div></div>' +
       '<div class="actions">' +
@@ -334,9 +332,6 @@ window.addEventListener('error', function (e) {
   function wire() {
     /* Every handler re-renders, so each one puts focus back where it was. */
     function refocus(sel) { var el = document.querySelector(sel); if (el) el.focus(); }
-    document.querySelectorAll('[data-matrix]').forEach(function (b) {
-      b.addEventListener('click', function () { state.matrix = b.dataset.matrix; render(); refocus('[data-matrix="' + state.matrix + '"]'); });
-    });
     document.querySelectorAll('.rp-chip').forEach(function (b) {
       b.addEventListener('click', function () { state.role = b.dataset.role; render(); refocus('.rp-chip[data-role="' + state.role + '"]'); });
     });

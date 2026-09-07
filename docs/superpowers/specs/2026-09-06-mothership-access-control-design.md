@@ -56,7 +56,7 @@ Held in `shared/access.js`. One record per SSO identity.
 | `id` | Stable slug derived from the name |
 | `name`, `email`, `networkId` | From the org chart. The chart has no emails, so they are generated in the astro.com.my pattern from the name. Network ID is the mailbox part upper-cased |
 | `role` | One of: Super Admin, Admin, Leadership, Sales VP, Head of Sales, Sales Manager, Sales (E/SE), Marketing Services / Product, Creative Strategist |
-| `hubs` | Non-empty subset of `sales`, `influencer`, `planning` |
+| `hubs` | Non-empty subset of `sales`, `influencer`, `media` |
 | `influencerRole` | One of: Admin / Head of Influencer, Influencer Manager, Viewer / Client. Present only when `influencer` is in `hubs`. Defaults to Viewer / Client |
 | `reportsTo` | Id of the manager, or an email string when the manager is not a Collabrium user. Read-only, labelled as from Azure AD |
 | `teamDirect`, `teamTotal` | Counts computed from the tree. Read-only |
@@ -173,7 +173,7 @@ as Settings.
 
 **Toolbar.** Search across name, email and role. Three filters on the
 design system's filter pill and panel, as the Influencers and Media plans
-pages use them: Role, Hub (Sales, Influencer, Planning), State (Active,
+pages use them: Role, Hub (Sales, Influencer, Media), State (Active,
 Deactivated, Never signed in). Every option carries its count across the
 directory, and every toggle applies at once: no Done button, the panel stays
 open, the trigger's badge updates in place, and the rows travel to their

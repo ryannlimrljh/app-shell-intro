@@ -21,10 +21,10 @@ without a code change.
 2. **Super Admin edits, Admin reads, business roles are refused.** The view
    is gated on the same activity that gates the directory; editing is gated
    on "Assign or change a user's role", which only Super Admin holds.
-3. **Three matrices, three tabs.** Mothership, Collab: Sales, Collab:
-   Influencer, copied from the artifact's Activities page verbatim. The
-   Influencer tab lists the Influencer role set; the other two list the
-   Sales-side set.
+3. **Mothership only, for now.** The page shows the Mothership matrix. Each
+   hub's own matrix (Collab: Sales, Collab: Influencer) is set inside that
+   hub's pod; the module still carries both, with their checks, so the tabs
+   can return when the pods hand that over.
 4. **Locks.** Super Admin's own row is locked to everything: the ceiling
    cannot lower itself. Items the artifact marks Super Admin only stay
    locked for every other role. A locked switch shows a lock and a reason.

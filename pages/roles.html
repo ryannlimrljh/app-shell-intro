@@ -228,18 +228,11 @@ window.addEventListener('error', function (e) {
     'Tools': 'ph-wrench', 'Browse': 'ph-books', 'Administration': 'ph-gear-six', 'Reference Data': 'ph-database', 'Insight': 'ph-chart-line-up'
   };
   var viewer, store;
-  var state = { matrix: 'mothership', role: 'admin' };
+  /* Opened from a person's sheet, the page lands on that person's role. */
+  var wanted = (function () { try { return new URLSearchParams(location.search).get('role'); } catch (e) { return null; } })();
+  var state = { matrix: 'mothership', role: wanted && A.ROLES.some(function (r) { return r.key === wanted; }) ? wanted : 'admin' };
 
-  A.loadOverrides(S);
-  viewer = Sh.init({ onViewerChange: function (v) { viewer = v; render(); } });
-  render();   /* the matrix needs no data; the counts arrive with the chart */
-  fetch('../data/org-tree.json').then(function (r) {
-    if (!r.ok) throw new Error('org-tree.json ' + r.status);
-    return r.json();
-  }).then(function (tree) {
-    store = A.createStore({ seed: A.buildSeed(tree), storage: S });
-    render();
-  }).catch(function () { store = null; render(); });
+
 
   var MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'June', 'July', 'Aug', 'Sept', 'Oct', 'Nov', 'Dec'];
   function fmtWhen(iso) {
@@ -360,6 +353,18 @@ window.addEventListener('error', function (e) {
       Sh.toast('success', 'Reset to default', m.title + ' · ' + (role ? role.label : state.role));
     });
   }
+
+  /* ── Boot, after every helper above exists ─────────────────────────── */
+  A.loadOverrides(S);
+  viewer = Sh.init({ onViewerChange: function (v) { viewer = v; render(); } });
+  render();   /* the matrix needs no data; the counts arrive with the chart */
+  fetch('../data/org-tree.json').then(function (r) {
+    if (!r.ok) throw new Error('org-tree.json ' + r.status);
+    return r.json();
+  }).then(function (tree) {
+    store = A.createStore({ seed: A.buildSeed(tree), storage: S });
+    render();
+  }).catch(function () { store = null; render(); });
 })();
 </script>
 </body>

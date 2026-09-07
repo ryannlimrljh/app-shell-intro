@@ -155,7 +155,7 @@
   }
   /* What the role can do: the artifact's activity matrix, read-only, folded
      under the description so the sheet stays short until someone asks. */
-  .us-acts{border:1px solid var(--color-neutral-3); border-radius:var(--radius-md); overflow:hidden;}
+  .us-acts{border:1px solid var(--color-neutral-3); border-radius:var(--radius-sm); overflow:hidden;}
   .us-acts-toggle{display:flex; align-items:center; justify-content:space-between; gap:var(--spacing-8); width:100%;
     padding:var(--spacing-12); border:none; background:var(--color-neutral-1); font-family:inherit; font-size:var(--text-body2-size);
     font-weight:700; color:var(--color-neutral-9); cursor:pointer; text-align:left;}
@@ -171,8 +171,11 @@
   .us-act{display:flex; align-items:flex-start; gap:var(--spacing-8); padding:4px 0; font-size:var(--text-caption-size); color:var(--color-neutral-9); line-height:1.4;}
   .us-act.off{color:var(--color-neutral-4);}
   .us-act .c-checkbox-box{width:16px; height:16px; margin-top:1px; border-radius:4px; font-size:11px;}
+  .us-acts-foot{margin-top:var(--spacing-12); padding-top:var(--spacing-8); border-top:1px solid var(--color-neutral-3); font-size:var(--text-caption-size); color:var(--color-neutral-5);}
+  .us-acts-foot a{color:var(--color-neutral-9); font-weight:700; text-decoration:none; white-space:nowrap;}
+  .us-acts-foot a:hover{text-decoration:underline;}
   .us-act.off .c-checkbox-box{background:var(--color-neutral-1); border-color:var(--color-neutral-3);}
-  .us-x{border:none; background:transparent; width:32px; height:32px; border-radius:var(--radius-sm);
+  .us-x{border:none; background:transparent; width:32px; height:32px; margin:-4px -8px 0 0; border-radius:var(--radius-sm);
     cursor:pointer; color:var(--color-neutral-5); display:inline-flex; align-items:center; justify-content:center;}
   .us-x:hover{background:var(--color-neutral-2); color:var(--color-neutral-9);}
   .us-f{display:flex; flex-direction:column; gap:var(--spacing-4);}
@@ -185,10 +188,11 @@
     border:1px solid var(--color-neutral-3); border-radius:var(--radius-sm); background:var(--color-neutral-2);
     font-size:var(--text-body2-size); color:var(--color-neutral-9);}
   .us-hubgrid{display:flex; flex-direction:column; gap:var(--spacing-8);}
-  .us-desc{border:1px solid var(--color-neutral-3); border-radius:var(--radius-md); padding:var(--spacing-12);
+  .us-hubgrid .c-checkbox-box{margin-top:3px;}
+  .us-desc{border:1px solid var(--color-neutral-3); border-radius:var(--radius-sm); padding:var(--spacing-12);
     font-size:var(--text-caption-size); color:var(--color-neutral-5); line-height:1.5; display:flex; flex-direction:column; gap:4px;}
   .us-desc b{color:var(--color-neutral-9);}
-  .us-ad{background:var(--color-neutral-2); border-radius:var(--radius-md); padding:var(--spacing-12);
+  .us-ad{background:var(--color-neutral-2); border-radius:var(--radius-sm); padding:var(--spacing-12);
     font-size:var(--text-caption-size); display:grid; grid-template-columns:auto 1fr; gap:4px var(--spacing-16);}
   .us-ad .k{color:var(--color-neutral-5);}
   .us-ad .note{grid-column:1 / -1; color:var(--color-neutral-5); margin-top:4px;}
@@ -205,7 +209,7 @@
   .us-picked{display:flex; align-items:center; gap:var(--spacing-12); padding:8px 12px;
     border:1px solid var(--color-obsidian); border-radius:var(--radius-sm);}
   .us-picked .us-x{margin-left:auto;}
-  .us-remove{margin-right:auto; border:none; background:transparent; font-family:inherit; font-size:var(--text-caption-size);
+  .us-remove{margin-right:auto; border:none; background:transparent; font-family:inherit; font-size:var(--text-body2-size);
     font-weight:700; color:var(--color-red); cursor:pointer; padding:0;}
   .us-confirm{margin-right:auto; display:flex; align-items:center; gap:var(--spacing-8); font-size:var(--text-caption-size); flex-wrap:wrap;}
   .us-confirm[hidden]{display:none;}
@@ -964,7 +968,11 @@ window.addEventListener('error', function (e) {
     }).join('');
     h += '<div class="us-acts"><button class="us-acts-toggle" type="button" id="actsToggle" aria-expanded="' + (f.showActs ? 'true' : 'false') + '" aria-controls="actsBody">' +
       '<span>What ' + esc(A.roleLabel(n.role)) + ' can do on Mothership <span class="n">· ' + held + ' of ' + totalActs + '</span></span><i class="ph ph-caret-down"></i></button>' +
-      '<div class="us-acts-body" id="actsBody" role="list" aria-label="Activities held by this role"' + (f.showActs ? '' : ' hidden') + '>' + actsHtml + '</div></div>';
+      '<div class="us-acts-body" id="actsBody" role="list" aria-label="Activities held by this role"' + (f.showActs ? '' : ' hidden') + '>' + actsHtml +
+      '<div class="us-acts-foot">This is set per role, not per person. ' +
+      (A.mayEditRoles(viewer) ? '<a href="roles.html?role=' + encodeURIComponent(n.role) + '">Change what ' + esc(A.roleLabel(n.role)) + ' can do <i class="ph ph-arrow-right"></i></a>'
+                              : '<a href="roles.html?role=' + encodeURIComponent(n.role) + '">See it in Roles &amp; permissions <i class="ph ph-arrow-right"></i></a>') +
+      '</div></div></div>';
 
     if (!isAdd) {
       h += '<div class="us-f"><label for="access">Access</label><select id="access">' +

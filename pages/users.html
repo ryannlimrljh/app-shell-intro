@@ -77,6 +77,12 @@
   .us-sub{font-size:var(--text-caption-size); color:var(--color-neutral-5); margin-top:2px;}
   .us-sub.warn{color:var(--color-neutral-5); font-style:italic;}
   .us-hubs{display:flex; gap:4px; flex-wrap:wrap;}
+  /* The Role column: one line per hub, the hub muted and the role in ink,
+     the same shape whether it is the Sales, Influencer or Media role. */
+  .us-roles{display:flex; flex-direction:column; gap:2px;}
+  .us-role{display:flex; align-items:baseline; gap:6px; white-space:nowrap;}
+  .us-role .k{font-size:var(--text-caption-size); color:var(--color-neutral-5); min-width:62px;}
+  .us-role .v{color:var(--color-neutral-9);}
   /* The element dot on its own, for places the full tag would be too loud:
      filter options, applied chips, the sheet's hub checkboxes. */
   .us-dot{display:inline-block; width:8px; height:8px; border-radius:var(--radius-pill); margin-right:8px; vertical-align:middle; position:relative; top:-1px;}
@@ -215,6 +221,14 @@
     font-size:var(--text-body2-size); color:var(--color-neutral-9);}
   .us-hubgrid{display:flex; flex-direction:column; gap:var(--spacing-8);}
   .us-hubgrid .c-checkbox-box{margin-top:3px;}
+  .us-hubrow{display:grid; grid-template-columns:minmax(0,1fr) 220px; align-items:center; gap:var(--spacing-12); min-height:40px;}
+  .us-hubrow .c-choice{align-items:center;}
+  .us-hubrow .c-choice .c-checkbox-box{margin-top:0;}
+  .us-hubrole:empty{display:none;}
+  .us-hubrow:not(.is-on) .us-hubrole{visibility:hidden;}
+  .us-hubrow .us-hubrole select, .us-hubrow .us-hubrole .ro{height:36px;}
+  .us-hubrow .us-hubrole .ro{color:var(--color-neutral-5);}
+  @media (max-width:520px){ .us-hubrow{grid-template-columns:1fr;} .us-hubrow .us-hubrole{padding-left:26px;} }
   .us-desc{border:1px solid var(--color-neutral-3); border-radius:var(--radius-sm); padding:var(--spacing-12);
     font-size:var(--text-caption-size); color:var(--color-neutral-5); line-height:1.5; display:flex; flex-direction:column; gap:4px;}
   .us-desc b{color:var(--color-neutral-9);}
@@ -548,7 +562,11 @@ window.addEventListener('error', function (e) {
       h += '<tr class="' + (r.access === 'inactive' ? 'is-off' : '') + '" data-id="' + esc(r.id) + '" data-letter="' + letterOf(r.name) + '">' +
         '<td><div class="us-name">' + esc(r.name) + (r.access === 'inactive' ? ' <span class="c-badge c-badge-neutral">Deactivated</span>' : '') + '</div><div class="us-sub">' + esc(r.email) + '</div></td>' +
         '<td><div class="us-hubs">' + r.hubs.map(function (k) { return '<span class="c-tag c-tag-' + A.hubElement(k) + '"><span class="dot"></span>' + esc(A.hubShort(k)) + '</span>'; }).join('') + '</div></td>' +
-        '<td>' + esc(A.roleLabel(r.role)) + (r.influencerRole ? '<div class="us-sub">Influencer: ' + esc(A.influencerRoleLabel(r.influencerRole)) + '</div>' : '') + (r.mediaRole ? '<div class="us-sub">Media: ' + esc(A.mediaRoleLabel(r.mediaRole)) + '</div>' : '') + '</td>' +
+        '<td><div class="us-roles">' +
+          '<div class="us-role"><span class="k">Sales</span><span class="v">' + esc(A.roleLabel(r.role)) + '</span></div>' +
+          (r.influencerRole ? '<div class="us-role"><span class="k">Influencer</span><span class="v">' + esc(A.influencerRoleLabel(r.influencerRole)) + '</span></div>' : '') +
+          (r.mediaRole ? '<div class="us-role"><span class="k">Media</span><span class="v">' + esc(A.mediaRoleLabel(r.mediaRole)) + '</span></div>' : '') +
+        '</div></td>' +
         '<td>' + esc(A.scopeWord(r.role)) + '</td>' +
         '<td>' + (mgr ? esc(mgr.name) + '<div class="us-sub">' + esc(mgr.email) + '</div>'
                       : r.reportsToEmail ? '<span class="us-ext">' + esc(r.reportsToEmail) + '</span><div class="us-sub warn">Not a Collabrium user — grants no access</div>'
@@ -945,37 +963,28 @@ window.addEventListener('error', function (e) {
       h += '<div class="help">Search the company directory by name or address. Only Astro staff appear — a guest account cannot sign in.</div></div>';
     }
 
-    h += '<div class="us-f"><div class="lab">Hubs</div><div class="us-hubgrid">' +
+    /* One row per hub: the grant on the left, that hub's role on the right,
+       so granting a hub and choosing what they are in it happen in one place.
+       The Sales row's role is the Sales-side role, which Mothership shares. */
+    function roleControl(id, list, value, labelOf) {
+      return mayRole
+        ? '<select id="' + id + '" aria-label="Role">' + list.map(function (r) { return '<option value="' + r.key + '"' + (r.key === value ? ' selected' : '') + '>' + esc(r.label) + '</option>'; }).join('') + '</select>'
+        : '<div class="ro" title="' + esc(A.ROLE_IS_SUPER) + '">' + esc(labelOf(value)) + '</div>';
+    }
+    h += '<div class="us-f"><div class="lab">Hubs and roles</div><div class="us-hubgrid">' +
       A.HUBS.map(function (x) {
         var on = n.hubs.indexOf(x.key) !== -1, last = on && n.hubs.length === 1;
-        return '<label class="c-choice' + (last ? ' disabled' : '') + '"><span class="c-checkbox-box' + (on ? ' on' : '') + '">' + (on ? '<i class="ph ph-check" style="font-size:12px"></i>' : '') + '</span>' +
+        var control = '';
+        if (x.key === 'sales') control = roleControl('role', A.ROLES, n.role, A.roleLabel);
+        else if (x.key === 'influencer' && on) control = roleControl('irole', A.INFLUENCER_ROLES, n.influencerRole, A.influencerRoleLabel);
+        else if (x.key === 'media' && on) control = roleControl('mrole', A.MEDIA_ROLES, n.mediaRole, A.mediaRoleLabel);
+        return '<div class="us-hubrow' + (on ? ' is-on' : '') + '">' +
+          '<label class="c-choice' + (last ? ' disabled' : '') + '"><span class="c-checkbox-box' + (on ? ' on' : '') + '">' + (on ? '<i class="ph ph-check" style="font-size:12px"></i>' : '') + '</span>' +
           '<input type="checkbox" data-hub="' + x.key + '"' + (on ? ' checked' : '') + (last ? ' disabled' : '') + ' />' +
-          '<span class="text"><span class="label"><span class="us-dot us-dot-' + x.element + '"></span>' + esc(x.label) + '</span>' + (last ? '<span class="desc">The last hub stays. Deactivate them instead.</span>' : '') + '</span></label>';
-      }).join('') + '</div><div class="help">Which hubs they can open. The switcher only ever offers what is ticked here.</div></div>';
-
-    h += '<div class="us-f"><label for="role">Role</label>' +
-      (mayRole
-        ? '<select id="role">' + A.ROLES.map(function (r) { return '<option value="' + r.key + '"' + (r.key === n.role ? ' selected' : '') + '>' + esc(r.label) + '</option>'; }).join('') + '</select>' +
-          '<div class="help">Decides what they can see and edit. Change it any time.</div>'
-        : '<div class="ro">' + esc(A.roleLabel(n.role)) + '</div><div class="help">' + esc(A.ROLE_IS_SUPER) + '</div>') +
-      '</div>';
-
-    if (hasInfl) {
-      h += '<div class="us-f"><label for="irole">Influencer role</label>' +
-        (mayRole
-          ? '<select id="irole">' + A.INFLUENCER_ROLES.map(function (r) { return '<option value="' + r.key + '"' + (r.key === n.influencerRole ? ' selected' : '') + '>' + esc(r.label) + '</option>'; }).join('') + '</select>' +
-            '<div class="help">Collab: Influencer runs its own role set.</div>'
-          : '<div class="ro">' + esc(A.influencerRoleLabel(n.influencerRole)) + '</div><div class="help">' + esc(A.ROLE_IS_SUPER) + '</div>') +
-        '</div>';
-    }
-    if (hasMedia) {
-      h += '<div class="us-f"><label for="mrole">Media role</label>' +
-        (mayRole
-          ? '<select id="mrole">' + A.MEDIA_ROLES.map(function (r) { return '<option value="' + r.key + '"' + (r.key === n.mediaRole ? ' selected' : '') + '>' + esc(r.label) + '</option>'; }).join('') + '</select>' +
-            '<div class="help">Collab: Media runs its own role set.</div>'
-          : '<div class="ro">' + esc(A.mediaRoleLabel(n.mediaRole)) + '</div><div class="help">' + esc(A.ROLE_IS_SUPER) + '</div>') +
-        '</div>';
-    }
+          '<span class="text"><span class="label"><span class="us-dot us-dot-' + x.element + '"></span>' + esc(x.label) + '</span>' + (last ? '<span class="desc">The last hub stays. Deactivate them instead.</span>' : '') + '</span></label>' +
+          '<div class="us-hubrole">' + control + '</div></div>';
+      }).join('') + '</div>' +
+      '<div class="help">' + (mayRole ? 'Tick a hub to grant it, then choose their role in it. The Sales role also decides what they see on Mothership.' : 'Tick a hub to grant it; it arrives with its default role. ' + esc(A.ROLE_IS_SUPER)) + '</div></div>';
 
     h += '<div class="us-desc">' + A.describe(n).map(function (line, i) {
       return '<div>' + (i === 0 ? esc(line).replace(/^Sees ([^.]+)\./, 'Sees <b>$1</b>.') : esc(line)) + '</div>';

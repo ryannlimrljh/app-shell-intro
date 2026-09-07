@@ -21,7 +21,7 @@ Behind them:
 |---|---|
 | `shared/access.js` | The access model. Roles, hubs, the three activity matrices from the architecture artifact, `holdsIn` with overrides, the directory seed and overlay store, every guard (`check`), the viewer, locks and change log. Browser global `CollabAccess`; CommonJS in Node. |
 | `shared/shell.css`, `shared/shell.js` | The app shell the three pages share: rail collapse with memory, account menu, department switcher, hover label, toast, page-to-page transitions, the "Viewing as" control. Browser global `CollabShell`. |
-| `scripts/check-access.mjs` | 137 assertions over the access model. `node scripts/check-access.mjs`. The only automated test in the repo. |
+| `scripts/check-access.mjs` | 151 assertions over the access model. `node scripts/check-access.mjs`. The only automated test in the repo. |
 | `data/org-tree.json` | Pre-existing. The org chart the directory is seeded from. |
 
 Specs and plans, in `docs/superpowers/`:
@@ -66,8 +66,8 @@ the artifact's Activities page.
 **Guards** (all in `check()` in `shared/access.js`, all covered by the checks):
 
 - Business roles cannot touch the directory.
-- Admin cannot change a role, on add or on edit, including the Influencer role.
-- A record cannot lose its last hub; an Influencer role exists only with that hub.
+- Admin cannot change a role, on add or on edit, including the Influencer and Media roles.
+- A record cannot lose its last hub; an Influencer or Media role exists only with its hub.
 - Nobody can change their own admin tier, deactivate themselves, or remove themselves.
 - The last active Super Admin cannot be deactivated, demoted or removed.
 

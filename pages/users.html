@@ -39,15 +39,6 @@
   .us-count{display:flex; align-items:center; justify-content:space-between; gap:var(--spacing-12);
     flex-wrap:wrap; font-size:var(--text-caption-size); color:var(--color-neutral-5); margin-bottom:var(--spacing-8);}
   .us-count b{color:var(--color-neutral-9);}
-  .us-pager{display:flex; align-items:center; gap:var(--spacing-8);}
-  .us-pager select{height:28px; border:1px solid var(--color-neutral-3); border-radius:var(--radius-sm);
-    font-family:inherit; font-size:var(--text-caption-size); background:var(--color-neutral-1);}
-  .us-pager button{width:28px; height:28px; border:1px solid transparent; border-radius:var(--radius-pill);
-    background:transparent; font-family:inherit; font-size:var(--text-caption-size); font-weight:700;
-    color:var(--color-neutral-9); cursor:pointer; display:inline-flex; align-items:center; justify-content:center;}
-  .us-pager button:hover:not(:disabled){background:var(--color-neutral-2);}
-  .us-pager button[aria-current="page"]{background:var(--color-obsidian); color:var(--color-neutral-1);}
-  .us-pager button:disabled{color:var(--color-neutral-4); cursor:default;}
 
   /* ── Table ───────────────────────────────────────────────────────── */
   /* The table, styled as the roster and the campaigns list style theirs:
@@ -388,11 +379,11 @@ window.addEventListener('error', function (e) {
   var EDIT_GATE = 'Deactivate or remove a user';
 
   var viewer, store, seedAll;
-  var state = { q: '', role: [], hub: [], st: [], sort: { key: 'name', dir: 1 }, page: 1, rows: 50 };
+  var state = { q: '', role: [], hub: [], st: [], sort: { key: 'name', dir: 1 } };
 
   /* ── Boot: the shell, then the org chart, then the store, then the page ── */
   A.loadOverrides(S);   /* a Super Admin's edits on Roles & permissions reach the checklist here */
-  viewer = Sh.init({ onViewerChange: function (v) { viewer = v; state.page = 1; if (store) render(); } });
+  viewer = Sh.init({ onViewerChange: function (v) { viewer = v; if (store) render(); } });
   /* Bones first. The chart is one local fetch, so the beat is staged
      rather than real: the roster page's own 1000ms, long enough for the
      bones to register as a considered loading state instead of a flicker. */
@@ -411,7 +402,7 @@ window.addEventListener('error', function (e) {
         sk('72px', 'us-sk-pill') + sk('68px', 'us-sk-pill') + sk('76px', 'us-sk-pill') +
       '</div><div class="us-bar-right">' + sk('90px') + '<span class="us-sk-btn"></span></div></div>' +
       '<p class="us-note"><span class="us-sk" style="width:520px; max-width:100%"></span></p>' +
-      '<div class="us-count"><span class="us-sk" style="width:150px"></span><span class="us-sk" style="width:180px"></span></div>' +
+      '<div class="us-count"><span class="us-sk" style="width:110px"></span></div>' +
       '<div class="us-tablewrap"><table class="c-table us-table" aria-hidden="true"><thead><tr>' +
         ['54px','36px','34px','52px','66px','36px','70px',''].map(function (w) { return '<th>' + (w ? '<span class="us-sk" style="width:' + w + '; height:9px"></span>' : '') + '</th>'; }).join('') +
       '</tr></thead><tbody>' + rows + '</tbody></table></div>';
@@ -517,9 +508,7 @@ window.addEventListener('error', function (e) {
     var all = store.list();
     var v = visible(all), rows = v.rows, byId = v.byId;
     var never = all.filter(function (r) { return stateOf(r) === 'never'; }).length;
-    var total = rows.length, pages = Math.max(1, Math.ceil(total / state.rows));
-    if (state.page > pages) state.page = pages;
-    var from = (state.page - 1) * state.rows, page = rows.slice(from, from + state.rows);
+    var total = rows.length, page = rows;
 
     /* The bar is built once and never rebuilt: an open filter panel and a
        focused search box both survive every re-render that way. */
@@ -535,10 +524,7 @@ window.addEventListener('error', function (e) {
     var before = snapshotRects();
     var h = '';
     h += '<p class="us-note">' + never + ' of ' + all.length + ' have never signed in. Until they do, nothing has confirmed the address we hold is one they can use.</p>';
-    h += '<div class="us-count"><span>Showing <b>' + (total ? from + 1 : 0) + '–' + Math.min(from + state.rows, total) + '</b> of <b>' + total + '</b> items</span>' +
-      '<div class="us-pager"><span>Rows</span><select id="rows" aria-label="Rows per page">' +
-      [25, 50, 100, 250].map(function (n) { return '<option value="' + n + '"' + (n === state.rows ? ' selected' : '') + '>' + n + '</option>'; }).join('') +
-      '</select>' + pager(pages) + '</div></div>';
+    h += '<div class="us-count"><span><b>' + total + '</b> ' + (total === 1 ? 'person' : 'people') + (total !== all.length ? ' of ' + all.length : '') + '</span></div>';
 
     h += '<div class="us-tablewrap"><table class="c-table us-table"><thead><tr>' +
       COLS.map(function (c) {
@@ -571,19 +557,6 @@ window.addEventListener('error', function (e) {
     lastRows = rows;
     renderRail();
     spy();
-  }
-
-  function pager(pages) {
-    var h = '<button type="button" data-page="' + (state.page - 1) + '" aria-label="Previous page"' + (state.page <= 1 ? ' disabled' : '') + '><i class="ph ph-caret-left"></i></button>';
-    for (var p = 1; p <= pages; p++) {
-      if (pages > 7 && Math.abs(p - state.page) > 2 && p !== 1 && p !== pages) {
-        if (p === 2 || p === pages - 1) h += '<span>…</span>';
-        continue;
-      }
-      h += '<button type="button" data-page="' + p + '"' + (p === state.page ? ' aria-current="page"' : '') + '>' + p + '</button>';
-    }
-    h += '<button type="button" data-page="' + (state.page + 1) + '" aria-label="Next page"' + (state.page >= pages ? ' disabled' : '') + '><i class="ph ph-caret-right"></i></button>';
-    return h;
   }
 
   /* ── The bar: search, one pill per facet, the sync stamp ──────────── */
@@ -663,7 +636,7 @@ window.addEventListener('error', function (e) {
   }
   function wireBar() {
     var q = document.getElementById('q');
-    q.addEventListener('input', function () { state.q = q.value; state.page = 1; render(); });
+    q.addEventListener('input', function () { state.q = q.value; render(); });
     document.getElementById('sync').addEventListener('click', function () {
       store.stampSync();
       render();
@@ -671,7 +644,7 @@ window.addEventListener('error', function (e) {
     });
     document.getElementById('clearAll').addEventListener('click', function () {
       FACETS.forEach(function (f) { state[f.key] = []; });
-      state.page = 1;
+     
       closePops();
       render();
     });
@@ -680,7 +653,7 @@ window.addEventListener('error', function (e) {
       if (!b) return;
       var k = b.dataset.facet;
       state[k] = state[k].filter(function (v) { return v !== b.dataset.remove; });
-      state.page = 1;
+     
       var opts = document.querySelector('[data-options="' + k + '"]');
       if (opts && opts.innerHTML) opts.innerHTML = optionRows(facetByKey(k));
       render();
@@ -704,7 +677,7 @@ window.addEventListener('error', function (e) {
       if (clr) {
         e.stopPropagation();
         var ck = clr.dataset.clear;
-        state[ck] = []; state.page = 1;
+        state[ck] = [];
         document.querySelector('[data-options="' + ck + '"]').innerHTML = optionRows(facetByKey(ck));
         render();
         return;
@@ -718,7 +691,7 @@ window.addEventListener('error', function (e) {
       if (!opt) return;
       var k = opt.dataset.facet, val = opt.dataset.v, i = state[k].indexOf(val);
       if (i > -1) state[k].splice(i, 1); else state[k].push(val);
-      state.page = 1;
+     
       document.querySelector('[data-options="' + k + '"]').innerHTML = optionRows(facetByKey(k));
       render();
     });
@@ -726,12 +699,6 @@ window.addEventListener('error', function (e) {
 
   /* ── The list's own controls, rebound after every render ──────────── */
   function wireList() {
-    document.getElementById('rows').addEventListener('change', function (e) {
-      state.rows = Number(e.target.value); state.page = 1; render();
-    });
-    document.querySelectorAll('.us-pager button[data-page]').forEach(function (b) {
-      b.addEventListener('click', function () { state.page = Number(b.dataset.page); render(); });
-    });
     document.querySelectorAll('.us-table th[data-sort]').forEach(function (th) {
       th.addEventListener('click', function () {
         var k = th.dataset.sort;
@@ -791,10 +758,9 @@ window.addEventListener('error', function (e) {
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape') { closePops(); closeModal(); } });
 
   /* ── Modals ───────────────────────────────────────────────────────── */
-  /* ── A–Z rail: the Influencers page's jump-and-spy, on a paged table.
-     Letter counts come from the whole filtered list, so the rail describes
-     the directory, not the page; a jump to a letter on another page turns
-     to that page first, then scrolls the shell's own scroll container. ── */
+  /* ── A–Z rail: the Influencers page's jump-and-spy. Letter counts come
+     from the filtered list; a jump scrolls the shell's own scroll
+     container to the first row with that letter. ── */
   var LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ#'.split('');
   var railEl = document.getElementById('rail');
   var scroller = document.querySelector('.c-shell-content');
@@ -821,8 +787,6 @@ window.addEventListener('error', function (e) {
     var L = row.dataset.letter, idx = -1;
     for (var i = 0; i < lastRows.length; i++) if (letterOf(lastRows[i].name) === L) { idx = i; break; }
     if (idx < 0) return;
-    var pg = Math.floor(idx / state.rows) + 1;
-    if (pg !== state.page) { state.page = pg; render(); }
     var target = content.querySelector('tr[data-letter="' + L + '"]');
     if (!target || !scroller) return;
     var top = target.getBoundingClientRect().top - scroller.getBoundingClientRect().top + scroller.scrollTop - 16;

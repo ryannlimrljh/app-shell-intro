@@ -185,8 +185,9 @@ right, "Synced 6 Sept, 10:18" from the store's stamp and a "Sync from Azure
 AD" button that restamps the time and shows a toast. A one-line note counts
 people who have never signed in, with the pod's wording.
 
-**Table.** Design system table, sortable on every column, 50 rows a page
-with the same rows selector (25, 50, 100, 250) and pager.
+**Table.** Design system table, sortable on every column. No pagination:
+every row renders, the A–Z rail is the way through a long list, and a count
+line says how many are showing.
 
 | Column | Shows |
 |---|---|

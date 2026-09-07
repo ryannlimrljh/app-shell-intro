@@ -168,8 +168,8 @@ today closes the menu and does nothing. That item becomes a link.
 `pages/users.html`, aligned to the pod's directory with Mothership's
 additions.
 
-**Header.** "Users & roles", subtitle "Who may sign in, which hubs they can
-open, and what they may do there." An "Add new user" button with a plus
+**Header.** "Users & roles", subtitle "Who may sign in and which hubs they
+can access." An "Add new user" button with a plus
 icon on the right, hidden for business roles. The same "Viewing as" control
 as Settings.
 
@@ -194,8 +194,8 @@ line says how many are showing.
 | Column | Shows |
 |---|---|
 | Person | Name, email underneath. Deactivated rows are dimmed with a Deactivated badge by the name |
-| Hubs | One small badge per granted hub |
-| Role | Sales-side role. Influencer role underneath in smaller text when granted |
+| Hubs | One design-system element tag per granted hub: Sales gold, Influencer earth, Media water |
+| Role | One line per hub in one shape, the hub muted and the role in ink: the Sales-side role always, the Influencer and Media roles when those hubs are granted |
 | Can see | The scope word |
 | Reports to | Name, email underneath. "Not a Collabrium user, grants no access" when the manager is not in the directory |
 | Team | Direct count, or a dash |
@@ -211,9 +211,8 @@ reduced motion skips the swing.
 
 **A–Z rail.** The Influencers page's rail, on the right edge where the
 scrollbar was: 27 letters, the current one in ink, letters with nobody to
-jump to faded and unfocusable. Counts come from the whole filtered list, so
-a jump to a letter on another page turns to that page first, then scrolls
-the shell's content to the first row with that letter. A scroll-spy keeps
+jump to faded and unfocusable. Counts come from the filtered list; a jump
+scrolls the shell's content to the first row with that letter. A scroll-spy keeps
 the current letter marked. Hidden on narrow screens and in the Admin-only
 state.
 
@@ -223,24 +222,24 @@ them a role."
 - Person: search over org-chart people not yet in the directory, with the
   pod's note that only Astro staff appear and a guest account cannot sign
   in.
-- Hubs: three checkboxes, Sales ticked by default, at least one required.
-- Role select. Influencer role select appears only when Influencer is
-  ticked.
-- Under the role, the same plain-language box the pod uses, describing the
-  Mothership scope and what the role can do in each ticked hub.
-- Under that, "What <role> can do on Mothership · n of 24": the artifact's
-  activity matrix for the chosen role as a read-only checklist, grouped by
-  the seven categories, folded until opened. The role decides it; nobody
-  edits it per person.
-- For an Admin viewer the role selects are read-only at their defaults with
-  the note "A Super Admin sets the role."
+- Hubs and roles: one row per hub, the checkbox and name on the left and
+  that hub's role control on the right. The Sales row always shows the
+  Sales-side role, which Mothership shares. The Influencer and Media rows
+  show their control once ticked, preset to the default (Viewer / Client;
+  Media Planner). Sales ticked by default, at least one hub required.
+- Under the rows, the plain-language box describing the Mothership scope
+  and what the person can do in each ticked hub, then the folded "What
+  this role can do on Mothership" checklist with a link to Roles &
+  permissions.
+- For an Admin viewer the role controls are read-only text with the note
+  "A Super Admin sets the role."; a hub still arrives with its default role.
 - Footer note: "Their reporting line comes from Azure AD and appears after
   the next sync. It is not set here."
 - Add is disabled until a person is chosen.
 
 **Edit a user.** Name and email in the header.
 
-- Hubs, Role, Influencer role with the same gating as Add.
+- The same Hubs and roles rows as Add, with the same gating.
 - Access select: Active, Deactivated, with the pod's note that deactivating
   keeps their place in the reporting tree, they simply cannot sign in.
 - A read-only Azure AD block: Reports to, Network ID, Team, with the pod's

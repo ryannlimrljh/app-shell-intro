@@ -50,7 +50,21 @@
      out. */
   .us-tablewrap{background:var(--color-neutral-1); border:1px solid var(--color-neutral-3);
     border-radius:var(--radius-lg); overflow:visible;}
-  .us-table{width:100%;}
+  /* A fixed column plan, as the roster uses: percentages always sum to the
+     table's own width, so nothing pushes the last columns under the rail. */
+  .us-table{width:100%; table-layout:fixed;}
+  .us-table th:nth-child(1), .us-table td:nth-child(1){width:23%;}
+  .us-table th:nth-child(2), .us-table td:nth-child(2){width:13%;}
+  .us-table th:nth-child(3), .us-table td:nth-child(3){width:19%;}
+  .us-table th:nth-child(4), .us-table td:nth-child(4){width:9%;}
+  .us-table th:nth-child(5), .us-table td:nth-child(5){width:20%;}
+  .us-table th:nth-child(6), .us-table td:nth-child(6){width:5%;}
+  .us-table th:nth-child(7), .us-table td:nth-child(7){width:11%;}
+  .us-table th:nth-child(8), .us-table td:nth-child(8){width:48px;}
+  .us-table td:nth-child(4){white-space:nowrap;}
+  .us-name, .us-sub, .us-ext{overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .us-name{display:block;}
+  .us-name .c-badge{margin-left:var(--spacing-8); vertical-align:middle;}
   .us-table th, .us-table td{padding:var(--spacing-12) var(--spacing-16);}
   .us-table th:first-child, .us-table td:first-child{padding-left:var(--spacing-20);}
   .us-table th:last-child, .us-table td:last-child{padding-right:var(--spacing-12);}
@@ -79,10 +93,10 @@
   .us-hubs{display:flex; gap:4px; flex-wrap:wrap;}
   /* The Role column: one line per hub, the hub muted and the role in ink,
      the same shape whether it is the Sales, Influencer or Media role. */
-  .us-roles{display:flex; flex-direction:column; gap:2px;}
-  .us-role{display:flex; align-items:baseline; gap:6px; white-space:nowrap;}
-  .us-role .k{font-size:var(--text-caption-size); color:var(--color-neutral-5); min-width:62px;}
-  .us-role .v{color:var(--color-neutral-9);}
+  .us-roles{display:flex; flex-direction:column; gap:2px; min-width:0;}
+  .us-role{display:flex; align-items:baseline; gap:6px; font-size:var(--text-caption-size); min-width:0;}
+  .us-role .k{color:var(--color-neutral-5); flex:none; width:62px;}
+  .us-role .v{color:var(--color-neutral-9); font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
   /* The element dot on its own, for places the full tag would be too loud:
      filter options, applied chips, the sheet's hub checkboxes. */
   .us-dot{display:inline-block; width:8px; height:8px; border-radius:var(--radius-pill); margin-right:8px; vertical-align:middle; position:relative; top:-1px;}

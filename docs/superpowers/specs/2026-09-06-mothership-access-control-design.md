@@ -26,9 +26,10 @@ Sources:
 ## Decisions taken during design
 
 1. **One SSO identity, one record.** A person has one Sales-side role that
-   Mothership and Collab: Sales share, a list of hubs they can open, and an
-   Influencer role only when Collab: Influencer is granted. Roles are not
-   chosen per hub independently.
+   Mothership and Collab: Sales share, a list of hubs they can open, an
+   Influencer role only when Collab: Influencer is granted, and a Media role
+   only when Collab: Media is granted. The Sales-side role is never chosen
+   per hub.
 2. **At least one hub always.** Adding a user requires one hub ticked, and
    the edit form will not remove the last one. A user with nothing to open is
    deactivated instead.
@@ -58,6 +59,7 @@ Held in `shared/access.js`. One record per SSO identity.
 | `role` | One of: Super Admin, Admin, Leadership, Sales VP, Head of Sales, Sales Manager, Sales (E/SE), Marketing Services / Product, Creative Strategist |
 | `hubs` | Non-empty subset of `sales`, `influencer`, `media` |
 | `influencerRole` | One of: Admin / Head of Influencer, Influencer Manager, Viewer / Client. Present only when `influencer` is in `hubs`. Defaults to Viewer / Client |
+| `mediaRole` | One of: Admin (Collab: Media), Media Planner. Present only when `media` is in `hubs`. Defaults to Media Planner |
 | `reportsTo` | Id of the manager, or an email string when the manager is not a Collabrium user. Read-only, labelled as from Azure AD |
 | `teamDirect`, `teamTotal` | Counts computed from the tree. Read-only |
 | `access` | `active` or `inactive` |

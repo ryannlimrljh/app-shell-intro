@@ -133,13 +133,19 @@ section('Guards');
   const edit = (rec, patch) => Object.assign({}, rec, patch);
   ok(A.check(SA, joy, edit(joy, { role: 'sales_manager' }), all) === null, 'Super Admin may change a role');
   ok(/Super Admin sets the role/.test(A.check(AD, joy, edit(joy, { role: 'sales_manager' }), all)), 'Admin may not change a role');
-  ok(A.check(AD, joy, edit(joy, { hubs: ['sales', 'media'] }), all) === null, 'Admin may assign hubs');
+  ok(A.check(AD, joy, edit(joy, { hubs: ['sales', 'media'], mediaRole: 'media_planner' }), all) === null, 'Admin may assign hubs');
   ok(A.check(AD, joy, edit(joy, { access: 'inactive' }), all) === null, 'Admin may deactivate');
   ok(A.check(AD, joy, null, all) === null, 'Admin may remove');
   ok(/Admin or Super Admin/.test(A.check(LD, joy, edit(joy, { access: 'inactive' }), all)), 'a business role may do nothing');
   ok(/at least one hub/.test(A.check(SA, joy, edit(joy, { hubs: [] }), all)), 'a record cannot lose its last hub');
   ok(/Influencer role/.test(A.check(SA, joy, edit(joy, { hubs: ['sales', 'influencer'], influencerRole: null }), all)), 'Influencer needs an Influencer role');
   ok(A.check(SA, joy, edit(joy, { hubs: ['sales', 'influencer'], influencerRole: 'viewer' }), all) === null, 'Influencer with a role is fine');
+  ok(A.check(AD, joy, edit(joy, { hubs: ['sales', 'influencer'], influencerRole: 'viewer' }), all) === null, 'Admin may grant Influencer with the default role on edit');
+  ok(/Super Admin sets the role/.test(A.check(AD, joy, edit(joy, { hubs: ['sales', 'influencer'], influencerRole: 'infl_admin' }), all) || ''), 'Admin may not grant Influencer with another role');
+  {
+    const held = edit(joy, { hubs: ['sales', 'influencer'], influencerRole: 'infl_admin' });
+    ok(A.check(AD, held, edit(held, { hubs: ['sales'], influencerRole: null }), all) === null, 'Admin may drop a hub, and its role goes with it');
+  }
   ok(/last active Super Admin/.test(A.check(SA, bryan, edit(bryan, { access: 'inactive' }), all)), 'the last Super Admin cannot be deactivated');
   ok(/last active Super Admin/.test(A.check(SA, bryan, edit(bryan, { role: 'admin' }), all)), 'the last Super Admin cannot be demoted');
   ok(/last active Super Admin/.test(A.check(SA, bryan, null, all)), 'the last Super Admin cannot be removed');
@@ -269,6 +275,31 @@ section('The ceiling holds');
   st.setItem(A.OVERRIDES_KEY, JSON.stringify({ o: [], log: [null, 3, { matrix: 'mothership', role: 'sales_rep', label: REPORTS, value: true, at: 'x', by: 'y' }] }));
   A.loadOverrides(st);
   ok(!A.isModified('mothership', 'sales_rep') && A.lastChange('mothership', 'sales_rep') !== null && A.lastChange('mothership', 'sales_rep').by === 'y', 'an array where the overrides should be is ignored, non-object log entries dropped');
+}
+
+
+section('Media role');
+{
+  ok(A.MEDIA_ROLES.map(r => r.key).join() === 'media_admin,media_planner' && A.DEFAULT_MEDIA_ROLE === 'media_planner', 'two Media roles, planner by default');
+  ok(seed.every(r => r.mediaRole === null), 'nobody carries a Media role in the seed');
+  const all = A.withTeams(seed.map(r => Object.assign({}, r)));
+  const SA = { id: 'bryan-wong', name: 'Bryan Wong', role: 'super_admin' };
+  const AD = { id: 'bryan-wong', name: 'Bryan Wong', role: 'admin' };
+  const joy = all.find(r => r.name.indexOf('Ahmad') !== -1);
+  const edit = (rec, patch) => Object.assign({}, rec, patch);
+  ok(/Media role/.test(A.check(SA, joy, edit(joy, { hubs: ['sales', 'media'], mediaRole: null }), all)), 'Media needs a Media role');
+  ok(/Collab: Media granted/.test(A.check(SA, joy, edit(joy, { mediaRole: 'media_planner' }), all)), 'a Media role needs the hub');
+  ok(A.check(SA, joy, edit(joy, { hubs: ['sales', 'media'], mediaRole: 'media_admin' }), all) === null, 'Super Admin may set a Media role');
+  ok(A.check(AD, joy, edit(joy, { hubs: ['sales', 'media'], mediaRole: 'media_planner' }), all) === null, 'Admin may grant Media with the default role');
+  ok(/Super Admin sets the role/.test(A.check(AD, joy, edit(joy, { hubs: ['sales', 'media'], mediaRole: 'media_admin' }), all)), 'Admin may not pick the Media admin role');
+  const withMedia = edit(joy, { hubs: ['sales', 'media'], mediaRole: 'media_planner' });
+  ok(/Super Admin sets the role/.test(A.check(AD, withMedia, edit(withMedia, { mediaRole: 'media_admin' }), all)), 'Admin may not change the Media role on edit');
+  ok(/media plans/.test(A.describe(withMedia)[2]) && /manages plans/.test(A.describe(edit(withMedia, { mediaRole: 'media_admin' }))[2]), 'describe names the Media role');
+  const st = memStorage();
+  const store = A.createStore({ seed, storage: st });
+  store.save(edit(joy, { hubs: ['sales', 'planning'] }));
+  ok(store.get(joy.id).mediaRole === 'media_planner', 'a Media grant saved before roles existed gets the default');
+  ok(store.get(all[0].id).mediaRole === null, 'no Media hub, no Media role');
 }
 
 console.log(failed ? `\n${failed} check(s) failed` : '\nAll checks passed');

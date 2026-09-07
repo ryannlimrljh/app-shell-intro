@@ -53,8 +53,11 @@ Production deploys from `main` on Vercel: `https://app-shell-intro.vercel.app/pa
 ## The access model, in one page
 
 **One SSO identity, one record.** A person has one Sales-side role that Mothership and
-Collab: Sales share, a list of hubs they can open, and an Influencer role only when
-Collab: Influencer is granted. At least one hub, always.
+Collab: Sales share, a list of hubs they can open, an Influencer role only when
+Collab: Influencer is granted (Admin / Head of Influencer, Influencer Manager, Viewer /
+Client), and a Media role only when Collab: Media is granted (Admin (Collab: Media),
+Media Planner). Granting a hub brings its default role, which Admin may do; choosing
+any other role is a Super Admin decision. At least one hub, always.
 
 **Two admin tiers.** Super Admin is the platform ceiling. Admin can add a user, assign
 hubs, deactivate or remove; only Super Admin sets or changes a role. Read literally from

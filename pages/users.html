@@ -369,7 +369,7 @@ window.addEventListener('error', function (e) {
     '<button class="c-btn c-btn-secondary c-btn-md" type="button" onclick="[\'collabrium.access.directory\',\'collabrium.access.overrides\',\'collabrium.access.viewer\'].forEach(function(k){try{localStorage.removeItem(k)}catch(e){}});location.reload(true)">Clear stored data and reload</button></div>';
 });
 </script>
-<script src="../shared/access.js?v=5"></script>
+<script src="../shared/access.js?v=6"></script>
 <script src="../shared/shell.js?v=4"></script>
 <script>
 (function () {
@@ -458,7 +458,7 @@ window.addEventListener('error', function (e) {
       if (state.hub.length && !state.hub.some(function (h) { return r.hubs.indexOf(h) !== -1; })) return false;
       if (state.st.length && state.st.indexOf(stateOf(r)) === -1) return false;
       if (!q) return true;
-      var hay = [r.name, r.email, A.roleLabel(r.role), r.influencerRole ? A.influencerRoleLabel(r.influencerRole) : ''].join(' ').toLowerCase();
+      var hay = [r.name, r.email, A.roleLabel(r.role), r.influencerRole ? A.influencerRoleLabel(r.influencerRole) : '', r.mediaRole ? A.mediaRoleLabel(r.mediaRole) : ''].join(' ').toLowerCase();
       return hay.indexOf(q) !== -1;
     });
     var k = state.sort.key, d = state.sort.dir;
@@ -548,7 +548,7 @@ window.addEventListener('error', function (e) {
       h += '<tr class="' + (r.access === 'inactive' ? 'is-off' : '') + '" data-id="' + esc(r.id) + '" data-letter="' + letterOf(r.name) + '">' +
         '<td><div class="us-name">' + esc(r.name) + (r.access === 'inactive' ? ' <span class="c-badge c-badge-neutral">Deactivated</span>' : '') + '</div><div class="us-sub">' + esc(r.email) + '</div></td>' +
         '<td><div class="us-hubs">' + r.hubs.map(function (k) { return '<span class="c-tag c-tag-' + A.hubElement(k) + '"><span class="dot"></span>' + esc(A.hubShort(k)) + '</span>'; }).join('') + '</div></td>' +
-        '<td>' + esc(A.roleLabel(r.role)) + (r.influencerRole ? '<div class="us-sub">Influencer: ' + esc(A.influencerRoleLabel(r.influencerRole)) + '</div>' : '') + '</td>' +
+        '<td>' + esc(A.roleLabel(r.role)) + (r.influencerRole ? '<div class="us-sub">Influencer: ' + esc(A.influencerRoleLabel(r.influencerRole)) + '</div>' : '') + (r.mediaRole ? '<div class="us-sub">Media: ' + esc(A.mediaRoleLabel(r.mediaRole)) + '</div>' : '') + '</td>' +
         '<td>' + esc(A.scopeWord(r.role)) + '</td>' +
         '<td>' + (mgr ? esc(mgr.name) + '<div class="us-sub">' + esc(mgr.email) + '</div>'
                       : r.reportsToEmail ? '<span class="us-ext">' + esc(r.reportsToEmail) + '</span><div class="us-sub warn">Not a Collabrium user — grants no access</div>'
@@ -891,7 +891,7 @@ window.addEventListener('error', function (e) {
 
   function blank() {
     return { id: '', name: '', email: '', networkId: '', role: A.DEFAULT_ROLE, hubs: ['sales'],
-             influencerRole: null, reportsTo: null, reportsToEmail: null, access: 'active', lastSignIn: null };
+             influencerRole: null, mediaRole: null, reportsTo: null, reportsToEmail: null, access: 'active', lastSignIn: null };
   }
   function openAdd() {
     opener = document.activeElement;
@@ -919,7 +919,7 @@ window.addEventListener('error', function (e) {
         activeHub = active && active.dataset ? active.dataset.hub : null;
     var f = form, n = f.next, isAdd = f.mode === 'add';
     var mayRole = A.holds(viewer.role, "Assign or change a user's role");
-    var hasInfl = n.hubs.indexOf('influencer') !== -1;
+    var hasInfl = n.hubs.indexOf('influencer') !== -1, hasMedia = n.hubs.indexOf('media') !== -1;
     var all = store.list();
     var byId = {};
     all.forEach(function (r) { byId[r.id] = r; });
@@ -966,6 +966,14 @@ window.addEventListener('error', function (e) {
           ? '<select id="irole">' + A.INFLUENCER_ROLES.map(function (r) { return '<option value="' + r.key + '"' + (r.key === n.influencerRole ? ' selected' : '') + '>' + esc(r.label) + '</option>'; }).join('') + '</select>' +
             '<div class="help">Collab: Influencer runs its own role set.</div>'
           : '<div class="ro">' + esc(A.influencerRoleLabel(n.influencerRole)) + '</div><div class="help">' + esc(A.ROLE_IS_SUPER) + '</div>') +
+        '</div>';
+    }
+    if (hasMedia) {
+      h += '<div class="us-f"><label for="mrole">Media role</label>' +
+        (mayRole
+          ? '<select id="mrole">' + A.MEDIA_ROLES.map(function (r) { return '<option value="' + r.key + '"' + (r.key === n.mediaRole ? ' selected' : '') + '>' + esc(r.label) + '</option>'; }).join('') + '</select>' +
+            '<div class="help">Collab: Media runs its own role set.</div>'
+          : '<div class="ro">' + esc(A.mediaRoleLabel(n.mediaRole)) + '</div><div class="help">' + esc(A.ROLE_IS_SUPER) + '</div>') +
         '</div>';
     }
 
@@ -1084,6 +1092,9 @@ window.addEventListener('error', function (e) {
         var hasInfl = n.hubs.indexOf('influencer') !== -1;
         if (hasInfl && !n.influencerRole) n.influencerRole = A.DEFAULT_INFLUENCER_ROLE;
         if (!hasInfl) n.influencerRole = null;
+        var hasMedia = n.hubs.indexOf('media') !== -1;
+        if (hasMedia && !n.mediaRole) n.mediaRole = A.DEFAULT_MEDIA_ROLE;
+        if (!hasMedia) n.mediaRole = null;
         paintModal();
       });
     });
@@ -1091,6 +1102,8 @@ window.addEventListener('error', function (e) {
     if (role) role.addEventListener('change', function () { n.role = role.value; paintModal(); });
     var irole = document.getElementById('irole');
     if (irole) irole.addEventListener('change', function () { n.influencerRole = irole.value; paintModal(); });
+    var mrole = document.getElementById('mrole');
+    if (mrole) mrole.addEventListener('change', function () { n.mediaRole = mrole.value; paintModal(); });
     var access = document.getElementById('access');
     if (access) access.addEventListener('change', function () { n.access = access.value; paintModal(); });
 

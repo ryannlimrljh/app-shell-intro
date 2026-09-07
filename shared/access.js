@@ -34,6 +34,11 @@
     { key: 'infl_manager', label: 'Influencer Manager' },
     { key: 'viewer',       label: 'Viewer / Client' }
   ];
+  /* Collab: Media runs its own pair, from the live app's directory. */
+  var MEDIA_ROLES = [
+    { key: 'media_admin',   label: 'Admin (Collab: Media)' },
+    { key: 'media_planner', label: 'Media Planner' }
+  ];
   /* element: the design system's department colour, the same mapping the
      department switcher uses (Sales is Gold, Influencers Earth, Media Water). */
   var HUBS = [
@@ -47,6 +52,7 @@
   var TEAM_SCOPED = ['sales_vp', 'head_of_sales', 'sales_manager'];
   var DEFAULT_ROLE = 'sales_rep';
   var DEFAULT_INFLUENCER_ROLE = 'viewer';
+  var DEFAULT_MEDIA_ROLE = 'media_planner';
 
   function labelOf(list, key) {
     for (var i = 0; i < list.length; i++) if (list[i].key === key) return list[i].label;
@@ -54,6 +60,7 @@
   }
   function roleLabel(k) { return labelOf(ROLES, k); }
   function influencerRoleLabel(k) { return labelOf(INFLUENCER_ROLES, k); }
+  function mediaRoleLabel(k) { return labelOf(MEDIA_ROLES, k); }
   function hubLabel(k) { return labelOf(HUBS, k); }
   function hubShort(k) {
     for (var i = 0; i < HUBS.length; i++) if (HUBS[i].key === k) return HUBS[i].short;
@@ -143,6 +150,9 @@
   api.ACTIVITIES = ACTIVITIES;
   api.roleLabel = roleLabel;
   api.influencerRoleLabel = influencerRoleLabel;
+  api.MEDIA_ROLES = MEDIA_ROLES;
+  api.DEFAULT_MEDIA_ROLE = DEFAULT_MEDIA_ROLE;
+  api.mediaRoleLabel = mediaRoleLabel;
   api.hubLabel = hubLabel;
   api.hubShort = hubShort;
   api.hubElement = hubElement;
@@ -226,7 +236,7 @@
       recs.push(rec);
     }
     push({ id: VIEWER_ID, name: 'Bryan Wong', email: 'bryan.wong@astro.com.my', networkId: 'BRYANWON',
-           role: 'super_admin', hubs: ['sales'], influencerRole: null,
+           role: 'super_admin', hubs: ['sales'], influencerRole: null, mediaRole: null,
            reportsTo: null, reportsToEmail: null, access: 'active',
            lastSignIn: iso(now - 2 * 3600000), _mgr: null });
     var index = tree.index || {};
@@ -240,7 +250,7 @@
                : 'sales_rep';
       var email = emailFor(name);
       push({ id: slug(name), name: name, email: email, networkId: networkIdFor(email),
-             role: role, hubs: ['sales'], influencerRole: null,
+             role: role, hubs: ['sales'], influencerRole: null, mediaRole: null,
              reportsTo: null, reportsToEmail: null, access: 'active',
              lastSignIn: role === 'sales_vp' ? iso(now - 3 * DAY) : null,
              _mgr: p.reportsTo || null });
@@ -306,6 +316,9 @@
        the old key reads back under the new one. */
     function migrate(r) {
       if (r.hubs) r.hubs = r.hubs.map(function (h) { return h === 'planning' ? 'media' : h; });
+      /* Media grants saved before the hub had roles get the default one. */
+      if (r.hubs && r.hubs.indexOf('media') !== -1 && !r.mediaRole) r.mediaRole = DEFAULT_MEDIA_ROLE;
+      if (r.mediaRole === undefined) r.mediaRole = null;
       return r;
     }
     function list() {
@@ -355,16 +368,30 @@
   var DENIED = 'Users & permissions is managed by an Admin or Super Admin.';
   var ROLE_IS_SUPER = 'A Super Admin sets the role.';
 
+  function hubRoleChanged(was, now, def) {
+    was = was || null; now = now || null;
+    if (was === now) return false;
+    if (now === null) return false;      /* the hub went, its role with it */
+    if (was === null) return now !== def; /* the hub arrived: only a non-default role is a choice */
+    return true;
+  }
   function check(viewer, before, next, all) {
     if (tierOf(viewer.role) !== 'admin') return DENIED;
     if (next) {
       if (!next.hubs || !next.hubs.length) return 'Every user needs at least one hub. Deactivate them instead.';
-      var hasInfl = next.hubs.indexOf('influencer') !== -1;
+      var hasInfl = next.hubs.indexOf('influencer') !== -1, hasMedia = next.hubs.indexOf('media') !== -1;
       if (hasInfl && !next.influencerRole) return 'Choose an Influencer role for Collab: Influencer.';
       if (!hasInfl && next.influencerRole) return 'An Influencer role needs Collab: Influencer granted.';
+      if (hasMedia && !next.mediaRole) return 'Choose a Media role for Collab: Media.';
+      if (!hasMedia && next.mediaRole) return 'A Media role needs Collab: Media granted.';
+      /* A hub's default role arriving with the hub is part of assigning the
+         hub, which Admin may do; any other role, or a change to one, is a
+         role decision, which Admin may not. Dropping a hub drops its role. */
       var roleChanged = before
-        ? (before.role !== next.role || (before.influencerRole || null) !== (next.influencerRole || null))
-        : (next.role !== DEFAULT_ROLE || (hasInfl && next.influencerRole !== DEFAULT_INFLUENCER_ROLE));
+        ? (before.role !== next.role ||
+           hubRoleChanged(before.influencerRole, next.influencerRole, DEFAULT_INFLUENCER_ROLE) ||
+           hubRoleChanged(before.mediaRole, next.mediaRole, DEFAULT_MEDIA_ROLE))
+        : (next.role !== DEFAULT_ROLE || (hasInfl && next.influencerRole !== DEFAULT_INFLUENCER_ROLE) || (hasMedia && next.mediaRole !== DEFAULT_MEDIA_ROLE));
       if (viewer.role === 'admin' && roleChanged) return ROLE_IS_SUPER;
       if (before && before.id === viewer.id && tierOf(before.role) !== tierOf(next.role))
         return 'You cannot change your own admin tier.';
@@ -422,6 +449,10 @@
     if (r === 'infl_manager') return 'full access across Tools, Reference Data and Insight, can view Users & Permissions but not manage it.';
     return 'no standing access, can respond to their own KOL preview or draft.';
   }
+  function mediaLine(r) {
+    if (r === 'media_admin') return 'full access; manages plans, rate cards and Users & Permissions in the hub.';
+    return 'builds and edits own media plans; opens Plans, Campaign performances, and Inventory availability & forecast.';
+  }
   function describe(rec) {
     var lines = [], hubs = rec.hubs || [];
     if (rec.role === 'super_admin') lines.push('Sees everything on the Sales Board. Platform ceiling: every activity, everywhere.');
@@ -429,7 +460,7 @@
     else lines.push('Sees ' + scopeWord(rec.role).toLowerCase() + ' on the Sales Board.');
     if (hubs.indexOf('sales') !== -1) lines.push('Collab: Sales: ' + salesLine(rec.role));
     if (hubs.indexOf('influencer') !== -1) lines.push('Collab: Influencer: ' + influencerLine(rec.influencerRole));
-    if (hubs.indexOf('media') !== -1) lines.push('Collab: Media: opens Plans, Campaign performances, and Inventory availability & forecast.');
+    if (hubs.indexOf('media') !== -1) lines.push('Collab: Media: ' + mediaLine(rec.mediaRole));
     return lines;
   }
 

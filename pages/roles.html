@@ -44,9 +44,7 @@
   .rp-stat .v{margin-top:4px; font-size:var(--text-h4-size); font-weight:800; font-variant-numeric:tabular-nums;}
   .rp-stat .s{font-size:var(--text-caption-size); color:var(--color-neutral-5); margin-top:2px;}
   /* The count is the way into the directory, filtered to this role. */
-  .rp-stat-link{display:inline-flex; align-items:center; gap:6px; color:var(--color-neutral-9); text-decoration:none; border-radius:var(--radius-sm);}
-  .rp-stat-link i{font-size:16px; color:var(--color-neutral-4); transition:transform var(--duration-fast) var(--ease-settle), color var(--duration-fast) var(--ease-standard);}
-  .rp-stat-link:hover i{transform:translateX(3px); color:var(--color-neutral-9);}
+  .rp-stat-link{display:inline-block; color:var(--color-neutral-9); text-decoration:none; border-radius:var(--radius-sm);}
   .rp-stat-link:hover{text-decoration:underline; text-underline-offset:4px;}
   .rp-stat-link:focus-visible{outline:2px solid var(--color-obsidian); outline-offset:4px;}
   .rp-bar{height:4px; border-radius:var(--radius-pill); background:var(--color-neutral-2); margin-top:var(--spacing-8); overflow:hidden;}
@@ -293,7 +291,7 @@ window.addEventListener('error', function (e) {
         '<h2 id="paneTitle" tabindex="-1">' + esc(role.label) + '</h2><p class="meaning">' + esc(MEANING[role.key] || '') + '</p></div></div>' +
       '<div class="rp-stat"><div class="k">Users</div>' +
         (n === null ? '<div class="v">—</div>'
-                    : '<a class="v rp-stat-link" href="users.html?role=' + encodeURIComponent(role.key) + '" aria-label="See the ' + n + (n === 1 ? ' user' : ' users') + ' with the role ' + esc(role.label) + ' in the directory">' + n + ' <i class="ph ph-arrow-right" aria-hidden="true"></i></a>') +
+                    : '<a class="v rp-stat-link" href="users.html?role=' + encodeURIComponent(role.key) + '" aria-label="See the ' + n + (n === 1 ? ' user' : ' users') + ' with the role ' + esc(role.label) + ' in the directory">' + n + '</a>') +
         '<div class="s">carry this role</div></div>' +
       '<div class="rp-stat"><div class="k">Activities</div><div class="v">' + heldActs + ' <span style="font-weight:500;color:var(--color-neutral-5)">of ' + totalActs + '</span></div>' +
         '<div class="rp-bar" aria-hidden="true"><i style="width:' + pct + '%"></i></div><div class="s">' + esc(m.title) + '</div></div>' +

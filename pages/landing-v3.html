@@ -3875,6 +3875,14 @@
   #salesBoard .controls.compact{align-items:flex-start;}
 }
 
+
+/* Pods without a deployed surface are visible but inert — dimmed, no
+   hover invitation, and the title says why. The attribute selector
+   outranks the component's own hover by specificity, so this needs no
+   particular load order. */
+.c-dept-option[aria-disabled="true"]{opacity:.45; cursor:default;}
+.c-dept-option[aria-disabled="true"]:hover{background:transparent;}
+
 /* ── Focus, on every interactive surface ─────────────────────── */
 #salesBoard a:focus-visible, #salesBoard button:focus-visible, #salesBoard input:focus-visible{
   outline:2px solid var(--navy); outline-offset:2px; border-radius:4px;}
@@ -4772,11 +4780,11 @@
       <span class="c-dept-option-logo"><img src="../collabrium-dls/logo-lockups/collabrium-default-logo.svg" alt="" style="--logo-scale:0.6" /></span>
       <i class="ph ph-check c-dept-check"></i>
     </div>
-    <div class="c-dept-option" role="option" aria-selected="false" aria-label="Studio" data-dept="studio" data-name="Studio" data-logo="../collabrium-dls/logo-lockups/collabStudio.svg" data-element-icon="../collabrium-dls/SVG/fire.svg">
+    <div class="c-dept-option" role="option" aria-selected="false" aria-label="Studio" data-dept="studio" data-name="Studio" data-logo="../collabrium-dls/logo-lockups/collabStudio.svg" data-element-icon="../collabrium-dls/SVG/fire.svg" aria-disabled="true" title="No workspace deployed yet">
       <span class="c-dept-option-logo"><img src="../collabrium-dls/logo-lockups/collabStudio.svg" alt="" /></span>
       <i class="ph ph-check c-dept-check"></i>
     </div>
-    <div class="c-dept-option" role="option" aria-selected="false" aria-label="Sales" data-dept="sales" data-name="Sales" data-logo="../collabrium-dls/logo-lockups/collabSales.svg" data-element-icon="../collabrium-dls/SVG/gold.svg">
+    <div class="c-dept-option" role="option" aria-selected="false" aria-label="Sales" data-dept="sales" data-name="Sales" data-logo="../collabrium-dls/logo-lockups/collabSales.svg" data-element-icon="../collabrium-dls/SVG/gold.svg" data-href="https://collab-sales-ui.vercel.app">
       <span class="c-dept-option-logo"><img src="../collabrium-dls/logo-lockups/collabSales.svg" alt="" /></span>
       <i class="ph ph-check c-dept-check"></i>
     </div>
@@ -4792,7 +4800,7 @@
       <span class="c-dept-option-logo"><img src="../collabrium-dls/logo-lockups/collabInfluencers.svg" alt="" /></span>
       <i class="ph ph-check c-dept-check"></i>
     </div>
-    <div class="c-dept-option" role="option" aria-selected="false" aria-label="Content" data-dept="content" data-name="Content" data-logo="../collabrium-dls/logo-lockups/collabContent.svg" data-element-icon="../collabrium-dls/SVG/wood.svg">
+    <div class="c-dept-option" role="option" aria-selected="false" aria-label="Content" data-dept="content" data-name="Content" data-logo="../collabrium-dls/logo-lockups/collabContent.svg" data-element-icon="../collabrium-dls/SVG/wood.svg" aria-disabled="true" title="No workspace deployed yet">
       <span class="c-dept-option-logo"><img src="../collabrium-dls/logo-lockups/collabContent.svg" alt="" /></span>
       <i class="ph ph-check c-dept-check"></i>
     </div>
@@ -5930,6 +5938,10 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
     deptDropdown.addEventListener('click', (e) => {
       const opt = e.target.closest('.c-dept-option');
       if (!opt) return;
+      // A pod with no deployed surface is shown but not selectable:
+      // swapping the shell to a workspace that does not exist yet would
+      // be a promise the click cannot keep.
+      if (opt.getAttribute('aria-disabled') === 'true') return;
       // A department that owns a deployed product opens it, in a new tab —
       // the same way this page's own hero CTAs leave for Collab Sales, so
       // the dashboard behind you survives the trip. The shell is left

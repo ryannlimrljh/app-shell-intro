@@ -30,6 +30,19 @@
   .st-card.is-off .c-btn{pointer-events:none; background:var(--color-neutral-2); color:var(--color-neutral-4); border-color:var(--color-neutral-3); box-shadow:none;}
   .st-note{display:inline-flex; align-items:center; gap:var(--spacing-4); font-size:var(--text-caption-size); color:var(--color-neutral-5);}
   .st-note i{font-size:14px;}
+  /* Skeleton first paint: each card shows bones in its own shape for the
+     roster's beat, then the real content, so the page lands in place
+     instead of popping. Same pulse as the directory and the roster. */
+  .st-card{position:relative;}
+  .st-sk-layer{position:absolute; inset:0; padding:var(--spacing-20); display:none; flex-direction:column; gap:var(--spacing-12);
+    background:var(--color-neutral-1); border-radius:inherit; z-index:1;}
+  .st-grid.is-loading .st-sk-layer{display:flex;}
+  .st-sk{display:block; height:12px; border-radius:var(--radius-sm); background:var(--color-neutral-2);}
+  .st-sk-btn{height:40px; width:160px; border-radius:var(--radius-md); background:var(--color-neutral-2); margin-top:auto;}
+  @media (prefers-reduced-motion:no-preference){
+    .st-sk, .st-sk-btn{animation:st-sk-pulse 1.4s var(--ease-standard) infinite;}
+    @keyframes st-sk-pulse{0%,100%{opacity:1;} 50%{opacity:.45;}}
+  }
   @media (max-width:760px){ .st-grid{grid-template-columns:1fr;} }
 </style>
 </head>
@@ -87,8 +100,9 @@
           <hr class="pg-rule" />
         </header>
 
-        <div class="st-grid">
+        <div class="st-grid is-loading" id="stGrid" aria-busy="true">
           <section class="c-card st-card" aria-labelledby="acctK">
+            <div class="st-sk-layer" aria-hidden="true"><span class="st-sk" style="width:64px; height:9px"></span><span class="st-sk" style="width:78%; height:16px"></span><span class="st-sk" style="width:56%; height:9px"></span><span class="st-sk-btn"></span></div>
             <div class="st-kicker" id="acctK">Account</div>
             <div class="st-email" id="acctEmail"></div>
             <div class="st-line" id="acctLine"></div>
@@ -98,6 +112,7 @@
           </section>
 
           <section class="c-card st-card" id="dirCard" aria-labelledby="dirK">
+            <div class="st-sk-layer" aria-hidden="true"><span class="st-sk" style="width:64px; height:9px"></span><span class="st-sk" style="width:78%; height:16px"></span><span class="st-sk" style="width:56%; height:9px"></span><span class="st-sk-btn"></span></div>
             <div class="st-kicker" id="dirK">Users &amp; roles</div>
             <p>Who may sign in, which hubs they can open, and what they may do there. Synced from Azure AD.</p>
             <div class="st-actions">
@@ -107,6 +122,7 @@
           </section>
 
           <section class="c-card st-card" id="rolesCard" aria-labelledby="rolesK">
+            <div class="st-sk-layer" aria-hidden="true"><span class="st-sk" style="width:64px; height:9px"></span><span class="st-sk" style="width:78%; height:16px"></span><span class="st-sk" style="width:56%; height:9px"></span><span class="st-sk-btn"></span></div>
             <div class="st-kicker" id="rolesK">Roles &amp; permissions</div>
             <p>What each role may do in Mothership. Super Admin edits, Admin views. Each hub sets its own inside the pod.</p>
             <div class="st-actions">
@@ -205,6 +221,15 @@ window.addEventListener('error', function (e) {
   A.loadOverrides(localStorage);
   var viewer = window.CollabShell.init({ onViewerChange: paint });
   paint(viewer);
+  /* The data is local, so the beat is staged rather than real: the roster
+     page's own 1000ms, long enough for the bones to register as a
+     considered loading state instead of a flicker. */
+  var HOLD = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 1000;
+  setTimeout(function () {
+    var g = document.getElementById('stGrid');
+    g.classList.remove('is-loading');
+    g.removeAttribute('aria-busy');
+  }, HOLD);
 })();
 </script>
 </body>

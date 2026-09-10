@@ -1534,6 +1534,14 @@
   .c-hcard-ai .c-hcard-rec{color:var(--color-neutral-3);}
   .c-hcard-ai .c-hcard-prov{color:var(--color-neutral-4);}
   .c-hcard-tags{display:flex; flex-wrap:wrap; gap:var(--spacing-8);}
+  /* The empty state inside a card. .c-empty is the DS component and is
+     left alone; these three declarations only let it fill the card it sits
+     in, so the specimen is centred in the same 380px box every other card
+     occupies rather than hugging the label. Its own horizontal padding
+     stands down because the card already pads 24, and 48 a side leaves the
+     sentence too narrow to read at 340. */
+  .c-hcard-empty .c-empty{flex:1 1 auto; justify-content:center; padding-inline:0;}
+
   .c-hcard-cta-btn{margin-top:auto; align-self:flex-start; border:none; border-radius:var(--radius-sm); background:var(--color-orange); color:var(--color-neutral-1); font-family:var(--font-primary); font-size:var(--text-label2-size); font-weight:700; padding:var(--spacing-8) var(--spacing-12); cursor:pointer; transition:opacity var(--duration-fast) var(--ease-standard);}
   .c-hcard-cta-btn:hover{opacity:.88;}
 
@@ -2261,6 +2269,24 @@
                 <span class="c-tag">2 unopened proposals</span>
               </div>
               <button class="c-hcard-cta-btn" type="button">Draft outreach</button>
+            </div>
+            <!-- ── The empty state, as a specimen. Every card above assumes it
+                 has something to say; this is what one becomes when its slice
+                 returns nothing, kept in the library so the treatment has
+                 somewhere to be seen and copied from.
+
+                 data-role="sample" is what keeps it off the fan: the overlay
+                 puts every role that is not FAN_ROLE in the drawer, so this
+                 needs no special case anywhere in the script. It carries no
+                 data-hero attributes, so the board's emitter never writes to
+                 it, and no data-modal, so a body click opens nothing. ── -->
+            <div class="c-card c-card-slide c-hcard-empty" data-role="sample">
+              <span class="c-hcard-label">Empty state <span class="c-hcard-prov" title="A specimen, not a live card. It shows what any card here looks like when the slice leaves it nothing to report.">&middot; sample</span></span>
+              <div class="c-empty">
+                <i class="ph-fill ph-funnel" aria-hidden="true"></i>
+                <h4>No open deals in this slice</h4>
+                <p>The filters have narrowed past every open deal. Clear one and the card fills again.</p>
+              </div>
             </div>
           </div>
         </div>

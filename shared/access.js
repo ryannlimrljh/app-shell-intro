@@ -212,7 +212,7 @@
     return recs;
   }
 
-  /* One record per person in the chart's flat index, plus Bryan Wong on
+  /* One record per person in the chart's flat index, plus Ryann Lim on
      top. Role from the chart's own lists: a name in `vps` → Sales VP, a
      name in `heads` → Head of Sales, a pod lead or AVP grade → Sales
      Manager, everyone else → Sales (E/SE). */
@@ -235,7 +235,7 @@
       byName[rec.name] = rec;
       recs.push(rec);
     }
-    push({ id: VIEWER_ID, name: 'Bryan Wong', email: 'bryan.wong@astro.com.my', networkId: 'BRYANWON',
+    push({ id: VIEWER_ID, name: 'Ryann Lim', email: 'ryann.lim@astro.com.my', networkId: 'RYANNLIM',
            role: 'super_admin', hubs: ['sales'], influencerRole: null, mediaRole: null,
            reportsTo: null, reportsToEmail: null, access: 'active',
            lastSignIn: iso(now - 2 * 3600000), _mgr: null });
@@ -418,7 +418,7 @@
 
   /* ── The viewer ─────────────────────────────────────────────────────── */
 
-  /* Always Bryan Wong; only the role line changes. That keeps the demo
+  /* Always Ryann Lim; only the role line changes. That keeps the demo
      honest about it being one person trying on three views. */
   var VIEWER_KEY = 'collabrium.access.viewer';
   var VIEWER_ROLES = ['super_admin', 'admin', 'leadership'];
@@ -427,7 +427,7 @@
     var role = null;
     try { role = storage.getItem(VIEWER_KEY); } catch (e) {}
     if (VIEWER_ROLES.indexOf(role) === -1) role = 'super_admin';
-    return { id: VIEWER_ID, name: 'Bryan Wong', email: 'bryan.wong@astro.com.my', role: role };
+    return { id: VIEWER_ID, name: 'Ryann Lim', email: 'ryann.lim@astro.com.my', role: role };
   }
   function setViewer(storage, role) {
     if (VIEWER_ROLES.indexOf(role) === -1) return;

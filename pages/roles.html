@@ -105,6 +105,11 @@
 .c-sidebar-item.soon .c-pod-mark{opacity:.4;}
 .c-sidebar-item.soon:hover{background:transparent;}
 .c-sidebar.is-collapsed .c-sidebar-item .c-badge{display:none;}
+/* The one line that says what a pod is. Caption size at body weight,
+   under the eyebrow it explains; it leaves with the labels when the
+   rail collapses, where there is no room for a sentence. */
+.c-sidebar-caption{margin:0; padding:0 var(--spacing-8) var(--spacing-8); font-size:var(--text-caption-size); font-weight:500; line-height:1.4; color:var(--color-neutral-5); flex-shrink:0;}
+.c-sidebar.is-collapsed .c-sidebar-caption{display:none;}
 </style>
 </head>
 <body>
@@ -133,6 +138,7 @@
            are. Same six rows, same order, in every app. ── -->
       <hr class="c-sidebar-divider" />
       <div class="c-sidebar-section">Pods</div>
+      <p class="c-sidebar-caption">Each pod is a team’s workspace. Hop across any time.</p>
       <a class="c-sidebar-item active" href="landing-v3.html" aria-current="true"><i class="c-pod-mark" aria-hidden="true"><img src="../collabrium-dls/SVG/coin.svg" alt="" /></i><span class="label">Collabrium</span><span class="c-sidebar-hover-text">Collabrium</span></a>
       <a class="c-sidebar-item" href="https://collab-sales-ui.vercel.app"><i class="c-pod-mark" aria-hidden="true"><img src="../collabrium-dls/SVG/gold.svg" alt="" /></i><span class="label">Sales</span><span class="c-sidebar-hover-text">Collab:Sales</span></a>
       <a class="c-sidebar-item" href="https://collab-media.vercel.app"><i class="c-pod-mark" aria-hidden="true"><img src="../collabrium-dls/SVG/water.svg" alt="" /></i><span class="label">Media</span><span class="c-sidebar-hover-text">Collab:Media</span></a>

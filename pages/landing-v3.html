@@ -88,8 +88,8 @@
   .c-canvas-greeting p{margin:0; font-family:var(--font-primary); font-size:var(--text-body1-size); font-weight:var(--text-body1-weight); color:var(--color-neutral-5);}
 
 
-  /* Greeting entrance — held invisible until the nav has finished its
-     own auto-collapse (see revealCanvasContent() in the script below),
+  /* Greeting entrance — held invisible until the nav has slid in and
+     settled, open (see revealCanvasContent() in the script below),
      then fade + slide up, staggered one after another (h1, then
      subtitle) via transition-delay off a single shared .is-revealed
      trigger — one JS call sets the class on both at once, CSS alone
@@ -5767,8 +5767,8 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
 
   // SidebarNav — collapse/expand toggle. Swaps the logo asset itself
   // and the toggle icon's arrow direction. Pulled out into a named
-  // function (ported logic, unmodified) so the auto-collapse timer
-  // further down can drive the exact same state change a manual click
+  // function (ported logic, unmodified) so anything else that needs to
+  // drive the rail can produce the exact same state change a manual click
   // does — logo swap, arrow direction, aria-label all included — rather
   // than just toggling the class and leaving the toggle button's own
   // visual state out of sync.
@@ -5929,7 +5929,7 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
     const EXIT_MS = 380;            // panel sweeps out, uncovering the viewport — same transition-duration as ENTER_MS
     const POST_WIPE_HOLD_MS = 200;  // blank warm canvas again, after the panel exits, before the nav slides in
     const NAV_DURATION_MS = 450;    // must match .c-sidebar-shell's transition-duration in <style> above
-    const AUTO_COLLAPSE_DELAY_MS = 900; // how long the nav stays expanded, once fully settled, before auto-collapsing — short on purpose (was 2500ms; per feedback the collapse should come quicker so the canvas content isn't kept waiting)
+    const NAV_SETTLE_MS = 900; // how long the nav sits, open, once fully in, before the canvas content arrives. The nav used to collapse at this beat; per feedback it now stays open, and the beat only paces the content
 
     function hideWipePanel() {
       wipePanel.style.display = 'none';
@@ -5938,16 +5938,14 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
       sidebarShell.classList.add('is-in');
     }
     // Greeting/cards stay invisible (see their own CSS above) until
-    // this fires — called only from inside autoCollapseNav(), below,
-    // once the sidebar's own width transition (--duration-slow, 360ms)
-    // has actually finished collapsing, not the moment the class is
-    // set. Setting all three .is-revealed classes together here is the
-    // *only* thing this needs to do — the h1→p→cards stagger itself is
-    // pure CSS (transition-delay), not sequenced in JS.
-    const SIDEBAR_COLLAPSE_TRANSITION_MS = 360; // must match .c-sidebar's own transition-duration in components.css
+    // this fires — called only from inside settleNav(), below, once the
+    // nav has slid in and sat for its beat. Setting all three
+    // .is-revealed classes together here is the *only* thing this needs
+    // to do — the h1→p→cards stagger itself is pure CSS
+    // (transition-delay), not sequenced in JS.
     let canvasRevealed = false;
     function revealCanvasContent() {
-      // Run-once guard: autoCollapseNav() fires from BOTH the normal
+      // Run-once guard: settleNav() fires from BOTH the normal
       // choreography and the throttled-tab fallback below, and unlike
       // its siblings this function is NOT naturally idempotent — a
       // second run would inject a second skeleton and re-add
@@ -6060,15 +6058,11 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
         }, contentAt);
       });
     }
-    // Auto-collapse the main nav a couple seconds after it's settled —
-    // reuses setSidebarCollapsed (defined above, in the sidebar-toggle
-    // section) so this drives the exact same state a manual click does
-    // (logo swap, arrow direction, aria-label), not just the class.
-    function autoCollapseNav() {
-      const nav = document.getElementById('shellSidebarNav');
-      const toggle = document.querySelector('[data-sidebar-toggle="shellSidebarNav"]');
-      if (nav && toggle) setSidebarCollapsed(nav, toggle, true);
-      setTimeout(revealCanvasContent, SIDEBAR_COLLAPSE_TRANSITION_MS);
+    // The nav has slid in and sat for its beat: the canvas content may
+    // arrive. The rail stays open; it used to collapse here, which left
+    // every first visit on the icon rail with the pods map out of sight.
+    function settleNav() {
+      revealCanvasContent();
     }
     function enterCover() {
       wipePanel.style.transform = 'translateX(0) skewX(-12deg)';
@@ -6083,18 +6077,18 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
       hideWipePanel();
       setTimeout(() => {
         revealNav();
-        setTimeout(autoCollapseNav, NAV_DURATION_MS + AUTO_COLLAPSE_DELAY_MS);
+        setTimeout(settleNav, NAV_DURATION_MS + NAV_SETTLE_MS);
       }, POST_WIPE_HOLD_MS);
     }, PRE_HOLD_MS + ENTER_MS + HOLD_COVER_MS + EXIT_MS);
 
-    // Fallback: guarantee the wipe panel hides, the nav reveals, and it
-    // still auto-collapses even if something delays a timer (e.g. a
+    // Fallback: guarantee the wipe panel hides, the nav reveals, and the
+    // content still arrives even if something delays a timer (e.g. a
     // backgrounded/throttled tab) — all three functions are idempotent,
     // so this is harmless if the normal path already ran.
     setTimeout(() => {
       hideWipePanel();
       revealNav();
-      setTimeout(autoCollapseNav, AUTO_COLLAPSE_DELAY_MS);
+      setTimeout(settleNav, NAV_SETTLE_MS);
     }, PRE_HOLD_MS + ENTER_MS + HOLD_COVER_MS + EXIT_MS + POST_WIPE_HOLD_MS + 300);
   }
 

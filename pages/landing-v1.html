@@ -2071,7 +2071,7 @@
 .c-sidebar-logo-home{display:inline-flex; align-items:center;}
 .c-sidebar.is-collapsed .c-sidebar-logo-home{display:none;}
 .c-nav-tree{display:flex; flex-direction:column; gap:var(--spacing-4); flex-shrink:0;}
-a.c-nav-child{text-decoration:none;}
+a.c-sidebar-item, a.c-nav-child{text-decoration:none;}
 .c-nav-child.soon{color:var(--color-neutral-4); cursor:not-allowed;}
 .c-nav-child.soon:hover{background:transparent;}
 </style>
@@ -2089,12 +2089,13 @@ a.c-nav-child{text-decoration:none;}
           <a class="c-sidebar-logo-home" href="landing-v3.html" aria-label="Collabrium home"><span class="c-sidebar-logo-live-wrap"><iframe src="../collabrium-dls/logo.html" title="Collabrium" scrolling="no"></iframe></span></a>
           <img class="c-sidebar-logo-collapsed" src="../collabrium-dls/SVG/coin.svg" alt="Collabrium" />
         </div>
-        <!-- The nav is the pods tree: one parent row per workspace, its
-             entries as children, rendered by shared/pods.js so every app
-             draws the same map. This page's own pod opens and its page is
-             the one active row; the parent goes bold with no fill, per the
-             DS's second-level navigation. Studio and Content are the DS's
-             "soon" rows until they have a surface. -->
+        <!-- The nav is the pods map, rendered by shared/pods.js so every
+             app draws the same one. This page's own pod sits first with its
+             entries open beneath it and nothing to toggle; a divider follows;
+             every other pod is one row that leads to its front door. The
+             page you are on is the one active row and its pod goes bold with
+             no fill, per the DS's second-level navigation. Studio and Content
+             are the DS's "soon" rows until they have a surface. -->
         <div class="c-sidebar-section">Pods</div>
         <p class="c-sidebar-caption">Each pod is a team’s workspace. Hop across any time.</p>
         <div class="c-nav-tree" id="podsNav" data-pod="collabrium"></div>

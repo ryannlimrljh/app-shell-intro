@@ -110,6 +110,12 @@
    rail collapses, where there is no room for a sentence. */
 .c-sidebar-caption{margin:0; padding:0 var(--spacing-8) var(--spacing-8); font-size:var(--text-caption-size); font-weight:500; line-height:1.4; color:var(--color-neutral-5); flex-shrink:0;}
 .c-sidebar.is-collapsed .c-sidebar-caption{display:none;}
+/* The logo as a home link, and the group the tour spotlights. The link
+   hides in the collapsed rail exactly as the old trigger did; the
+   collapsed coin stands in for it there. */
+.c-sidebar-logo-home{display:inline-flex; align-items:center;}
+.c-sidebar.is-collapsed .c-sidebar-logo-home{display:none;}
+.c-sidebar-group{display:flex; flex-direction:column; gap:var(--spacing-4); flex-shrink:0;}
 </style>
 </head>
 <body>
@@ -118,13 +124,10 @@
   <div class="c-sidebar-shell" id="shellSidebarShell">
     <nav class="c-sidebar" id="shellSidebarNav">
       <div class="c-sidebar-header">
-        <button class="c-dept-trigger js-dept-trigger" type="button" aria-haspopup="listbox"
-                aria-expanded="false" aria-label="Switch department" aria-controls="deptDropdown">
-          <span class="c-sidebar-logo-live-wrap js-dept-logo-live"><iframe src="../collabrium-dls/logo.html" title="Collabrium" scrolling="no"></iframe></span>
-          <img class="c-dept-logo-static js-dept-logo-static" alt="" style="display:none" />
-          <i class="ph ph-caret-down js-dept-chevron c-dept-chevron"></i>
-        </button>
-        <img class="c-sidebar-logo-collapsed js-dept-logo-collapsed" src="../collabrium-dls/SVG/coin.svg" alt="Collabrium" />
+        <!-- The logo is the home link it reads as. The way across to the
+             other pods is the Pods section below, so nothing hides here. -->
+          <a class="c-sidebar-logo-home" href="landing-v3.html" aria-label="Collabrium home"><span class="c-sidebar-logo-live-wrap"><iframe src="../collabrium-dls/logo.html" title="Collabrium" scrolling="no"></iframe></span></a>
+        <img class="c-sidebar-logo-collapsed" src="../collabrium-dls/SVG/coin.svg" alt="Collabrium" />
       </div>
       <div class="c-sidebar-section">Overview</div>
       <a class="c-sidebar-item" href="landing-v3.html"><i class="ph-fill ph-house"></i><span class="label">Dashboard</span><span class="c-sidebar-hover-text">Dashboard</span></a>
@@ -136,6 +139,7 @@
            no deployed surface is the DS's own "soon" row rather than a dead
            link. The current pod is marked, so the rail also says where you
            are. Same six rows, same order, in every app. ── -->
+      <div class="c-sidebar-group" id="podsNav">
       <hr class="c-sidebar-divider" />
       <div class="c-sidebar-section">Pods</div>
       <p class="c-sidebar-caption">Each pod is a team’s workspace. Hop across any time.</p>
@@ -145,6 +149,7 @@
       <a class="c-sidebar-item" href="https://collab-influence.vercel.app/pages/influencers-v2.html"><i class="c-pod-mark" aria-hidden="true"><img src="../collabrium-dls/SVG/earth.svg" alt="" /></i><span class="label">Influence</span><span class="c-sidebar-hover-text">Collab:Influence</span></a>
       <a class="c-sidebar-item soon" aria-disabled="true" title="No workspace deployed yet"><i class="c-pod-mark" aria-hidden="true"><img src="../collabrium-dls/SVG/fire.svg" alt="" /></i><span class="label">Studio</span><span class="c-badge c-badge-neutral">Soon</span><span class="c-sidebar-hover-text">Collab:Studio · soon</span></a>
       <a class="c-sidebar-item soon" aria-disabled="true" title="No workspace deployed yet"><i class="c-pod-mark" aria-hidden="true"><img src="../collabrium-dls/SVG/wood.svg" alt="" /></i><span class="label">Content</span><span class="c-badge c-badge-neutral">Soon</span><span class="c-sidebar-hover-text">Collab:Content · soon</span></a>
+      </div>
       <div class="c-sidebar-footer">
         <button class="c-sidebar-account" type="button" id="accountMenuTrigger"
                 aria-haspopup="menu" aria-expanded="false" aria-controls="accountMenu">
@@ -194,37 +199,6 @@
   <a class="c-account-menu-item" href="settings.html" role="menuitem"><i class="ph-fill ph-gear"></i><span>Settings</span></a>
   <a class="c-account-menu-item" href="login-v1.html" role="menuitem"><i class="ph-fill ph-sign-out"></i><span>Log out</span></a>
 </div>
-
-<div class="c-dept-dropdown" id="deptDropdown" role="listbox" aria-label="Departments" hidden>
-  <div class="c-dept-option is-active" role="option" aria-selected="true" aria-label="Collabrium (Default)" data-dept="default" data-name="Collabrium (Default)" data-element-icon="../collabrium-dls/SVG/coin.svg">
-    <span class="c-dept-option-logo"><img src="../collabrium-dls/logo-lockups/collabrium-default-logo.svg" alt="" style="--logo-scale:0.6" /></span>
-    <i class="ph ph-check c-dept-check"></i>
-  </div>
-  <div class="c-dept-option" role="option" aria-selected="false" aria-label="Studio" data-dept="studio" data-name="Studio" data-logo="../collabrium-dls/logo-lockups/collabStudio.svg" data-element-icon="../collabrium-dls/SVG/fire.svg">
-    <span class="c-dept-option-logo"><img src="../collabrium-dls/logo-lockups/collabStudio.svg" alt="" /></span>
-    <i class="ph ph-check c-dept-check"></i>
-  </div>
-  <div class="c-dept-option" role="option" aria-selected="false" aria-label="Sales" data-dept="sales" data-name="Sales" data-logo="../collabrium-dls/logo-lockups/collabSales.svg" data-element-icon="../collabrium-dls/SVG/gold.svg">
-    <span class="c-dept-option-logo"><img src="../collabrium-dls/logo-lockups/collabSales.svg" alt="" /></span>
-    <i class="ph ph-check c-dept-check"></i>
-  </div>
-  <!-- Media is the one department with somewhere to go: Collab:Media is a
-       deployed product, so picking it opens that app rather than restyling
-       this shell. data-href is what says so; shell.js opens it in a new tab. -->
-  <div class="c-dept-option" role="option" aria-selected="false" aria-label="Media" data-dept="media" data-name="Media" data-logo="../collabrium-dls/logo-lockups/collabMedia.svg" data-element-icon="../collabrium-dls/SVG/water.svg" data-href="https://collab-media.vercel.app">
-    <span class="c-dept-option-logo"><img src="../collabrium-dls/logo-lockups/collabMedia.svg" alt="" /></span>
-    <i class="ph ph-arrow-up-right c-dept-check" aria-hidden="true" style="opacity:1"></i>
-  </div>
-  <div class="c-dept-option" role="option" aria-selected="false" aria-label="Influencers" data-dept="influencers" data-name="Influencers" data-logo="../collabrium-dls/logo-lockups/collabInfluencers.svg" data-element-icon="../collabrium-dls/SVG/earth.svg">
-    <span class="c-dept-option-logo"><img src="../collabrium-dls/logo-lockups/collabInfluencers.svg" alt="" /></span>
-    <i class="ph ph-check c-dept-check"></i>
-  </div>
-  <div class="c-dept-option" role="option" aria-selected="false" aria-label="Content" data-dept="content" data-name="Content" data-logo="../collabrium-dls/logo-lockups/collabContent.svg" data-element-icon="../collabrium-dls/SVG/wood.svg">
-    <span class="c-dept-option-logo"><img src="../collabrium-dls/logo-lockups/collabContent.svg" alt="" /></span>
-    <i class="ph ph-check c-dept-check"></i>
-  </div>
-</div>
-
 <div class="c-toast-host" id="toasts"></div>
 
 <script>

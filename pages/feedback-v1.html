@@ -661,6 +661,12 @@
    rail collapses, where there is no room for a sentence. */
 .c-sidebar-caption{margin:0; padding:0 var(--spacing-8) var(--spacing-8); font-size:var(--text-caption-size); font-weight:500; line-height:1.4; color:var(--color-neutral-5); flex-shrink:0;}
 .c-sidebar.is-collapsed .c-sidebar-caption{display:none;}
+/* The logo as a home link, and the group the tour spotlights. The link
+   hides in the collapsed rail exactly as the old trigger did; the
+   collapsed coin stands in for it there. */
+.c-sidebar-logo-home{display:inline-flex; align-items:center;}
+.c-sidebar.is-collapsed .c-sidebar-logo-home{display:none;}
+.c-sidebar-group{display:flex; flex-direction:column; gap:var(--spacing-4); flex-shrink:0;}
 </style>
 </head>
 <body>
@@ -669,17 +675,10 @@
   <div class="c-sidebar-shell" id="shellSidebarShell">
     <nav class="c-sidebar" id="shellSidebarNav">
       <div class="c-sidebar-header">
-        <!-- Three marks, one shown at a time, and CSS picks which rather than
-             JS swapping a src: the live wrap is the animated default, the
-             static img is a picked department's lockup, and the collapsed
-             icon is shown only by .c-sidebar.is-collapsed in components.css. -->
-        <button class="c-dept-trigger js-dept-trigger" type="button" aria-haspopup="listbox"
-                aria-expanded="false" aria-label="Switch department" aria-controls="deptDropdown">
-          <span class="c-sidebar-logo-live-wrap js-dept-logo-live"><iframe src="../collabrium-dls/logo.html" title="Collabrium" scrolling="no"></iframe></span>
-          <img class="c-dept-logo-static js-dept-logo-static" alt="" style="display:none" />
-          <i class="ph ph-caret-down js-dept-chevron c-dept-chevron"></i>
-        </button>
-        <img class="c-sidebar-logo-collapsed js-dept-logo-collapsed" src="../collabrium-dls/SVG/coin.svg" alt="Collabrium" />
+        <!-- The logo is the home link it reads as. The way across to the
+             other pods is the Pods section below, so nothing hides here. -->
+          <a class="c-sidebar-logo-home" href="landing-v3.html" aria-label="Collabrium home"><span class="c-sidebar-logo-live-wrap"><iframe src="../collabrium-dls/logo.html" title="Collabrium" scrolling="no"></iframe></span></a>
+        <img class="c-sidebar-logo-collapsed" src="../collabrium-dls/SVG/coin.svg" alt="Collabrium" />
       </div>
       <div class="c-sidebar-section">Overview</div>
       <a class="c-sidebar-item" href="landing-v3.html"><i class="ph-fill ph-house"></i><span class="label">Dashboard</span><span class="c-sidebar-hover-text">Dashboard</span></a>
@@ -691,6 +690,7 @@
            no deployed surface is the DS's own "soon" row rather than a dead
            link. The current pod is marked, so the rail also says where you
            are. Same six rows, same order, in every app. ── -->
+      <div class="c-sidebar-group" id="podsNav">
       <hr class="c-sidebar-divider" />
       <div class="c-sidebar-section">Pods</div>
       <p class="c-sidebar-caption">Each pod is a team’s workspace. Hop across any time.</p>
@@ -700,6 +700,7 @@
       <a class="c-sidebar-item" href="https://collab-influence.vercel.app/pages/influencers-v2.html"><i class="c-pod-mark" aria-hidden="true"><img src="../collabrium-dls/SVG/earth.svg" alt="" /></i><span class="label">Influence</span><span class="c-sidebar-hover-text">Collab:Influence</span></a>
       <a class="c-sidebar-item soon" aria-disabled="true" title="No workspace deployed yet"><i class="c-pod-mark" aria-hidden="true"><img src="../collabrium-dls/SVG/fire.svg" alt="" /></i><span class="label">Studio</span><span class="c-badge c-badge-neutral">Soon</span><span class="c-sidebar-hover-text">Collab:Studio · soon</span></a>
       <a class="c-sidebar-item soon" aria-disabled="true" title="No workspace deployed yet"><i class="c-pod-mark" aria-hidden="true"><img src="../collabrium-dls/SVG/wood.svg" alt="" /></i><span class="label">Content</span><span class="c-badge c-badge-neutral">Soon</span><span class="c-sidebar-hover-text">Collab:Content · soon</span></a>
+      </div>
       <div class="c-sidebar-footer">
         <button class="c-sidebar-account" type="button" id="accountMenuTrigger"
                 aria-haspopup="menu" aria-expanded="false" aria-controls="accountMenu">
@@ -803,34 +804,6 @@
        closes on the way out. -->
   <a class="c-account-menu-item" href="login-v1.html" role="menuitem"><i class="ph-fill ph-sign-out"></i><span>Log out</span></a>
 </div>
-
-<!-- Outside .c-sidebar and position:fixed, unlike the system's own absolutely
-     positioned .c-dept-dropdown: .c-sidebar sets overflow-x:clip, so a panel
-     positioned inside it is clipped at the rail's edge. Same escape the
-     account menu and the hover label above already take. -->
-<div class="c-dept-dropdown" id="deptDropdown" role="listbox" aria-label="Departments" hidden>
-  <div class="c-dept-option is-active" role="option" aria-selected="true" aria-label="Collabrium (Default)" data-dept="default" data-name="Collabrium (Default)" data-element-icon="../collabrium-dls/SVG/coin.svg">
-    <span class="c-dept-option-logo"><img src="../collabrium-dls/logo-lockups/collabrium-default-logo.svg" alt="" style="--logo-scale:0.6" /></span>
-    <i class="ph ph-check c-dept-check"></i>
-  </div>
-  <div class="c-dept-option" role="option" aria-selected="false" aria-label="Studio" data-dept="studio" data-name="Studio" data-logo="../collabrium-dls/logo-lockups/collabStudio.svg" data-element-icon="../collabrium-dls/SVG/fire.svg">
-    <span class="c-dept-option-logo"><img src="../collabrium-dls/logo-lockups/collabStudio.svg" alt="" /></span>
-    <i class="ph ph-check c-dept-check"></i>
-  </div>
-  <div class="c-dept-option" role="option" aria-selected="false" aria-label="Sales" data-dept="sales" data-name="Sales" data-logo="../collabrium-dls/logo-lockups/collabSales.svg" data-element-icon="../collabrium-dls/SVG/gold.svg">
-    <span class="c-dept-option-logo"><img src="../collabrium-dls/logo-lockups/collabSales.svg" alt="" /></span>
-    <i class="ph ph-check c-dept-check"></i>
-  </div>
-  <div class="c-dept-option" role="option" aria-selected="false" aria-label="Influencers" data-dept="influencers" data-name="Influencers" data-logo="../collabrium-dls/logo-lockups/collabInfluencers.svg" data-element-icon="../collabrium-dls/SVG/earth.svg">
-    <span class="c-dept-option-logo"><img src="../collabrium-dls/logo-lockups/collabInfluencers.svg" alt="" /></span>
-    <i class="ph ph-check c-dept-check"></i>
-  </div>
-  <div class="c-dept-option" role="option" aria-selected="false" aria-label="Content" data-dept="content" data-name="Content" data-logo="../collabrium-dls/logo-lockups/collabContent.svg" data-element-icon="../collabrium-dls/SVG/wood.svg">
-    <span class="c-dept-option-logo"><img src="../collabrium-dls/logo-lockups/collabContent.svg" alt="" /></span>
-    <i class="ph ph-check c-dept-check"></i>
-  </div>
-</div>
-
 <div class="c-toast-host" id="fbToasts"></div>
 
 <script>
@@ -2369,8 +2342,6 @@ document.addEventListener('keydown', function (e) {
      behind the account menu, which stayed open on top of it. */
   var am = document.getElementById('accountMenu');
   if (am && am.classList.contains('is-open')) return;
-  var dd = document.getElementById('deptDropdown');
-  if (dd && !dd.hidden) return;
   if (COMPOSE) return;
   e.preventDefault(); compose();
 });
@@ -2420,7 +2391,7 @@ var AUTO_MIN_MS = 1600;
    or using one would close the rail underneath it. */
 document.addEventListener('click', function (e) {
   if (!NARROW.matches || e.target.closest('#shellSidebarShell') ||
-      e.target.closest('#accountMenu') || e.target.closest('#deptDropdown')) return;
+      e.target.closest('#accountMenu')) return;
   setCollapsed(true);
 });
 
@@ -2473,83 +2444,6 @@ document.getElementById('sidebarToggle').addEventListener('click', function () {
   window.addEventListener('resize', function () {
     if (menu.classList.contains('is-open')) place();
   });
-})();
-
-/* ── The department switcher. The system supplies the markup contract
-     (data-dept / data-logo / data-element-icon on each .c-dept-option) and
-     every visual rule; this wires them up and does the one thing the system
-     cannot, which is position a fixed panel next to a trigger inside a
-     clipping rail. Ported from the dashboard, which means it carries the
-     dashboard's own limit: the choice lives in memory, so walking to the
-     dashboard and back returns to the default. */
-(function () {
-  var trigger = document.querySelector('.js-dept-trigger');
-  var panel = document.getElementById('deptDropdown');
-  if (!trigger || !panel) return;
-
-  var liveMark = trigger.querySelector('.js-dept-logo-live');
-  var staticMark = trigger.querySelector('.js-dept-logo-static');
-  var collapsedMark = document.querySelector('.js-dept-logo-collapsed');
-  var chevron = trigger.querySelector('.js-dept-chevron');
-
-  function place() {
-    var r = trigger.getBoundingClientRect();
-    var w = panel.offsetWidth || 240;
-    panel.style.left = Math.max(8, Math.min(r.left, window.innerWidth - w - 8)) + 'px';
-    panel.style.top = (r.bottom + 8) + 'px';
-  }
-  function close() {
-    panel.hidden = true;
-    trigger.setAttribute('aria-expanded', 'false');
-    if (chevron) chevron.classList.replace('ph-caret-up', 'ph-caret-down');
-  }
-  function open() {
-    panel.hidden = false;          // unhidden BEFORE measuring: offsetWidth is 0 while hidden
-    place();
-    trigger.setAttribute('aria-expanded', 'true');
-    if (chevron) chevron.classList.replace('ph-caret-down', 'ph-caret-up');
-  }
-
-  trigger.addEventListener('click', function (e) {
-    e.stopPropagation();
-    if (panel.hidden) open(); else close();
-  });
-
-  panel.addEventListener('click', function (e) {
-    var opt = e.target.closest('.c-dept-option');
-    if (!opt) return;
-    var all = panel.querySelectorAll('.c-dept-option');
-    for (var i = 0; i < all.length; i++) {
-      var on = all[i] === opt;
-      all[i].classList.toggle('is-active', on);
-      all[i].setAttribute('aria-selected', String(on));
-    }
-    /* The default department has no data-logo, which is what selects the
-       animated mark over a static lockup. Absence is the signal, so there is
-       no separate "is this the default" flag to keep in step. */
-    var logo = opt.dataset.logo;
-    if (logo) {
-      staticMark.src = logo;
-      staticMark.alt = opt.dataset.name || '';
-      staticMark.style.display = '';
-      liveMark.style.display = 'none';
-    } else {
-      staticMark.style.display = 'none';
-      staticMark.removeAttribute('src');
-      liveMark.style.display = '';
-    }
-    if (collapsedMark && opt.dataset.elementIcon) collapsedMark.src = opt.dataset.elementIcon;
-    trigger.setAttribute('aria-label', 'Switch department, ' + (opt.dataset.name || ''));
-    close();
-  });
-
-  document.addEventListener('click', function (e) {
-    if (panel.hidden) return;
-    if (e.target.closest('#deptDropdown') || e.target.closest('.js-dept-trigger')) return;
-    close();
-  });
-  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') close(); });
-  window.addEventListener('resize', function () { if (!panel.hidden) place(); });
 })();
 
 /* ── The collapsed rail's hover label. The .c-sidebar-hover-text spans were

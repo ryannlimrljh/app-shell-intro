@@ -60,7 +60,7 @@
     }
     document.addEventListener('click', function (e) {
       if (!NARROW.matches || e.target.closest('#shellSidebarShell') ||
-          e.target.closest('#accountMenu') || e.target.closest('#deptDropdown')) return;
+          e.target.closest('#accountMenu')) return;
       setCollapsed(true);
     });
     var toggle = document.getElementById('sidebarToggle');
@@ -144,76 +144,6 @@
     });
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape') close(); });
     window.addEventListener('resize', function () { if (menu.classList.contains('is-open')) place(); });
-  }
-
-  /* ── Department switcher ──────────────────────────────────────────── */
-  function initDeptSwitcher() {
-    var trigger = document.querySelector('.js-dept-trigger');
-    var panel = document.getElementById('deptDropdown');
-    if (!trigger || !panel) return;
-    var liveMark = trigger.querySelector('.js-dept-logo-live');
-    var staticMark = trigger.querySelector('.js-dept-logo-static');
-    var collapsedMark = document.querySelector('.js-dept-logo-collapsed');
-    var chevron = trigger.querySelector('.js-dept-chevron');
-    function place() {
-      var r = trigger.getBoundingClientRect();
-      var w = panel.offsetWidth || 240;
-      panel.style.left = Math.max(8, Math.min(r.left, window.innerWidth - w - 8)) + 'px';
-      panel.style.top = (r.bottom + 8) + 'px';
-    }
-    function close() {
-      panel.hidden = true;
-      trigger.setAttribute('aria-expanded', 'false');
-      if (chevron) chevron.classList.replace('ph-caret-up', 'ph-caret-down');
-    }
-    function open() {
-      panel.hidden = false;
-      place();
-      trigger.setAttribute('aria-expanded', 'true');
-      if (chevron) chevron.classList.replace('ph-caret-down', 'ph-caret-up');
-    }
-    trigger.addEventListener('click', function (e) {
-      e.stopPropagation();
-      if (panel.hidden) open(); else close();
-    });
-    panel.addEventListener('click', function (e) {
-      var opt = e.target.closest('.c-dept-option');
-      if (!opt) return;
-      /* A department that owns a deployed product opens it in a new tab,
-         as the dashboard does, and leaves this shell's lockup alone. */
-      if (opt.dataset.href) {
-        window.open(opt.dataset.href, '_blank', 'noopener');
-        close();
-        return;
-      }
-      var all = panel.querySelectorAll('.c-dept-option');
-      for (var i = 0; i < all.length; i++) {
-        var on = all[i] === opt;
-        all[i].classList.toggle('is-active', on);
-        all[i].setAttribute('aria-selected', String(on));
-      }
-      var logo = opt.dataset.logo;
-      if (logo) {
-        staticMark.src = logo;
-        staticMark.alt = opt.dataset.name || '';
-        staticMark.style.display = '';
-        liveMark.style.display = 'none';
-      } else {
-        staticMark.style.display = 'none';
-        staticMark.removeAttribute('src');
-        liveMark.style.display = '';
-      }
-      if (collapsedMark && opt.dataset.elementIcon) collapsedMark.src = opt.dataset.elementIcon;
-      trigger.setAttribute('aria-label', 'Switch department, ' + (opt.dataset.name || ''));
-      close();
-    });
-    document.addEventListener('click', function (e) {
-      if (panel.hidden) return;
-      if (e.target.closest('#deptDropdown') || e.target.closest('.js-dept-trigger')) return;
-      close();
-    });
-    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') close(); });
-    window.addEventListener('resize', function () { if (!panel.hidden) place(); });
   }
 
   /* ── Collapsed rail hover label ───────────────────────────────────── */
@@ -309,7 +239,6 @@
     initSidebar();
     initTransitions();
     initAccountMenu();
-    initDeptSwitcher();
     initHoverLabel();
     var viewer = window.CollabAccess.getViewer(localStorage);
     paintAccount(viewer);

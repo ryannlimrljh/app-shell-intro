@@ -2021,7 +2021,7 @@
 .c-sidebar-logo-home{display:inline-flex; align-items:center;}
 .c-sidebar.is-collapsed .c-sidebar-logo-home{display:none;}
 .c-nav-tree{display:flex; flex-direction:column; gap:var(--spacing-4); flex-shrink:0;}
-/* Pod strip: one boxed initial per pod, under the logo. The current pod
+/* Pod strip: one boxed mark per pod, under the logo. The current pod
    is filled with its element's lightest tint (the only coloured fill the
    DS permits); the rest sit on white inside a hairline. */
 .c-pod-strip{display:flex; gap:var(--spacing-4); padding:0 2px var(--spacing-4); flex-shrink:0;}
@@ -2029,6 +2029,8 @@
 .c-sidebar.is-collapsed .c-pod-chip:not(.is-current){display:none;}
 .c-pod-chip{width:32px; height:32px; flex:none; display:inline-flex; align-items:center; justify-content:center; border-radius:var(--radius-sm); background:var(--color-neutral-1); box-shadow:var(--shadow-hairline); color:var(--color-neutral-5); font-family:inherit; font-size:var(--text-label2-size); font-weight:700; line-height:1; text-decoration:none; cursor:pointer; transition:background-color var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard);}
 .c-pod-chip:hover{background:var(--color-neutral-2); color:var(--color-neutral-9);}
+.c-pod-chip img{width:var(--icon-base); height:var(--icon-base); display:block; object-fit:contain;}
+.c-pod-chip.soon img{opacity:.4;}
 .c-pod-chip:focus-visible{outline:2px solid var(--color-obsidian); outline-offset:2px;}
 .c-pod-chip.is-current{color:var(--color-neutral-9); box-shadow:none;}
 .c-pod-chip.is-current.tint-neutral{background:var(--color-neutral-2);}
@@ -2077,7 +2079,7 @@ a.c-sidebar-item, a.c-nav-child{text-decoration:none;}
           <img class="c-sidebar-logo-collapsed" src="../collabrium-dls/SVG/coin.svg" alt="Collabrium" />
         </div>
         <!-- The nav is the pods map, rendered by shared/pods.js so every
-             app draws the same one. A strip of boxed initials under the logo,
+             app draws the same one. A strip of boxed marks under the logo,
              one per pod, is the way across: the pod you are in is filled,
              hover says what each pod does, the grey boxes are not built yet.
              Below it, this pod's own menu on two shelves, Workspace and

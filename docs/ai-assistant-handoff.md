@@ -109,7 +109,7 @@ Lives entirely in `api/ask.mjs`, in plain English, in this order:
    stay in. One friendly decline for the rest. It is a courtesy fence,
    not a security fence; the spend cap is the security.
 4. **Pod routing**: CollabSales (this seat), CollabInfluencers,
-   CollabStudio, CollabContent, with the Pods section in the sidebar. Other pods' assistants are declared upcoming, not pretended.
+   CollabStudio, CollabContent, with the pod strip under the logo in the sidebar. Other pods' assistants are declared upcoming, not pretended.
 5. **Names**: resolve shortforms per `name_conventions`, answer in the
    name the asker used, name candidates when genuinely ambiguous.
 6. **Brevity**: two to four sentences by default, verdict plus the

@@ -6089,6 +6089,14 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
     // arrive. The rail stays open; it used to collapse here, which left
     // every first visit on the icon rail with the pods map out of sight.
     function settleNav() {
+      /* Phones are the exception: below 640 the nav is an overlay box, not
+         a rail, and left open it covers the page. There it closes as it
+         always did; the reader opens it from its corner when they want it. */
+      if (window.matchMedia('(max-width:640px)').matches) {
+        const nav = document.getElementById('shellSidebarNav');
+        const toggle = document.querySelector('[data-sidebar-toggle="shellSidebarNav"]');
+        if (nav && toggle) setSidebarCollapsed(nav, toggle, true);
+      }
       revealCanvasContent();
     }
     function enterCover() {

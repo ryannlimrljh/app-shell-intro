@@ -1,0 +1,62 @@
+/* Mothership · the Guide (shared/guide.js), styled as Collab:Sales' Guide
+   (collab-sales/shared/workspace.css, .gd-*) so the two pods teach the
+   same way. DLS tokens throughout; the 14px card corner and the coach
+   mark's tail are Collab:Sales' own values, kept so the marks match. */
+
+/* the ring on the thing being explained: it follows the control's corners */
+.gd-ring{box-shadow:0 0 0 3px var(--color-neutral-1), 0 0 0 5px var(--color-obsidian) !important; animation:gd-ring 1.8s var(--ease-settle) infinite; position:relative; z-index:2;}
+@keyframes gd-ring{0%,100%{box-shadow:0 0 0 3px var(--color-neutral-1), 0 0 0 5px var(--color-obsidian);} 50%{box-shadow:0 0 0 3px var(--color-neutral-1), 0 0 0 7px color-mix(in srgb, var(--color-obsidian) 55%, transparent);}}
+
+/* the coach mark: one small card by the thing */
+.gd-mark{position:fixed; z-index:1200; width:340px; max-width:calc(100vw - 16px); padding:14px 16px 12px; border:1px solid var(--color-neutral-3); border-radius:14px;
+  background:var(--color-neutral-1); box-shadow:var(--shadow-3); font-family:var(--font-primary); color:var(--color-neutral-9);
+  opacity:0; transform:translateY(6px); transition:opacity .26s var(--ease-settle), transform .26s var(--ease-settle);}
+.gd-mark.is-in{opacity:1; transform:none;}
+.gd-mark.is-above{transform:translateY(-6px);} .gd-mark.is-above.is-in{transform:none;}
+.gd-mark .gd-k{display:inline-flex; align-items:center; gap:5px; font-size:11px; font-weight:700; letter-spacing:.02em; text-transform:uppercase; color:var(--color-neutral-5);}
+.gd-mark .gd-k i{color:var(--color-navy); font-size:12px;}
+.gd-mark > b{display:block; margin-top:6px; padding-right:24px; font-size:var(--text-body1-size); font-weight:800; color:var(--color-neutral-9);}
+.gd-mark > p{margin:4px 0 0; font-size:var(--text-body2-size); line-height:1.5; color:var(--color-neutral-7);}
+.gd-acts{display:flex; flex-wrap:wrap; gap:8px; margin-top:12px;}
+.gd-step{margin:6px 0 0; font-size:var(--text-body2-size); line-height:1.5; color:var(--color-neutral-8);}
+.gd-step-n{display:inline-block; margin-right:8px; padding:1px 7px; border-radius:999px; background:var(--color-neutral-2); font-size:11px; font-weight:700; color:var(--color-neutral-6); vertical-align:1px;}
+.gd-x{position:absolute; top:8px; right:8px; width:28px; height:28px; border:0; border-radius:8px; background:none; color:var(--color-neutral-5); cursor:pointer; display:grid; place-items:center;}
+.gd-x:hover{background:var(--color-neutral-2); color:var(--color-neutral-9);}
+.gd-tail{position:absolute; left:var(--tail, 24px); top:-6px; width:12px; height:12px; background:var(--color-neutral-1); border-left:1px solid var(--color-neutral-3); border-top:1px solid var(--color-neutral-3); transform:rotate(45deg);}
+.gd-mark.is-above .gd-tail{top:auto; bottom:-6px; border:0; border-right:1px solid var(--color-neutral-3); border-bottom:1px solid var(--color-neutral-3);}
+.gd-mark.is-right .gd-tail{top:var(--tail, 24px); left:-6px; border:0; border-left:1px solid var(--color-neutral-3); border-bottom:1px solid var(--color-neutral-3);}
+.gd-mark.is-left .gd-tail{top:var(--tail, 24px); left:auto; right:-6px; border:0; border-right:1px solid var(--color-neutral-3); border-top:1px solid var(--color-neutral-3);}
+.gd-mark.no-tail .gd-tail{display:none;}
+/* while the thing is scrolled off screen, the card steps out of the way */
+.gd-mark.is-in.is-away{opacity:0; pointer-events:none; transform:translateY(4px);}
+.gd-mark.is-right, .gd-mark.is-left{transform:translateX(0);} .gd-mark.is-right:not(.is-in){transform:translateX(-6px);} .gd-mark.is-left:not(.is-in){transform:translateX(6px);}
+
+/* the way in, in the account menu */
+.gd-entry .gd-count{margin-left:auto; font-size:var(--text-caption-size); color:var(--color-neutral-5); font-variant-numeric:tabular-nums;}
+
+/* the Guide sheet: the six moments, ticked */
+.gd-sheet{position:fixed; inset:0; z-index:1300; display:flex; align-items:center; justify-content:center; padding:16px;}
+.gd-scrim{position:absolute; inset:0; background:var(--shadow-overlay); opacity:0; transition:opacity var(--duration-base) var(--ease-standard);}
+.gd-panel{position:relative; width:min(600px, 100%); border-radius:var(--radius-lg); background:var(--color-neutral-1); box-shadow:var(--shadow-modal, var(--shadow-4));
+  opacity:0; transform:translateY(12px) scale(.98); transition:opacity var(--duration-base) var(--ease-settle), transform var(--duration-base) var(--ease-settle);}
+.gd-sheet.is-open .gd-scrim{opacity:1;}
+.gd-sheet.is-open .gd-panel{opacity:1; transform:none;}
+.gd-panel > .gd-x{top:12px; right:12px; z-index:1;}
+.gd{padding:var(--spacing-24); max-height:calc(100vh - 96px); overflow:auto; overscroll-behavior:contain; font-family:var(--font-primary); color:var(--color-neutral-9);}
+.gd h4{margin:0; padding-right:32px; font-size:var(--text-h4-size); line-height:var(--text-h4-lh); font-weight:800;}
+.gd-lead{margin:4px 0 var(--spacing-16); font-size:var(--text-body2-size); line-height:1.5; color:var(--color-neutral-6);}
+.gd-track{display:flex; gap:4px; margin-bottom:var(--spacing-16);}
+.gd-track i{flex:1; height:6px; border-radius:3px; background:var(--color-neutral-3);} .gd-track i.ok{background:var(--color-obsidian);}
+.gd-row{display:flex; align-items:flex-start; gap:12px; padding:12px 0; border-top:1px solid var(--color-neutral-2);}
+.gd-n{display:grid; place-items:center; width:28px; height:28px; border-radius:50%; flex:none; background:var(--color-neutral-2); font-size:12px; font-weight:800; color:var(--color-neutral-7);}
+.gd-row.is-done .gd-n{background:var(--color-obsidian); color:var(--color-neutral-1);}
+.gd-t{flex:1; min-width:0;} .gd-t b{display:block; font-size:var(--text-body2-size); font-weight:800;} .gd-t small{display:block; margin-top:2px; font-size:var(--text-caption-size); line-height:1.45; color:var(--color-neutral-6);}
+.gd-row.is-done .gd-t b{color:var(--color-neutral-6);}
+.gd-pts{margin:6px 0 0; padding:0 0 0 16px; font-size:var(--text-caption-size); line-height:1.5; color:var(--color-neutral-7);}
+.gd-pts li{margin:0 0 3px;} .gd-pts li::marker{color:var(--color-neutral-4);}
+.gd-row.is-done .gd-pts{display:none;}
+.gd-row .c-btn{flex:none; margin-top:2px;}
+.gd-foot{margin:var(--spacing-12) 0 0; padding-top:var(--spacing-12); border-top:1px solid var(--color-neutral-2); font-size:var(--text-caption-size); color:var(--color-neutral-5);}
+.gd-foot kbd{display:inline-block; min-width:18px; padding:0 5px; border:1px solid var(--color-neutral-3); border-bottom-width:2px; border-radius:6px; font-family:var(--font-primary); font-size:11px; font-weight:700; color:var(--color-neutral-9); text-align:center;}
+
+@media (prefers-reduced-motion:reduce){ .gd-ring{animation:none;} .gd-mark,.gd-scrim,.gd-panel{transition:none;} }

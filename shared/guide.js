@@ -41,16 +41,16 @@ var MOMENTS = [
   { key: 'month', n: 3, title: 'Will we make October?', tab: 'now',
     line: 'Forecast is won-booked plus 80% deals weighted at 80%. The rest of what is logged counts toward coverage, and the gap is new business.',
     points: [{ t: 'The four numbers: forecast, won-booked, weighted 80%, and the new business still to find.', at: '#standSec' },
-             { t: 'The gauge: forecast against target, with everything logged behind it and the 50% and 60% lines.', at: '.gauge-t' },
+             { t: 'The gauge: forecast against target, with everything logged behind it and the 50% and 60% lines.', at: '.gauge-t', id: 'gauge' },
              { t: 'The bridge: from what is booked to the target, in ringgit. Hover a column for what it holds.', at: '#bridgeSec' },
-             { t: 'What it takes: tick the moves and watch the lines. Nothing is saved; it is arithmetic on the report.', at: '#simSec' }],
+             { t: 'What it takes: tick the moves and watch the lines. Nothing is saved; it is arithmetic on the report.', at: '#simSec', id: 'sim' }],
     at: function () { return $('#standSec'); } },
   { key: 'heads', n: 4, title: 'Who needs help', tab: 'now',
     line: 'Every head, or every person in a team, against their own target. Open a row for their team, their months and their top deals.',
     points: [{ t: 'Each bar is forecast against target, with the rest of coverage behind it. The badge says where they stand.', at: '#lbRows .hr, #teamSec .hr' },
              { t: 'Click a row: it opens in place. Open another and the first one folds away.', at: '#lbRows .hr, #teamSec .hr' },
              { t: 'Gap or Lead: largest gap first, or grouped by VP line.', at: '#leadSec .c-segctl, #leadSec, #teamSec' },
-             { t: 'The four-month sprint at a glance: one dot per month, shaded by how much is logged. A dot opens that month.', at: '#dotsSec' }],
+             { t: 'The four-month sprint at a glance: one dot per month, shaded by how much is logged. A dot opens that month.', at: '#dotsSec', id: 'dots' }],
     at: function () { return $('#leadSec') || $('#teamSec'); } },
   { key: 'deals', n: 5, title: 'Two ways to move the number', tab: 'now',
     line: 'Push the 50% deals to close, and get the 80% deals booked. Each row is the campaign, the brand, its channels and who holds it.',
@@ -67,6 +67,9 @@ var MOMENTS = [
              { t: 'Where the gap is forming: each cell is a month. Hover a row for its bars; click a cell to open that month.', at: '#gridSec' }],
     at: function () { return $('#sprintSec'); } }
 ];
+/* A page can leave a section out (window.BOARD_OMIT, by point id); the
+   Guide then skips the stops that would point at it. */
+function live(p) { return !p.id || (window.BOARD_OMIT || []).indexOf(p.id) < 0; }
 function byKey(k) { return MOMENTS.filter(function (m) { return m.key === k; })[0]; }
 
 /* ── What the reader has done, per browser ── */
@@ -120,7 +123,7 @@ function note(k, opts) {
   if (r0.top < 96 || r0.top > innerHeight - 160) el.scrollIntoView({ block: 'center', behavior: REDUCED ? 'auto' : 'smooth' });
   var card = document.createElement('div');
   card.className = 'gd-mark'; card.setAttribute('data-key', k); card.setAttribute('role', 'dialog'); card.setAttribute('aria-label', m.title);
-  var rec = { card: card, el: el, key: k, step: -1 }, pts = m.points || [];
+  var rec = { card: card, el: el, key: k, step: -1 }, pts = (m.points || []).filter(live);
   function head() { return '<span class="gd-k">' + ic('sparkle', true) + 'Guide · ' + m.n + ' of ' + MOMENTS.length + '</span><b>' + esc(m.title) + '</b>'; }
   function paint() {
     if (rec.step < 0) {
@@ -255,7 +258,7 @@ function open() {
   var rows = MOMENTS.map(function (m) {
     var d = isDone(m.key);
     return '<div class="gd-row' + (d ? ' is-done' : '') + '"><span class="gd-n">' + (d ? ic('check') : m.n) + '</span><span class="gd-t"><b>' + esc(m.title) + '</b><small>' + esc(m.line) + '</small>' +
-      '<ul class="gd-pts">' + m.points.map(function (p) { return '<li>' + esc(p.t) + '</li>'; }).join('') + '</ul></span>' +
+      '<ul class="gd-pts">' + m.points.filter(live).map(function (p) { return '<li>' + esc(p.t) + '</li>'; }).join('') + '</ul></span>' +
       '<button type="button" class="c-btn ' + (d ? 'c-btn-ghost' : 'c-btn-secondary') + ' c-btn-sm" data-gd-show="' + m.key + '">' + ic('play', true) + (d ? 'Again' : 'Show me') + '</button></div>';
   }).join('');
   sheet = document.createElement('div');
@@ -320,7 +323,7 @@ if (document.readyState === 'loading') document.addEventListener('DOMContentLoad
 function refresh() {
   marks.forEach(function (rec) {
     if (document.body.contains(rec.el)) return;
-    var m = byKey(rec.key), pts = m.points || [];
+    var m = byKey(rec.key), pts = (m.points || []).filter(live);
     var again = (rec.step >= 0 && pick(pts[rec.step].at)) || m.at();
     if (again) { rec.el = again; ring(again); place(rec); }
   });

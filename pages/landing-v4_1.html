@@ -3240,6 +3240,67 @@ a.c-sidebar-item, a.c-nav-child{text-decoration:none;}
 #salesBoard .bc-nt{font-size:11px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
 #salesBoard .bc-nt b{color:var(--ink);}
 #salesBoard .grid-t.bars .gr.total{border-top:2px solid var(--ink);}
+
+/* ══ V4.1 polish pass ═══════════════════════════════════════════════ */
+/* 1 · quiet facts and dot status */
+#salesBoard .meta{font-size:var(--text-caption-size); line-height:var(--text-caption-lh); font-weight:600; color:var(--muted); white-space:nowrap;}
+#salesBoard .st{display:inline-flex; align-items:center; gap:6px; font-size:var(--text-caption-size); line-height:1; font-weight:700; color:var(--color-neutral-7); white-space:nowrap;}
+#salesBoard .st i{width:7px; height:7px; border-radius:50%; flex:none;}
+#salesBoard .st-ok i{background:var(--color-green);} #salesBoard .st-warn i{background:var(--color-amber);} #salesBoard .st-bad i{background:var(--color-red);}
+#salesBoard .kpi.feat .st{color:var(--color-neutral-4);}
+#salesBoard .dlt{display:inline-flex; align-items:center; gap:2px; font-size:var(--text-caption-size); line-height:1; font-weight:700; color:var(--color-neutral-7); white-space:nowrap;}
+#salesBoard .dlt i{font-size:10px;} #salesBoard .dlt.up{color:var(--ok-text);}
+#salesBoard .stg{background:transparent; border-color:transparent; padding-left:0; padding-right:0; font-weight:700; color:var(--color-neutral-7);}
+#salesBoard .stg-dot.bk{background:var(--color-green);}
+#salesBoard .hr-amt{gap:6px;}
+#salesBoard .kgap{margin-top:var(--spacing-12);}
+
+/* 2 · red is for the Gap card and the 50% line */
+#salesBoard .neg{color:var(--ink);}
+#salesBoard .c-stat-trend.down{color:var(--color-neutral-7);}
+
+/* 3 · the serif for headline figures */
+#salesBoard .kpi .big,#salesBoard .sum-t .big{font-family:var(--font-secondary, 'Source Serif 4', Georgia, serif); font-weight:600; letter-spacing:-0.01em;
+  font-variant-numeric:lining-nums tabular-nums; font-optical-sizing:auto;}
+
+/* 4 · lighter bars: slimmer, rounded, a hairline between parts, quiet ticks */
+#salesBoard .pt{height:12px; background:var(--color-neutral-2); box-shadow:none;}
+#salesBoard .pt.sm{height:8px;}
+#salesBoard .hr .pt{height:10px;}
+#salesBoard .pt-seg{box-shadow:inset -1px 0 0 var(--color-neutral-1);}
+#salesBoard .kpi.feat .pt-seg{box-shadow:inset -1px 0 0 var(--color-neutral-9);}
+#salesBoard .pt-seg:last-of-type{box-shadow:none;}
+#salesBoard .pt-mk{top:0; bottom:0; width:1.5px; margin-left:-0.75px; border-radius:0;}
+#salesBoard .pt-mk.tgt{top:-2px; bottom:-2px; width:2px; margin-left:-1px;}
+#salesBoard .pt-lbl{height:18px; font-size:11px;}
+#salesBoard .mrplot{height:20px;}
+#salesBoard .mh{box-shadow:inset -1px 0 0 var(--color-neutral-1);}
+#salesBoard .mh-tgt{background:var(--color-neutral-2);}
+#salesBoard .mh-mk{top:-2px; bottom:-2px; border-left-width:1.5px;}
+#salesBoard .mh-pct{height:18px; font-size:11px;}
+#salesBoard .bc .pt{height:9px;}
+
+/* 6 · calmer headers, more air */
+#salesBoard .t:not(.kpi){padding:var(--spacing-24);}
+#salesBoard .th{margin-bottom:var(--spacing-20);}
+#salesBoard .th h3{font-size:var(--text-h5-size, 20px); line-height:var(--text-h5-lh, 28px); font-weight:800;}
+#salesBoard .th .sub{max-width:60ch;}
+#salesBoard .hr{padding-top:var(--spacing-12); padding-bottom:var(--spacing-12);}
+@media (min-width:1280px){ #salesBoard .th h3{font-size:var(--text-h5-size, 20px); line-height:var(--text-h5-lh, 28px);} }
+
+/* 7 · chapter labels across the grid */
+#salesBoard .sec-eb{grid-column:1 / -1; display:flex; align-items:center; gap:var(--spacing-12); margin:var(--spacing-24) 0 calc(-1 * var(--spacing-4));
+  font-size:11px; line-height:16px; font-weight:800; letter-spacing:.1em; text-transform:uppercase; color:var(--color-neutral-6);}
+#salesBoard .sec-eb::after{content:''; flex:1; height:1px; background:var(--color-neutral-3);}
+#salesBoard .bento > .sec-eb:first-child{margin-top:0;}
+
+/* 8 · finishing */
+#salesBoard{font-variant-numeric:tabular-nums;}
+#salesBoard .hr.drill,#salesBoard .dl,#salesBoard .mrow,#salesBoard button.bc{transition:background var(--duration-fast, 150ms) var(--ease-standard), box-shadow var(--duration-fast, 150ms) var(--ease-standard), transform var(--duration-fast, 150ms) var(--ease-standard);}
+#salesBoard .hr.drill:hover{background:var(--color-neutral-1); box-shadow:0 0 0 1px var(--color-neutral-3), var(--shadow-1); transform:translateY(-1px);}
+#salesBoard .views.has-ink::after{background:var(--color-amber, #FFA425); height:3px; border-radius:3px 3px 0 0;}
+#salesBoard .kpi.gap{background:var(--color-neutral-1); border-color:var(--color-neutral-3); box-shadow:inset 3px 0 0 var(--color-red), var(--shadow-1);}
+@media (prefers-reduced-motion:reduce){ #salesBoard .hr.drill:hover{transform:none;} }
 </style>
 
 
@@ -6064,7 +6125,16 @@ function chip(cls, html, tip) {
   return '<span class="' + k + '"' + (tip ? ' title="' + esc(tip) + '"' : '') + '>' + html + '</span>';
 }
 function statusChip(p) {
-  return p >= 100 ? chip('ok', 'On target') : p >= 60 ? chip('warn', 'Commission') : p >= 50 ? chip('warn', 'Past 50%') : chip('bad', 'Below 50%');
+  /* a dot and a word: the colour carries the band, the text stays calm */
+  var k = p >= 100 ? 'ok' : p >= 50 ? 'warn' : 'bad', t = p >= 100 ? 'On target' : p >= 60 ? 'Commission' : p >= 50 ? 'Past 50%' : 'Below 50%';
+  return '<span class="st st-' + k + '"><i aria-hidden="true"></i>' + t + '</span>';
+}
+/* Secondary facts as quiet text, not badges (V4.1 polish). */
+function meta(html, tip) { return '<span class="meta"' + (tip ? ' title="' + esc(tip) + '"' : '') + '>' + html + '</span>'; }
+/* A change as a small arrow and a neutral figure: red is kept for the
+   Gap card and the 50% line. */
+function delta(v, txt, tip) {
+  return '<span class="dlt ' + (v < 0 ? 'dn' : v > 0 ? 'up' : 'flat') + '"' + (tip ? ' title="' + esc(tip) + '"' : '') + '><i class="ph-fill ph-caret-' + (v < 0 ? 'down' : 'up') + '" aria-hidden="true"></i>' + txt + '</span>';
 }
 function trend(d, period) {
   var k = Math.abs(d) < 0.0005 ? 'flat' : d > 0 ? 'up' : 'down';
@@ -6111,7 +6181,7 @@ function pt(o, size) {
 }
 /* Stage markers in the deal lists: Won black, 80% blue, 50% lighter blue */
 function stageChip(st, label, tip) {
-  var k = st === 'won' ? 'won' : +st === 50 ? 's50' : 's80';
+  var k = st === 'won' ? 'won' : st === 'bk' ? 'bk' : +st === 50 ? 's50' : 's80';
   return '<span class="c-badge c-badge-neutral stg"' + (tip ? ' title="' + esc(tip) + '"' : '') + '><i class="stg-dot ' + k + '" aria-hidden="true"></i>' + esc(label) + '</span>';
 }
 
@@ -6233,13 +6303,13 @@ function kpiTiles(s, L, r) {
     var share = L.forecast > 0 ? Math.round(L.weighted / L.forecast * 100) : 0;
     out += tile({ span: 3, cls: 'kpi', title: 'Won-booked',
       body: '<div class="big" data-count="' + L.won + '">' + rm(L.won) + '</div>' + since + '<p class="note">Booked in the systems, or won at 100% and awaiting booking. </p>' });
-    out += tile({ span: 3, cls: 'kpi', title: 'Weighted 80%', side: chip('soft', '80% × 0.8'),
+    out += tile({ span: 3, cls: 'kpi', title: 'Weighted 80%', side: meta('80% × 0.8'),
       body: '<div class="big" data-count="' + L.weighted + '">' + rm(L.weighted) + '</div><div class="c-progress-track size-default" aria-hidden="true"><div class="c-progress-fill tone-gold" style="width:' + Math.max(share, 2) + '%"></div></div>' +
         '<p class="note">Agreed verbally, waiting on paperwork. <b>' + share + '%</b> of the forecast.</p>' });
   } else {
-    out += tile({ span: 3, cls: 'kpi', title: 'If every deal lands', side: chip('soft', 'Coverage'),
+    out += tile({ span: 3, cls: 'kpi', title: 'If every deal lands', side: meta('Coverage'),
       body: '<div class="big"><span data-count="' + L.cov + '" data-fmt="int">' + L.cov + '</span>%</div><p class="note">≈' + rm(covAmt) + ' logged from 30% up, unweighted, against a ' + rm(T) + ' target.</p>' });
-    out += tile({ span: 3, cls: 'kpi', title: 'Four months', side: r && r.g != null ? chip(r.g < 0 ? 'bad' : 'up', gapTxt(r.g) + ' gap') : '',
+    out += tile({ span: 3, cls: 'kpi', title: 'Four months', side: r && r.g != null ? meta(gapTxt(r.g) + ' gap') : '',
       body: '<div class="big" data-count="' + (r ? r.f : 0) + '">' + rm(r ? r.f : null) + '</div><p class="note">Forecast across October to January' + (r && r.g != null ? ', ' + gapTxt(r.g) + ' against the four targets.' : '.') + '</p>' });
   }
   if (need > 0.0005) {
@@ -6317,8 +6387,8 @@ function headsTile(s, span) {
   var side = s.level === 'all' ? segctl('Order', [['gap', 'Gap', 'Largest gap first'], ['lead', 'Lead', 'Grouped by lead']], state.order, 'order') : DERIVED_TAG();
   var worst = sorted[0];
   return tile({ id: 'leadSec', span: span, title: s.level === 'all' ? 'Heads of sales' : 'Heads of sales in ' + seatName(s),
-    sub: '<b>' + esc(worst.name) + '</b> has the largest gap, ' + rm(worst.gap) + '. Open a row for their team, months and top deals.', side: side,
-    body: '<div class="hrs" id="lbRows">' + body + '</div>' + toneLegend() });
+    sub: '<b>' + esc(worst.name) + '</b> has the largest gap, ' + rm(worst.gap) + '.', side: side,
+    body: '<div class="hrs" id="lbRows">' + body + '</div>' });
 }
 function teamTile(s, span) {
   var T = TEAM[s.head]; if (!T) return '';
@@ -6338,10 +6408,10 @@ function teamTile(s, span) {
   var people = rows.filter(function (r) { return (r.kind === 'exec' || r.kind === 'own') && Array.isArray(r.cells[0]); });
   var top = people.sort(function (a, b) { return b.cells[0][0] - a.cells[0][0]; })[0];
   var off = rows.filter(function (r) { return r.offChart; }).map(function (r) { return r.n; });
-  var sub = (top ? '<b>' + esc(top.n) + '</b> is furthest ahead at ' + top.cells[0][0] + '%. ' : '') + 'Open a row to see that book on its own.' +
+  var sub = (top ? '<b>' + esc(top.n) + '</b> is furthest ahead at ' + top.cells[0][0] + '%. ' : '') +
     (off.length ? ' ' + esc(off.join(' and ')) + (off.length === 1 ? ' is' : ' are') + ' on this report but not on the 6 Oct org chart.' : '');
   return tile({ id: 'teamSec', span: span, title: s.level === 'mgr' ? esc(mgrLabel(s.head, s.name)) : 'My team', sub: sub, side: off.length ? OFF_TAG() : '',
-    body: '<div class="hrs">' + body + '</div>' + toneLegend() + '<p class="note">' + esc(R.rules.mapping) + '</p>' });
+    body: '<div class="hrs">' + body + '</div>' + '<p class="note">' + esc(R.rules.mapping) + '</p>' });
 }
 /* The sprint at a glance: one dot per line per month, shaded by how much
    of that month is already logged. A dot opens that month. */
@@ -6403,16 +6473,16 @@ function platTile(s, span) {
     return '<div class="hr pr' + (p === best ? ' on' : '') + '">' +
       '<span class="av pav">' + esc(CH[p.name] || p.name) + '</span>' +
       '<span class="hr-who"><b>' + esc(p.name) + (p.cycle ? ' <i class="ph ph-clock-counter-clockwise cyc" title="' + esc(cyc) + '" aria-label="' + esc(cyc) + '"></i>' : '') +
-        (p === best ? ' ' + chip('ink', 'Closest') : '') + '</b><small>target ' + rm(p.target) + '</small></span>' +
+        '</b><small>target ' + rm(p.target) + '</small></span>' +
       pt({ won: p.won, forecast: p.forecast, target: p.target, pct: p.pct, cov: p.cov, label: p.name }) +
-      '<span class="hr-amt"><b>' + rm(p.forecast) + '</b>' + chip(p.ly < 0 ? 'bad' : 'up', (p.ly > 0 ? '+' : '') + p.ly + '% LY', p.ly + '% vs October 2025') + '</span>' +
+      '<span class="hr-amt"><b>' + rm(p.forecast) + '</b>' + delta(p.ly, Math.abs(p.ly) + '% vs LY', p.ly + '% vs October 2025') + '</span>' +
       '<i class="chev" aria-hidden="true"></i></div>';
   }).join('');
   var cycled = R.platforms.filter(function (p) { return p.cycle; });
   var note = cycled.length ? '<p class="note"><i class="ph ph-clock-counter-clockwise" aria-hidden="true"></i> ' + esc(cycled.map(function (p) { return p.name; }).join(' and ')) +
     ' bill ' + cycled[0].cycle.from + 'th to ' + (cycled[0].cycle.from - 1) + 'rd, so their October catches up as the period runs: day ' + cycled[0].cycle.day + ' of ' + cycled[0].cycle.days + '.</p>' : '';
-  return tile({ id: 'platSec', span: span, title: 'By platform', sub: '<b>' + esc(weakest.name) + '</b> is furthest behind at ' + weakest.pct + '%. Hover a bar for the detail.',
-    body: '<div class="hrs prs">' + rows + '</div>' + toneLegend() + note });
+  return tile({ id: 'platSec', span: span, title: 'By platform', sub: '<b>' + esc(weakest.name) + '</b> is furthest behind at ' + weakest.pct + '%.',
+    body: '<div class="hrs prs">' + rows + '</div>' + note });
 }
 function dealsTiles(s, span) {
   /* V4.1 review: Push to close is every open deal at 50% or 80% (still in
@@ -6432,20 +6502,20 @@ function dealsTiles(s, span) {
   var sum = function (l) { return l.reduce(function (a, d) { return a + d.v; }, 0); };
   var N = R.negotiating.months.Oct, W = R.wonNotBooked && R.wonNotBooked.months.Oct;
   var pushSide = s.level === 'all' && N.fifty
-    ? chip('soft', N.count + ' deals · ' + rm(N.fifty.value + N.eighty.value), 'All deals at 50% and 80% for October, company total; the largest are listed')
-    : chip('soft', plural(push.length, 'deal') + ' · ' + rm(sum(push)));
+    ? meta(N.count + ' deals · ' + rm(N.fifty.value + N.eighty.value), 'All deals at 50% and 80% for October, company total; the largest are listed')
+    : meta(plural(push.length, 'deal') + ' · ' + rm(sum(push)));
   var bookSide = s.level === 'all' && W
-    ? chip('soft', W.count + ' deals · ' + rm(W.value), 'All deals won and not yet booked for October, company total; the largest are listed')
-    : chip('soft', plural(won.length, 'deal') + ' · ' + rm(sum(won)));
+    ? meta(W.count + ' deals · ' + rm(W.value), 'All deals won and not yet booked for October, company total; the largest are listed')
+    : meta(plural(won.length, 'deal') + ' · ' + rm(sum(won)));
   var list = function (l, empty, stage) {
     if (!l.length) return '<p class="empty">' + empty + '</p>';
     return '<div class="dls' + (stage ? ' has-badge' : '') + '">' + l.slice(0, max).map(function (d, i) { return stage ? dealRow(d, i, true) : dealLine({ i: i, c: d.c, a: d.a, p: d.p, owner: d.owner, v: d.v }); }).join('') + '</div>';
   };
   var both = '<span class="c-badge c-badge-neutral stg" title="Deals at 50% and 80%, in negotiation"><i class="stg-dot s50" aria-hidden="true"></i><i class="stg-dot s80" aria-hidden="true"></i>50–80%</span>';
-  return tile({ id: 'dealsSec', span: span, cls: 'lane', title: 'Push to close' + both, sub: 'In negotiation at 50% or 80%. Closing one turns it into won.', side: pushSide,
+  return tile({ id: 'dealsSec', span: span, cls: 'lane', title: 'Push to close' + both, sub: 'In negotiation at 50% or 80%.', side: pushSide,
       body: list(push, 'No deals in negotiation for October in this book.', true) + '<p class="note">Full, unweighted October values. A blank advertiser shows the agency.</p>' }) +
-    tile({ span: span, cls: 'lane', title: 'Get it booked' + stageChip('won', '100%', 'Won at 100% in NeoCRM, awaiting booking'), sub: 'Won, not yet in the booking systems. Each needs its MO/IO through Scheduling or Ad Ops.', side: bookSide,
-      body: list(won, 'No won deals waiting to be booked for October here.') + '<p class="note">At risk until booked: won counts in won-booked already.</p>' });
+    tile({ span: span, cls: 'lane', title: 'Get it booked' + stageChip('won', '100%', 'Won at 100% in NeoCRM, awaiting booking'), sub: 'Won, not yet in the booking systems.', side: bookSide,
+      body: list(won, 'No won deals waiting to be booked for October here.') + '<p class="note">At risk until booked: each needs its MO/IO through Scheduling or Ad Ops.</p>' });
 }
 function bankTile(s, sprint) {
   /* October (V4.1 review): booked only, since won-not-booked has its own
@@ -6464,11 +6534,11 @@ function bankTile(s, sprint) {
       var mx = Math.max.apply(null, d.m.concat([0.001]));
       var sp = '<span class="sp" role="img" aria-label="' + esc(MONTHS.map(function (k, j) { return MN[k] + ' ' + (d.m[j] ? rm(d.m[j]) : 'none'); }).join(', ')) + '">' +
         d.m.map(function (v, j) { return '<span class="sp-c" data-tip="' + esc(MN[MONTHS[j]] + ': ' + (v ? rm(v) : 'nothing booked')) + '"><i' + (v ? '' : ' class="z"') + ' style="height:' + (v ? Math.max(12, v / mx * 100) : 100).toFixed(0) + '%"></i><em>' + MONTHS[j][0] + '</em></span>'; }).join('') + '</span>';
-      return dealLine({ i: i, c: d.c, a: d.a, p: d.p, owner: d.owner, v: d.v, spark: sp, badge: d.st === 'Booked' ? chip('ok', 'Booked') : stageChip('won', 'Won') });
+      return dealLine({ i: i, c: d.c, a: d.a, p: d.p, owner: d.owner, v: d.v, spark: sp, badge: d.st === 'Booked' ? stageChip('bk', 'Booked') : stageChip('won', 'Won') });
     }).join('') + '</div>' +
       (!state.bankAll && rows.length > 8 ? '<button class="c-btn c-btn-secondary c-btn-sm more" type="button" data-bank-all>Show all ' + Math.min(15, rows.length) + '</button>' : '');
   }
-  return tile({ id: id, span: 12, title: title, sub: sub, side: chip('soft', 'Top ' + Math.min(15, rows.length)), body: body });
+  return tile({ id: id, span: 12, title: title, sub: sub, side: meta('Top ' + Math.min(15, rows.length)), body: body });
 }
 function booksTile(s) {
   var T = teamOf(s); if (!T) return '';
@@ -6736,7 +6806,7 @@ function sprintSec(s) {
     '<span class="c-progress-legend-item"><i class="c-progress-legend-swatch need"></i>Shortfall</span>' +
     '<span class="c-progress-legend-item"><i class="lgl perf"></i>50%</span><span class="c-progress-legend-item"><i class="lgl comm"></i>60%</span></div>';
   var chart = tile({ id: 'sprintSec', span: 8, title: (s.level === 'all' ? 'October' : esc(seatName(s)) + ', October') + ' to January',
-    sub: 'Each month in ringgit, left to right up to its own target: what is booked and logged, and dashed, what is still to find.' + (thin ? ' <b>' + MN[thin] + ' is the thinnest</b> at ' + lines[thin].cov + '% logged.' : '') + ' Pick a month for what can still land.',
+    sub: thin ? '<b>' + MN[thin] + ' is the thinnest</b>, at ' + lines[thin].cov + '% logged.' : 'Each month up to its own target.',
     side: tags, body: '<div class="mrows">' + cols + '</div>' + legend });
 
   /* The runway: the four months added up, as one bar and its parts. */
@@ -6751,7 +6821,7 @@ function sprintSec(s) {
     var seg = function (k, v) { return v > 0.0005 ? '<span class="rw-s ' + k + '" style="width:' + pc(v) + '"></span>' : ''; };
     var row = function (k, label, v) { return '<div class="rw-r"><span><i class="rw-k ' + k + '"></i>' + label + '</span><b>' + v + '</b></div>'; };
     body = '<div class="big" data-count="' + (S2.forecast || sum.f) + '">' + rm(S2.forecast != null ? S2.forecast : sum.f) + '</div>' +
-      (S2.gap != null ? '<div class="kgap">' + chip(S2.gap < 0 ? 'bad' : 'up', gapTxt(S2.gap) + ' vs targets') + '</div>' : '') +
+      (S2.gap != null ? '<div class="kgap">' + delta(S2.gap, rm(Math.abs(S2.gap)) + (S2.gap < 0 ? ' short of' : ' ahead of') + ' the four targets') + '</div>' : '') +
       '<div class="rw-bar" role="img" aria-label="' + esc('Four months: forecast ' + rm(sum.f) + ', logged ' + rm(sum.lg) + ', new business needed ' + rm(sum.need) + ', of ' + rm(sum.t) + ' in targets') + '">' +
       (sum.split ? seg('won', sum.won) + seg('wt', sum.wt) : seg('won', sum.f)) + seg('cov', sum.lg - sum.f) + seg('need', sum.need) + '</div>' +
       '<div class="rw-rows">' + (sum.split ? row('won', 'Secured, won-booked', rm(sum.won)) + row('wt', 'Weighted 80%', rm(sum.wt)) : row('won', 'Forecast', ax2 + rm(sum.f))) +
@@ -6806,7 +6876,7 @@ function gridSec(s) {
         '<span class="gv">' + rm(h.sprintForecast) + '</span>' + gapBar(h.sprintGap, maxG) + '</div>';
     }).join('');
     /* no totals row: the runway above carries the four months (V4.1 review) */
-    return tile({ id: 'gridSec', span: 12, title: 'Where the gap is forming', sub: 'Ordered by gap to target across the four months, largest first. Each cell is forecast as a share of that head’s target for the month, then coverage. Click a cell to open that month.',
+    return tile({ id: 'gridSec', span: 12, title: 'Where the gap is forming', sub: 'Largest four-month gap first. Click a cell to open that month.',
       side: s.level === 'lead' ? DERIVED_TAG() : '', body: '<div class="grid-t bars">' + body + '</div>' + legend });
   }
   if (s.level === 'person') return '';
@@ -6820,7 +6890,7 @@ function gridSec(s) {
       r.cells.map(function (c, j) { return heatCell(c, r.n, MONTHS[j], seat); }).join('') +
       '<span class="gv">' + rm(r.f) + '</span>' + gapBar(r.g, maxR) + '</div>';
   }).join('');
-  return tile({ id: 'gridSec', span: 12, title: 'Where the gap is forming', sub: 'Managers carry their team’s subtotal; their salespeople sit beneath. Each cell is forecast as a share of that month’s target, then coverage. Click a cell to open that month.',
+  return tile({ id: 'gridSec', span: 12, title: 'Where the gap is forming', sub: 'Managers carry their team’s subtotal. Click a cell to open that month.',
     body: '<div class="grid-t bars">' + body + '</div>' + legend });
 }
 
@@ -6852,8 +6922,8 @@ function monthSec(s) {
       return dealLine({ i: i, c: d.c, a: d.a, p: d.p, owner: d.owner, v: d.m[idx], sub: Math.abs(d.v - d.m[idx]) > 0.0005 ? 'of ' + rm(d.v) : '' });
     }).join('') + '</div>'
     : '<p class="empty">' + (teamOf(s) ? 'Nothing booked for ' + MN[m] + ' in this book yet.' : 'None of the top campaigns books into ' + MN[m] + ' in this line.') + '</p>';
-  var lanes = '<div class="m-lanes"><div class="m-lane"><div class="lane-h"><h4>' + (O.team ? 'Open, 80% and 50%' : staged ? 'In negotiation, 50% and 80%' : 'In negotiation, 50%') + '</h4>' + chip('soft', count) + '</div>' + open + '</div>' +
-    '<div class="m-lane"><div class="lane-h"><h4>In the booking system</h4>' + chip('ok', bank.length ? plural(bank.length, 'campaign') + ' · ' + rm(bankVal) : 'None yet') + '</div>' + banked + '</div></div>';
+  var lanes = '<div class="m-lanes"><div class="m-lane"><div class="lane-h"><h4>' + (O.team ? 'Open, 80% and 50%' : staged ? 'In negotiation, 50% and 80%' : 'In negotiation, 50%') + '</h4>' + meta(count) + '</div>' + open + '</div>' +
+    '<div class="m-lane"><div class="lane-h"><h4>In the booking system</h4>' + meta(bank.length ? plural(bank.length, 'campaign') + ' · ' + rm(bankVal) : 'None yet') + '</div>' + banked + '</div></div>';
   var sim = '';   // What it takes per month: removed (V4.1 review)
   return tile({ id: 'monthSec', span: 12, title: MN[m] + ', what can still land', side: seg,
     body: '<div class="mfocus">' + nums + '</div>' + lanes + sim +
@@ -7051,19 +7121,26 @@ function pair(fa, fb, sa, sb) {
   var a = fa(sa), b = fb(sb);
   return a && b ? a + b : (a ? fa(12) : '') + (b ? fb(12) : '');
 }
+/* A quiet chapter label across the grid, so the scroll reads in parts. */
+function eyebrow(t) { return '<div class="sec-eb" role="heading" aria-level="2">' + t + '</div>'; }
 function composeNow(s) {
   var L = lineFor(s), r = (s.level === 'mgr' || s.level === 'person') ? rowOf(s.head, s.name) : null, out = '';
   /* V4.1 review: the gauge ("Will we make the month?"), the sprint dots
      and the days-left calendar are gone; their row-mates take the row.
      What it takes is gone too. */
+  out += eyebrow('This month');
   if (L && !L.none && !L.noTarget) out += kpiTiles(s, L, r) + bridgeTile(s, L, 12);
   else if (L) out += awaitTile(s, L, r);
-  if (s.level === 'all' || s.level === 'lead') out += headsTile(s, 12);
-  else if (s.level === 'head' || s.level === 'mgr') out += teamTile(s, 12);
-  out += (s.level === 'all' ? platTile(s, 12) : '') + dealsTiles(s, 6);
-  return out + bankTile(s, false) + booksTile(s);
+  var who = s.level === 'all' || s.level === 'lead' ? headsTile(s, 12) : (s.level === 'head' || s.level === 'mgr') ? teamTile(s, 12) : '';
+  var plat = s.level === 'all' ? platTile(s, 12) : '';
+  if (who || plat) out += eyebrow(plat ? 'Who and where' : 'Who needs help') + who + plat;
+  out += eyebrow('Deals to move') + dealsTiles(s, 6);
+  return out + eyebrow('Booked') + bankTile(s, false) + booksTile(s);
 }
-function composeNext(s) { return sprintSec(s) + gridSec(s) + monthSec(s) + bankTile(s, true); }   // where the gap forms, then the month in focus (V4.1 review)
+function composeNext(s) {
+  var grid = gridSec(s);
+  return eyebrow('The four months') + sprintSec(s) + grid + eyebrow('The month in focus') + monthSec(s) + eyebrow('Booked') + bankTile(s, true);
+}   // where the gap forms, then the month in focus (V4.1 review)
 function render() {
   var s = parse(state.seat);
   if (!canSee(state.seat)) { state.seat = state.lockAt; s = parse(state.seat); }

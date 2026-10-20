@@ -3296,6 +3296,11 @@ a.c-sidebar-item, a.c-nav-child{text-decoration:none;}
 #salesBoard .views.has-ink::after{background:var(--color-amber, #FFA425); height:3px; border-radius:3px 3px 0 0;}
 #salesBoard .kpi.gap{background:var(--color-neutral-1); border-color:var(--color-neutral-3); box-shadow:inset 3px 0 0 var(--color-red), var(--shadow-1);}
 @media (prefers-reduced-motion:reduce){ #salesBoard .hr.drill:hover{transform:none;} }
+
+/* the four headline cards: one header height, so the big numbers share a line */
+#salesBoard .kpi .th{height:24px; align-items:center; overflow:visible;}
+#salesBoard .kpi .th-r{display:flex; align-items:center; height:24px;}
+#salesBoard .kpi .ichip{margin:-8px 0;}
 </style>
 
 

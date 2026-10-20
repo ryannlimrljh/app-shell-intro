@@ -3190,12 +3190,9 @@ a.c-sidebar-item, a.c-nav-child{text-decoration:none;}
 /* ── V4.1 · Projection months as left-to-right bars ───────────────── */
 #salesBoard .mrows{display:flex; flex-direction:column; gap:var(--spacing-4); flex:1; justify-content:center; padding:var(--spacing-8) 0;}
 #salesBoard .mrow{display:grid; grid-template-columns:132px minmax(0,1fr) 128px; align-items:center; gap:var(--spacing-16); width:100%;
-  border:0; background:none; padding:var(--spacing-12) var(--spacing-8); border-radius:var(--radius-md, 12px); cursor:pointer; text-align:left; color:var(--ink);
+  border:0; background:none; padding:var(--spacing-12) var(--spacing-8); border-radius:var(--radius-md, 12px); cursor:default; text-align:left; color:var(--ink);
   transition:background var(--duration-fast, 150ms) var(--ease-standard);}
 /* the chosen month lifts as a DLS card (white, hairline, shadow-1); the rest stay flat */
-#salesBoard .mrow:hover{background:color-mix(in srgb, var(--color-neutral-2) 60%, transparent);}
-#salesBoard .mrow.is-on{background:var(--color-neutral-1); box-shadow:0 0 0 1px var(--color-neutral-3), var(--shadow-1);}
-#salesBoard .mrow:focus-visible{outline:none; box-shadow:var(--shadow-focus);}
 #salesBoard .mr-who{min-width:0; display:flex; flex-direction:column;}
 #salesBoard .mr-who b{font-size:var(--text-body1-size); line-height:var(--text-body1-lh); font-weight:800;}
 #salesBoard .mr-who b em{font-style:normal; font-size:var(--text-caption-size); font-weight:700; color:var(--acc-text); margin-left:2px;}
@@ -6793,9 +6790,10 @@ function sprintSec(s) {
           : n60 > 0.0005 ? 'Past the 50% line. ' + ax + rm(n60) + ' more unlocks commission at 60%.'
           : L.forecast < L.target ? 'Commission unlocked. ' + ax + rm(L.target - L.forecast) + ' more reaches target.' : 'Forecast is at or above target.') + '</div>';
     }
-    return '<button class="mrow' + (on ? ' is-on' : '') + '" type="button" data-month="' + m + '" aria-pressed="' + on + '"' + (tipx ? ' data-tipx="' + esc(tipx) + '"' : '') + '>' +
+    /* a row to read, not to pick: the month in focus has its own switch below (V4.1 review) */
+    return '<div class="mrow"' + (tipx ? ' data-tipx="' + esc(tipx) + '"' : '') + '>' +
       '<span class="mr-who"><b>' + MN[m] + (i === 0 ? ' <em>now</em>' : '') + '</b><small>' + sub + '</small></span>' +
-      '<span class="mrplot">' + plot + '</span><span class="mr-need">' + need + '</span></button>';
+      '<span class="mrplot">' + plot + '</span><span class="mr-need">' + need + '</span></div>';
   }).join('');
   var thin = real.slice().sort(function (a, b) { return lines[a].cov - lines[b].cov; })[0];
   var r = (s.level === 'mgr' || s.level === 'person') ? rowOf(s.head, s.name) : null;
@@ -7044,7 +7042,7 @@ function renderIdentity(s) {
   var hist = isLatest() ? '' : '<div class="hist-bar c-banner c-banner-warning" role="status"><i class="ph-fill ph-clock-counter-clockwise icon" aria-hidden="true"></i><div class="body"><p class="message">' +
     'You’re viewing the <b>' + esc(R.asOfLabel) + '</b> report, an earlier week. The latest is <b>' + esc(REPORTS[CUTS[0]].asOfLabel) + '</b>.</p></div>' +
     '<button class="c-btn c-btn-secondary c-btn-sm" type="button" data-cut="' + CUTS[0] + '">Back to latest</button></div>';
-  document.getElementById('boardConf').innerHTML = hist + '<div class="seat-id c-pageheader"><div class="c-pageheader-row"><div class="seat-av">' + av + '</div><div class="seat-id-main c-pageheader-text"><h2>' + esc(name) +
+  document.getElementById('boardConf').innerHTML = hist + '<div class="seat-id c-pageheader"><div class="c-pageheader-row"><div class="seat-id-main c-pageheader-text"><h2>' + esc(name) +
     '</h2><p class="sub">' + esc(sub) + '</p></div>' + right + '</div></div>';
 }
 function renderHero(s) {

@@ -6065,9 +6065,9 @@ function seatName(s) {
 function lede(s, L) {
   var who = s.level === 'all' ? 'October' : seatName(s);
   if (L.cov >= 100) return 'Logged pipeline already covers the target. <b>Landing it is the job</b>: ' + rm(L.forecast) + ' is forecast so far.';
-  if (L.cov >= 60) return 'If every logged deal lands, ' + who + ' reaches <b>' + L.cov + '%</b> of target, clear of the commission line. The rest needs new business.';
+  if (L.cov >= 60) return 'If every logged deal lands, ' + who + ' reaches <b>' + L.cov + '%</b> of target, clear of the commission line. The rest is uncovered.';
   if (L.cov >= 50) return 'If every logged deal lands, ' + who + ' reaches <b>' + L.cov + '%</b> of target, just past the 50% line.';
-  return 'Even if every logged deal lands, ' + who + ' reaches only <b>' + L.cov + '%</b> of target. The pipeline can’t close this gap; new business has to.';
+  return 'Even if every logged deal lands, ' + who + ' reaches only <b>' + L.cov + '%</b> of target. The pipeline can’t close this gap: the rest is uncovered.';
 }
 
 /* ── deals and books in scope ───────────────────────────────────── */
@@ -6317,16 +6317,18 @@ function kpiTiles(s, L, r) {
     out += tile({ span: 3, cls: 'kpi', title: 'Four months', side: r && r.g != null ? meta(gapTxt(r.g) + ' gap') : '',
       body: '<div class="big" data-count="' + (r ? r.f : 0) + '">' + rm(r ? r.f : null) + '</div><p class="note">Forecast across October to January' + (r && r.g != null ? ', ' + gapTxt(r.g) + ' against the four targets.' : '.') + '</p>' });
   }
-  /* The gap: everything logged against the target. Short of it, red and
-     negative; past it, the same card turns green and positive. */
-  var gapV = covAmt - T;
+  /* The gap: forecast against target, coverage left out (as the SLT
+     report's "gap to target"). Short, red and negative; past target, the
+     same card turns green and positive. The note splits the shortfall
+     into what is logged (coverage) and what is uncovered. */
+  var gapV = L.forecast - T, inPlay = Math.max(0, Math.min(covAmt, T) - L.forecast);
   if (gapV < -0.0005) {
     out += tile({ span: 3, cls: 'kpi gap', title: 'Gap', side: '<span class="ichip" aria-hidden="true"><i class="ph-fill ph-trend-down"></i></span>',
-      body: '<div class="big" data-count="' + gapV + '"' + pre + '>' + ax + rm(gapV) + '</div><p class="note"><b>' + ax + rm(need / DAYS_LEFT) + ' a day</b> for ' + DAYS_LEFT +
-        ' days. Even if every logged deal lands, this part is not in NeoCRM yet.</p>' });
+      body: '<div class="big" data-count="' + gapV + '"' + pre + '>' + ax + rm(gapV) + '</div><p class="note">Forecast to target. <b>' + ax + rm(inPlay) + '</b> of it is in the pipeline' +
+        (need > 0.0005 ? '; <b>' + ax + rm(need) + '</b> is uncovered.' : ', so all of it is logged.') + '</p>' });
   } else {
     out += tile({ span: 3, cls: 'kpi gap ahead', title: 'Gap', side: '<span class="ichip" aria-hidden="true"><i class="ph-fill ph-trend-up"></i></span>',
-      body: '<div class="big" data-count="' + gapV + '" data-pre="' + ax + '+">' + ax + '+' + rm(gapV) + '</div><p class="note">Logged beyond the target. <b>Landing it is the job.</b></p>' });
+      body: '<div class="big" data-count="' + gapV + '" data-pre="' + ax + '+">' + ax + '+' + rm(gapV) + '</div><p class="note">Forecast is past target. <b>Booking it is the job.</b></p>' });
   }
   return out;
 }
@@ -6617,13 +6619,13 @@ function weekSummary(s) {
     html: Math.abs(d) < 0.0005 ? 'Won-booked <b>flat</b> since ' + since : '<b>' + (d > 0 ? '+' : '−') + rm(Math.abs(d)) + '</b> booked since ' + since,
     tip: 'Won-booked ' + (Math.abs(d) < 0.0005 ? 'is flat' : (d > 0 ? 'rose ' : 'fell ') + rm(Math.abs(d))) + ' since ' + since + '.' + lead + ' ' + (P.note || '') });
   var covAmt = L.cov / 100 * L.target, need = L.target - covAmt, tip3 = 'Every logged deal would take ' + (s.level === 'all' ? 'October' : 'it') + ' to ' + L.cov + '%' +
-    (L.cov >= 100 ? ', so the pipeline already covers target.' : (L.cov >= 50 ? ', past the 50% line' : ', still short of the 50% line') + '; reaching target needs ' + rm(need) + ' of new business.');
+    (L.cov >= 100 ? ', so the pipeline already covers target.' : (L.cov >= 50 ? ', past the 50% line' : ', still short of the 50% line') + '; ' + rm(need) + ' is uncovered.');
   if (s.level === 'all') {
     var weakest = HEADS.slice().sort(function (a, b) { return a.pct - b.pct; })[0], S2 = sprintFor(s);
     var thin = MONTHS.slice(1).sort(function (a, b) { return S2.m[a].cov - S2.m[b].cov; })[0];
     tip3 += ' Thinnest spots: ' + weakest.name + (selfLed(weakest.key) ? '’s ' + lineName(weakest.key) : '') + ' at ' + weakest.pct + '%, and ' + MN[thin] + ' at ' + S2.m[thin].cov + '% covered.';
   }
-  chips.push(need > 0.0005 ? { icon: 'target', html: '<b>' + rm(need) + '</b> new business to find', tip: tip3 }
+  chips.push(need > 0.0005 ? { icon: 'target', html: '<b>' + rm(need) + '</b> uncovered', tip: tip3 }
                            : { icon: 'check-circle', html: 'Pipeline <b>covers target</b>', tip: tip3 });
   return chips;
 }
@@ -6647,7 +6649,7 @@ function bridgeTile(s, L, span) {
   }
   cols.push({ n: 'Forecast', a: 0, b: L.forecast, k: 'tot', g: 'ink', wonp: L.won != null && L.forecast > 0 ? L.won / L.forecast * 100 : 100, tip: ax + rm(L.forecast) + ' · ' + L.pct + '% of target' });
   if (rest > 0.0005) cols.push({ n: 'Coverage', a: L.forecast, b: covAmt, k: 'cov', g: 'wh', plus: true, tip: 'Everything else logged from 30% up, unweighted: 50% deals and the uncounted part of 80% deals' });
-  if (need > 0.0005) cols.push({ n: 'New business', a: covAmt, b: t, k: 'new', g: 'sf', plus: true, tip: 'Pipeline that does not exist yet' });
+  if (need > 0.0005) cols.push({ n: 'Uncovered', a: covAmt, b: t, k: 'new', g: 'sf', plus: true, tip: 'Not logged in NeoCRM yet' });
   cols.push({ n: 'Target', a: 0, b: t, k: 'tgt', g: 'wh', tip: 'October target' });
   var top = Math.max(t, covAmt) * 1.06;
   var y = function (v) { return (v / top * 100).toFixed(2) + '%'; };
@@ -6781,7 +6783,7 @@ function sprintSec(s) {
         '<i class="mh-mk perf" style="left:' + h(L.target * 0.5) + '" title="50% · ' + ax + rm(L.target * 0.5) + '"></i>' +
         '<i class="mh-mk comm" style="left:' + h(L.target * 0.6) + '" title="60% · ' + ax + rm(L.target * 0.6) + '"></i>' +
         '<span class="mh-pct' + (L.forecast / top < 0.07 ? ' out' : '') + '" style="left:' + h(L.forecast) + '">' + L.pct + '%</span>';
-      var need = L.need > 0.0005 ? '<span class="mh-need">' + ax + rm(L.need) + ' to find</span>' : '<span class="mh-need ok">Covered</span>';
+      var need = L.need > 0.0005 ? '<span class="mh-need">' + ax + rm(L.need) + ' uncovered</span>' : '<span class="mh-need ok">Covered</span>';
       sub = rm(L.target) + ' · ' + L.cov + '% logged';
     } else {
       plot = '<span class="mh-none">' + (x.noTarget ? rm(x.f) + ' forecast · no target' : 'No figures') + '</span>'; var need = '';
@@ -6796,7 +6798,7 @@ function sprintSec(s) {
         r(L.won != null ? 'background:transparent' : 'background:#080808', 'Forecast', ax + rm(L.forecast) + ' · ' + L.pct + '%') +
         r('background:#FFC982', 'Coverage', ax + rm(L.logged - L.forecast)) +
         r('background:transparent', 'Total logged', ax + rm(L.logged) + ' · ' + L.cov + '%') +
-        r('background:#F0F0F0;box-shadow:inset 0 0 0 1px #bdbdbd', 'Shortfall, new business', L.need > 0.0005 ? ax + rm(L.need) : 'None') +
+        r('background:#F0F0F0;box-shadow:inset 0 0 0 1px #bdbdbd', 'Uncovered', L.need > 0.0005 ? ax + rm(L.need) : 'None') +
         '<div class="hint">' + (n50 > 0.0005 ? ax + rm(n50) + ' more reaches the 50% line, ' + ax + rm(n60) + ' unlocks commission at 60%.'
           : n60 > 0.0005 ? 'Past the 50% line. ' + ax + rm(n60) + ' more unlocks commission at 60%.'
           : L.forecast < L.target ? 'Commission unlocked. ' + ax + rm(L.target - L.forecast) + ' more reaches target.' : 'Forecast is at or above target.') + '</div>';
@@ -6812,7 +6814,7 @@ function sprintSec(s) {
   var legend = '<div class="c-progress-legend" aria-hidden="true"><span class="c-progress-legend-item"><i class="c-progress-legend-swatch" style="background:var(--seg-won)"></i>' + (real.some(function (m) { return lines[m].won != null; }) ? 'Won-booked' : 'Forecast') + '</span>' +
     (real.some(function (m) { return lines[m].won != null; }) ? '<span class="c-progress-legend-item"><i class="c-progress-legend-swatch" style="background:var(--seg-wt)"></i>Weighted 80%</span>' : '') +
     '<span class="c-progress-legend-item"><i class="c-progress-legend-swatch" style="background:var(--seg-cov)"></i>Coverage</span>' +
-    '<span class="c-progress-legend-item"><i class="c-progress-legend-swatch need"></i>Shortfall</span>' +
+    '<span class="c-progress-legend-item"><i class="c-progress-legend-swatch need"></i>Uncovered</span>' +
     '<span class="c-progress-legend-item"><i class="lgl perf"></i>50%</span><span class="c-progress-legend-item"><i class="lgl comm"></i>60%</span></div>';
   var chart = tile({ id: 'sprintSec', span: 8, title: (s.level === 'all' ? 'October' : esc(seatName(s)) + ', October') + ' to January',
     sub: thin ? '<b>' + MN[thin] + ' is the thinnest</b>, at ' + lines[thin].cov + '% logged.' : 'Each month up to its own target.',
@@ -6831,10 +6833,10 @@ function sprintSec(s) {
     var row = function (k, label, v) { return '<div class="rw-r"><span><i class="rw-k ' + k + '"></i>' + label + '</span><b>' + v + '</b></div>'; };
     body = '<div class="big" data-count="' + (S2.forecast || sum.f) + '">' + rm(S2.forecast != null ? S2.forecast : sum.f) + '</div>' +
       (S2.gap != null ? '<div class="kgap">' + delta(S2.gap, rm(Math.abs(S2.gap)) + (S2.gap < 0 ? ' short of' : ' ahead of') + ' the four targets') + '</div>' : '') +
-      '<div class="rw-bar" role="img" aria-label="' + esc('Four months: forecast ' + rm(sum.f) + ', logged ' + rm(sum.lg) + ', new business needed ' + rm(sum.need) + ', of ' + rm(sum.t) + ' in targets') + '">' +
+      '<div class="rw-bar" role="img" aria-label="' + esc('Four months: forecast ' + rm(sum.f) + ', logged ' + rm(sum.lg) + ', uncovered ' + rm(sum.need) + ', of ' + rm(sum.t) + ' in targets') + '">' +
       (sum.split ? seg('won', sum.won) + seg('wt', sum.wt) : seg('won', sum.f)) + seg('cov', sum.lg - sum.f) + seg('need', sum.need) + '</div>' +
       '<div class="rw-rows">' + (sum.split ? row('won', 'Secured, won-booked', rm(sum.won)) + row('wt', 'Weighted 80%', rm(sum.wt)) : row('won', 'Forecast', ax2 + rm(sum.f))) +
-      row('cov', 'Coverage', ax2 + rm(sum.lg - sum.f)) + row('need', 'New business needed', ax2 + rm(sum.need)) +
+      row('cov', 'Coverage', ax2 + rm(sum.lg - sum.f)) + row('need', 'Uncovered', ax2 + rm(sum.need)) +
       '<div class="rw-r tot"><span>Four targets' + (real.length < 4 ? ' (' + real.length + ' months)' : '') + '</span><b>' + rm(sum.t) + '</b></div></div>' +
       '<p class="note">' + esc(R.sprint.caveat) + '</p>';
   } else {
@@ -6867,7 +6869,7 @@ function gridSec(s) {
   var legend = '<div class="c-progress-legend" aria-hidden="true"><span class="c-progress-legend-item"><i class="c-progress-legend-swatch" style="background:var(--seg-won)"></i>Won-booked</span>' +
     '<span class="c-progress-legend-item"><i class="c-progress-legend-swatch" style="background:var(--seg-wt)"></i>Weighted 80%</span>' +
     '<span class="c-progress-legend-item"><i class="c-progress-legend-swatch" style="background:var(--seg-cov)"></i>Coverage</span>' +
-    '<span class="c-progress-legend-item"><i class="c-progress-legend-swatch" style="background:var(--seg-sf);box-shadow:inset 0 0 0 1px var(--color-neutral-4)"></i>Shortfall</span>' +
+    '<span class="c-progress-legend-item"><i class="c-progress-legend-swatch" style="background:var(--seg-sf);box-shadow:inset 0 0 0 1px var(--color-neutral-4)"></i>Uncovered</span>' +
     '<span class="c-progress-legend-item"><i class="lgl" style="background:var(--ink)"></i>Target</span>' +
     '<span class="c-progress-legend-item"><i class="lgl perf"></i>50% threshold</span><span class="c-progress-legend-item"><i class="lgl comm"></i>60% commission</span></div>';
   var who = function (av, name, small, seat) {
@@ -6917,7 +6919,7 @@ function monthSec(s) {
     var ax = L.approx ? '≈' : '';
     nums = '<div class="mfs">' + fig(x.pct + '%', 'forecast of target', 'hero') +
       (x.won != null ? fig(rm(x.won), 'won-booked') + fig(rm(x.weighted), 'weighted 80%', 'acc') : fig(ax + rm(L.forecast), 'forecast')) +
-      fig(x.cov + '%', 'logged') + fig(ax + rm(L.need), 'new business to find', 'need') + fig(rm(x.target), 'target') + '</div>' +
+      fig(x.cov + '%', 'logged') + fig(ax + rm(L.need), 'uncovered', 'need') + fig(rm(x.target), 'target') + '</div>' +
       pt({ won: x.won, forecast: x.won != null ? x.won + x.weighted : null, target: x.target, pct: x.pct, cov: x.cov, label: MN[m] }, 'lg');
   }
   var O = openDeals(s, m);
@@ -7066,8 +7068,8 @@ function renderHero(s) {
   put('gap-v', gapTxt(gap));
   var day = slot('gap-day');
   if (day) { day.textContent = 'Day ' + R.month.day + ' of ' + R.month.days + ' · ' + DAYS_LEFT + ' days left'; day.classList.toggle('down', gap < 0); day.classList.toggle('up', gap >= 0); }
-  put('gap-rate', gap < 0 ? rm(-gap / DAYS_LEFT) + ' a day of new business closes it' : 'Forecast is at or above target for this book');
-  put('gap-rec', gap < 0 ? 'Logged deals take it to ' + L.cov + '% at most. The rest is new business.' : 'Nothing more is required to reach it.');
+  put('gap-rate', gap < 0 ? rm(-gap / DAYS_LEFT) + ' a day closes it' : 'Forecast is at or above target for this book');
+  put('gap-rec', gap < 0 ? 'Logged deals take it to ' + L.cov + '% at most. The rest is uncovered.' : 'Nothing more is required to reach it.');
 
   var O = openDeals(s, 'Oct'), top = O.list[0];
   if (top) {

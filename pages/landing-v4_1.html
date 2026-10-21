@@ -3306,6 +3306,10 @@ a.c-sidebar-item, a.c-nav-child{text-decoration:none;}
 #salesBoard .kpi.gap.ahead{background:color-mix(in srgb, var(--color-green) 8%, var(--color-neutral-1)); border-color:color-mix(in srgb, var(--color-green) 24%, transparent);}
 #salesBoard .kpi.gap.ahead .big{color:var(--ok-text, #00854c);}
 #salesBoard .kpi.gap.ahead .ichip{background:color-mix(in srgb, var(--color-green) 16%, transparent); color:var(--ok-text, #00854c);}
+
+/* the month's lane titles carry their stage tag, as the October lanes do */
+#salesBoard .m-lane .lane-h h4{display:flex; align-items:center; gap:var(--spacing-8); flex-wrap:wrap;}
+#salesBoard .m-lane .lane-h h4 .c-badge{height:24px; padding:0 var(--spacing-8); font-size:var(--text-label2-size);}
 </style>
 
 
@@ -6935,8 +6939,10 @@ function monthSec(s) {
       return dealLine({ i: i, c: d.c, a: d.a, p: d.p, owner: d.owner, v: d.m[idx], sub: Math.abs(d.v - d.m[idx]) > 0.0005 ? 'of ' + rm(d.v) : '' });
     }).join('') + '</div>'
     : '<p class="empty">No won deals waiting to be booked for ' + MN[m] + (teamOf(s) ? ' in this book.' : ' in this line.') + '</p>';
-  var lanes = '<div class="m-lanes"><div class="m-lane"><div class="lane-h"><h4>Push to close, ' + (staged ? '50% and 80%' : '50%') + '</h4>' + meta(count) + '</div>' + open + '</div>' +
-    '<div class="m-lane"><div class="lane-h"><h4>Get it booked, 100%</h4>' + meta(wonCount) + '</div>' + wonList + '</div></div>';
+  /* labelled as the October tab's lanes: the name, then its stage tag */
+  var both = '<span class="c-badge c-badge-neutral stg" title="Deals at 50% and 80%, in negotiation"><i class="stg-dot s50" aria-hidden="true"></i><i class="stg-dot s80" aria-hidden="true"></i>50–80%</span>';
+  var lanes = '<div class="m-lanes"><div class="m-lane"><div class="lane-h"><h4>Push to close' + (staged ? both : stageChip(50, '50%', 'Deals at 50%, in negotiation')) + '</h4>' + meta(count) + '</div>' + open + '</div>' +
+    '<div class="m-lane"><div class="lane-h"><h4>Get it booked' + stageChip('won', '100%', 'Won at 100% in NeoCRM, awaiting booking') + '</h4>' + meta(wonCount) + '</div>' + wonList + '</div></div>';
   var sim = '';   // What it takes per month: removed (V4.1 review)
   return tile({ id: 'monthSec', span: 12, title: MN[m] + ', what can still land', side: seg,
     body: '<div class="mfocus">' + nums + '</div>' + lanes + sim +

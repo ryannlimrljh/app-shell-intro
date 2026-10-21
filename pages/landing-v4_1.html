@@ -6538,19 +6538,24 @@ function bankTile(s, sprint) {
   var title = sprint ? 'In the booking system, October to January' : 'In the booking system, October';
   var sub = 'Booked in the TV, Radio, Digital or AA systems. Net values.' + (sprint ? ' Digital and AA hold the current month only.' : '');
   if (!rows.length) return tile({ id: id, span: 12, title: title, sub: sub, body: '<p class="empty">' + (teamOf(s) ? 'Nothing booked in this book yet.' : 'None of the top campaigns sits in this line. Open a head to see their own.') + '</p>' });
+  /* Rule (V4.1 review): the top ten by default; "Show all" opens the rest,
+     and "Show top 10" folds them back. Each box remembers its own. */
+  var key = sprint ? 'sprint' : 'oct', all = !!(state.bankAll && state.bankAll[key]), TOP = 10;
+  var shown = all ? rows : rows.slice(0, TOP);
+  var more = rows.length > TOP ? '<button class="c-btn c-btn-secondary c-btn-sm more" type="button" data-bank-all="' + key + '" aria-expanded="' + all + '">' +
+    (all ? 'Show top ' + TOP : 'Show all ' + rows.length) + '</button>' : '';
+  var side = meta(rows.length > TOP && !all ? 'Top ' + TOP + ' of ' + rows.length : plural(rows.length, 'campaign'));
   var body;
-  if (!sprint) body = '<div class="dls cols">' + rows.slice(0, 15).map(function (d, i) { return dealLine({ i: i, c: d.c, a: d.a, p: d.p, owner: d.owner, v: d.v }); }).join('') + '</div>';
+  if (!sprint) body = '<div class="dls cols">' + shown.map(function (d, i) { return dealLine({ i: i, c: d.c, a: d.a, p: d.p, owner: d.owner, v: d.v }); }).join('') + '</div>' + more;
   else {
-    var shown = state.bankAll ? rows.slice(0, 15) : rows.slice(0, 8);
     body = '<div class="dls cols spark">' + shown.map(function (d, i) {
       var mx = Math.max.apply(null, d.m.concat([0.001]));
       var sp = '<span class="sp" role="img" aria-label="' + esc(MONTHS.map(function (k, j) { return MN[k] + ' ' + (d.m[j] ? rm(d.m[j]) : 'none'); }).join(', ')) + '">' +
         d.m.map(function (v, j) { return '<span class="sp-c" data-tip="' + esc(MN[MONTHS[j]] + ': ' + (v ? rm(v) : 'nothing booked')) + '"><i' + (v ? '' : ' class="z"') + ' style="height:' + (v ? Math.max(12, v / mx * 100) : 100).toFixed(0) + '%"></i><em>' + MONTHS[j][0] + '</em></span>'; }).join('') + '</span>';
       return dealLine({ i: i, c: d.c, a: d.a, p: d.p, owner: d.owner, v: d.v, spark: sp });
-    }).join('') + '</div>' +
-      (!state.bankAll && rows.length > 8 ? '<button class="c-btn c-btn-secondary c-btn-sm more" type="button" data-bank-all>Show all ' + Math.min(15, rows.length) + '</button>' : '');
+    }).join('') + '</div>' + more;
   }
-  return tile({ id: id, span: 12, title: title, sub: sub, side: meta('Top ' + Math.min(15, rows.length)), body: body });
+  return tile({ id: id, span: 12, title: title, sub: sub, side: side, body: body });
 }
 function booksTile(s) {
   var T = teamOf(s); if (!T) return '';
@@ -7325,7 +7330,7 @@ function pickCut(key) {
   go(seat);
 }
 function go(seat, to) {
-  state.seat = seat; state.books = { q: '', who: '', all: false }; state.open = null; state.sim = { pick: {}, nb: 0 }; state.bankAll = false;
+  state.seat = seat; state.books = { q: '', who: '', all: false }; state.open = null; state.sim = { pick: {}, nb: 0 }; state.bankAll = {};
   scrollToBoard();
   swap(function () {
     var el = to && document.getElementById(to), sc = document.querySelector('.c-shell-content');
@@ -7415,7 +7420,7 @@ B.addEventListener('click', function (e) {
   var t = e.target.closest('[data-gm],[data-seat],[data-open],[data-view],[data-month],[data-order],[data-who],[data-flag],[data-books-all],[data-bank-all]');
   if (!t || !B.contains(t)) return;
   /* a sprint dot opens that line's month in the Projection tab */
-  if (t.dataset.gm) { state.month = t.dataset.gm; state.tab = 'next'; state.bankAll = false; go(t.dataset.gs && canSee(t.dataset.gs) ? t.dataset.gs : state.seat, 'monthSec'); return; }
+  if (t.dataset.gm) { state.month = t.dataset.gm; state.tab = 'next'; state.bankAll = {}; go(t.dataset.gs && canSee(t.dataset.gs) ? t.dataset.gs : state.seat, 'monthSec'); return; }
   if (t.dataset.seat) { if (!canSee(t.dataset.seat)) return; go(t.dataset.seat, t.dataset.to); return; }
   if (t.dataset.open) {
     /* an open row folds shut first, then the next one unfolds */
@@ -7432,7 +7437,11 @@ B.addEventListener('click', function (e) {
   }
   if (t.dataset.view) { if (state.tab !== t.dataset.view) { B.dataset.dir = t.dataset.view === 'next' ? 'fwd' : 'back'; state.tab = t.dataset.view; swap(); } return; }
   if (t.dataset.month) { if (state.month !== t.dataset.month) state.sim = { pick: {}, nb: 0 }; state.month = t.dataset.month; render(); return; }
-  if (t.hasAttribute('data-bank-all')) { state.bankAll = true; render(); return; }
+  if (t.hasAttribute('data-bank-all')) {
+    var bk = t.dataset.bankAll || 'sprint'; state.bankAll = state.bankAll || {}; state.bankAll[bk] = !state.bankAll[bk]; render();
+    var nb = B.querySelector('[data-bank-all="' + bk + '"]'); if (nb) nb.focus({ preventScroll: true });
+    return;
+  }
   if (t.dataset.order) { state.order = t.dataset.order; render(); return; }
   if (t.hasAttribute('data-who')) { state.books.who = t.dataset.who; render(); return; }
   if (t.dataset.flag) { state.flags[t.dataset.flag] = !state.flags[t.dataset.flag]; render(); return; }

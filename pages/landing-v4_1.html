@@ -2988,11 +2988,7 @@ a.c-sidebar-item, a.c-nav-child{text-decoration:none;}
 #salesBoard .books-tools{display:flex; gap:var(--spacing-12); flex-wrap:wrap; align-items:center; margin-bottom:var(--spacing-16);}
 #salesBoard .books-tools .c-search-input-box{flex:1 1 260px; max-width:420px;}
 #salesBoard .books-tools .c-search-input-icon{position:absolute; left:var(--spacing-12); color:var(--muted); font-size:var(--icon-sm);}
-#salesBoard .books-tbl tr.flagged td{background:var(--color-gold-bg);}
-#salesBoard .flagbtn{border:1px solid var(--rule); background:var(--color-neutral-1); border-radius:var(--radius-sm); height:32px; padding:0 var(--spacing-12); box-shadow:var(--shadow-1);
   display:inline-flex; align-items:center; gap:6px; font-size:var(--text-label2-size); font-weight:700; color:var(--ink); cursor:pointer;}
-#salesBoard .flagbtn:hover{background:var(--soft);}
-#salesBoard .flagbtn[aria-pressed="true"]{background:var(--color-obsidian); border-color:var(--color-obsidian); color:var(--color-neutral-1);}
 #salesBoard .books-foot{display:flex; justify-content:space-between; gap:var(--spacing-12); flex-wrap:wrap; margin-top:var(--spacing-12); font-size:var(--text-caption-size); color:var(--muted);}
 #salesBoard .books-foot b{color:var(--ink);}
 #salesBoard .more{margin-top:var(--spacing-12); align-self:flex-start;}
@@ -5934,7 +5930,6 @@ var state = {
   month: 'Nov',
   order: 'gap',
   books: { q: '', who: '', all: false },
-  flags: {},
   open: null,                    // the head row opened in place
   sim: { pick: {}, nb: 0 }       // what-it-takes: ticked moves, new business
 };
@@ -6531,20 +6526,48 @@ function dealsTiles(s, span) {
     tile({ span: span, cls: 'lane', title: 'Get it booked' + stageChip('won', '100%', 'Won at 100% in NeoCRM, awaiting booking'), sub: 'Won, not yet in the booking systems.', side: bookSide,
       body: list(won, 'No won deals waiting to be booked for October here.') + '<p class="note">At risk until booked: each needs its MO/IO through Scheduling or Ad Ops.</p>' });
 }
+/* Every October booking in scope, one row per campaign (V4.1, confirmed
+   with the data team's lead): each head's "All booked campaigns,
+   October" pages, the list Check the books reads, summed by campaign and
+   advertiser. Credits and adjustments stay in, so the count and the
+   total match the report. Above a head each row names the head. */
+function octBooked(s) {
+  var ppl = peopleIn(s), above = !teamOf(s), by = {}, out = [];
+  headsIn(s).forEach(function (h) {
+    var T = TEAM[h.key]; if (!T) return;
+    T.bookings.forEach(function (b) {
+      if (ppl && ppl.indexOf(b[3]) < 0) return;
+      var k = h.key + '|' + b[0] + '|' + b[1], e = by[k];
+      if (!e) { e = by[k] = { c: b[0], a: b[1], ps: [], people: [], v: 0, h: h }; out.push(e); }
+      e.v += b[4];
+      String(b[2]).split(' + ').forEach(function (x) { if (e.ps.indexOf(x) < 0) e.ps.push(x); });
+      if (b[3] && b[3] !== '—' && e.people.indexOf(b[3]) < 0) e.people.push(b[3]);
+    });
+  });
+  return out.map(function (e) {
+    var who = e.people.length === 1 ? e.people[0] : e.people.length ? e.people[0] + ' +' + (e.people.length - 1) : '—';
+    return { c: e.c, a: e.a, p: ['Digital', 'Radio', 'TV', 'AA'].filter(function (x) { return e.ps.indexOf(x) >= 0; }).join(' + ') || e.ps.join(' + '),
+             st: 'Booked', owner: above ? e.h.name + (who !== '—' ? ' · ' + who : '') : who, v: e.v };
+  }).sort(function (a, b) { return b.v - a.v; });
+}
 function bankTile(s, sprint) {
   /* Booked only (V4.1 review): won-not-booked has its own lane, Get it
      booked, on both tabs. */
-  var rows = bankRows(s, sprint).filter(function (d) { return d.st === 'Booked'; }), id = sprint ? 'bankSprintSec' : 'bankSec';
+  var rows = sprint ? bankRows(s, sprint).filter(function (d) { return d.st === 'Booked'; }) : octBooked(s), id = sprint ? 'bankSprintSec' : 'bankSec';
   var title = sprint ? 'In the booking system, October to January' : 'In the booking system, October';
-  var sub = 'Booked in the TV, Radio, Digital or AA systems. Net values.' + (sprint ? ' Digital and AA hold the current month only.' : '');
-  if (!rows.length) return tile({ id: id, span: 12, title: title, sub: sub, body: '<p class="empty">' + (teamOf(s) ? 'Nothing booked in this book yet.' : 'None of the top campaigns sits in this line. Open a head to see their own.') + '</p>' });
-  /* Rule (V4.1 review): the top ten by default; "Show all" opens the rest,
-     and "Show top 10" folds them back. Each box remembers its own. */
+  var sub = sprint ? 'Booked in the TV, Radio, Digital or AA systems. Net values. Digital and AA hold the current month only.'
+                   : 'Every October booking in the TV, Radio, Digital or AA systems, credited to the salesperson on the booking. Net values; negatives are credits or adjustments.';
+  if (!rows.length) return tile({ id: id, span: 12, title: title, sub: sub, body: '<p class="empty">' + (teamOf(s) ? 'Nothing booked in this book yet.' : sprint ? 'None of the top campaigns sits in this line. Open a head to see their own.' : 'Nothing booked in this line yet.') + '</p>' });
+  /* Rule (agreed with the data team's lead, 21 Oct 2026), the same on both
+     tabs: the top ten by default. Leadership and VP views open to the top
+     thirty; a head of sales, manager or salesperson opens to the full
+     list. Each box remembers its own; a seat change folds them back. */
   var key = sprint ? 'sprint' : 'oct', all = !!(state.bankAll && state.bankAll[key]), TOP = 10;
-  var shown = all ? rows : rows.slice(0, TOP);
+  var CAP = (s.level === 'all' || s.level === 'lead') ? 30 : Infinity, open = Math.min(rows.length, CAP);
+  var shown = all ? rows.slice(0, open) : rows.slice(0, TOP);
   var more = rows.length > TOP ? '<button class="c-btn c-btn-secondary c-btn-sm more" type="button" data-bank-all="' + key + '" aria-expanded="' + all + '">' +
-    (all ? 'Show top ' + TOP : 'Show all ' + rows.length) + '</button>' : '';
-  var side = meta(rows.length > TOP && !all ? 'Top ' + TOP + ' of ' + rows.length : plural(rows.length, 'campaign'));
+    (all ? 'Show top ' + TOP : rows.length > CAP ? 'Show top ' + CAP : 'Show all ' + rows.length) + '</button>' : '';
+  var side = meta(rows.length <= TOP || (all && open === rows.length) ? plural(rows.length, 'campaign') : 'Top ' + (all ? open : TOP) + ' of ' + rows.length);
   var body;
   if (!sprint) body = '<div class="dls cols">' + shown.map(function (d, i) { return dealLine({ i: i, c: d.c, a: d.a, p: d.p, owner: d.owner, v: d.v }); }).join('') + '</div>' + more;
   else {
@@ -6569,24 +6592,21 @@ function booksTile(s) {
   });
   var total = rows.reduce(function (a, x) { return a + x.b[4]; }, 0);
   var shown = state.books.all || qv || wv ? rows : rows.slice(0, 10);
-  var flagged = Object.keys(state.flags).filter(function (k) { return state.flags[k]; }).length;
   var chips = who.length < 2 ? '' : '<div class="c-chip-group" role="group" aria-label="Salesperson"><button class="c-chip c-chip-filter' + (!wv ? ' is-active' : '') + '" type="button" data-who="" aria-pressed="' + (!wv) + '">Everyone</button>' +
     who.map(function (p) { return '<button class="c-chip c-chip-filter' + (wv === p ? ' is-active' : '') + '" type="button" data-who="' + esc(p) + '" aria-pressed="' + (wv === p) + '">' + esc(p) + '</button>'; }).join('') + '</div>';
   var table = '<div class="tblw"><table class="tbl books-tbl">' +
-    '<thead><tr><th>Campaign</th><th class="opt" style="width:11%">Platform</th><th style="width:16%">Salesperson</th><th class="r" style="width:12%">October</th><th class="r" style="width:14%">Check</th></tr></thead><tbody>' +
+    '<thead><tr><th>Campaign</th><th class="opt" style="width:13%">Platform</th><th style="width:20%">Salesperson</th><th class="r" style="width:14%">October</th></tr></thead><tbody>' +
     (shown.length ? shown.map(function (x) {
-      var on = !!state.flags[x.id];
       var br = brand(x.b[1]);
-      return '<tr class="' + (on ? 'flagged' : '') + '"><td><div class="who" data-tip="' + esc(x.b[0] + ' · ' + br.full) + '"><b>' + esc(x.b[0]) + '</b><small>' + esc(br.n) + (br.agency ? ' <span class="ag">Agency</span>' : '') + '</small></div></td>' +
-        '<td class="opt mut">' + esc(x.b[2]) + '</td><td>' + esc(x.b[3]) + '</td><td class="r b">' + rm(x.b[4]) + '</td>' +
-        '<td class="r"><button class="flagbtn" type="button" data-flag="' + esc(x.id) + '" aria-pressed="' + on + '"><i class="ph-fill ph-flag" aria-hidden="true"></i>' + (on ? 'Flagged' : 'Flag') + '</button></td></tr>';
-    }).join('') : '<tr><td colspan="5" class="mut">No bookings match. Clear the search or pick Everyone.</td></tr>') + '</tbody></table></div>';
+      return '<tr><td><div class="who" data-tip="' + esc(x.b[0] + ' · ' + br.full) + '"><b>' + esc(x.b[0]) + '</b><small>' + esc(br.n) + (br.agency ? ' <span class="ag">Agency</span>' : '') + '</small></div></td>' +
+        '<td class="opt mut">' + esc(x.b[2]) + '</td><td>' + esc(x.b[3]) + '</td><td class="r b">' + rm(x.b[4]) + '</td></tr>';
+    }).join('') : '<tr><td colspan="4" class="mut">No bookings match. Clear the search or pick Everyone.</td></tr>') + '</tbody></table></div>';
   var more = !state.books.all && !qv && !wv && rows.length > 10 ? '<button class="c-btn c-btn-secondary c-btn-sm more" type="button" data-books-all>Show all ' + rows.length + ' bookings</button>' : '';
-  return tile({ id: 'booksSec', span: 12, title: 'Check the books', sub: 'Every October booking, ' + plural(all.length, 'line') + ', credited to the salesperson on the booking. <b>Flag anything missing or out of place</b> and it goes to the data team.',
+  return tile({ id: 'booksSec', span: 12, title: 'Check the books', sub: 'Every October booking, ' + plural(all.length, 'line') + ', credited to the salesperson on the booking.',
     body: '<div class="books-tools"><div class="c-search-input-box"><i class="ph ph-magnifying-glass c-search-input-icon" aria-hidden="true"></i>' +
       '<input type="search" id="booksQ" placeholder="Search campaign, advertiser or salesperson" aria-label="Search bookings" value="' + esc(state.books.q) + '" /></div>' + chips + '</div>' +
       table + more + '<div class="books-foot"><span>' + plural(rows.length, 'booking') + ' · ' + rm(total) + '</span><span>' +
-      (flagged ? '<b>' + flagged + ' flagged.</b> Sent to the data team once the report is wired.' : 'Negative values would be credits or adjustments.') + '</span></div>' });
+      'Negative values are credits or adjustments.</span></div>' });
 }
 
 function rowMeta(head, r) {
@@ -6790,7 +6810,10 @@ function sprintSec(s) {
         '<i class="mh-mk perf" style="left:' + h(L.target * 0.5) + '" title="50% · ' + ax + rm(L.target * 0.5) + '"></i>' +
         '<i class="mh-mk comm" style="left:' + h(L.target * 0.6) + '" title="60% · ' + ax + rm(L.target * 0.6) + '"></i>' +
         '<span class="mh-pct' + (L.forecast / top < 0.07 ? ' out' : '') + '" style="left:' + h(L.forecast) + '">' + L.pct + '%</span>';
-      var need = L.need > 0.0005 ? '<span class="mh-need">' + ax + rm(L.need) + ' uncovered</span>' : '<span class="mh-need ok">Covered</span>';
+      /* the month's gap, forecast against its target, as the grid below
+         and the runway read it; the four add up to the runway's total */
+      var gp = L.forecast - L.target;
+      var need = gp < -0.0005 ? '<span class="mh-need">' + ax + rm(gp) + ' gap</span>' : '<span class="mh-need ok">' + ax + '+' + rm(gp) + ' ahead</span>';
       sub = rm(L.target) + ' · ' + L.cov + '% logged';
     } else {
       plot = '<span class="mh-none">' + (x.noTarget ? rm(x.f) + ' forecast · no target' : 'No figures') + '</span>'; var need = '';
@@ -6805,6 +6828,7 @@ function sprintSec(s) {
         r(L.won != null ? 'background:transparent' : 'background:#080808', 'Forecast', ax + rm(L.forecast) + ' · ' + L.pct + '%') +
         r('background:#FFC982', 'Coverage', ax + rm(L.logged - L.forecast)) +
         r('background:transparent', 'Total logged', ax + rm(L.logged) + ' · ' + L.cov + '%') +
+        r('background:transparent', 'Gap to target', ax + gapTxt(L.forecast - L.target)) +
         r('background:#F0F0F0;box-shadow:inset 0 0 0 1px #bdbdbd', 'Uncovered', L.need > 0.0005 ? ax + rm(L.need) : 'None') +
         '<div class="hint">' + (n50 > 0.0005 ? ax + rm(n50) + ' more reaches the 50% line, ' + ax + rm(n60) + ' unlocks commission at 60%.'
           : n60 > 0.0005 ? 'Past the 50% line. ' + ax + rm(n60) + ' more unlocks commission at 60%.'
@@ -7182,7 +7206,7 @@ function render() {
   history.replaceState(history.state, '', url.pathname + url.search + url.hash);
 }
 /* A change of seat or horizon is an arrival: the bars grow in and the
-   sections settle, once. Re-renders inside a seat (a flag, a search) stay
+   sections settle, once. Re-renders inside a seat (a search, a filter) stay
    still. */
 var arriveT = null;
 function arrive() {
@@ -7417,7 +7441,7 @@ B.addEventListener('click', function (e) {
   if (yb) { state.cutYears = state.cutYears || {}; state.cutYears[yb.dataset.cutyear] = !state.cutYears[yb.dataset.cutyear]; renderCutPanel(); var nb = document.querySelector('#cutPanel [data-cutyear="' + yb.dataset.cutyear + '"]'); if (nb) nb.focus(); return; }
   if (e.target.closest('#cutPanel')) return;
   if (e.target.closest('#v2Btn') && state.tab === 'now' && CUTS.length > 1) { openCuts(!state.cutOpen); return; }
-  var t = e.target.closest('[data-gm],[data-seat],[data-open],[data-view],[data-month],[data-order],[data-who],[data-flag],[data-books-all],[data-bank-all]');
+  var t = e.target.closest('[data-gm],[data-seat],[data-open],[data-view],[data-month],[data-order],[data-who],[data-books-all],[data-bank-all]');
   if (!t || !B.contains(t)) return;
   /* a sprint dot opens that line's month in the Projection tab */
   if (t.dataset.gm) { state.month = t.dataset.gm; state.tab = 'next'; state.bankAll = {}; go(t.dataset.gs && canSee(t.dataset.gs) ? t.dataset.gs : state.seat, 'monthSec'); return; }
@@ -7444,7 +7468,6 @@ B.addEventListener('click', function (e) {
   }
   if (t.dataset.order) { state.order = t.dataset.order; render(); return; }
   if (t.hasAttribute('data-who')) { state.books.who = t.dataset.who; render(); return; }
-  if (t.dataset.flag) { state.flags[t.dataset.flag] = !state.flags[t.dataset.flag]; render(); return; }
   if (t.hasAttribute('data-books-all')) { state.books.all = true; render(); return; }
 });
 document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && state.cutOpen) { e.preventDefault(); openCuts(false); } });

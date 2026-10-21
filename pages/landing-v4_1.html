@@ -3301,6 +3301,11 @@ a.c-sidebar-item, a.c-nav-child{text-decoration:none;}
 #salesBoard .kpi .th{height:24px; align-items:center; overflow:visible;}
 #salesBoard .kpi .th-r{display:flex; align-items:center; height:24px;}
 #salesBoard .kpi .ichip{margin:-8px 0;}
+
+/* the gap, when the pipeline is past target: green */
+#salesBoard .kpi.gap.ahead{background:color-mix(in srgb, var(--color-green) 8%, var(--color-neutral-1)); border-color:color-mix(in srgb, var(--color-green) 24%, transparent);}
+#salesBoard .kpi.gap.ahead .big{color:var(--ok-text, #00854c);}
+#salesBoard .kpi.gap.ahead .ichip{background:color-mix(in srgb, var(--color-green) 16%, transparent); color:var(--ok-text, #00854c);}
 </style>
 
 
@@ -6312,13 +6317,16 @@ function kpiTiles(s, L, r) {
     out += tile({ span: 3, cls: 'kpi', title: 'Four months', side: r && r.g != null ? meta(gapTxt(r.g) + ' gap') : '',
       body: '<div class="big" data-count="' + (r ? r.f : 0) + '">' + rm(r ? r.f : null) + '</div><p class="note">Forecast across October to January' + (r && r.g != null ? ', ' + gapTxt(r.g) + ' against the four targets.' : '.') + '</p>' });
   }
-  if (need > 0.0005) {
+  /* The gap: everything logged against the target. Short of it, red and
+     negative; past it, the same card turns green and positive. */
+  var gapV = covAmt - T;
+  if (gapV < -0.0005) {
     out += tile({ span: 3, cls: 'kpi gap', title: 'Gap', side: '<span class="ichip" aria-hidden="true"><i class="ph-fill ph-trend-down"></i></span>',
-      body: '<div class="big" data-count="' + need + '"' + pre + '>' + ax + rm(need) + '</div><p class="note"><b>' + ax + rm(need / DAYS_LEFT) + ' a day</b> for ' + DAYS_LEFT +
+      body: '<div class="big" data-count="' + gapV + '"' + pre + '>' + ax + rm(gapV) + '</div><p class="note"><b>' + ax + rm(need / DAYS_LEFT) + ' a day</b> for ' + DAYS_LEFT +
         ' days. Even if every logged deal lands, this part is not in NeoCRM yet.</p>' });
   } else {
-    out += tile({ span: 3, cls: 'kpi', title: 'Pipeline covers target', side: chip('ok', 'Covered'),
-      body: '<div class="big">' + ax + rm(covAmt - T) + '</div><p class="note">Logged beyond the target. <b>Landing it is the job.</b></p>' });
+    out += tile({ span: 3, cls: 'kpi gap ahead', title: 'Gap', side: '<span class="ichip" aria-hidden="true"><i class="ph-fill ph-trend-up"></i></span>',
+      body: '<div class="big" data-count="' + gapV + '" data-pre="' + ax + '+">' + ax + '+' + rm(gapV) + '</div><p class="note">Logged beyond the target. <b>Landing it is the job.</b></p>' });
   }
   return out;
 }

@@ -6528,23 +6528,21 @@ function dealsTiles(s, span) {
       body: list(won, 'No won deals waiting to be booked for October here.') + '<p class="note">At risk until booked: each needs its MO/IO through Scheduling or Ad Ops.</p>' });
 }
 function bankTile(s, sprint) {
-  /* October (V4.1 review): booked only, since won-not-booked has its own
-     lane, Get it booked. The sprint view keeps both. */
-  var rows = bankRows(s, sprint), id = sprint ? 'bankSprintSec' : 'bankSec';
-  if (!sprint) rows = rows.filter(function (d) { return d.st === 'Booked'; });
-  var title = sprint ? 'In the bank, October to January' : 'In the booking system, October';
-  var sub = sprint ? 'Booked is in the TV, Radio, Digital or AA systems. Won is 100% in NeoCRM, awaiting booking. Net values. Digital and AA cover the current month only.'
-                   : 'Booked in the TV, Radio, Digital or AA systems. Net values.';
-  if (!rows.length) return tile({ id: id, span: 12, title: title, sub: sub, body: '<p class="empty">' + (teamOf(s) ? (sprint ? 'Nothing booked or won in this book yet.' : 'Nothing booked in this book yet.') : 'None of the top campaigns sits in this line. Open a head to see their own.') + '</p>' });
+  /* Booked only (V4.1 review): won-not-booked has its own lane, Get it
+     booked, on both tabs. */
+  var rows = bankRows(s, sprint).filter(function (d) { return d.st === 'Booked'; }), id = sprint ? 'bankSprintSec' : 'bankSec';
+  var title = sprint ? 'In the booking system, October to January' : 'In the booking system, October';
+  var sub = 'Booked in the TV, Radio, Digital or AA systems. Net values.' + (sprint ? ' Digital and AA hold the current month only.' : '');
+  if (!rows.length) return tile({ id: id, span: 12, title: title, sub: sub, body: '<p class="empty">' + (teamOf(s) ? 'Nothing booked in this book yet.' : 'None of the top campaigns sits in this line. Open a head to see their own.') + '</p>' });
   var body;
   if (!sprint) body = '<div class="dls cols">' + rows.slice(0, 15).map(function (d, i) { return dealLine({ i: i, c: d.c, a: d.a, p: d.p, owner: d.owner, v: d.v }); }).join('') + '</div>';
   else {
     var shown = state.bankAll ? rows.slice(0, 15) : rows.slice(0, 8);
-    body = '<div class="dls cols spark has-badge">' + shown.map(function (d, i) {
+    body = '<div class="dls cols spark">' + shown.map(function (d, i) {
       var mx = Math.max.apply(null, d.m.concat([0.001]));
       var sp = '<span class="sp" role="img" aria-label="' + esc(MONTHS.map(function (k, j) { return MN[k] + ' ' + (d.m[j] ? rm(d.m[j]) : 'none'); }).join(', ')) + '">' +
         d.m.map(function (v, j) { return '<span class="sp-c" data-tip="' + esc(MN[MONTHS[j]] + ': ' + (v ? rm(v) : 'nothing booked')) + '"><i' + (v ? '' : ' class="z"') + ' style="height:' + (v ? Math.max(12, v / mx * 100) : 100).toFixed(0) + '%"></i><em>' + MONTHS[j][0] + '</em></span>'; }).join('') + '</span>';
-      return dealLine({ i: i, c: d.c, a: d.a, p: d.p, owner: d.owner, v: d.v, spark: sp, badge: d.st === 'Booked' ? stageChip('bk', 'Booked') : stageChip('won', 'Won') });
+      return dealLine({ i: i, c: d.c, a: d.a, p: d.p, owner: d.owner, v: d.v, spark: sp });
     }).join('') + '</div>' +
       (!state.bankAll && rows.length > 8 ? '<button class="c-btn c-btn-secondary c-btn-sm more" type="button" data-bank-all>Show all ' + Math.min(15, rows.length) + '</button>' : '');
   }
@@ -6927,19 +6925,23 @@ function monthSec(s) {
   var staged = O.team || O.list.some(function (d) { return d.stage !== 50; });
   var open = O.list.length ? '<div class="dls' + (staged ? ' has-badge' : '') + '">' + O.list.slice(0, 10).map(function (d, i) { return dealRow(d, i, staged); }).join('') + '</div>'
     : '<p class="empty">No ' + (O.team ? 'open campaigns' : 'deals in negotiation') + ' land in ' + MN[m] + ' for this book.</p>';
-  var bank = bankRows(s, true).filter(function (d) { return d.st === 'Booked' && d.m[idx] > 0.0005; }).sort(function (a, b) { return b.m[idx] - a.m[idx]; });
-  var bankVal = bank.reduce(function (a, d) { return a + d.m[idx]; }, 0);
-  var banked = bank.length ? '<div class="dls">' + bank.slice(0, 10).map(function (d, i) {
+  /* the month's two lanes, named as on the October tab (V4.1 review):
+     Push to close (50% and 80%) and Get it booked (won, not yet booked) */
+  var won = bankRows(s, true).filter(function (d) { return d.st === 'Won' && d.m[idx] > 0.0005; }).sort(function (a, b) { return b.m[idx] - a.m[idx]; });
+  var wonVal = won.reduce(function (a, d) { return a + d.m[idx]; }, 0);
+  var WN = R.wonNotBooked && R.wonNotBooked.months[m];
+  var wonCount = s.level === 'all' && WN ? Math.min(10, won.length) + ' of ' + WN.count + ' shown' : won.length ? plural(won.length, 'deal') + ' · ' + rm(wonVal) : 'None yet';
+  var wonList = won.length ? '<div class="dls">' + won.slice(0, 10).map(function (d, i) {
       return dealLine({ i: i, c: d.c, a: d.a, p: d.p, owner: d.owner, v: d.m[idx], sub: Math.abs(d.v - d.m[idx]) > 0.0005 ? 'of ' + rm(d.v) : '' });
     }).join('') + '</div>'
-    : '<p class="empty">' + (teamOf(s) ? 'Nothing booked for ' + MN[m] + ' in this book yet.' : 'None of the top campaigns books into ' + MN[m] + ' in this line.') + '</p>';
-  var lanes = '<div class="m-lanes"><div class="m-lane"><div class="lane-h"><h4>' + (O.team ? 'Open, 80% and 50%' : staged ? 'In negotiation, 50% and 80%' : 'In negotiation, 50%') + '</h4>' + meta(count) + '</div>' + open + '</div>' +
-    '<div class="m-lane"><div class="lane-h"><h4>In the booking system</h4>' + meta(bank.length ? plural(bank.length, 'campaign') + ' · ' + rm(bankVal) : 'None yet') + '</div>' + banked + '</div></div>';
+    : '<p class="empty">No won deals waiting to be booked for ' + MN[m] + (teamOf(s) ? ' in this book.' : ' in this line.') + '</p>';
+  var lanes = '<div class="m-lanes"><div class="m-lane"><div class="lane-h"><h4>Push to close, ' + (staged ? '50% and 80%' : '50%') + '</h4>' + meta(count) + '</div>' + open + '</div>' +
+    '<div class="m-lane"><div class="lane-h"><h4>Get it booked, 100%</h4>' + meta(wonCount) + '</div>' + wonList + '</div></div>';
   var sim = '';   // What it takes per month: removed (V4.1 review)
   return tile({ id: 'monthSec', span: 12, title: MN[m] + ', what can still land', side: seg,
     body: '<div class="mfocus">' + nums + '</div>' + lanes + sim +
       '<p class="note">Values are each campaign’s ' + MN[m] + ' amount. ' + (O.team ? '80% deals have verbal confirmation and need paperwork; 50% deals are negotiating.' : esc(R.rules.fifty)) +
-      ' In the booking system lists the report’s top campaigns booked for each month.</p>' });
+      ' Get it booked lists deals won at 100% and not yet in the booking systems.</p>' });
 }
 
 /* ── View as: v3's Slice row ──────────────────────────────────────

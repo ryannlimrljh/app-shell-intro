@@ -3306,6 +3306,10 @@ a.c-sidebar-item, a.c-nav-child{text-decoration:none;}
 /* the month's lane titles carry their stage tag, as the October lanes do */
 #salesBoard .m-lane .lane-h h4{display:flex; align-items:center; gap:var(--spacing-8); flex-wrap:wrap;}
 #salesBoard .m-lane .lane-h h4 .c-badge{height:24px; padding:0 var(--spacing-8); font-size:var(--text-label2-size);}
+
+/* the books' footer: count and total on the left, the note on the right */
+#salesBoard .books-foot{display:flex; justify-content:space-between; align-items:center; gap:var(--spacing-12); flex-wrap:wrap; margin-top:var(--spacing-12);
+  font-size:var(--text-caption-size); color:var(--muted);}
 </style>
 
 
@@ -6601,7 +6605,9 @@ function booksTile(s) {
       return '<tr><td><div class="who" data-tip="' + esc(x.b[0] + ' · ' + br.full) + '"><b>' + esc(x.b[0]) + '</b><small>' + esc(br.n) + (br.agency ? ' <span class="ag">Agency</span>' : '') + '</small></div></td>' +
         '<td class="opt mut">' + esc(x.b[2]) + '</td><td>' + esc(x.b[3]) + '</td><td class="r b">' + rm(x.b[4]) + '</td></tr>';
     }).join('') : '<tr><td colspan="4" class="mut">No bookings match. Clear the search or pick Everyone.</td></tr>') + '</tbody></table></div>';
-  var more = !state.books.all && !qv && !wv && rows.length > 10 ? '<button class="c-btn c-btn-secondary c-btn-sm more" type="button" data-books-all>Show all ' + rows.length + ' bookings</button>' : '';
+  /* every expand folds back (V4.1 review) */
+  var more = !qv && !wv && rows.length > 10 ? '<button class="c-btn c-btn-secondary c-btn-sm more" type="button" data-books-all aria-expanded="' + !!state.books.all + '">' +
+    (state.books.all ? 'Show first 10' : 'Show all ' + rows.length + ' bookings') + '</button>' : '';
   return tile({ id: 'booksSec', span: 12, title: 'Check the books', sub: 'Every October booking, ' + plural(all.length, 'line') + ', credited to the salesperson on the booking.',
     body: '<div class="books-tools"><div class="c-search-input-box"><i class="ph ph-magnifying-glass c-search-input-icon" aria-hidden="true"></i>' +
       '<input type="search" id="booksQ" placeholder="Search campaign, advertiser or salesperson" aria-label="Search bookings" value="' + esc(state.books.q) + '" /></div>' + chips + '</div>' +
@@ -7434,6 +7440,13 @@ function scrollToBoard() {
   if (sc.scrollTop > top) sc.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
 }
 
+/* Folding a long list back: bring its heading into view, so the reader is
+   not left far below where the list now ends. */
+function backTo(id) {
+  var el = document.getElementById(id), sc = document.querySelector('.c-shell-content'); if (!el || !sc) return;
+  var top = el.getBoundingClientRect().top - sc.getBoundingClientRect().top;
+  if (top < 0) sc.scrollTo({ top: sc.scrollTop + top - 150, behavior: REDUCED ? 'auto' : 'smooth' });
+}
 B.addEventListener('click', function (e) {
   var cutB = e.target.closest('[data-cut],[data-cutpick]'); if (cutB && B.contains(cutB)) { pickCut(cutB.dataset.cut || cutB.dataset.cutpick); return; }
   if (e.target.closest('[data-cutmore]')) { state.cutMore = !state.cutMore; renderCutPanel(); var mb = document.querySelector('#cutPanel [data-cutmore]'); if (mb) mb.focus(); return; }
@@ -7462,13 +7475,14 @@ B.addEventListener('click', function (e) {
   if (t.dataset.view) { if (state.tab !== t.dataset.view) { B.dataset.dir = t.dataset.view === 'next' ? 'fwd' : 'back'; state.tab = t.dataset.view; swap(); } return; }
   if (t.dataset.month) { if (state.month !== t.dataset.month) state.sim = { pick: {}, nb: 0 }; state.month = t.dataset.month; render(); return; }
   if (t.hasAttribute('data-bank-all')) {
-    var bk = t.dataset.bankAll || 'sprint'; state.bankAll = state.bankAll || {}; state.bankAll[bk] = !state.bankAll[bk]; render();
+    var bk = t.dataset.bankAll || 'sprint'; state.bankAll = state.bankAll || {}; var was = !!state.bankAll[bk]; state.bankAll[bk] = !state.bankAll[bk]; render();
+    if (was) backTo(bk === 'oct' ? 'bankSec' : 'bankSprintSec');
     var nb = B.querySelector('[data-bank-all="' + bk + '"]'); if (nb) nb.focus({ preventScroll: true });
     return;
   }
   if (t.dataset.order) { state.order = t.dataset.order; render(); return; }
   if (t.hasAttribute('data-who')) { state.books.who = t.dataset.who; render(); return; }
-  if (t.hasAttribute('data-books-all')) { state.books.all = true; render(); return; }
+  if (t.hasAttribute('data-books-all')) { var wasB = state.books.all; state.books.all = !state.books.all; render(); var bb = B.querySelector('[data-books-all]'); if (bb) bb.focus({ preventScroll: true }); if (wasB) backTo('booksSec'); return; }
 });
 document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && state.cutOpen) { e.preventDefault(); openCuts(false); } });
 document.addEventListener('click', function (e) {

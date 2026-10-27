@@ -1132,6 +1132,22 @@
      neighbour. */
   .c-card-slide.is-settled{transition:none; cursor:pointer;}
   .c-card-slide.is-settled:hover{z-index:10;}
+  /* Focus on the middle (27 Oct): the lead card (Focus 1) sits larger, and
+     the two outermost cards tuck in behind their neighbours and come
+     forward while hovered. CSS scale and translate stack with the transform
+     Motion writes for the fan pose and tilt, so neither fights the other.
+     Desktop fan only: the phone deck and the drawer grid are untouched. */
+  @media (min-width:641px){
+    #cardSlider .c-card-slider-track:not(.is-stacked) > .c-card-slide[data-lead]{scale:1.08;}
+    #cardSlider .c-card-slider-track:not(.is-stacked) > .c-card-slide:nth-child(1){translate:150px 0;}
+    #cardSlider .c-card-slider-track:not(.is-stacked) > .c-card-slide:nth-child(5){translate:-150px 0;}
+    #cardSlider .c-card-slider-track:not(.is-stacked) > .c-card-slide.is-settled:is(:nth-child(1), :nth-child(5)){transition:translate .45s cubic-bezier(.22,1,.36,1);}
+    /* Hovered, an outer card comes forward (z-index 10, above) and rises,
+       moving inwards rather than out: outwards would put the left one under
+       the nav and the right one off the screen edge. */
+    #cardSlider .c-card-slider-track:not(.is-stacked) > .c-card-slide.is-settled:nth-child(1):is(:hover, :focus-within){translate:240px -14px;}
+    #cardSlider .c-card-slider-track:not(.is-stacked) > .c-card-slide.is-settled:nth-child(5):is(:hover, :focus-within){translate:-240px -14px;}
+  }
 
   /* ---- Card detail modal. Clicking a card opens this as a true
      modal overlay: a full-viewport backdrop dims the ENTIRE page

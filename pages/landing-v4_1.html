@@ -1023,7 +1023,7 @@
      which the margin-top:auto anchors inside them spend on pushing the rec line
      and the CTA to the bottom edge.
      Going BELOW 342 is what is not available: that would mean cutting copy. */
-  .c-card-slide{flex:0 0 340px; width:340px; min-height:380px; scroll-snap-align:start; position:relative;}
+  .c-card-slide{flex:0 0 340px; width:340px; min-height:380px; scroll-snap-align:center; position:relative;}
 
   /* ---- Convex-arc fan layout (per reference: cards splayed like a
      hand of book covers). Each card carries two custom properties —
@@ -2199,7 +2199,12 @@ a.c-sidebar-item, a.c-nav-child{text-decoration:none;}
                  numbers here are the company slice so the page is right even if
                  the board script never runs. Cards act through their own buttons
                  and links, not brief modals — the click delegate skips them. ── -->
-            <!-- ── Hero cards, 27 Oct 2026 (approved design): the fan's five.
+            <!-- ── Fan order (users' feedback, 27 Oct): the most important card, Focus 1,
+                 sits in the middle (child 3, the upright pose); Focus 2 and 3 flank it;
+                 Competitor activity, no longer a focus, goes far left; Client
+                 intelligence stays far right. Poses are nth-child, so DOM order IS
+                 the fan order.
+                 Hero cards, 27 Oct 2026 (approved design): the fan's five.
                  Gap to target is live from the board (renderHero writes every
                  data-hero="n-…" slot on each pass); In the news is live from
                  the trade press feeds (/api/news, see the script at the end);
@@ -2207,8 +2212,29 @@ a.c-sidebar-item, a.c-nav-child{text-decoration:none;}
                  have no source this board can reach yet, so they carry dummy
                  content and say "placeholder". The previous six hero cards
                  are data-role="earlier": off the fan, in the Hero Cards drawer. ── -->
-            <div class="c-card c-card-slide c-stat c-hn-gap" data-role="hero">
-              <span class="c-hcard-ribbon" role="img" aria-label="Focus 1 of 4"><span class="c-hcard-ribbon-band" aria-hidden="true">Focus 1</span></span>
+            <div class="c-card c-card-slide" data-role="hero">
+              <span class="c-hcard-label">Competitor activity <span class="c-hcard-prov" title="Dummy content. Competitor tracking is not wired to this board yet.">· placeholder</span></span>
+              <h4>23 brands on rival publishers</h4>
+              <div class="c-hcard-list">
+                <div class="c-hcard-list-row"><span>Sample Telco</span><span class="c-badge c-badge-neutral">9 posts</span></div>
+                <div class="c-hcard-list-row"><span>Example Bank</span><span class="c-badge c-badge-neutral">6 posts</span></div>
+                <div class="c-hcard-list-row"><span>Demo Snacks</span><span class="c-badge c-badge-neutral">4 posts</span></div>
+              </div>
+              <span class="c-hcard-rec">Last 7 days. Busiest rival: Rival Publisher A, 28 branded posts.</span>
+              <a class="c-hcard-cta" href="https://collab-sales.vercel.app/pages/home.html" target="_blank" rel="noopener">Open Competitor Activity <i class="ph ph-arrow-right"></i></a>
+            </div>
+            <div class="c-card c-card-slide c-hn-news" data-role="hero">
+              <span class="c-hcard-ribbon" role="img" aria-label="Focus 2 of 3"><span class="c-hcard-ribbon-band" aria-hidden="true">Focus 2</span></span>
+              <span class="c-hcard-label">In the news <span class="c-hcard-prov" id="heroNewsProv" title="Live from the trade press feeds (Campaign Brief Asia, Branding in Asia). Placeholder stories show until they load.">· placeholder</span></span>
+              <div class="c-hn-list" id="heroNews" aria-live="polite">
+                <a class="c-hn-item" href="#" tabindex="-1"><span class="c-hn-thumb">MI</span><span class="c-hn-txt"><small>Marketing-Interactive &middot; 45m ago</small><b>Sample Brand unveils regional campaign built around short video</b></span></a>
+                <a class="c-hn-item" href="#" tabindex="-1"><span class="c-hn-thumb">CBA</span><span class="c-hn-txt"><small>Campaign Brief Asia &middot; 5h ago</small><b>Agencies shift budgets towards retail media as costs climb</b></span></a>
+                <a class="c-hn-item" href="#" tabindex="-1"><span class="c-hn-thumb">BIA</span><span class="c-hn-txt"><small>Branding in Asia &middot; yesterday</small><b>Example Foods names new creative partner after pitch</b></span></a>
+              </div>
+              <a class="c-hcard-cta" href="https://collab-sales.vercel.app/pages/home.html" target="_blank" rel="noopener">More in Collab Sales <i class="ph ph-arrow-right"></i></a>
+            </div>
+            <div class="c-card c-card-slide c-stat c-hn-gap" data-role="hero" data-lead>
+              <span class="c-hcard-ribbon" role="img" aria-label="Focus 1 of 3"><span class="c-hcard-ribbon-band" aria-hidden="true">Focus 1</span></span>
               <span class="c-stat-label">Gap to target <span class="c-hcard-prov" title="Derived from the board's own model. Follows every slice and filter below.">· derived, live</span></span>
               <div class="c-stat-value hero" data-hero="n-gap-v">&minus;RM20.3M</div>
               <p data-hero="n-gap-rate">RM2.0M a working day of new business closes it</p>
@@ -2221,18 +2247,8 @@ a.c-sidebar-item, a.c-nav-child{text-decoration:none;}
               <span class="c-hcard-rec">The largest open deal in this slice. Land it and the daily rate drops.</span>
               <button class="c-hcard-cta-btn" type="button" data-decision="hero-gap">See where it sits</button>
             </div>
-            <div class="c-card c-card-slide c-hn-news" data-role="hero">
-              <span class="c-hcard-ribbon" role="img" aria-label="Focus 2 of 4"><span class="c-hcard-ribbon-band" aria-hidden="true">Focus 2</span></span>
-              <span class="c-hcard-label">In the news <span class="c-hcard-prov" id="heroNewsProv" title="Live from the trade press feeds (Campaign Brief Asia, Branding in Asia). Placeholder stories show until they load.">· placeholder</span></span>
-              <div class="c-hn-list" id="heroNews" aria-live="polite">
-                <a class="c-hn-item" href="#" tabindex="-1"><span class="c-hn-thumb">MI</span><span class="c-hn-txt"><small>Marketing-Interactive &middot; 45m ago</small><b>Sample Brand unveils regional campaign built around short video</b></span></a>
-                <a class="c-hn-item" href="#" tabindex="-1"><span class="c-hn-thumb">CBA</span><span class="c-hn-txt"><small>Campaign Brief Asia &middot; 5h ago</small><b>Agencies shift budgets towards retail media as costs climb</b></span></a>
-                <a class="c-hn-item" href="#" tabindex="-1"><span class="c-hn-thumb">BIA</span><span class="c-hn-txt"><small>Branding in Asia &middot; yesterday</small><b>Example Foods names new creative partner after pitch</b></span></a>
-              </div>
-              <a class="c-hcard-cta" href="https://collab-sales.vercel.app/pages/home.html" target="_blank" rel="noopener">More in Collab Sales <i class="ph ph-arrow-right"></i></a>
-            </div>
             <div class="c-card c-card-slide" data-role="hero">
-              <span class="c-hcard-ribbon" role="img" aria-label="Focus 3 of 4"><span class="c-hcard-ribbon-band" aria-hidden="true">Focus 3</span></span>
+              <span class="c-hcard-ribbon" role="img" aria-label="Focus 3 of 3"><span class="c-hcard-ribbon-band" aria-hidden="true">Focus 3</span></span>
               <span class="c-hcard-label">Pending proposals <span class="c-hcard-prov" title="Derived from the board's own model: open deals at 50% and 80%, ranked by client budget (full value, October to January). Follows every slice and filter below.">· derived, live</span></span>
               <h4 data-hero="n-prop-h">108 pending &middot; RM13.4M</h4>
               <div class="c-hcard-list" data-hero="n-prop-list">
@@ -2242,18 +2258,6 @@ a.c-sidebar-item, a.c-nav-child{text-decoration:none;}
               </div>
               <span class="c-hcard-rec" data-hero="n-prop-rec">Kementerian Kesihatan Malaysia has the largest budget in play, RM1.1M on Perolehahan Media Buy 2026-2027.</span>
               <a class="c-hcard-cta-btn" href="https://collab-sales.vercel.app/pages/campaigns.html" target="_blank" rel="noopener">Finish them in Collab Sales</a>
-            </div>
-            <div class="c-card c-card-slide" data-role="hero">
-              <span class="c-hcard-ribbon" role="img" aria-label="Focus 4 of 4"><span class="c-hcard-ribbon-band" aria-hidden="true">Focus 4</span></span>
-              <span class="c-hcard-label">Competitor activity <span class="c-hcard-prov" title="Dummy content. Competitor tracking is not wired to this board yet.">· placeholder</span></span>
-              <h4>23 brands on rival publishers</h4>
-              <div class="c-hcard-list">
-                <div class="c-hcard-list-row"><span>Sample Telco</span><span class="c-badge c-badge-neutral">9 posts</span></div>
-                <div class="c-hcard-list-row"><span>Example Bank</span><span class="c-badge c-badge-neutral">6 posts</span></div>
-                <div class="c-hcard-list-row"><span>Demo Snacks</span><span class="c-badge c-badge-neutral">4 posts</span></div>
-              </div>
-              <span class="c-hcard-rec">Last 7 days. Busiest rival: Rival Publisher A, 28 branded posts.</span>
-              <a class="c-hcard-cta" href="https://collab-sales.vercel.app/pages/home.html" target="_blank" rel="noopener">Open Competitor Activity <i class="ph ph-arrow-right"></i></a>
             </div>
             <div class="c-card c-card-slide c-hcard-ai" data-role="hero">
               <span class="c-hcard-label"><i class="ph-fill ph-sparkle" aria-hidden="true"></i> Client intelligence <span class="c-hcard-prov" title="Dummy content. Client dossiers live in Collab Sales; this board cannot read them yet.">· placeholder</span></span>
@@ -4064,13 +4068,27 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
        deferred rather than reading FAN_ROLE a second time. */
     const stackCards = () => Array.from(stackTrack.children)
       .filter((c) => c.classList.contains('c-card-slide') && !c.classList.contains('is-off-fan'));
-    let stackTop = 0;
+    let stackTop = null;   // first paint opens on the lead card (data-lead: Focus 1)
     let stackPagerBuilt = false;
+    /* Desktop: the lead card (Focus 1) holds the fan's middle pose, so the fan
+       opens scrolled to put it in the visual centre of the slider. */
+    function centreLead() {
+      if (STACK_MQ.matches || isDragging) return;
+      const lead = stackCards().find((c) => c.hasAttribute('data-lead'));
+      const area = document.querySelector('.c-canvas-greeting') || document.querySelector('.c-shell-content');
+      if (!lead || !area) return;
+      // measured on screen: the slider is wider than the page (it bleeds into
+      // the gutters), so its own centre is not the page's
+      const lr = lead.getBoundingClientRect(), ar = area.getBoundingClientRect();
+      const delta = (lr.left + lr.width / 2) - (ar.left + ar.width / 2);
+      if (Math.abs(delta) > 1) cardSlider.scrollLeft = Math.max(0, cardSlider.scrollLeft + delta);
+    }
 
     function paintStack() {
       const cs = stackCards();
       const n = cs.length;
       if (!n) return;
+      if (stackTop === null) { const li = cs.findIndex((c) => c.hasAttribute('data-lead')); stackTop = li < 0 ? 0 : li; }
       stackTop = ((stackTop % n) + n) % n;
       stackTrack.classList.add('is-stacked');
       cs.forEach((card, j) => {
@@ -4159,8 +4177,14 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
           // ones still arriving pick it up from the settle handler as usual.
           if (c.classList.contains('is-settled')) enableCardTilt(c);
         });
+        centreLead();
       }
     }
+    window.addEventListener('load', centreLead);
+    // and again once the fan has dealt itself out (the entrance moves the cards)
+    [1200, 3000].forEach((ms) => setTimeout(centreLead, ms));
+    let centreT = null;
+    window.addEventListener('resize', () => { clearTimeout(centreT); centreT = setTimeout(centreLead, 150); });
     STACK_MQ.addEventListener('change', applyStackMode);
     // One macrotask, not immediate: .is-off-fan is applied by a later script
     // block, and stackCards() would otherwise count all twelve.

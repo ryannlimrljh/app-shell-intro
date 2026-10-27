@@ -1575,15 +1575,18 @@
   .c-hn-kicker{font-size:11px; line-height:16px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; color:var(--color-orange);}
   .c-hn-close b{font-size:var(--text-body2-size); line-height:var(--text-body2-lh); font-weight:800; color:var(--color-neutral-9);}
   .c-hn-close span:last-child{font-size:var(--text-caption-size); color:var(--color-neutral-6);}
-  .c-hn-list{display:flex; flex-direction:column; gap:var(--spacing-12);}
-  .c-hn-item{display:grid; grid-template-columns:72px minmax(0,1fr); gap:var(--spacing-12); align-items:start; text-decoration:none; color:inherit; border-radius:var(--radius-sm);}
+  .c-hn-list{display:flex; flex-direction:column;}
+  .c-hn-item{display:grid; grid-template-columns:64px minmax(0,1fr); gap:var(--spacing-12); align-items:start; padding:var(--spacing-12) 0; text-decoration:none; color:inherit;
+    border-top:1px solid var(--color-neutral-2);}
+  .c-hn-item:first-child{border-top:none; padding-top:var(--spacing-4);}
   a.c-hn-item[href^="http"]:hover b{text-decoration:underline;}
-  .c-hn-thumb{width:72px; height:52px; border-radius:var(--radius-sm); background:var(--color-neutral-2) center/cover no-repeat; display:grid; place-items:center;
+  .c-hn-thumb{width:64px; height:48px; border-radius:var(--radius-sm); background:var(--color-neutral-2) center/cover no-repeat; display:grid; place-items:center;
     font-size:11px; font-weight:800; color:var(--color-neutral-6); overflow:hidden;}
-  .c-hn-txt{display:flex; flex-direction:column; gap:2px; min-width:0;}
+  .c-hn-txt{display:flex; flex-direction:column; gap:var(--spacing-4); min-width:0;}
   .c-hn-txt small{font-size:10px; line-height:14px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:var(--color-neutral-5); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
-  .c-hn-txt b{font-size:var(--text-body2-size); line-height:1.3; font-weight:700; color:var(--color-neutral-9);
-    display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden;}
+  .c-hn-txt b{font-size:var(--text-body2-size); line-height:1.4; font-weight:400; color:var(--color-neutral-8);
+    display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;}
+  a.c-hcard-cta-btn{display:inline-flex; align-items:center; text-decoration:none;}
   .c-hn-list + .c-hcard-cta{margin-top:auto;}
   .c-hcard-ai .c-hcard-label .ph-sparkle{color:var(--color-amber);}
   /* The empty state inside a card. .c-empty is the DS component and is
@@ -2230,15 +2233,15 @@ a.c-sidebar-item, a.c-nav-child{text-decoration:none;}
             </div>
             <div class="c-card c-card-slide" data-role="hero">
               <span class="c-hcard-ribbon" role="img" aria-label="Focus 3 of 4"><span class="c-hcard-ribbon-band" aria-hidden="true">Focus 3</span></span>
-              <span class="c-hcard-label">Pending proposals <span class="c-hcard-prov" title="Dummy content. Proposals live in Collab Sales; this board cannot read them yet.">· placeholder</span></span>
-              <h4>3 pending &middot; RM2.3M</h4>
-              <div class="c-hcard-list">
-                <div class="c-hcard-list-row"><span>Initech Retail</span><span class="c-badge c-badge-error">RM650K &middot; overdue</span></div>
-                <div class="c-hcard-list-row"><span>Umbrella Pharma</span><span class="c-badge c-badge-warning">RM1.2M &middot; due in 3d</span></div>
-                <div class="c-hcard-list-row"><span>Stark Motors</span><span class="c-badge c-badge-neutral">RM480K &middot; due in 9d</span></div>
+              <span class="c-hcard-label">Pending proposals <span class="c-hcard-prov" title="Derived from the board's own model: open deals at 50% and 80%, ranked by client budget (full value, October to January). Follows every slice and filter below.">· derived, live</span></span>
+              <h4 data-hero="n-prop-h">108 pending &middot; RM13.4M</h4>
+              <div class="c-hcard-list" data-hero="n-prop-list">
+                <div class="c-hcard-list-row"><span>Kementerian Kesihatan Malaysia</span><span class="c-badge c-badge-neutral">RM1.1M &middot; 50%</span></div>
+                <div class="c-hcard-list-row"><span>Mediakey Group</span><span class="c-badge c-badge-neutral">RM936K &middot; 80%</span></div>
+                <div class="c-hcard-list-row"><span>Cleave Amity</span><span class="c-badge c-badge-neutral">RM624K &middot; 80%</span></div>
               </div>
-              <span class="c-hcard-rec">Initech Retail is past its date. Present it first.</span>
-              <a class="c-hcard-cta" href="https://collab-sales.vercel.app/pages/campaigns.html" target="_blank" rel="noopener">Finish them in Collab Sales <i class="ph ph-arrow-right"></i></a>
+              <span class="c-hcard-rec" data-hero="n-prop-rec">Kementerian Kesihatan Malaysia has the largest budget in play, RM1.1M on Perolehahan Media Buy 2026-2027.</span>
+              <a class="c-hcard-cta-btn" href="https://collab-sales.vercel.app/pages/campaigns.html" target="_blank" rel="noopener">Finish them in Collab Sales</a>
             </div>
             <div class="c-card c-card-slide" data-role="hero">
               <span class="c-hcard-ribbon" role="img" aria-label="Focus 4 of 4"><span class="c-hcard-ribbon-band" aria-hidden="true">Focus 4</span></span>
@@ -7204,6 +7207,20 @@ function renderHero(s) {
   put('n-gap-rate', gap < 0 ? rm(-gap / Math.max(1, wd)) + ' a working day of new business closes it' : 'Forecast is at or above target for this book');
   var nd = slot('n-gap-day');
   if (nd) { nd.textContent = 'Day ' + R.month.day + ' of ' + R.month.days + ' · ' + plural(wd, 'working day') + ' left'; nd.classList.toggle('up', gap >= 0); }
+  /* Pending proposals (27 Oct): open deals at 50% and 80% in this view,
+     ranked by client budget, the deal's full value October to January */
+  var ppl = peopleIn(s), pend = [];
+  headsIn(s).forEach(function (h) { var T = TEAM[h.key]; if (!T) return;
+    T.open.forEach(function (d) { if (ppl && ppl.indexOf(d[4]) < 0) return;
+      var v = 0; for (var mk in d[5]) v += d[5][mk]; if (v > 0.0005) pend.push({ c: d[0], a: d[1], st: d[3] === 'mixed' ? '80%' : d[3], v: v }); }); });
+  pend.sort(function (a, b) { return b.v - a.v; });
+  var ptot = pend.reduce(function (a, d) { return a + d.v; }, 0);
+  put('n-prop-h', pend.length ? pend.length + ' pending · ' + rm(ptot) : 'None pending');
+  var pl = slot('n-prop-list');
+  if (pl) pl.innerHTML = pend.slice(0, 3).map(function (d) {
+    return '<div class="c-hcard-list-row" title="' + esc(d.c) + '"><span>' + esc(brand(d.a).n) + '</span><span class="c-badge c-badge-neutral">' + rm(d.v) + ' · ' + esc(d.st) + '</span></div>';
+  }).join('') || '<div class="c-hcard-list-row"><span>No open deals at 50% or 80% here.</span></div>';
+  put('n-prop-rec', pend.length ? brand(pend[0].a).n + ' has the largest budget in play, ' + rm(pend[0].v) + ' on ' + pend[0].c + '.' : 'Nothing in negotiation in this book. New pipeline is the lever.');
   var O = openDeals(s, 'Oct'), top = O.list[0];
   if (top) {
     put('n-close-h', brand(top.a).n + ' · ' + top.c);

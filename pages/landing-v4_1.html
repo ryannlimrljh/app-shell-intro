@@ -1567,6 +1567,25 @@
   .c-hcard-ai .c-hcard-rec{color:var(--color-neutral-3);}
   .c-hcard-ai .c-hcard-prov{color:var(--color-neutral-4);}
   .c-hcard-tags{display:flex; flex-wrap:wrap; gap:var(--spacing-8);}
+  /* ── Hero cards, 27 Oct: the Gap card's day line and "close this first",
+     and In the news's story rows (thumbnail, source and age, headline). */
+  .c-hn-day{font-size:var(--text-caption-size); font-weight:700; color:var(--color-red);}
+  .c-hn-day.up{color:var(--ok-text, #00854c);}
+  .c-hn-close{display:flex; flex-direction:column; gap:2px; padding-top:var(--spacing-12); border-top:1px solid var(--color-neutral-2);}
+  .c-hn-kicker{font-size:11px; line-height:16px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; color:var(--color-orange);}
+  .c-hn-close b{font-size:var(--text-body2-size); line-height:var(--text-body2-lh); font-weight:800; color:var(--color-neutral-9);}
+  .c-hn-close span:last-child{font-size:var(--text-caption-size); color:var(--color-neutral-6);}
+  .c-hn-list{display:flex; flex-direction:column; gap:var(--spacing-12);}
+  .c-hn-item{display:grid; grid-template-columns:72px minmax(0,1fr); gap:var(--spacing-12); align-items:start; text-decoration:none; color:inherit; border-radius:var(--radius-sm);}
+  a.c-hn-item[href^="http"]:hover b{text-decoration:underline;}
+  .c-hn-thumb{width:72px; height:52px; border-radius:var(--radius-sm); background:var(--color-neutral-2) center/cover no-repeat; display:grid; place-items:center;
+    font-size:11px; font-weight:800; color:var(--color-neutral-6); overflow:hidden;}
+  .c-hn-txt{display:flex; flex-direction:column; gap:2px; min-width:0;}
+  .c-hn-txt small{font-size:10px; line-height:14px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:var(--color-neutral-5); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .c-hn-txt b{font-size:var(--text-body2-size); line-height:1.3; font-weight:700; color:var(--color-neutral-9);
+    display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden;}
+  .c-hn-list + .c-hcard-cta{margin-top:auto;}
+  .c-hcard-ai .c-hcard-label .ph-sparkle{color:var(--color-amber);}
   /* The empty state inside a card. .c-empty is the DS component and is
      left alone; these three declarations only let it fill the card it sits
      in, so the specimen is centred in the same 380px box every other card
@@ -2177,8 +2196,74 @@ a.c-sidebar-item, a.c-nav-child{text-decoration:none;}
                  numbers here are the company slice so the page is right even if
                  the board script never runs. Cards act through their own buttons
                  and links, not brief modals — the click delegate skips them. ── -->
-            <div class="c-card c-card-slide c-stat" data-role="hero">
-              <span class="c-hcard-ribbon" role="img" aria-label="Focus 1 of 3"><span class="c-hcard-ribbon-band" aria-hidden="true">Focus 1</span></span>
+            <!-- ── Hero cards, 27 Oct 2026 (approved design): the fan's five.
+                 Gap to target is live from the board (renderHero writes every
+                 data-hero="n-…" slot on each pass); In the news is live from
+                 the trade press feeds (/api/news, see the script at the end);
+                 Pending proposals, Competitor activity and Client intelligence
+                 have no source this board can reach yet, so they carry dummy
+                 content and say "placeholder". The previous six hero cards
+                 are data-role="earlier": off the fan, in the Hero Cards drawer. ── -->
+            <div class="c-card c-card-slide c-stat c-hn-gap" data-role="hero">
+              <span class="c-hcard-ribbon" role="img" aria-label="Focus 1 of 4"><span class="c-hcard-ribbon-band" aria-hidden="true">Focus 1</span></span>
+              <span class="c-stat-label">Gap to target <span class="c-hcard-prov" title="Derived from the board's own model. Follows every slice and filter below.">· derived, live</span></span>
+              <div class="c-stat-value hero" data-hero="n-gap-v">&minus;RM20.3M</div>
+              <p data-hero="n-gap-rate">RM2.0M a working day of new business closes it</p>
+              <span class="c-hn-day" data-hero="n-gap-day">Day 16 of 31 &middot; 10 working days left</span>
+              <div class="c-hn-close">
+                <span class="c-hn-kicker">Close this first:</span>
+                <b data-hero="n-close-h">Mediakey Group &middot; Mualim Muda S2 Sponsorship</b>
+                <span data-hero="n-close-m">RM936K &middot; Joy Ahmad &middot; 80%</span>
+              </div>
+              <span class="c-hcard-rec">The largest open deal in this slice. Land it and the daily rate drops.</span>
+              <button class="c-hcard-cta-btn" type="button" data-decision="hero-gap">See where it sits</button>
+            </div>
+            <div class="c-card c-card-slide c-hn-news" data-role="hero">
+              <span class="c-hcard-ribbon" role="img" aria-label="Focus 2 of 4"><span class="c-hcard-ribbon-band" aria-hidden="true">Focus 2</span></span>
+              <span class="c-hcard-label">In the news <span class="c-hcard-prov" id="heroNewsProv" title="Live from the trade press feeds (Campaign Brief Asia, Branding in Asia). Placeholder stories show until they load.">· placeholder</span></span>
+              <div class="c-hn-list" id="heroNews" aria-live="polite">
+                <a class="c-hn-item" href="#" tabindex="-1"><span class="c-hn-thumb">MI</span><span class="c-hn-txt"><small>Marketing-Interactive &middot; 45m ago</small><b>Sample Brand unveils regional campaign built around short video</b></span></a>
+                <a class="c-hn-item" href="#" tabindex="-1"><span class="c-hn-thumb">CBA</span><span class="c-hn-txt"><small>Campaign Brief Asia &middot; 5h ago</small><b>Agencies shift budgets towards retail media as costs climb</b></span></a>
+                <a class="c-hn-item" href="#" tabindex="-1"><span class="c-hn-thumb">BIA</span><span class="c-hn-txt"><small>Branding in Asia &middot; yesterday</small><b>Example Foods names new creative partner after pitch</b></span></a>
+              </div>
+              <a class="c-hcard-cta" href="https://collab-sales.vercel.app/pages/home.html" target="_blank" rel="noopener">More in Collab Sales <i class="ph ph-arrow-right"></i></a>
+            </div>
+            <div class="c-card c-card-slide" data-role="hero">
+              <span class="c-hcard-ribbon" role="img" aria-label="Focus 3 of 4"><span class="c-hcard-ribbon-band" aria-hidden="true">Focus 3</span></span>
+              <span class="c-hcard-label">Pending proposals <span class="c-hcard-prov" title="Dummy content. Proposals live in Collab Sales; this board cannot read them yet.">· placeholder</span></span>
+              <h4>3 pending &middot; RM2.3M</h4>
+              <div class="c-hcard-list">
+                <div class="c-hcard-list-row"><span>Initech Retail</span><span class="c-badge c-badge-error">RM650K &middot; overdue</span></div>
+                <div class="c-hcard-list-row"><span>Umbrella Pharma</span><span class="c-badge c-badge-warning">RM1.2M &middot; due in 3d</span></div>
+                <div class="c-hcard-list-row"><span>Stark Motors</span><span class="c-badge c-badge-neutral">RM480K &middot; due in 9d</span></div>
+              </div>
+              <span class="c-hcard-rec">Initech Retail is past its date. Present it first.</span>
+              <a class="c-hcard-cta" href="https://collab-sales.vercel.app/pages/campaigns.html" target="_blank" rel="noopener">Finish them in Collab Sales <i class="ph ph-arrow-right"></i></a>
+            </div>
+            <div class="c-card c-card-slide" data-role="hero">
+              <span class="c-hcard-ribbon" role="img" aria-label="Focus 4 of 4"><span class="c-hcard-ribbon-band" aria-hidden="true">Focus 4</span></span>
+              <span class="c-hcard-label">Competitor activity <span class="c-hcard-prov" title="Dummy content. Competitor tracking is not wired to this board yet.">· placeholder</span></span>
+              <h4>23 brands on rival publishers</h4>
+              <div class="c-hcard-list">
+                <div class="c-hcard-list-row"><span>Sample Telco</span><span class="c-badge c-badge-neutral">9 posts</span></div>
+                <div class="c-hcard-list-row"><span>Example Bank</span><span class="c-badge c-badge-neutral">6 posts</span></div>
+                <div class="c-hcard-list-row"><span>Demo Snacks</span><span class="c-badge c-badge-neutral">4 posts</span></div>
+              </div>
+              <span class="c-hcard-rec">Last 7 days. Busiest rival: Rival Publisher A, 28 branded posts.</span>
+              <a class="c-hcard-cta" href="https://collab-sales.vercel.app/pages/home.html" target="_blank" rel="noopener">Open Competitor Activity <i class="ph ph-arrow-right"></i></a>
+            </div>
+            <div class="c-card c-card-slide c-hcard-ai" data-role="hero">
+              <span class="c-hcard-label"><i class="ph-fill ph-sparkle" aria-hidden="true"></i> Client intelligence <span class="c-hcard-prov" title="Dummy content. Client dossiers live in Collab Sales; this board cannot read them yet.">· placeholder</span></span>
+              <h4>Sample Client</h4>
+              <div class="c-hcard-tags">
+                <span class="c-tag">3 sell angles ready</span>
+                <span class="c-tag">2 high-threat competitors</span>
+                <span class="c-tag">researched 2d ago</span>
+              </div>
+              <span class="c-hcard-rec">Pitch a festive-season video package into their weakest channel.</span>
+              <a class="c-hcard-cta" href="https://collab-sales.vercel.app/pages/home.html" target="_blank" rel="noopener">Read it before the call <i class="ph ph-arrow-up-right"></i></a>
+            </div>
+            <div class="c-card c-card-slide c-stat" data-role="earlier">
               <span class="c-stat-label">Gap to target <span class="c-hcard-prov" title="Derived from the board's own model. Follows every slice and filter below.">· derived, live</span></span>
               <div class="c-stat-value hero" data-hero="gap-v">&minus;RM4.5M</div>
               <p data-hero="gap-rate">RM180K a day of new business closes it</p>
@@ -2186,8 +2271,7 @@ a.c-sidebar-item, a.c-nav-child{text-decoration:none;}
               <span class="c-hcard-rec" data-hero="gap-rec">This is the number the deal list has to beat.</span>
               <button class="c-hcard-cta-btn" type="button" data-decision="hero-gap">See where it sits</button>
             </div>
-            <div class="c-card c-card-slide" data-role="hero">
-              <span class="c-hcard-ribbon" role="img" aria-label="Focus 2 of 3"><span class="c-hcard-ribbon-band" aria-hidden="true">Focus 2</span></span>
+            <div class="c-card c-card-slide" data-role="earlier">
               <span class="c-hcard-label">Close this first <span class="c-hcard-prov" title="Derived from the board's own model. Follows every slice and filter below.">· derived, live</span></span>
               <h4 data-hero="deal-h">ZETRIX AI BERHAD &middot; EPL 2026/27 Sponsorship</h4>
               <div class="c-hcard-list">
@@ -2199,8 +2283,7 @@ a.c-sidebar-item, a.c-nav-child{text-decoration:none;}
               <button class="c-hcard-cta-btn" type="button" data-decision="hero-deal">See the deal list</button>
               <a class="c-hcard-cta" href="https://collab-sales.vercel.app/pages/home.html" target="_blank" rel="noopener">Open the client dossier <i class="ph ph-arrow-up-right"></i></a>
             </div>
-            <div class="c-card c-card-slide" data-role="hero">
-              <span class="c-hcard-ribbon" role="img" aria-label="Focus 3 of 3"><span class="c-hcard-ribbon-band" aria-hidden="true">Focus 3</span></span>
+            <div class="c-card c-card-slide" data-role="earlier">
               <span class="c-hcard-label">Proposals <span class="c-hcard-prov" title="Figures come from the Collab Sales workspace, not this board's data.">· illustrative</span></span>
               <h4>RM710K awaiting decks</h4>
               <div class="c-hcard-list">
@@ -2211,7 +2294,7 @@ a.c-sidebar-item, a.c-nav-child{text-decoration:none;}
               <span class="c-hcard-rec">Sunsilk needs revision before it can move. It has sat the longest.</span>
               <a class="c-hcard-cta" href="https://collab-sales.vercel.app/pages/campaigns.html" target="_blank" rel="noopener">Finish them in Collab Sales <i class="ph ph-arrow-up-right"></i></a>
             </div>
-            <div class="c-card c-card-slide" data-role="hero">
+            <div class="c-card c-card-slide" data-role="earlier">
               <span class="c-hcard-label">Weakest platform <span class="c-hcard-prov" title="Derived from the board's own model. Follows every slice and filter below.">· derived, live</span></span>
               <h4 data-hero="plat-h">AA at 12% to target</h4>
               <p data-hero="plat-p">RM53K a day reaches it, 17 delivery days left</p>
@@ -2220,14 +2303,14 @@ a.c-sidebar-item, a.c-nav-child{text-decoration:none;}
               <span class="c-hcard-rec" data-hero="plat-rec">Furthest behind with the fewest days left. Demand is the constraint, not stock.</span>
               <button class="c-hcard-cta-btn" type="button" data-decision="hero-plat" data-platform="AA" data-hero="plat-btn">Slice the board to AA</button>
             </div>
-            <div class="c-card c-card-slide c-stat" data-role="hero">
+            <div class="c-card c-card-slide c-stat" data-role="earlier">
               <span class="c-stat-label">Thinnest month ahead <span class="c-hcard-prov" title="Derived from the board's own model. Follows every slice and filter below.">· derived, live</span></span>
               <div class="c-stat-value hero" data-hero="mo-v">22%</div>
               <p data-hero="mo-p">Nov 26 coverage, against a RM28.0M target</p>
               <span class="c-hcard-rec" data-hero="mo-rec">The least covered month in the window. New pipeline lands here first.</span>
               <button class="c-hcard-cta-btn" type="button" data-decision="hero-month">Open the forward window</button>
             </div>
-            <div class="c-card c-card-slide c-hcard-ai" data-role="hero">
+            <div class="c-card c-card-slide c-hcard-ai" data-role="earlier">
               <span class="c-hcard-label">&#129302; Client intelligence <span class="c-hcard-prov" title="Figures come from the Collab Sales workspace, not this board's data.">· illustrative</span></span>
               <h4>Toyota dossier is fresh</h4>
               <div class="c-hcard-tags">
@@ -7114,7 +7197,20 @@ function renderHero(s) {
   put('gap-rate', gap < 0 ? rm(-gap / DAYS_LEFT) + ' a day closes it' : 'Forecast is at or above target for this book');
   put('gap-rec', gap < 0 ? 'Logged deals take it to ' + L.cov + '% at most. The rest is uncovered.' : 'Nothing more is required to reach it.');
 
+  /* the new Gap to target card (27 Oct): per working day, and the deal to close first */
+  var y0 = +R.asOf.slice(0, 4), m0 = +R.asOf.slice(5, 7) - 1, wd = 0;
+  for (var dd = R.month.day + 1; dd <= R.month.days; dd++) { var dw = new Date(y0, m0, dd).getDay(); if (dw > 0 && dw < 6) wd++; }
+  put('n-gap-v', gapTxt(gap));
+  put('n-gap-rate', gap < 0 ? rm(-gap / Math.max(1, wd)) + ' a working day of new business closes it' : 'Forecast is at or above target for this book');
+  var nd = slot('n-gap-day');
+  if (nd) { nd.textContent = 'Day ' + R.month.day + ' of ' + R.month.days + ' · ' + plural(wd, 'working day') + ' left'; nd.classList.toggle('up', gap >= 0); }
   var O = openDeals(s, 'Oct'), top = O.list[0];
+  if (top) {
+    put('n-close-h', brand(top.a).n + ' · ' + top.c);
+    put('n-close-m', rm(top.v) + ' · ' + top.owner + ' · ' + top.stageLabel);
+  } else {
+    put('n-close-h', 'No open deals in this book'); put('n-close-m', 'Nothing at 50% or 80% lands in October here.');
+  }
   if (top) {
     put('deal-h', top.c + ' · ' + top.a);
     put('deal-v', rm(top.v)); put('deal-o', top.owner); put('deal-s', top.stage === 50 ? 'Negotiating at 50%' : 'Agreed at ' + top.stageLabel);
@@ -8616,6 +8712,33 @@ document.addEventListener('keydown', function (e) {
   var b = document.querySelector('[data-sidebar-toggle="shellSidebarNav"]'); if (!b) return;
   e.preventDefault(); b.click();
 });
+</script>
+<script>
+/* In the news (hero card 2): the latest trade press stories from /api/news
+   (api/news.mjs reads the feeds server side). Until they arrive, or if they
+   cannot, the card keeps its placeholder stories and says so. */
+(function () {
+  var list = document.getElementById('heroNews'), prov = document.getElementById('heroNewsProv');
+  if (!list || !window.fetch) return;
+  var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
+  var ago = function (iso) {
+    var t = Date.parse(iso); if (isNaN(t)) return '';
+    var m = Math.max(0, Math.round((Date.now() - t) / 60000));
+    if (m < 60) return m + 'm ago';
+    var h = Math.round(m / 60); if (h < 24) return h + 'h ago';
+    var d = Math.round(h / 24); return d === 1 ? 'yesterday' : d + 'd ago';
+  };
+  fetch('/api/news', { headers: { Accept: 'application/json' } }).then(function (r) { if (!r.ok) throw r.status; return r.json(); }).then(function (d) {
+    var items = (d && d.items || []).slice(0, 3); if (!items.length) return;
+    list.innerHTML = items.map(function (it) {
+      var safe = /^https:\/\//.test(it.image || '') ? it.image : '';
+      return '<a class="c-hn-item" href="' + esc(it.link) + '" target="_blank" rel="noopener">' +
+        '<span class="c-hn-thumb"' + (safe ? ' style="background-image:url(\'' + esc(safe).replace(/'/g, '%27') + '\')"' : '') + '>' + (safe ? '' : esc(it.short)) + '</span>' +
+        '<span class="c-hn-txt"><small>' + esc(it.source) + (it.date ? ' &middot; ' + esc(ago(it.date)) : '') + '</small><b>' + esc(it.title) + '</b></span></a>';
+    }).join('');
+    if (prov) { prov.textContent = '· live'; prov.title = 'Live from the trade press feeds: ' + (d.sources || []).join(', ') + '.'; }
+  }).catch(function () { /* keep the placeholder stories */ });
+})();
 </script>
 </body>
 </html>

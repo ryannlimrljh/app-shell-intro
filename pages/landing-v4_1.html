@@ -1137,7 +1137,6 @@
      forward while hovered. CSS scale and translate stack with the transform
      Motion writes for the fan pose and tilt, so neither fights the other.
      Desktop fan only: the phone deck and the drawer grid are untouched. */
-  @property --fade-off{syntax:'<length>'; inherits:false; initial-value:0px;}
   @media (min-width:641px){
     /* 10px more headroom inside the slider, which clips above its top
        edge, and the slider raised by the same 10px, so the cards sit where
@@ -1166,28 +1165,18 @@
     #cardSlider .c-card-slider-track:not(.is-stacked) > .c-card-slide{flex-basis:360px; width:360px;}
     #cardSlider .c-card-slider-track:not(.is-stacked) > .c-card-slide:is(:nth-child(2), :nth-child(5)){margin-left:calc(-26px + var(--spread));}
     /* Too narrow for all five (.is-tight, set by fitFan()): the outer two
-       run off the visible edges, the nav's edge and the screen's. Any card
-       that crosses one dissolves into it: a mask on the card itself, so it
-       fades along its own tilt, eased over --fw (140px) to clear at the
-       edge. --fe-l/--fe-r are where that edge falls in the card's own
-       coordinates (set by fadeFan()); a card that doesn't cross keeps them
-       far off, fully opaque. Hovering an outer card slides it whole into
-       view and slides its fade (and its neighbour's) off meanwhile. */
-    #cardSlider.is-tight .c-card-slider-track:not(.is-stacked) > .c-card-slide{
-      --fw:140px; --fe-l:-9999px; --fe-r:-9999px;
-      transition:--fade-off .45s cubic-bezier(.22,1,.36,1);
-      -webkit-mask-image:linear-gradient(to right, transparent calc(var(--fe-l) - var(--fade-off)), rgba(0,0,0,0.02) calc(var(--fe-l) + var(--fw) * 0.1 - var(--fade-off)), rgba(0,0,0,0.07) calc(var(--fe-l) + var(--fw) * 0.2 - var(--fade-off)), rgba(0,0,0,0.15) calc(var(--fe-l) + var(--fw) * 0.3 - var(--fade-off)), rgba(0,0,0,0.27) calc(var(--fe-l) + var(--fw) * 0.4 - var(--fade-off)), rgba(0,0,0,0.42) calc(var(--fe-l) + var(--fw) * 0.5 - var(--fade-off)), rgba(0,0,0,0.58) calc(var(--fe-l) + var(--fw) * 0.6 - var(--fade-off)), rgba(0,0,0,0.73) calc(var(--fe-l) + var(--fw) * 0.7 - var(--fade-off)), rgba(0,0,0,0.86) calc(var(--fe-l) + var(--fw) * 0.8 - var(--fade-off)), rgba(0,0,0,0.95) calc(var(--fe-l) + var(--fw) * 0.9 - var(--fade-off)), #000 calc(var(--fe-l) + var(--fw) - var(--fade-off))), linear-gradient(to left, transparent calc(var(--fe-r) - var(--fade-off)), rgba(0,0,0,0.02) calc(var(--fe-r) + var(--fw) * 0.1 - var(--fade-off)), rgba(0,0,0,0.07) calc(var(--fe-r) + var(--fw) * 0.2 - var(--fade-off)), rgba(0,0,0,0.15) calc(var(--fe-r) + var(--fw) * 0.3 - var(--fade-off)), rgba(0,0,0,0.27) calc(var(--fe-r) + var(--fw) * 0.4 - var(--fade-off)), rgba(0,0,0,0.42) calc(var(--fe-r) + var(--fw) * 0.5 - var(--fade-off)), rgba(0,0,0,0.58) calc(var(--fe-r) + var(--fw) * 0.6 - var(--fade-off)), rgba(0,0,0,0.73) calc(var(--fe-r) + var(--fw) * 0.7 - var(--fade-off)), rgba(0,0,0,0.86) calc(var(--fe-r) + var(--fw) * 0.8 - var(--fade-off)), rgba(0,0,0,0.95) calc(var(--fe-r) + var(--fw) * 0.9 - var(--fade-off)), #000 calc(var(--fe-r) + var(--fw) - var(--fade-off)));
-      -webkit-mask-composite:source-in;
-      mask-image:linear-gradient(to right, transparent calc(var(--fe-l) - var(--fade-off)), rgba(0,0,0,0.02) calc(var(--fe-l) + var(--fw) * 0.1 - var(--fade-off)), rgba(0,0,0,0.07) calc(var(--fe-l) + var(--fw) * 0.2 - var(--fade-off)), rgba(0,0,0,0.15) calc(var(--fe-l) + var(--fw) * 0.3 - var(--fade-off)), rgba(0,0,0,0.27) calc(var(--fe-l) + var(--fw) * 0.4 - var(--fade-off)), rgba(0,0,0,0.42) calc(var(--fe-l) + var(--fw) * 0.5 - var(--fade-off)), rgba(0,0,0,0.58) calc(var(--fe-l) + var(--fw) * 0.6 - var(--fade-off)), rgba(0,0,0,0.73) calc(var(--fe-l) + var(--fw) * 0.7 - var(--fade-off)), rgba(0,0,0,0.86) calc(var(--fe-l) + var(--fw) * 0.8 - var(--fade-off)), rgba(0,0,0,0.95) calc(var(--fe-l) + var(--fw) * 0.9 - var(--fade-off)), #000 calc(var(--fe-l) + var(--fw) - var(--fade-off))), linear-gradient(to left, transparent calc(var(--fe-r) - var(--fade-off)), rgba(0,0,0,0.02) calc(var(--fe-r) + var(--fw) * 0.1 - var(--fade-off)), rgba(0,0,0,0.07) calc(var(--fe-r) + var(--fw) * 0.2 - var(--fade-off)), rgba(0,0,0,0.15) calc(var(--fe-r) + var(--fw) * 0.3 - var(--fade-off)), rgba(0,0,0,0.27) calc(var(--fe-r) + var(--fw) * 0.4 - var(--fade-off)), rgba(0,0,0,0.42) calc(var(--fe-r) + var(--fw) * 0.5 - var(--fade-off)), rgba(0,0,0,0.58) calc(var(--fe-r) + var(--fw) * 0.6 - var(--fade-off)), rgba(0,0,0,0.73) calc(var(--fe-r) + var(--fw) * 0.7 - var(--fade-off)), rgba(0,0,0,0.86) calc(var(--fe-r) + var(--fw) * 0.8 - var(--fade-off)), rgba(0,0,0,0.95) calc(var(--fe-r) + var(--fw) * 0.9 - var(--fade-off)), #000 calc(var(--fe-r) + var(--fw) - var(--fade-off)));
-      mask-composite:intersect;}
-    #cardSlider.is-tight .c-card-slider-track:not(.is-stacked) > .c-card-slide.is-settled:is(:nth-child(1), :nth-child(5)){transition:translate .5s cubic-bezier(.22,1,.36,1), z-index 0s linear .5s, --fade-off .45s cubic-bezier(.22,1,.36,1);}
-    #cardSlider.is-tight .c-card-slider-track:not(.is-stacked) > .c-card-slide.is-settled:is(:nth-child(1), :nth-child(5)):is(:hover, :focus-within, .is-out){--fade-off:1200px; transition:translate .5s cubic-bezier(.22,1,.36,1), z-index 0s, --fade-off .45s cubic-bezier(.22,1,.36,1);}
-    #cardSlider.is-tight .c-card-slider-track:not(.is-stacked):has(> .c-card-slide.is-settled:nth-child(1):is(:hover, :focus-within, .is-out)) > .c-card-slide:nth-child(2),
-    #cardSlider.is-tight .c-card-slider-track:not(.is-stacked):has(> .c-card-slide.is-settled:nth-child(5):is(:hover, :focus-within, .is-out)) > .c-card-slide:nth-child(4){--fade-off:1200px;}
-    /* Narrower still, the lead's neighbours reach the edge themselves and
-       the outer card behind would show through their fade: it bows out. */
-    #cardSlider.is-tight .c-card-slider-track:not(.is-stacked) > .c-card-slide.is-gone{opacity:0; pointer-events:none;}
-    #cardSlider.is-tight .c-card-slider-track:not(.is-stacked) > .c-card-slide.is-settled:is(:nth-child(2), :nth-child(4)){transition:translate .5s cubic-bezier(.22,1,.36,1), --fade-off .45s cubic-bezier(.22,1,.36,1);}
+       run off the visible edges, the nav's edge and the screen's. Over each
+       edge they cross sits a veil (.c-fan-veil): a still layer in the page's
+       own background, eased from solid at the edge to clear 140px in, that
+       the cards pass under. fadeFan() places it. Hovering an outer card
+       slides it whole into view and lifts the veil on its side meanwhile. */
+    :has(> #cardSlider){position:relative;}
+    .c-fan-veil{position:absolute; z-index:5; width:140px; pointer-events:none; display:none; opacity:1; transition:opacity .45s cubic-bezier(.22,1,.36,1);}
+    .c-fan-veil.is-on{display:block;}
+    .c-fan-veil-l{background:linear-gradient(to right, color-mix(in srgb, var(--color-canvas-warm) 100%, transparent) 0%, color-mix(in srgb, var(--color-canvas-warm) 98%, transparent) 10%, color-mix(in srgb, var(--color-canvas-warm) 93%, transparent) 20%, color-mix(in srgb, var(--color-canvas-warm) 85%, transparent) 30%, color-mix(in srgb, var(--color-canvas-warm) 73%, transparent) 40%, color-mix(in srgb, var(--color-canvas-warm) 58%, transparent) 50%, color-mix(in srgb, var(--color-canvas-warm) 42%, transparent) 60%, color-mix(in srgb, var(--color-canvas-warm) 27%, transparent) 70%, color-mix(in srgb, var(--color-canvas-warm) 14%, transparent) 80%, color-mix(in srgb, var(--color-canvas-warm) 5%, transparent) 90%, color-mix(in srgb, var(--color-canvas-warm) 0%, transparent) 100%);}
+    .c-fan-veil-r{background:linear-gradient(to left, color-mix(in srgb, var(--color-canvas-warm) 100%, transparent) 0%, color-mix(in srgb, var(--color-canvas-warm) 98%, transparent) 10%, color-mix(in srgb, var(--color-canvas-warm) 93%, transparent) 20%, color-mix(in srgb, var(--color-canvas-warm) 85%, transparent) 30%, color-mix(in srgb, var(--color-canvas-warm) 73%, transparent) 40%, color-mix(in srgb, var(--color-canvas-warm) 58%, transparent) 50%, color-mix(in srgb, var(--color-canvas-warm) 42%, transparent) 60%, color-mix(in srgb, var(--color-canvas-warm) 27%, transparent) 70%, color-mix(in srgb, var(--color-canvas-warm) 14%, transparent) 80%, color-mix(in srgb, var(--color-canvas-warm) 5%, transparent) 90%, color-mix(in srgb, var(--color-canvas-warm) 0%, transparent) 100%);}
+    :has(> #cardSlider .c-card-slider-track:not(.is-stacked) > .c-card-slide.is-settled:nth-child(1):is(:hover, :focus-within, .is-out)) > .c-fan-veil-l,
+    :has(> #cardSlider .c-card-slider-track:not(.is-stacked) > .c-card-slide.is-settled:nth-child(5):is(:hover, :focus-within, .is-out)) > .c-fan-veil-r{opacity:0;}
     /* --tuck is how far the outer two sit in behind their neighbours: 90px,
        which leaves ~224px of each showing. It does not deepen to save room
        (a 60px strip read as hidden); instead fitFan() in the script below
@@ -4174,7 +4163,7 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
       stackTrack.style.zoom = '';
       FAN_VARS.forEach((v) => stackTrack.style.removeProperty(v));
       cardSlider.classList.remove('is-tight');
-      cs.forEach((c) => { c.classList.remove('is-out', 'is-gone'); c.style.removeProperty('--fe-l'); c.style.removeProperty('--fe-r'); });
+      cs.forEach((c) => c.classList.remove('is-out'));
       const first = cs[0], last = cs[cs.length - 1];
       const w = lead.offsetWidth, h = Math.max(...cs.map((c) => c.offsetHeight));
       let leadC = lead.offsetLeft + w / 2;
@@ -4238,29 +4227,39 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
       document.documentElement.addEventListener('pointerleave', release);
     });
 
-    // Where each visible edge (the nav's and the screen's) falls in a tight
-    // fan card's own coordinates, for its fade mask. Run after centring,
-    // since it reads where the row has scrolled to. Taken from layout and
-    // the resting pose, not the live rect, so a hovered or still-arriving
-    // card can't skew it; only cards that cross an edge get a fade.
+    // The veils over a tight fan's edges (see .c-fan-veil): placed over the
+    // nav's edge and the screen's, the slider's height, and shown only on a
+    // side some card actually crosses at rest. Run after centring, since it
+    // reads where the row has scrolled to; taken from layout and the resting
+    // pose, so a hovered or still-arriving card can't skew it.
+    const FAN_VEIL = 140;
+    const fanVeils = ['l', 'r'].map((side) => {
+      const v = document.createElement('div');
+      v.className = 'c-fan-veil c-fan-veil-' + side;
+      v.setAttribute('aria-hidden', 'true');
+      cardSlider.parentElement.appendChild(v);
+      return v;
+    });
     function fadeFan() {
-      if (!cardSlider.classList.contains('is-tight')) return;
-      const cs = stackCards();
-      const tl = stackTrack.getBoundingClientRect().left;
+      const tight = cardSlider.classList.contains('is-tight') && !STACK_MQ.matches;
+      let crossL = false, crossR = false;
       const navEdge = document.querySelector('.c-shell-content').getBoundingClientRect().left;
-      const tuck = parseFloat(stackTrack.style.getPropertyValue('--tuck')) || 0;
-      cs.forEach((c, i) => {
-        const shift = i === 0 ? tuck : i === cs.length - 1 ? -tuck : 0;
-        const left = tl + c.offsetLeft + shift, right = left + c.offsetWidth;
-        if (left < navEdge) c.style.setProperty('--fe-l', Math.round(navEdge - left) + 'px'); else c.style.removeProperty('--fe-l');
-        if (right > innerWidth) c.style.setProperty('--fe-r', Math.round(right - innerWidth) + 'px'); else c.style.removeProperty('--fe-r');
+      if (tight) {
+        const cs = stackCards(), tl = stackTrack.getBoundingClientRect().left;
+        const tuck = parseFloat(stackTrack.style.getPropertyValue('--tuck')) || 0;
+        cs.forEach((c, i) => {
+          const left = tl + c.offsetLeft + (i === 0 ? tuck : i === cs.length - 1 ? -tuck : 0);
+          if (left < navEdge) crossL = true;
+          if (left + c.offsetWidth > innerWidth) crossR = true;
+        });
+      }
+      const pr = cardSlider.parentElement.getBoundingClientRect(), sr = cardSlider.getBoundingClientRect();
+      fanVeils.forEach((v, i) => {
+        v.classList.toggle('is-on', i ? crossR : crossL);
+        v.style.top = Math.round(sr.top - pr.top) + 'px';
+        v.style.height = Math.round(sr.height) + 'px';
+        v.style.left = Math.round((i ? innerWidth - FAN_VEIL : navEdge) - pr.left) + 'px';
       });
-      // where a neighbour already runs into the edge there is nowhere left
-      // for the outer card to peek, and it would show through the
-      // neighbour's fade, so it bows out on that side
-      const n = cs.length;
-      cs[0].classList.toggle('is-gone', !!cs[1].style.getPropertyValue('--fe-l'));
-      cs[n - 1].classList.toggle('is-gone', !!cs[n - 2].style.getPropertyValue('--fe-r'));
     }
 
     function centreLead() {
@@ -4359,6 +4358,7 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
         stackTrack.style.zoom = '';
         FAN_VARS.forEach((v) => stackTrack.style.removeProperty(v));
         cardSlider.classList.remove('is-tight');
+        fadeFan();
         cs.forEach(releaseCardTransform);
         buildStackPager();
         paintStack();

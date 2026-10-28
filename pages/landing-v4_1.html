@@ -253,6 +253,46 @@
      .c-dash's own margin-top (--section-gap again) then starts the
      section one gap below it. No JS measurement, no magic number. */
   .c-canvas-hero{min-height:calc(100dvh - var(--section-gap));}
+  /* ── Fallback: Pods view (28 Oct, exploring). The hero fan gives way to
+     one card per pod, each a door into that pod: the element mark on its
+     own tint, the pod's name and what it does, and the way in. Pods that
+     are not built yet show, dimmed, as Coming soon. */
+  .c-pods-toggle{display:inline-flex; align-items:center; gap:var(--spacing-8); margin:0; padding:0; border:0; background:none; font:inherit; color:inherit; cursor:pointer; vertical-align:middle;}
+  .c-pods-toggle:focus-visible{outline:2px solid var(--color-obsidian); outline-offset:4px; border-radius:var(--radius-pill);}
+  .c-pods-toggle[aria-checked="true"] .c-switch-track{background:var(--color-obsidian);}
+  .c-pods-toggle[aria-checked="true"] .c-switch-thumb{left:19px;}
+  /* The fallback assumes no sales board can be shown: the week's number
+     pills, the board below and the links into it all go, leaving the
+     greeting, the pods' fan and the switch, centred in the space above the
+     ask box (auto margins, so a tall fan never pushes the greeting off the
+     top the way justify-content:center would). */
+  html.is-pods #weekSummary, html.is-pods #space, html.is-pods .c-dash-links{display:none !important;}
+  html.is-pods .c-canvas-hero{display:flex; flex-direction:column; min-height:calc(100dvh - 200px);}
+  html.is-pods .c-canvas-greeting{margin-top:auto;}
+  html.is-pods .c-canvas-dashlink{margin-bottom:auto;}
+  html.is-pods .c-shell-content{padding-bottom:0;}
+  @media (max-width:640px){
+    /* the phone scrolls clear of the ask box as usual */
+    html.is-pods .c-canvas-hero{min-height:0;}
+    html.is-pods .c-shell-content{padding-bottom:184px;}
+  }
+  /* A card whose role is not in play this view: pods in the hero view
+     (they never join the Hero Cards drawer), everything else in Pods view. */
+  .c-card-slide.is-role-out{display:none !important;}
+  /* The pod cards: a hero card each. The pod's name as the label, its
+     element mark on its own tint as the cover, what it does as the title,
+     and the way in. Pods not built yet are dimmed, with no way in. */
+  .c-pod-cover{flex:1; min-height:132px; display:flex; align-items:center; justify-content:center; border-radius:var(--radius-md, 16px); background:var(--pod-bg, var(--color-neutral-2));}
+  .c-pod-cover img{width:72px; height:72px; object-fit:contain;}
+  .c-pod-hcard.tint-gold{--pod-bg:var(--color-gold-bg-strong);}
+  .c-pod-hcard.tint-water{--pod-bg:var(--color-water-bg-strong);}
+  .c-pod-hcard.tint-earth{--pod-bg:var(--color-earth-bg-strong);}
+  .c-pod-hcard.tint-fire{--pod-bg:var(--color-fire-bg-strong);}
+  .c-pod-hcard.tint-wood{--pod-bg:var(--color-wood-bg-strong);}
+  .c-pod-hcard.is-soon .c-pod-cover{background:var(--color-neutral-2);}
+  .c-pod-hcard.is-soon .c-pod-cover img{filter:grayscale(1); opacity:.45;}
+  .c-pod-hcard.is-soon h4{color:var(--color-neutral-5);}
+  .c-pod-soon{align-self:flex-start; padding:var(--spacing-8) var(--spacing-16); border-radius:var(--radius-pill); background:var(--color-neutral-2); font-size:var(--text-body2-size); font-weight:700; color:var(--color-neutral-6);}
 
   /* ── Section 2 — the two spaces. The same business, read two ways:
      Decisions Space leads with what is being asked of the reader,
@@ -2581,6 +2621,54 @@ a.c-sidebar-item, a.c-nav-child{text-decoration:none;}
             </div>
           </div>
         </div>
+        <script>
+        /* Fallback, Pods view (28 Oct, exploring): one hero card per pod,
+           data-role="pods", dealt onto the same fan in place of the hero cards
+           when the "Pods view" switch is on (see setFanRole). Built here, from
+           the nav's own pod tray (shared/pods.js renders it above), before the
+           fan's scripts run, so the reveal, tilt and deck treat them like any
+           other card, and the names, descriptions and links can never disagree
+           with the tray. The mothership is left out: you are in it. Fan order
+           puts the live pods in the middle with Collab:Sales as the lead, and
+           the pods not built yet on the outside; the phone deck deals the
+           live ones first. */
+        (function () {
+          var track = document.querySelector('#cardSlider .c-card-slider-track');
+          var chips = Array.prototype.slice.call(document.querySelectorAll('.c-pod-strip .c-pod-chip')).filter(function (c) { return !c.classList.contains('is-current'); });
+          if (!track || !chips.length) return;
+          var pods = chips.map(function (chip) {
+            var said = chip.getAttribute('aria-label') || '', cut = said.indexOf('. ');
+            var img = chip.querySelector('img');
+            return { name: cut < 0 ? said : said.slice(0, cut), about: cut < 0 ? '' : said.slice(cut + 2).replace(/\s*Not built yet\.?$/, ''),
+              soon: chip.classList.contains('soon') || !chip.getAttribute('href'), href: chip.href,
+              tint: (Array.prototype.slice.call(chip.classList).filter(function (k) { return k.indexOf('tint-') === 0; })[0] || ''),
+              mark: img ? img.getAttribute('src') : '' };
+          });
+          var live = pods.filter(function (p) { return !p.soon; }), soon = pods.filter(function (p) { return p.soon; });
+          // the fan: soon, live, LEAD, live, soon (as many as there are)
+          var mid = live.slice(1), fan = [];
+          fan.push.apply(fan, soon.slice(0, Math.ceil(soon.length / 2)));
+          fan.push.apply(fan, mid.slice(0, Math.floor(mid.length / 2)));
+          if (live[0]) fan.push(live[0]);
+          fan.push.apply(fan, mid.slice(Math.floor(mid.length / 2)));
+          fan.push.apply(fan, soon.slice(Math.ceil(soon.length / 2)));
+          var deck = live.concat(soon);
+          var esc = function (t) { return String(t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
+          fan.forEach(function (p) {
+            var card = document.createElement('div');
+            // out of play until Pods view deals them (and never in the drawer)
+            card.className = 'c-card c-card-slide c-pod-hcard is-role-out ' + p.tint + (p.soon ? ' is-soon' : '');
+            card.dataset.role = 'pods';
+            card.dataset.deck = String(deck.indexOf(p) + 1);
+            if (p === live[0]) card.setAttribute('data-lead', '');
+            card.innerHTML = '<span class="c-hcard-label">' + esc(p.name) + (p.soon ? ' <span class="c-hcard-prov">· not built yet</span>' : '') + '</span>' +
+              '<div class="c-pod-cover" aria-hidden="true">' + (p.mark ? '<img src="' + esc(p.mark) + '" alt="">' : '') + '</div>' +
+              '<h4>' + esc(p.about) + '</h4>' +
+              (p.soon ? '<span class="c-pod-soon">Coming soon</span>' : '<a class="c-hcard-cta-btn" href="' + esc(p.href) + '">Open ' + esc(p.name) + '</a>');
+            track.appendChild(card);
+          });
+        })();
+        </script>
         <!-- Deck affordance, mobile only (display:none above 640). The system's
              own Pagination (.c-page-controls + .c-page-btn), minus the count
              label and the prev/next carets, which do not fit a 255px column —
@@ -2593,7 +2681,7 @@ a.c-sidebar-item, a.c-nav-child{text-decoration:none;}
              three are wired (the old "Clean up cards" was href="#" and did
              nothing). "Hero Cards" returns to the fan above, so it
              gets no down-arrow — the other two go down into the spaces. -->
-        <p class="c-canvas-dashlink" id="dashLink">Get more done, straight to your <a href="#salesBoard">Sales Board &#8595;</a> | <a href="#cardSlider">Hero Cards &#9633;</a></p>
+        <p class="c-canvas-dashlink" id="dashLink"><span class="c-dash-links">Get more done, straight to your <a href="#salesBoard">Sales Board &#8595;</a> | <a href="#cardSlider">Hero Cards &#9633;</a> | </span><button class="c-pods-toggle" id="podsToggle" type="button" role="switch" aria-checked="false"><span class="c-switch-track" aria-hidden="true"><span class="c-switch-thumb"></span></span>Pods view</button></p>
         </div><!-- /.c-canvas-hero -->
 
         <!-- ── Section 2 — the two spaces.
@@ -4407,6 +4495,43 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
         centreLead();
       }
     }
+    // Which cards the fan deals: the hero cards ('hero') or, in the Pods
+    // view fallback, one per pod ('pods'). The chosen role's cards move to
+    // the front of the track, since the fan's poses are nth-child and DOM
+    // order IS the fan order; the rest leave the fan, and a role not in play
+    // leaves the drawer too (.is-role-out). Motion's baked poses are handed
+    // back first and the deck and pager rebuilt, so fit, centring, veils,
+    // hover and the phone deck all follow the new five. On a live switch the
+    // new cards fade in; on the first paint the entrance deals them.
+    const TRACK_ORDER = Array.from(stackTrack.children).filter((c) => c.classList.contains('c-card-slide'));
+    let fanRole = 'hero';
+    function setFanRole(role, initial) {
+      if (role === fanRole) return;
+      fanRole = role;
+      TRACK_ORDER.forEach((c) => {
+        const r = c.dataset.role || '';
+        c.classList.toggle('is-off-fan', r !== role);
+        c.classList.toggle('is-role-out', role === 'pods' ? r !== 'pods' : r === 'pods');
+        c.classList.remove('is-out');
+        releaseCardTransform(c);
+        // first paint: the entrance has not run yet, so let it deal the new
+        // five (and keep the rest revealed, as the drawer expects)
+        if (initial) c.classList.toggle('is-revealed', r !== role);
+      });
+      TRACK_ORDER.filter((c) => c.dataset.role === role).concat(TRACK_ORDER.filter((c) => c.dataset.role !== role)).forEach((c) => stackTrack.appendChild(c));
+      stackTop = null;
+      stackPagerBuilt = false;
+      const pager = document.getElementById('cardStackPager');
+      if (pager) pager.innerHTML = '';
+      cardSlider.scrollLeft = 0;
+      applyStackMode();
+      if (!initial && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        stackCards().forEach((c, i) => c.animate([{ opacity: 0, filter: 'blur(6px)' }, { opacity: 1, filter: 'blur(0px)' }],
+          { duration: 520, delay: i * 70, easing: 'cubic-bezier(.22,1,.36,1)', fill: 'backwards' }));
+      }
+    }
+    window.collabFanRole = setFanRole;
+
     window.addEventListener('load', centreLead);
     // and again once the fan has dealt itself out (the entrance moves the cards)
     [1200, 3000].forEach((ms) => setTimeout(centreLead, ms));
@@ -9015,6 +9140,31 @@ document.addEventListener('keydown', function (e) {
     if (prov) { prov.textContent = '· live'; prov.title = 'Live from the trade press feeds: ' + (d.sources || []).join(', ') + '.'; }
   }).catch(function () { /* keep the placeholder stories */ });
 })();
+</script>
+<script>
+/* Pods view, the hero's fallback (28 Oct, exploring): the switch on the
+   dash line. On, the fan deals the pod cards (see setFanRole) and the page
+   drops everything that needs the sales board. Remembered per viewer;
+   ?fallback=1 (or 0) in the address sets it, so the view can be shared. */
+// After DOMContentLoaded: the fan's script is a module, so it runs after
+// this one, and setFanRole only exists once it has.
+document.addEventListener('DOMContentLoaded', function () {
+  const toggle = document.getElementById('podsToggle');
+  if (!toggle || !window.collabFanRole) return;
+  const KEY = 'collab.heroFallback';
+  function set(on, opts) {
+    document.documentElement.classList.toggle('is-pods', on);
+    toggle.setAttribute('aria-checked', String(on));
+    window.collabFanRole(on ? 'pods' : 'hero', opts.initial);
+    if (opts.remember) { try { localStorage.setItem(KEY, on ? '1' : '0'); } catch (e) {} }
+  }
+  toggle.addEventListener('click', () => set(toggle.getAttribute('aria-checked') !== 'true', { remember: true }));
+  let start;
+  const q = new URLSearchParams(location.search).get('fallback');
+  if (q === '1' || q === '0') start = q === '1';
+  else { try { start = localStorage.getItem(KEY) === '1'; } catch (e) { start = false; } }
+  if (start) set(true, { initial: true });
+});
 </script>
 </body>
 </html>

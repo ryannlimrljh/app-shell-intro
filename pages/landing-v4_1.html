@@ -1131,12 +1131,13 @@
      so its scaled/tilted edges aren't clipped by an overlapping
      neighbour. */
   .c-card-slide.is-settled{transition:none; cursor:pointer;}
-  .c-card-slide.is-settled:hover{z-index:10;}
+  .c-card-slide.is-settled:is(:hover, .is-out){z-index:10;}
   /* Focus on the middle (27 Oct): the lead card (Focus 1) sits larger, and
      the two outermost cards tuck in behind their neighbours and come
      forward while hovered. CSS scale and translate stack with the transform
      Motion writes for the fan pose and tilt, so neither fights the other.
      Desktop fan only: the phone deck and the drawer grid are untouched. */
+  @property --fade-off{syntax:'<length>'; inherits:false; initial-value:0px;}
   @media (min-width:641px){
     /* 10px more headroom inside the slider, which clips above its top
        edge, and the slider raised by the same 10px, so the cards sit where
@@ -1156,20 +1157,50 @@
     /* The lead's two neighbours sit nearly edge to edge with it (-6px, not
        the row's -26px): the lead is scaled up 8%, so at -26px it covered the
        first words of their titles. */
-    #cardSlider .c-card-slider-track:not(.is-stacked) > .c-card-slide:is(:nth-child(3), :nth-child(4)){margin-left:-6px;}
+    #cardSlider .c-card-slider-track:not(.is-stacked) > .c-card-slide:is(:nth-child(3), :nth-child(4)){margin-left:calc(-6px + var(--spread));}
+    /* --spread opens every gap in the row by the same amount (and eases the
+       outer tuck by it too). fitFan() sets it to as much as the window has
+       room for, up to 120px, so a wide screen gets a loose fan. Cards never
+       scale down: a screen too narrow for all five goes .is-tight (below). The fan's cards are 360px
+       here, a touch wider than the 340px the drawer and phone deck use. */
+    #cardSlider .c-card-slider-track:not(.is-stacked) > .c-card-slide{flex-basis:360px; width:360px;}
+    #cardSlider .c-card-slider-track:not(.is-stacked) > .c-card-slide:is(:nth-child(2), :nth-child(5)){margin-left:calc(-26px + var(--spread));}
+    /* Too narrow for all five (.is-tight, set by fitFan()): the outer two
+       run off the visible edges, the nav's edge and the screen's. Any card
+       that crosses one dissolves into it: a mask on the card itself, so it
+       fades along its own tilt, eased over --fw (140px) to clear at the
+       edge. --fe-l/--fe-r are where that edge falls in the card's own
+       coordinates (set by fadeFan()); a card that doesn't cross keeps them
+       far off, fully opaque. Hovering an outer card slides it whole into
+       view and slides its fade (and its neighbour's) off meanwhile. */
+    #cardSlider.is-tight .c-card-slider-track:not(.is-stacked) > .c-card-slide{
+      --fw:140px; --fe-l:-9999px; --fe-r:-9999px;
+      transition:--fade-off .45s cubic-bezier(.22,1,.36,1);
+      -webkit-mask-image:linear-gradient(to right, transparent calc(var(--fe-l) - var(--fade-off)), rgba(0,0,0,0.02) calc(var(--fe-l) + var(--fw) * 0.1 - var(--fade-off)), rgba(0,0,0,0.07) calc(var(--fe-l) + var(--fw) * 0.2 - var(--fade-off)), rgba(0,0,0,0.15) calc(var(--fe-l) + var(--fw) * 0.3 - var(--fade-off)), rgba(0,0,0,0.27) calc(var(--fe-l) + var(--fw) * 0.4 - var(--fade-off)), rgba(0,0,0,0.42) calc(var(--fe-l) + var(--fw) * 0.5 - var(--fade-off)), rgba(0,0,0,0.58) calc(var(--fe-l) + var(--fw) * 0.6 - var(--fade-off)), rgba(0,0,0,0.73) calc(var(--fe-l) + var(--fw) * 0.7 - var(--fade-off)), rgba(0,0,0,0.86) calc(var(--fe-l) + var(--fw) * 0.8 - var(--fade-off)), rgba(0,0,0,0.95) calc(var(--fe-l) + var(--fw) * 0.9 - var(--fade-off)), #000 calc(var(--fe-l) + var(--fw) - var(--fade-off))), linear-gradient(to left, transparent calc(var(--fe-r) - var(--fade-off)), rgba(0,0,0,0.02) calc(var(--fe-r) + var(--fw) * 0.1 - var(--fade-off)), rgba(0,0,0,0.07) calc(var(--fe-r) + var(--fw) * 0.2 - var(--fade-off)), rgba(0,0,0,0.15) calc(var(--fe-r) + var(--fw) * 0.3 - var(--fade-off)), rgba(0,0,0,0.27) calc(var(--fe-r) + var(--fw) * 0.4 - var(--fade-off)), rgba(0,0,0,0.42) calc(var(--fe-r) + var(--fw) * 0.5 - var(--fade-off)), rgba(0,0,0,0.58) calc(var(--fe-r) + var(--fw) * 0.6 - var(--fade-off)), rgba(0,0,0,0.73) calc(var(--fe-r) + var(--fw) * 0.7 - var(--fade-off)), rgba(0,0,0,0.86) calc(var(--fe-r) + var(--fw) * 0.8 - var(--fade-off)), rgba(0,0,0,0.95) calc(var(--fe-r) + var(--fw) * 0.9 - var(--fade-off)), #000 calc(var(--fe-r) + var(--fw) - var(--fade-off)));
+      -webkit-mask-composite:source-in;
+      mask-image:linear-gradient(to right, transparent calc(var(--fe-l) - var(--fade-off)), rgba(0,0,0,0.02) calc(var(--fe-l) + var(--fw) * 0.1 - var(--fade-off)), rgba(0,0,0,0.07) calc(var(--fe-l) + var(--fw) * 0.2 - var(--fade-off)), rgba(0,0,0,0.15) calc(var(--fe-l) + var(--fw) * 0.3 - var(--fade-off)), rgba(0,0,0,0.27) calc(var(--fe-l) + var(--fw) * 0.4 - var(--fade-off)), rgba(0,0,0,0.42) calc(var(--fe-l) + var(--fw) * 0.5 - var(--fade-off)), rgba(0,0,0,0.58) calc(var(--fe-l) + var(--fw) * 0.6 - var(--fade-off)), rgba(0,0,0,0.73) calc(var(--fe-l) + var(--fw) * 0.7 - var(--fade-off)), rgba(0,0,0,0.86) calc(var(--fe-l) + var(--fw) * 0.8 - var(--fade-off)), rgba(0,0,0,0.95) calc(var(--fe-l) + var(--fw) * 0.9 - var(--fade-off)), #000 calc(var(--fe-l) + var(--fw) - var(--fade-off))), linear-gradient(to left, transparent calc(var(--fe-r) - var(--fade-off)), rgba(0,0,0,0.02) calc(var(--fe-r) + var(--fw) * 0.1 - var(--fade-off)), rgba(0,0,0,0.07) calc(var(--fe-r) + var(--fw) * 0.2 - var(--fade-off)), rgba(0,0,0,0.15) calc(var(--fe-r) + var(--fw) * 0.3 - var(--fade-off)), rgba(0,0,0,0.27) calc(var(--fe-r) + var(--fw) * 0.4 - var(--fade-off)), rgba(0,0,0,0.42) calc(var(--fe-r) + var(--fw) * 0.5 - var(--fade-off)), rgba(0,0,0,0.58) calc(var(--fe-r) + var(--fw) * 0.6 - var(--fade-off)), rgba(0,0,0,0.73) calc(var(--fe-r) + var(--fw) * 0.7 - var(--fade-off)), rgba(0,0,0,0.86) calc(var(--fe-r) + var(--fw) * 0.8 - var(--fade-off)), rgba(0,0,0,0.95) calc(var(--fe-r) + var(--fw) * 0.9 - var(--fade-off)), #000 calc(var(--fe-r) + var(--fw) - var(--fade-off)));
+      mask-composite:intersect;}
+    #cardSlider.is-tight .c-card-slider-track:not(.is-stacked) > .c-card-slide.is-settled:is(:nth-child(1), :nth-child(5)){transition:translate .5s cubic-bezier(.22,1,.36,1), z-index 0s linear .5s, --fade-off .45s cubic-bezier(.22,1,.36,1);}
+    #cardSlider.is-tight .c-card-slider-track:not(.is-stacked) > .c-card-slide.is-settled:is(:nth-child(1), :nth-child(5)):is(:hover, :focus-within, .is-out){--fade-off:1200px; transition:translate .5s cubic-bezier(.22,1,.36,1), z-index 0s, --fade-off .45s cubic-bezier(.22,1,.36,1);}
+    #cardSlider.is-tight .c-card-slider-track:not(.is-stacked):has(> .c-card-slide.is-settled:nth-child(1):is(:hover, :focus-within, .is-out)) > .c-card-slide:nth-child(2),
+    #cardSlider.is-tight .c-card-slider-track:not(.is-stacked):has(> .c-card-slide.is-settled:nth-child(5):is(:hover, :focus-within, .is-out)) > .c-card-slide:nth-child(4){--fade-off:1200px;}
+    /* Narrower still, the lead's neighbours reach the edge themselves and
+       the outer card behind would show through their fade: it bows out. */
+    #cardSlider.is-tight .c-card-slider-track:not(.is-stacked) > .c-card-slide.is-gone{opacity:0; pointer-events:none;}
+    #cardSlider.is-tight .c-card-slider-track:not(.is-stacked) > .c-card-slide.is-settled:is(:nth-child(2), :nth-child(4)){transition:translate .5s cubic-bezier(.22,1,.36,1), --fade-off .45s cubic-bezier(.22,1,.36,1);}
     /* --tuck is how far the outer two sit in behind their neighbours: 90px,
        which leaves ~224px of each showing. It does not deepen to save room
        (a 60px strip read as hidden); instead fitFan() in the script below
        scales the whole fan (zoom on the track) when the window is too narrow
        for all five cards to show whole between the sidebar and the edge. */
-    #cardSlider .c-card-slider-track:not(.is-stacked){--tuck:90px; --out-l:60px; --out-r:60px; --nb-l:0px; --nb-r:0px;}
+    #cardSlider .c-card-slider-track:not(.is-stacked){--spread:0px; --tuck:90px; --out-l:60px; --out-r:60px; --nb-l:0px; --nb-r:0px;}
     #cardSlider .c-card-slider-track:not(.is-stacked) > .c-card-slide:nth-child(1){translate:var(--tuck) 0;}
     #cardSlider .c-card-slider-track:not(.is-stacked) > .c-card-slide:nth-child(5){translate:calc(-1 * var(--tuck)) 0;}
     /* Leaving, the card keeps its place in front (z-index 10) until it has
        slid all the way back; dropping behind its neighbour mid-slide read as
        a pop. Arriving, it comes in front at once. */
     #cardSlider .c-card-slider-track:not(.is-stacked) > .c-card-slide.is-settled:is(:nth-child(1), :nth-child(5)){transition:translate .5s cubic-bezier(.22,1,.36,1), z-index 0s linear .5s;}
-    #cardSlider .c-card-slider-track:not(.is-stacked) > .c-card-slide.is-settled:is(:nth-child(1), :nth-child(5)):is(:hover, :focus-within){transition:translate .5s cubic-bezier(.22,1,.36,1), z-index 0s;}
+    #cardSlider .c-card-slider-track:not(.is-stacked) > .c-card-slide.is-settled:is(:nth-child(1), :nth-child(5)):is(:hover, :focus-within, .is-out){transition:translate .5s cubic-bezier(.22,1,.36,1), z-index 0s;}
     /* Hovered, an outer card comes forward (z-index 10, above) and slides
        out to the side, clear of its neighbour (no rise: the slider clips
        above its top edge). To make the room, the neighbour tucks in behind
@@ -1178,11 +1209,11 @@
        the screen edge. Out, never in: you hover the card on its narrow
        visible strip, and sliding inwards moved it out from under the
        pointer, which dropped the hover and slid it back: a flicker. */
-    #cardSlider .c-card-slider-track:not(.is-stacked) > .c-card-slide.is-settled:nth-child(1):is(:hover, :focus-within){translate:var(--out-l) 0;}
-    #cardSlider .c-card-slider-track:not(.is-stacked) > .c-card-slide.is-settled:nth-child(5):is(:hover, :focus-within){translate:calc(-1 * var(--out-r)) 0;}
+    #cardSlider .c-card-slider-track:not(.is-stacked) > .c-card-slide.is-settled:nth-child(1):is(:hover, :focus-within, .is-out){translate:var(--out-l) 0;}
+    #cardSlider .c-card-slider-track:not(.is-stacked) > .c-card-slide.is-settled:nth-child(5):is(:hover, :focus-within, .is-out){translate:calc(-1 * var(--out-r)) 0;}
     #cardSlider .c-card-slider-track:not(.is-stacked) > .c-card-slide.is-settled:is(:nth-child(2), :nth-child(4)){transition:translate .5s cubic-bezier(.22,1,.36,1);}
-    #cardSlider .c-card-slider-track:not(.is-stacked):has(> .c-card-slide.is-settled:nth-child(1):is(:hover, :focus-within)) > .c-card-slide:nth-child(2){translate:var(--nb-l) 0;}
-    #cardSlider .c-card-slider-track:not(.is-stacked):has(> .c-card-slide.is-settled:nth-child(5):is(:hover, :focus-within)) > .c-card-slide:nth-child(4){translate:calc(-1 * var(--nb-r)) 0;}
+    #cardSlider .c-card-slider-track:not(.is-stacked):has(> .c-card-slide.is-settled:nth-child(1):is(:hover, :focus-within, .is-out)) > .c-card-slide:nth-child(2){translate:var(--nb-l) 0;}
+    #cardSlider .c-card-slider-track:not(.is-stacked):has(> .c-card-slide.is-settled:nth-child(5):is(:hover, :focus-within, .is-out)) > .c-card-slide:nth-child(4){translate:calc(-1 * var(--nb-r)) 0;}
   }
 
   /* ---- Card detail modal. Clicking a card opens this as a true
@@ -4121,53 +4152,115 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
     let stackPagerBuilt = false;
     /* Desktop: the lead card (Focus 1) holds the fan's middle pose, so the fan
        opens scrolled to put it in the visual centre of the slider. */
-    // Fit the fan to the room it has (27 Oct). The five cards need ~1360px
-    // at rest, wider than the content area below ~1650px, where the outer
-    // two ran under the sidebar and off the right edge. It is the hovered
-    // pose that has to fit, since a hovered outer card slides out, at least
-    // FAN_SLIDE and as far as the room allows, with its neighbour tucking in
-    // behind the lead to clear it (to FAN_CLEAR apart). The resting overlap
-    // stays at FAN_TUCK (tucking deeper read as hiding the cards); the whole
-    // fan scales down instead, never below 0.48; past that the row scrolls.
-    // Measured in layout space with the zoom reset, so the answer doesn't
-    // depend on the last one.
-    const FAN_TUCK = 90, FAN_SLIDE = 30, FAN_CLEAR = 300, FAN_MIN_ZOOM = 0.48;
-    const FAN_VARS = ['--tuck', '--out-l', '--out-r', '--nb-l', '--nb-r'];
+    // Fit the fan to the room it has (27-28 Oct). Cards never scale down.
+    // Where the window has room, the row loosens (--spread, up to
+    // FAN_SPREAD) as far as it can with the HOVERED pose still fitting: a
+    // hovered outer card slides out, at least FAN_SLIDE and as far as the
+    // room allows, its neighbour tucking in behind the lead to clear it
+    // (to a card's width less 40px apart). Where even the tightest row
+    // doesn't fit, the fan goes tight (.is-tight on the slider): no spread,
+    // the outer two run off the edges behind a FAN_FADE soft fade, and a
+    // hovered one slides IN until it is whole inside the visible area,
+    // while the CSS lifts the fade on its side. Measured in layout space
+    // with the vars reset, so the answer doesn't depend on the last one.
+    const FAN_TUCK = 90, FAN_SLIDE = 30, FAN_SPREAD = 120, FAN_EDGE = 8;
+    const FAN_VARS = ['--spread', '--tuck', '--out-l', '--out-r', '--nb-l', '--nb-r'];
     function fitFan() {
       const cs = stackCards();
       const lead = cs.find((c) => c.hasAttribute('data-lead'));
       const area = document.querySelector('.c-canvas-greeting');
-      if (cs.length < 3 || !lead || !area) return;
+      const content = document.querySelector('.c-shell-content');
+      if (cs.length < 3 || !lead || !area || !content) return;
       stackTrack.style.zoom = '';
       FAN_VARS.forEach((v) => stackTrack.style.removeProperty(v));
+      cardSlider.classList.remove('is-tight');
+      cs.forEach((c) => { c.classList.remove('is-out', 'is-gone'); c.style.removeProperty('--fe-l'); c.style.removeProperty('--fe-r'); });
       const first = cs[0], last = cs[cs.length - 1];
       const w = lead.offsetWidth, h = Math.max(...cs.map((c) => c.offsetHeight));
-      const leadC = lead.offsetLeft + w / 2;
+      let leadC = lead.offsetLeft + w / 2;
       // a tilted card is wider than its box: half its rotated footprint
-      const half = (c) => { const r = Math.abs(parseFloat(getComputedStyle(c).getPropertyValue('--arc-rotate')) || 0) * Math.PI / 180; return (w * Math.cos(r) + h * Math.sin(r)) / 2; };
-      const reach = (tuck) => Math.max(
-        leadC - (first.offsetLeft + w / 2 + tuck) + half(first),
-        (last.offsetLeft + w / 2 - tuck) - leadC + half(last));
-      const room = area.getBoundingClientRect().width / 2;
-      const tuck = FAN_TUCK;
-      const zoom = Math.max(FAN_MIN_ZOOM, Math.min(1, room / reach(tuck - FAN_SLIDE)));
-      // the hovered pose, per side: the outer card as far out as the room
-      // allows (never inwards of its resting place, see the CSS), and its
-      // neighbour in just far enough to clear it
-      const R = room / zoom;
-      const side = (outer, nb, sign) => {
-        const nat = sign * (leadC - (outer.offsetLeft + w / 2)), natNb = sign * (leadC - (nb.offsetLeft + w / 2));
-        const d = Math.max(nat - (tuck - FAN_SLIDE), Math.min(nat, R - half(outer)));
-        return [nat - d, natNb - Math.min(natNb, d - FAN_CLEAR)];
-      };
-      const [outL, nbL] = side(first, cs[1], 1), [outR, nbR] = side(last, cs[cs.length - 2], -1);
+      // (hovered: Motion lifts it 5%, and it turns about a point 35% down,
+      // not its centre, which walks the centre sideways by 0.15h·sin r)
+      const half = (c) => { const r = Math.abs(parseFloat(getComputedStyle(c).getPropertyValue('--arc-rotate')) || 0) * Math.PI / 180; return 1.05 * (w * Math.cos(r) + h * Math.sin(r)) / 2 + 0.15 * h * Math.sin(r); };
+      // how far the hovered fan reaches from the lead's centre at a given
+      // spread: the outer card is two gaps out, so it moves 2px per 1px of
+      // spread, plus whatever the tuck gives back
+      const natL = leadC - (first.offsetLeft + w / 2), natR = (last.offsetLeft + w / 2) - leadC;
+      const tuckAt = (sp) => Math.max(0, FAN_TUCK - sp);
+      // the room each side of the lead's centre (which centreLead puts at
+      // the greeting's centre), out to the visible area: the sidebar's edge
+      // and the screen's, FAN_EDGE in from each
+      const ar = area.getBoundingClientRect(), gc = ar.left + ar.width / 2, cl = content.getBoundingClientRect().left;
+      const edgeL = gc - cl - FAN_EDGE, edgeR = innerWidth - gc - FAN_EDGE;
+      const fitsAt = (sp) => 2 * sp - tuckAt(sp) + FAN_SLIDE <= Math.min(edgeL - natL - half(first), edgeR - natR - half(last));
+      let spread = -1;
+      for (let sp = FAN_SPREAD; sp >= 0; sp -= 2) if (fitsAt(sp)) { spread = sp; break; }
+      const tight = spread < 0;
+      if (tight) spread = 0;
+      const tuck = tuckAt(spread);
+      stackTrack.style.setProperty('--spread', spread + 'px');
+      leadC = lead.offsetLeft + w / 2;
       const px = (v) => Math.round(v) + 'px';
+      if (tight) cardSlider.classList.add('is-tight');
+      // the hovered pose, per side: the outer card as far out as the room
+      // allows (never inwards of its resting place unless tight, see the
+      // CSS), and its neighbour in just far enough to clear it
+      const side = (outer, nb, sign, edge) => {
+        const nat = sign * (leadC - (outer.offsetLeft + w / 2)), natNb = sign * (leadC - (nb.offsetLeft + w / 2));
+        const fit = Math.min(nat, edge - half(outer));
+        const d = tight ? fit : Math.max(nat - (tuck - FAN_SLIDE), fit);
+        return [nat - d, natNb - Math.min(natNb, d - (w - 40))];
+      };
+      const [outL, nbL] = side(first, cs[1], 1, edgeL), [outR, nbR] = side(last, cs[cs.length - 2], -1, edgeR);
       stackTrack.style.setProperty('--tuck', px(tuck));
       stackTrack.style.setProperty('--out-l', px(outL));
       stackTrack.style.setProperty('--out-r', px(outR));
       stackTrack.style.setProperty('--nb-l', px(nbL));
       stackTrack.style.setProperty('--nb-r', px(nbR));
-      if (zoom < 1) stackTrack.style.zoom = zoom.toFixed(3);
+    }
+
+    // Tight fan: a hovered outer card slides IN to show itself whole, which
+    // can leave a pointer resting near the screen edge outside it; the card
+    // would drop its hover, slide back under the pointer, and flicker. So it
+    // stays out (.is-out, styled like :hover) until the pointer has left
+    // both where the card is now and where it was when the pointer arrived.
+    stackTrack.addEventListener('pointerover', (e) => {
+      if (e.pointerType !== 'mouse' || !cardSlider.classList.contains('is-tight')) return;
+      const card = e.target.closest('.c-card-slide');
+      const cs = stackCards();
+      if (!card || !card.classList.contains('is-settled') || card.classList.contains('is-out') || (card !== cs[0] && card !== cs[cs.length - 1])) return;
+      const home = card.getBoundingClientRect();
+      const inside = (r, x, y) => x >= r.left && x <= r.right && y >= r.top && y <= r.bottom;
+      const release = () => { card.classList.remove('is-out'); document.removeEventListener('pointermove', onMove); document.documentElement.removeEventListener('pointerleave', release); };
+      const onMove = (ev) => { if (!inside(home, ev.clientX, ev.clientY) && !inside(card.getBoundingClientRect(), ev.clientX, ev.clientY)) release(); };
+      card.classList.add('is-out');
+      document.addEventListener('pointermove', onMove);
+      document.documentElement.addEventListener('pointerleave', release);
+    });
+
+    // Where each visible edge (the nav's and the screen's) falls in a tight
+    // fan card's own coordinates, for its fade mask. Run after centring,
+    // since it reads where the row has scrolled to. Taken from layout and
+    // the resting pose, not the live rect, so a hovered or still-arriving
+    // card can't skew it; only cards that cross an edge get a fade.
+    function fadeFan() {
+      if (!cardSlider.classList.contains('is-tight')) return;
+      const cs = stackCards();
+      const tl = stackTrack.getBoundingClientRect().left;
+      const navEdge = document.querySelector('.c-shell-content').getBoundingClientRect().left;
+      const tuck = parseFloat(stackTrack.style.getPropertyValue('--tuck')) || 0;
+      cs.forEach((c, i) => {
+        const shift = i === 0 ? tuck : i === cs.length - 1 ? -tuck : 0;
+        const left = tl + c.offsetLeft + shift, right = left + c.offsetWidth;
+        if (left < navEdge) c.style.setProperty('--fe-l', Math.round(navEdge - left) + 'px'); else c.style.removeProperty('--fe-l');
+        if (right > innerWidth) c.style.setProperty('--fe-r', Math.round(right - innerWidth) + 'px'); else c.style.removeProperty('--fe-r');
+      });
+      // where a neighbour already runs into the edge there is nowhere left
+      // for the outer card to peek, and it would show through the
+      // neighbour's fade, so it bows out on that side
+      const n = cs.length;
+      cs[0].classList.toggle('is-gone', !!cs[1].style.getPropertyValue('--fe-l'));
+      cs[n - 1].classList.toggle('is-gone', !!cs[n - 2].style.getPropertyValue('--fe-r'));
     }
 
     function centreLead() {
@@ -4181,6 +4274,7 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
       const lr = lead.getBoundingClientRect(), ar = area.getBoundingClientRect();
       const delta = (lr.left + lr.width / 2) - (ar.left + ar.width / 2);
       if (Math.abs(delta) > 1) cardSlider.scrollLeft = Math.max(0, cardSlider.scrollLeft + delta);
+      fadeFan();
     }
 
     function paintStack() {
@@ -4264,6 +4358,7 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
       if (STACK_MQ.matches) {
         stackTrack.style.zoom = '';
         FAN_VARS.forEach((v) => stackTrack.style.removeProperty(v));
+        cardSlider.classList.remove('is-tight');
         cs.forEach(releaseCardTransform);
         buildStackPager();
         paintStack();
@@ -4286,6 +4381,12 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
     [1200, 3000].forEach((ms) => setTimeout(centreLead, ms));
     let centreT = null;
     window.addEventListener('resize', () => { clearTimeout(centreT); centreT = setTimeout(centreLead, 150); });
+    // Collapsing or expanding the nav resizes the content column with no
+    // window resize. Follow it a frame at a time, so the fan and its fade
+    // edges ride the rail's own width transition instead of lagging it.
+    let centreRaf = 0;
+    new ResizeObserver(() => { cancelAnimationFrame(centreRaf); centreRaf = requestAnimationFrame(centreLead); })
+      .observe(document.querySelector('.c-canvas-greeting') || cardSlider);
     STACK_MQ.addEventListener('change', applyStackMode);
     // One macrotask, not immediate: .is-off-fan is applied by a later script
     // block, and stackCards() would otherwise count all twelve.

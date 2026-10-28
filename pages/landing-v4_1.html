@@ -1144,12 +1144,25 @@
     #cardSlider{margin-top:18px;}
     #cardSlider .c-card-slider-track:not(.is-stacked){padding-top:40px;}
     #cardSlider .c-card-slider-track:not(.is-stacked) > .c-card-slide[data-lead]{scale:1.08;}
-    /* --tuck is how far the outer two sit in behind their neighbours: 150px,
-       which leaves ~164px of each showing. It does not deepen to save room
+    /* A looser, hand-dealt pose (28 Oct): irregular tilts and drops in
+       place of the even arc, as if the five were dropped on a desk. Fixed
+       values, not random per load, so the page looks the same every visit.
+       enableCardTilt() reads these off computed style, so Motion keeps them. */
+    #cardSlider .c-card-slider-track:not(.is-stacked) > .c-card-slide:nth-child(1){--arc-rotate:-7deg; --arc-y:22px;}
+    #cardSlider .c-card-slider-track:not(.is-stacked) > .c-card-slide:nth-child(2){--arc-rotate:2.5deg; --arc-y:4px;}
+    #cardSlider .c-card-slider-track:not(.is-stacked) > .c-card-slide:nth-child(3){--arc-rotate:-1.5deg; --arc-y:0px;}
+    #cardSlider .c-card-slider-track:not(.is-stacked) > .c-card-slide:nth-child(4){--arc-rotate:-3.5deg; --arc-y:18px;}
+    #cardSlider .c-card-slider-track:not(.is-stacked) > .c-card-slide:nth-child(5){--arc-rotate:6deg; --arc-y:6px;}
+    /* The lead's two neighbours sit nearly edge to edge with it (-6px, not
+       the row's -26px): the lead is scaled up 8%, so at -26px it covered the
+       first words of their titles. */
+    #cardSlider .c-card-slider-track:not(.is-stacked) > .c-card-slide:is(:nth-child(3), :nth-child(4)){margin-left:-6px;}
+    /* --tuck is how far the outer two sit in behind their neighbours: 90px,
+       which leaves ~224px of each showing. It does not deepen to save room
        (a 60px strip read as hidden); instead fitFan() in the script below
        scales the whole fan (zoom on the track) when the window is too narrow
        for all five cards to show whole between the sidebar and the edge. */
-    #cardSlider .c-card-slider-track:not(.is-stacked){--tuck:150px; --out-l:100px; --out-r:100px; --nb-l:0px; --nb-r:0px;}
+    #cardSlider .c-card-slider-track:not(.is-stacked){--tuck:90px; --out-l:60px; --out-r:60px; --nb-l:0px; --nb-r:0px;}
     #cardSlider .c-card-slider-track:not(.is-stacked) > .c-card-slide:nth-child(1){translate:var(--tuck) 0;}
     #cardSlider .c-card-slider-track:not(.is-stacked) > .c-card-slide:nth-child(5){translate:calc(-1 * var(--tuck)) 0;}
     /* Leaving, the card keeps its place in front (z-index 10) until it has
@@ -4118,7 +4131,7 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
     // fan scales down instead, never below 0.48; past that the row scrolls.
     // Measured in layout space with the zoom reset, so the answer doesn't
     // depend on the last one.
-    const FAN_TUCK = 150, FAN_SLIDE = 50, FAN_CLEAR = 300, FAN_MIN_ZOOM = 0.48;
+    const FAN_TUCK = 90, FAN_SLIDE = 30, FAN_CLEAR = 300, FAN_MIN_ZOOM = 0.48;
     const FAN_VARS = ['--tuck', '--out-l', '--out-r', '--nb-l', '--nb-r'];
     function fitFan() {
       const cs = stackCards();

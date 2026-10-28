@@ -1497,6 +1497,27 @@
   .c-hcard-list{display:flex; flex-direction:column;}
   .c-hcard-list-row{display:flex; align-items:center; justify-content:space-between; gap:var(--spacing-12); padding:var(--spacing-8) 0; border-top:1px solid var(--color-neutral-2); font-size:var(--text-body2-size); color:var(--color-neutral-9);}
   .c-hcard-list-row:first-child{border-top:none;}
+  /* Brand marks in the hero cards (28 Oct): the board's own brandMark()
+     (live logo from the brand directory, initials when there is none),
+     sized down from the sales board's 32px to sit beside a list row. */
+  .c-hcard-who{display:flex; align-items:center; gap:var(--spacing-8); min-width:0;}
+  .c-card-slide .dl-logo{position:relative; flex:none; width:24px; height:24px; border-radius:6px; border:1px solid var(--color-neutral-3); background:var(--color-neutral-1);
+    display:inline-flex; align-items:center; justify-content:center; overflow:hidden; font-size:9px; line-height:1; font-weight:800; letter-spacing:0; color:var(--color-neutral-6);}
+  .c-card-slide .dl-logo .ini{font-size:9px; color:var(--color-neutral-6);}
+  .c-card-slide .dl-logo img{position:absolute; inset:2px; width:calc(100% - 4px); height:calc(100% - 4px); object-fit:contain; opacity:0; transition:opacity var(--duration-base) var(--ease-standard);}
+  .c-card-slide .dl-logo.has-logo img{opacity:1;}
+  .c-card-slide .dl-logo.has-logo .ini{opacity:0;}
+  .c-card-slide .dl-logo.is-ready img{transition:none;}
+  .c-hcard-ai h4.c-hcard-who .dl-logo{width:28px; height:28px; border-color:transparent;}
+  /* Deal stages carry the sales board's own dots (stageChip there): 80%
+     blue, 50% the lighter blue, so a stage reads the same in both places.
+     Same values as the board's --stg-80 / --stg-50. */
+  .c-card-slide{--stg-80:#1473E6; --stg-50:#5A9CEC;}
+  .c-card-slide .stg-dot{display:inline-block; width:8px; height:8px; border-radius:var(--radius-pill); margin-right:4px; vertical-align:0; flex:none;}
+  .c-card-slide .stg-dot.s80{background:var(--stg-80);}
+  .c-card-slide .stg-dot.s50{background:var(--stg-50);}
+  .c-hcard-stg{white-space:nowrap;}
+  .c-hcard-stg .stg-dot{margin-right:0;}   /* the badge's own gap spaces it */
   .c-hcard-cta{margin-top:auto; display:flex; align-items:center; gap:var(--spacing-4); font-size:var(--text-label2-size); font-weight:700; color:var(--color-neutral-9);}
   /* The same CTA line as a real link (the hero cards link out to the Collab
      Sales workspace): drop the UA underline, keep everything else. */
@@ -1639,14 +1660,21 @@
   .c-hcard-ai .c-hcard-rec{color:var(--color-neutral-3);}
   .c-hcard-ai .c-hcard-prov{color:var(--color-neutral-4);}
   .c-hcard-tags{display:flex; flex-wrap:wrap; gap:var(--spacing-8);}
-  /* ── Hero cards, 27 Oct: the Gap card's day line and "close this first",
+  /* ── Hero cards, 27 Oct: the Gap card's day line,
      and In the news's story rows (thumbnail, source and age, headline). */
   .c-hn-day{font-size:var(--text-caption-size); font-weight:700; color:var(--color-red);}
+  /* The Gap card, target first (28 Oct): the gap, the target it is
+     measured against, a bar of how much of it the forecast covers, and
+     the daily rate that closes the rest. Nothing else. */
+  .c-hn-gap .c-gap-to{margin-top:calc(-1 * var(--spacing-8)); font-size:var(--text-body2-size); line-height:var(--text-body2-lh); color:var(--color-neutral-6);}
+  .c-gap-meter{display:flex; flex-direction:column; gap:var(--spacing-8); margin-top:var(--spacing-8);}
+  .c-gap-bar{height:10px; border-radius:var(--radius-pill); background:var(--color-neutral-2); overflow:hidden;}
+  .c-gap-bar > i{display:block; height:100%; border-radius:inherit; background:var(--color-obsidian); transition:width .6s cubic-bezier(.22,1,.36,1);}
+  .c-hn-gap.is-up .c-gap-bar > i{background:var(--color-green);}
+  .c-gap-legend{display:flex; justify-content:space-between; gap:var(--spacing-12); font-size:var(--text-caption-size); color:var(--color-neutral-6);}
+  .c-gap-legend b{font-weight:800; color:var(--color-neutral-9);}
+  .c-hn-gap .c-gap-rate{margin-top:auto; padding-top:var(--spacing-12); border-top:1px solid var(--color-neutral-2); font-size:var(--text-body2-size); line-height:var(--text-body2-lh); font-weight:700; color:var(--color-neutral-9);}
   .c-hn-day.up{color:var(--ok-text, #00854c);}
-  .c-hn-close{display:flex; flex-direction:column; gap:2px; padding-top:var(--spacing-12); border-top:1px solid var(--color-neutral-2);}
-  .c-hn-kicker{font-size:11px; line-height:16px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; color:var(--color-orange);}
-  .c-hn-close b{font-size:var(--text-body2-size); line-height:var(--text-body2-lh); font-weight:800; color:var(--color-neutral-9);}
-  .c-hn-close span:last-child{font-size:var(--text-caption-size); color:var(--color-neutral-6);}
   .c-hn-list{display:flex; flex-direction:column;}
   .c-hn-item{display:grid; grid-template-columns:64px minmax(0,1fr); gap:var(--spacing-12); align-items:start; padding:var(--spacing-12) 0; text-decoration:none; color:inherit;
     border-top:1px solid var(--color-neutral-2);}
@@ -2272,10 +2300,12 @@ a.c-sidebar-item, a.c-nav-child{text-decoration:none;}
                  the board script never runs. Cards act through their own buttons
                  and links, not brief modals — the click delegate skips them. ── -->
             <!-- ── Fan order (users' feedback, 27 Oct): the most important card, Focus 1,
-                 sits in the middle (child 3, the upright pose); Focus 2 and 3 flank it;
-                 Competitor activity, no longer a focus, goes far left; Client
-                 intelligence stays far right. Poses are nth-child, so DOM order IS
-                 the fan order.
+                 sits in the middle (child 3, the upright pose); Pending proposals
+                 sits to its right and Competitor activity to its left (28 Oct),
+                 with In the news far left and Client intelligence far right.
+                 Poses are nth-child, so DOM order IS the fan order. The phone
+                 deck has its own order, data-deck: Gap to target, Pending
+                 proposals, Competitor activity, In the news, Client intelligence.
                  Hero cards, 27 Oct 2026 (approved design): the fan's five.
                  Gap to target is live from the board (renderHero writes every
                  data-hero="n-…" slot on each pass); In the news is live from
@@ -2284,18 +2314,7 @@ a.c-sidebar-item, a.c-nav-child{text-decoration:none;}
                  have no source this board can reach yet, so they carry dummy
                  content and say "placeholder". The previous six hero cards
                  are data-role="earlier": off the fan, in the Hero Cards drawer. ── -->
-            <div class="c-card c-card-slide" data-role="hero">
-              <span class="c-hcard-label">Competitor activity <span class="c-hcard-prov" title="Dummy content. Competitor tracking is not wired to this board yet.">· placeholder</span></span>
-              <h4>23 brands on rival publishers</h4>
-              <div class="c-hcard-list">
-                <div class="c-hcard-list-row"><span>Sample Telco</span><span class="c-badge c-badge-neutral">9 posts</span></div>
-                <div class="c-hcard-list-row"><span>Example Bank</span><span class="c-badge c-badge-neutral">6 posts</span></div>
-                <div class="c-hcard-list-row"><span>Demo Snacks</span><span class="c-badge c-badge-neutral">4 posts</span></div>
-              </div>
-              <span class="c-hcard-rec">Last 7 days. Busiest rival: Rival Publisher A, 28 branded posts.</span>
-              <a class="c-hcard-cta" href="https://collab-sales.vercel.app/pages/home.html" target="_blank" rel="noopener">Open Competitor Activity <i class="ph ph-arrow-right"></i></a>
-            </div>
-            <div class="c-card c-card-slide c-hn-news" data-role="hero">
+            <div class="c-card c-card-slide c-hn-news" data-role="hero" data-deck="4">
               <span class="c-hcard-label">In the news <span class="c-hcard-prov" id="heroNewsProv" title="Live from the trade press feeds (Campaign Brief Asia, Branding in Asia). Placeholder stories show until they load.">· placeholder</span></span>
               <div class="c-hn-list" id="heroNews" aria-live="polite">
                 <a class="c-hn-item" href="#" tabindex="-1"><span class="c-hn-thumb">MI</span><span class="c-hn-txt"><small>Marketing-Interactive &middot; 45m ago</small><b>Sample Brand unveils regional campaign built around short video</b></span></a>
@@ -2304,33 +2323,42 @@ a.c-sidebar-item, a.c-nav-child{text-decoration:none;}
               </div>
               <a class="c-hcard-cta" href="https://collab-sales.vercel.app/pages/home.html" target="_blank" rel="noopener">More in Collab Sales <i class="ph ph-arrow-right"></i></a>
             </div>
-            <div class="c-card c-card-slide c-stat c-hn-gap" data-role="hero" data-lead>
+            <div class="c-card c-card-slide" data-role="hero" data-deck="3">
+              <span class="c-hcard-label">Competitor activity <span class="c-hcard-prov" title="Dummy content. Competitor tracking is not wired to this board yet.">· placeholder</span></span>
+              <h4>23 brands on rival publishers</h4>
+              <div class="c-hcard-list">
+                <div class="c-hcard-list-row"><span class="c-hcard-who"><span class="dl-logo" aria-hidden="true"><span class="ini">ST</span></span><span>Sample Telco</span></span><span class="c-badge c-badge-neutral">9 posts</span></div>
+                <div class="c-hcard-list-row"><span class="c-hcard-who"><span class="dl-logo" aria-hidden="true"><span class="ini">EB</span></span><span>Example Bank</span></span><span class="c-badge c-badge-neutral">6 posts</span></div>
+                <div class="c-hcard-list-row"><span class="c-hcard-who"><span class="dl-logo" aria-hidden="true"><span class="ini">DS</span></span><span>Demo Snacks</span></span><span class="c-badge c-badge-neutral">4 posts</span></div>
+              </div>
+              <span class="c-hcard-rec">Last 7 days. Busiest rival: Rival Publisher A, 28 branded posts.</span>
+              <a class="c-hcard-cta" href="https://collab-sales.vercel.app/pages/home.html" target="_blank" rel="noopener">Open Competitor Activity <i class="ph ph-arrow-right"></i></a>
+            </div>
+            <div class="c-card c-card-slide c-stat c-hn-gap" data-role="hero" data-lead data-deck="1">
               <span class="c-stat-label">Gap to target <span class="c-hcard-prov" title="Derived from the board's own model. Follows every slice and filter below.">· derived, live</span></span>
               <div class="c-stat-value hero" data-hero="n-gap-v">&minus;RM20.3M</div>
-              <p data-hero="n-gap-rate">RM2.0M a working day of new business closes it</p>
-              <span class="c-hn-day" data-hero="n-gap-day">Day 16 of 31 &middot; 10 working days left</span>
-              <div class="c-hn-close">
-                <span class="c-hn-kicker">Close this first:</span>
-                <b data-hero="n-close-h">Mediakey Group &middot; Mualim Muda S2 Sponsorship</b>
-                <span data-hero="n-close-m">RM936K &middot; Joy Ahmad &middot; 80%</span>
+              <p class="c-gap-to" data-hero="n-gap-to">to reach the RM38.7M target</p>
+              <div class="c-gap-meter">
+                <div class="c-gap-bar" role="img" data-hero="n-gap-bar" aria-label="Forecast RM18.4M, 48% of the RM38.7M target"><i style="width:48%"></i></div>
+                <div class="c-gap-legend"><span data-hero="n-gap-fc"><b>RM18.4M</b> forecast &middot; 48%</span><span class="c-hn-day" data-hero="n-gap-day">10 working days left</span></div>
               </div>
-              <span class="c-hcard-rec">The largest open deal in this slice. Land it and the daily rate drops.</span>
+              <p class="c-gap-rate" data-hero="n-gap-rate">RM2.0M a working day closes it</p>
               <button class="c-hcard-cta-btn" type="button" data-decision="hero-gap">See where it sits</button>
             </div>
-            <div class="c-card c-card-slide" data-role="hero">
+            <div class="c-card c-card-slide" data-role="hero" data-deck="2">
               <span class="c-hcard-label">Pending proposals <span class="c-hcard-prov" title="Derived from the board's own model: open deals at 50% and 80%, ranked by client budget (full value, October to January). Follows every slice and filter below.">· derived, live</span></span>
               <h4 data-hero="n-prop-h">108 pending &middot; RM13.4M</h4>
               <div class="c-hcard-list" data-hero="n-prop-list">
-                <div class="c-hcard-list-row"><span>Kementerian Kesihatan Malaysia</span><span class="c-badge c-badge-neutral">RM1.1M &middot; 50%</span></div>
-                <div class="c-hcard-list-row"><span>Mediakey Group</span><span class="c-badge c-badge-neutral">RM936K &middot; 80%</span></div>
-                <div class="c-hcard-list-row"><span>Cleave Amity</span><span class="c-badge c-badge-neutral">RM624K &middot; 80%</span></div>
+                <div class="c-hcard-list-row"><span class="c-hcard-who"><span class="dl-logo" aria-hidden="true"><span class="ini">KK</span></span><span>Kementerian Kesihatan Malaysia</span></span><span class="c-badge c-badge-neutral c-hcard-stg">RM1.1M &middot; <i class="stg-dot s50" aria-hidden="true"></i>50%</span></div>
+                <div class="c-hcard-list-row"><span class="c-hcard-who"><span class="dl-logo" aria-hidden="true"><span class="ini">MG</span></span><span>Mediakey Group</span></span><span class="c-badge c-badge-neutral c-hcard-stg">RM936K &middot; <i class="stg-dot s80" aria-hidden="true"></i>80%</span></div>
+                <div class="c-hcard-list-row"><span class="c-hcard-who"><span class="dl-logo" aria-hidden="true"><span class="ini">CA</span></span><span>Cleave Amity</span></span><span class="c-badge c-badge-neutral c-hcard-stg">RM624K &middot; <i class="stg-dot s80" aria-hidden="true"></i>80%</span></div>
               </div>
               <span class="c-hcard-rec" data-hero="n-prop-rec">Kementerian Kesihatan Malaysia has the largest budget in play, RM1.1M on Perolehahan Media Buy 2026-2027.</span>
               <a class="c-hcard-cta-btn" href="https://collab-sales.vercel.app/pages/campaigns.html" target="_blank" rel="noopener">Finish them in Collab Sales</a>
             </div>
-            <div class="c-card c-card-slide c-hcard-ai" data-role="hero">
+            <div class="c-card c-card-slide c-hcard-ai" data-role="hero" data-deck="5">
               <span class="c-hcard-label"><i class="ph-fill ph-sparkle" aria-hidden="true"></i> Client intelligence <span class="c-hcard-prov" title="Dummy content. Client dossiers live in Collab Sales; this board cannot read them yet.">· placeholder</span></span>
-              <h4>Sample Client</h4>
+              <h4 class="c-hcard-who"><span class="dl-logo" aria-hidden="true"><span class="ini">SC</span></span><span>Sample Client</span></h4>
               <div class="c-hcard-tags">
                 <span class="c-tag">3 sell angles ready</span>
                 <span class="c-tag">2 high-threat competitors</span>
@@ -4137,6 +4165,9 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
        deferred rather than reading FAN_ROLE a second time. */
     const stackCards = () => Array.from(stackTrack.children)
       .filter((c) => c.classList.contains('c-card-slide') && !c.classList.contains('is-off-fan'));
+    // The phone deck's own order (data-deck), not the fan's DOM order: the
+    // fan puts the lead in the middle, the deck deals it first.
+    const deckCards = () => stackCards().sort((a, b) => (+a.dataset.deck || 99) - (+b.dataset.deck || 99));
     let stackTop = null;   // first paint opens on the lead card (data-lead: Focus 1)
     let stackPagerBuilt = false;
     /* Desktop: the lead card (Focus 1) holds the fan's middle pose, so the fan
@@ -4277,7 +4308,7 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
     }
 
     function paintStack() {
-      const cs = stackCards();
+      const cs = deckCards();
       const n = cs.length;
       if (!n) return;
       if (stackTop === null) { const li = cs.findIndex((c) => c.hasAttribute('data-lead')); stackTop = li < 0 ? 0 : li; }
@@ -4314,7 +4345,7 @@ import { animate } from "https://cdn.jsdelivr.net/npm/motion@12/+esm";
       if (stackPagerBuilt) return;
       const pager = document.getElementById('cardStackPager');
       if (!pager) return;
-      const cs = stackCards();
+      const cs = deckCards();
       if (!cs.length) return;          // nothing to label yet; applyStackMode runs again on change
       stackPagerBuilt = true;
       cs.forEach((card, j) => {
@@ -7426,13 +7457,20 @@ function renderHero(s) {
   put('gap-rate', gap < 0 ? rm(-gap / DAYS_LEFT) + ' a day closes it' : 'Forecast is at or above target for this book');
   put('gap-rec', gap < 0 ? 'Logged deals take it to ' + L.cov + '% at most. The rest is uncovered.' : 'Nothing more is required to reach it.');
 
-  /* the new Gap to target card (27 Oct): per working day, and the deal to close first */
+  /* the Gap to target card (28 Oct, target first): the gap, the target,
+     a bar of the forecast against it, and the rate per working day left */
   var y0 = +R.asOf.slice(0, 4), m0 = +R.asOf.slice(5, 7) - 1, wd = 0;
   for (var dd = R.month.day + 1; dd <= R.month.days; dd++) { var dw = new Date(y0, m0, dd).getDay(); if (dw > 0 && dw < 6) wd++; }
+  var gpct = L.target ? Math.round(L.forecast / L.target * 100) : L.pct;
   put('n-gap-v', gapTxt(gap));
-  put('n-gap-rate', gap < 0 ? rm(-gap / Math.max(1, wd)) + ' a working day of new business closes it' : 'Forecast is at or above target for this book');
+  put('n-gap-to', gap < 0 ? 'to reach the ' + rm(L.target) + ' target' : 'over the ' + rm(L.target) + ' target');
+  var gb = slot('n-gap-bar');
+  if (gb) { gb.firstElementChild.style.width = Math.min(100, Math.max(0, gpct)) + '%'; gb.setAttribute('aria-label', 'Forecast ' + rm(L.forecast) + ', ' + gpct + '% of the ' + rm(L.target) + ' target'); gb.closest('.c-hn-gap').classList.toggle('is-up', gap >= 0); }
+  var gf = slot('n-gap-fc');
+  if (gf) gf.innerHTML = '<b>' + esc(rm(L.forecast)) + '</b> forecast · ' + gpct + '%';
   var nd = slot('n-gap-day');
-  if (nd) { nd.textContent = 'Day ' + R.month.day + ' of ' + R.month.days + ' · ' + plural(wd, 'working day') + ' left'; nd.classList.toggle('up', gap >= 0); }
+  if (nd) { nd.textContent = plural(wd, 'working day') + ' left'; nd.classList.toggle('up', gap >= 0); }
+  put('n-gap-rate', gap < 0 ? rm(-gap / Math.max(1, wd)) + ' a working day closes it' : 'Forecast is at or above target for this book');
   /* Pending proposals (27 Oct): open deals at 50% and 80% in this view,
      ranked by client budget, the deal's full value October to January */
   var ppl = peopleIn(s), pend = [];
@@ -7444,16 +7482,11 @@ function renderHero(s) {
   put('n-prop-h', pend.length ? pend.length + ' pending · ' + rm(ptot) : 'None pending');
   var pl = slot('n-prop-list');
   if (pl) pl.innerHTML = pend.slice(0, 3).map(function (d) {
-    return '<div class="c-hcard-list-row" title="' + esc(d.c) + '"><span>' + esc(brand(d.a).n) + '</span><span class="c-badge c-badge-neutral">' + rm(d.v) + ' · ' + esc(d.st) + '</span></div>';
+    var br = brand(d.a);
+    return '<div class="c-hcard-list-row" title="' + esc(d.c) + '"><span class="c-hcard-who">' + brandMark(br) + '<span>' + esc(br.n) + '</span></span><span class="c-badge c-badge-neutral c-hcard-stg">' + rm(d.v) + ' · <i class="stg-dot ' + (d.st === '50%' ? 's50' : 's80') + '" aria-hidden="true"></i>' + esc(d.st) + '</span></div>';
   }).join('') || '<div class="c-hcard-list-row"><span>No open deals at 50% or 80% here.</span></div>';
   put('n-prop-rec', pend.length ? brand(pend[0].a).n + ' has the largest budget in play, ' + rm(pend[0].v) + ' on ' + pend[0].c + '.' : 'Nothing in negotiation in this book. New pipeline is the lever.');
   var O = openDeals(s, 'Oct'), top = O.list[0];
-  if (top) {
-    put('n-close-h', brand(top.a).n + ' · ' + top.c);
-    put('n-close-m', rm(top.v) + ' · ' + top.owner + ' · ' + top.stageLabel);
-  } else {
-    put('n-close-h', 'No open deals in this book'); put('n-close-m', 'Nothing at 50% or 80% lands in October here.');
-  }
   if (top) {
     put('deal-h', top.c + ' · ' + top.a);
     put('deal-v', rm(top.v)); put('deal-o', top.owner); put('deal-s', top.stage === 50 ? 'Negotiating at 50%' : 'Agreed at ' + top.stageLabel);

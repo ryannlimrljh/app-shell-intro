@@ -44,6 +44,7 @@ window.BRAND_LOGOS = [
   { name: 'UMW Toyota',            re: '^UMW TOYOTA',                      domain: 'toyota.com.my' },
   { name: 'KWSP',                  re: '^KUMPULAN WANG SIMPANAN PEKERJA',  domain: 'kwsp.gov.my' },
   { name: 'Tabung Haji',           re: '^LEMBAGA TABUNG HAJI',             domain: 'tabunghaji.gov.my' },
+  { name: 'Kementerian Kesihatan Malaysia', re: '^KEMENTERIAN KESIHATAN',     domain: 'moh.gov.my' },
   { name: 'Innocean',              re: '^INNOCEAN',                        domain: 'innocean.com' },
   { name: 'McDonald’s Malaysia',   re: '^GERBANG ALAF',                    domain: 'mcdonalds.com.my' },
   { name: 'AEON Credit',           re: '^AEON CREDIT',                     domain: 'aeoncredit.com.my' },

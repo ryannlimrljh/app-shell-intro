@@ -151,7 +151,7 @@ a.c-sidebar-item, a.c-nav-child{text-decoration:none;}
             <a class="pg-back" href="landing-v4_1.html" aria-label="Back to the dashboard"><i class="ph ph-arrow-left"></i></a>
             <div>
               <h1>Settings</h1>
-              <p class="sub">Your account, and who may sign in.</p>
+              <p class="sub">Your account, who may sign in, what changed, and the clients on offer.</p>
             </div>
           </div>
           <div class="pg-head-right">
@@ -188,6 +188,26 @@ a.c-sidebar-item, a.c-nav-child{text-decoration:none;}
             <div class="st-actions">
               <a class="c-btn c-btn-secondary c-btn-md" id="rolesLink" href="roles.html">Open roles <i class="ph ph-arrow-right"></i></a>
               <span class="st-note" id="rolesNote" hidden><i class="ph ph-lock-simple"></i> Admin only</span>
+            </div>
+          </section>
+
+          <section class="c-card st-card" id="logCard" aria-labelledby="logK">
+            <div class="st-sk-layer" aria-hidden="true"><span class="st-sk" style="width:64px; height:9px"></span><span class="st-sk" style="width:78%; height:16px"></span><span class="st-sk" style="width:56%; height:9px"></span><span class="st-sk-btn"></span></div>
+            <div class="st-kicker" id="logK">Activity log</div>
+            <p>Every change to users, roles and sales reports, and who made it. Kept for 12 months.</p>
+            <div class="st-actions">
+              <a class="c-btn c-btn-secondary c-btn-md" id="logLink" href="activity.html">Open the log <i class="ph ph-arrow-right"></i></a>
+              <span class="st-note" id="logNote" hidden><i class="ph ph-lock-simple"></i> Admin only</span>
+            </div>
+          </section>
+
+          <section class="c-card st-card" id="clientsCard" aria-labelledby="clientsK">
+            <div class="st-sk-layer" aria-hidden="true"><span class="st-sk" style="width:64px; height:9px"></span><span class="st-sk" style="width:78%; height:16px"></span><span class="st-sk" style="width:56%; height:9px"></span><span class="st-sk-btn"></span></div>
+            <div class="st-kicker" id="clientsK">Client management</div>
+            <p>The clients people can pick when they create a campaign. Add, edit or retire them.</p>
+            <div class="st-actions">
+              <a class="c-btn c-btn-secondary c-btn-md" id="clientsLink" href="clients.html">Manage clients <i class="ph ph-arrow-right"></i></a>
+              <span class="st-note" id="clientsNote" hidden><i class="ph ph-lock-simple"></i> Admin only</span>
             </div>
           </section>
         </div>
@@ -240,11 +260,15 @@ window.addEventListener('error', function (e) {
     note.hidden = allowed;
     /* Roles is gated the same way: whoever can open the directory can see
        what roles hold; only a Super Admin can change it, on the page itself. */
-    var rc = document.getElementById('rolesCard'), rl = document.getElementById('rolesLink'), rn = document.getElementById('rolesNote');
-    rc.classList.toggle('is-off', !allowed);
-    rl.setAttribute('aria-disabled', String(!allowed));
-    rl.tabIndex = allowed ? 0 : -1;
-    rn.hidden = allowed;
+    /* The activity log and client management are admin tools too, gated
+       the same way. */
+    ['roles', 'log', 'clients'].forEach(function (k) {
+      var c = document.getElementById(k + 'Card'), l = document.getElementById(k + 'Link'), n = document.getElementById(k + 'Note');
+      c.classList.toggle('is-off', !allowed);
+      l.setAttribute('aria-disabled', String(!allowed));
+      l.tabIndex = allowed ? 0 : -1;
+      n.hidden = allowed;
+    });
   }
 
   A.loadOverrides(localStorage);

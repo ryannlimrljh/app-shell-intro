@@ -1,0 +1,364 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Collabrium · Client management</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="icon" id="siteFavicon" type="image/svg+xml" href="../collabrium-dls/SVG/coin.svg" />
+<script src="assets/favicon.js" defer></script>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Mulish:wght@400;500;600;700;800;900&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css" />
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css" />
+<link rel="stylesheet" href="../collabrium-dls/tokens.css?v=f278e40" />
+<link rel="stylesheet" href="../collabrium-dls/components.css?v=f278e40" />
+<link rel="stylesheet" href="../shared/shell.css?v=4" />
+<link rel="stylesheet" href="../shared/admin-list.css?v=1" />
+<style>
+/* Pods, in the nav. Element marks are SVG files rather than Phosphor
+   glyphs, so they sit inside the item's own <i> slot at the icon size:
+   the collapsed rail's hover label anchors on that <i>, and an <img>
+   in its place left the label with nothing to find. Everything else
+   is the DS's sidebar item. A "soon" row is the DS's locked variant with
+   its hover invitation removed, and its badge leaves with the label
+   when the rail collapses, or the 72px rail would be the one place a
+   badge ever sat beside a lone icon. */
+.c-sidebar.is-collapsed .c-sidebar-item .c-badge{display:none;}
+/* The one line that says what a pod is. Caption size at body weight,
+   under the eyebrow it explains; it leaves with the labels when the
+   rail collapses, where there is no room for a sentence. */
+/* The logo as a home link, and the group the tour spotlights. The link
+   hides in the collapsed rail exactly as the old trigger did; the
+   collapsed coin stands in for it there. */
+.c-sidebar-logo-home{display:inline-flex; align-items:center;}
+.c-sidebar.is-collapsed .c-sidebar-logo-home{display:none;}
+.c-nav-tree{display:flex; flex-direction:column; gap:var(--spacing-4); flex-shrink:0;}
+/* Pod strip: one grey tray under the logo holding a mark per pod; the
+   current pod sits on a white tab, segmented-control fashion. */
+.c-pod-strip{display:flex; gap:var(--spacing-4); padding:var(--spacing-4); border-radius:var(--radius-sm); background:var(--color-neutral-2); flex-shrink:0;}
+.c-sidebar.is-collapsed .c-pod-strip{justify-content:center;}
+.c-sidebar.is-collapsed .c-pod-chip:not(.is-current){display:none;}
+.c-pod-chip{flex:1 1 0; min-width:0; height:32px; display:inline-flex; align-items:center; justify-content:center; border-radius:calc(var(--radius-sm) - var(--spacing-4)); background:transparent; text-decoration:none; cursor:pointer; transition:background-color var(--duration-fast) var(--ease-standard), box-shadow var(--duration-fast) var(--ease-standard);} /* a cell of the tray, six sharing the width with no minimum so the last one keeps its margin; the inner radius is the tray's less its padding */
+.c-pod-chip:hover{background:var(--color-neutral-1);}
+.c-pod-chip img{width:var(--icon-base); height:var(--icon-base); display:block; object-fit:contain;}
+.c-pod-chip i{font-size:var(--icon-base); line-height:1; color:var(--color-neutral-9);}
+.c-pod-chip.soon img{filter:grayscale(1); opacity:.45;} /* not built yet: grey, not its element colour */
+.c-pod-chip:focus-visible{outline:2px solid var(--color-obsidian); outline-offset:2px;}
+.c-pod-chip.is-current{background:var(--color-neutral-1); box-shadow:var(--shadow-1);} /* the white tab */
+.c-pod-chip.soon{cursor:not-allowed;}
+.c-pod-chip.soon:hover{background:transparent;}
+/* The tip: the DS hover label, two lines, fixed so the sidebar's clip cannot cut it. */
+.c-pod-tip{position:fixed; z-index:60; max-width:240px; padding:var(--spacing-8) var(--spacing-12); border-radius:var(--radius-sm); background:var(--color-neutral-7); color:var(--color-neutral-1); font-size:var(--text-caption-size); line-height:var(--text-caption-lh); font-weight:500; opacity:0; pointer-events:none; transition:opacity var(--duration-fast) var(--ease-standard);}
+.c-pod-tip.is-visible{opacity:1;}
+.c-pod-tip b{display:block; font-size:var(--text-label2-size); line-height:var(--text-label2-lh); font-weight:700;}
+.c-pod-tip span{display:block; color:var(--color-neutral-3);}
+/* The flyout: the pods as rows beside the collapsed rail. */
+.c-pod-fly{position:fixed; z-index:60; width:272px; padding:var(--spacing-8); border-radius:var(--radius-md); background:var(--color-neutral-1); box-shadow:var(--shadow-2), var(--shadow-hairline); display:none; flex-direction:column; gap:var(--spacing-4);}
+.c-pod-fly.is-open{display:flex;}
+.c-pod-fly-row{display:flex; align-items:center; gap:var(--spacing-12); padding:var(--spacing-8); border-radius:var(--radius-sm); text-decoration:none; color:var(--color-neutral-9);}
+.c-pod-fly-row:hover{background:var(--color-neutral-2);}
+.c-pod-fly-row:focus-visible{outline:2px solid var(--color-obsidian); outline-offset:-2px;}
+.c-pod-fly-row[aria-disabled="true"]{color:var(--color-neutral-4); cursor:not-allowed;}
+.c-pod-fly-row[aria-disabled="true"]:hover{background:transparent;}
+.c-pod-fly-row .c-pod-chip{flex:none; width:32px; min-width:32px; background:var(--color-neutral-2); cursor:inherit;}
+.c-pod-fly-row[aria-current] .c-pod-chip{background:var(--color-neutral-1); box-shadow:var(--shadow-hairline);}
+.c-pod-fly-text{display:flex; flex-direction:column; min-width:0;}
+.c-pod-fly-text b{font-size:var(--text-label1-size); line-height:var(--text-label1-lh); font-weight:700;}
+.c-pod-fly-text small{font-size:var(--text-caption-size); line-height:var(--text-caption-lh); color:var(--color-neutral-5);}
+.c-pod-fly-row[aria-disabled="true"] small{color:var(--color-neutral-4);}
+.c-nav-group{padding:var(--spacing-8) var(--spacing-12) var(--spacing-4); font-size:var(--text-caption-size); line-height:var(--text-caption-lh); font-weight:500; letter-spacing:var(--text-caption-tracking); text-transform:none;} /* a shelf label inside a pod's menu: caption type, indented to the entries, quieter than the section label above the pods */
+a.c-sidebar-item, a.c-nav-child{text-decoration:none;}
+.c-nav-child.soon{color:var(--color-neutral-4); cursor:not-allowed;}
+.c-nav-child.soon:hover{background:transparent;}
+</style>
+</head>
+<body>
+
+<div class="c-shell">
+  <div class="c-sidebar-shell" id="shellSidebarShell">
+    <nav class="c-sidebar" id="shellSidebarNav">
+      <div class="c-sidebar-header">
+        <!-- The logo is the home link it reads as. The way across to the
+             other pods is the Pods section below, so nothing hides here. -->
+          <a class="c-sidebar-logo-home" href="landing-v4_1.html" aria-label="Collabrium home"><span class="c-sidebar-logo-live-wrap"><iframe src="../collabrium-dls/logo.html" title="Collabrium" scrolling="no"></iframe></span></a>
+        <img class="c-sidebar-logo-collapsed" src="../collabrium-dls/SVG/coin.svg" alt="Collabrium" />
+      </div>
+      <!-- The nav is the pods map, rendered by shared/pods.js so every
+           app draws the same one. A strip of boxed marks under the logo,
+           one per pod, is the way across: the pod you are in is filled,
+           hover says what each pod does, the grey boxes are not built yet.
+           Below it, this pod's own menu on two shelves, Workspace and
+           General. Collapsed, the strip keeps only this pod's box and a
+           click on it opens the pods as a flyout beside the rail. -->
+      <div class="c-nav-tree" id="podsNav" data-pod="collabrium"></div>
+      <script src="../shared/pods.js"></script>
+      <div class="c-sidebar-footer">
+        <button class="c-sidebar-account" type="button" id="accountMenuTrigger"
+                aria-haspopup="menu" aria-expanded="false" aria-controls="accountMenu">
+          <span class="c-search-input-avatar">RL</span>
+          <span class="c-search-input-text">
+            <span class="c-search-input-title">Ryann Lim</span>
+            <span class="c-search-input-subtitle">Super Admin</span>
+          </span>
+        </button>
+      </div>
+    </nav>
+    <button class="c-sidebar-toggle" type="button" aria-label="Collapse sidebar" id="sidebarToggle">
+      <svg viewBox="0 0 20 20" fill="none">
+        <rect x="2.5" y="3.5" width="15" height="13" rx="2" stroke="currentColor" stroke-width="1.4"/>
+        <line x1="9" y1="3.5" x2="9" y2="16.5" stroke="currentColor" stroke-width="1.4"/>
+        <path id="sidebarArrow" d="M13.5 7 11 10l2.5 3" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+  </div>
+
+  <div class="c-shell-main">
+    <div class="c-shell-content">
+      <div class="pg-wrap">
+        <header class="pg-head">
+          <div class="pg-title">
+            <a class="pg-back" href="settings.html" aria-label="Back to Settings"><i class="ph ph-arrow-left"></i></a>
+            <div>
+              <h1>Client management</h1>
+              <p class="sub">The clients people can pick when they create a campaign. Sample clients, changes reset when the page reloads.</p>
+            </div>
+          </div>
+          <div class="pg-head-right">
+            <div class="va" id="viewingAs"></div>
+          </div>
+          <hr class="pg-rule" />
+        </header>
+
+        <div id="content"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="c-sidebar-hover-label" id="shellSidebarHoverLabel" role="tooltip"></div>
+
+<div class="c-account-menu" id="accountMenu" role="menu" aria-hidden="true">
+  <a class="c-account-menu-item" href="settings.html" role="menuitem"><i class="ph-fill ph-gear"></i><span>Settings</span></a>
+  <a class="c-account-menu-item" href="login-v1.html" role="menuitem"><i class="ph-fill ph-sign-out"></i><span>Log out</span></a>
+</div>
+
+<div class="al-overlay" id="overlay" aria-hidden="true">
+  <div class="al-backdrop" data-close></div>
+  <div class="c-modal al-modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle"></div>
+</div>
+<div class="c-toast-host" id="toasts"></div>
+
+<script>
+/* A blank page tells nobody anything. If the page's own script fails before
+   it paints, say so where the content would be, with a way to clear this
+   browser's stored data, which is the usual cause after a stale load. */
+window.addEventListener('error', function (e) {
+  var c = document.getElementById('content');
+  if (!c || c.children.length) return;
+  var msg = (e && e.message) || 'Unknown error';
+  c.innerHTML = '<div class="c-empty" style="max-width:520px;margin:48px auto"><i class="ph ph-warning-circle"></i>' +
+    '<h4>This page could not load</h4><p>' + String(msg).replace(/[&<>]/g, function (ch) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;' }[ch]; }) +
+    '</p><p>Reload with a fresh copy, or clear this browser\'s stored data for the prototype and reload.</p>' +
+    '<button class="c-btn c-btn-secondary c-btn-md" type="button" onclick="[\'collabrium.access.directory\',\'collabrium.access.overrides\',\'collabrium.access.viewer\'].forEach(function(k){try{localStorage.removeItem(k)}catch(e){}});location.reload(true)">Clear stored data and reload</button></div>';
+});
+</script>
+<script src="../shared/access.js?v=6"></script>
+<script src="../shared/shell.js?v=4"></script>
+<script>
+/* Client management (4 Nov). The clients people can pick when they create
+   a campaign: search, sort, add, edit, deactivate and remove. Sample
+   clients, held in the page, so every change resets on reload. */
+(function () {
+
+  var A = window.CollabAccess, Sh = window.CollabShell, esc = Sh.esc;
+  /* Gated as Users & roles is: whoever can invite to the workspace. */
+  var GATE = 'Invite / add a user to the workspace';
+  var viewer, ready = false;
+  A.loadOverrides(localStorage);
+  viewer = Sh.init({ onViewerChange: function (v) { viewer = v; if (ready) render(); } });
+  function denied() {
+    document.getElementById('content').innerHTML =
+      '<div class="c-empty al-denied"><i class="ph ph-lock-simple"></i><h4>Admin only</h4>' +
+      '<p>' + esc(document.querySelector('.pg-title h1').textContent + ' is for an Admin or Super Admin.') + '</p><a class="c-btn c-btn-secondary c-btn-md" href="settings.html">Back to Settings</a></div>';
+  }
+  function sortHead(cols, sort) {
+    return cols.map(function (c) {
+      if (!c.sort) return '<th scope="col"' + (c.w ? ' style="width:' + c.w + '"' : '') + '>' + esc(c.label) + '</th>';
+      var on = sort.key === c.key;
+      return '<th scope="col"' + (c.w ? ' style="width:' + c.w + '"' : '') + ' aria-sort="' + (on ? (sort.dir > 0 ? 'ascending' : 'descending') : 'none') + '">' +
+        '<button type="button" class="al-sort" data-sort="' + c.key + '">' + esc(c.label) +
+        '<i class="ph ' + (on ? (sort.dir > 0 ? 'ph-caret-up' : 'ph-caret-down') : 'ph-caret-up-down') + ' al-sorticon' + (on ? ' is-on' : '') + '" aria-hidden="true"></i></button></th>';
+    }).join('');
+  }
+  function skeleton(cols, rows) {
+    var sk = function (w, h) { return '<span class="al-sk" style="width:' + w + (h ? '; height:' + h : '') + '"></span>'; };
+    var body = '';
+    for (var i = 0; i < rows; i++) body += '<tr>' + cols.map(function (c, j) { return '<td>' + sk(j ? '60%' : '72%') + (j ? '' : '<span class="al-sk" style="width:48%; height:9px; margin-top:8px"></span>') + '</td>'; }).join('') + '</tr>';
+    document.getElementById('content').innerHTML =
+      '<div class="al-bar" aria-hidden="true"><div class="al-bar-left"><span class="al-sk al-sk-box" style="width:280px"></span><span class="al-sk al-sk-box" style="width:168px"></span></div></div>' +
+      '<div class="al-count"><span class="al-sk" style="width:72px"></span></div>' +
+      '<div class="al-tablewrap"><table class="c-table al-table" aria-hidden="true"><thead><tr>' +
+      cols.map(function (c) { return '<th' + (c.w ? ' style="width:' + c.w + '"' : '') + '>' + esc(c.label) + '</th>'; }).join('') + '</tr></thead><tbody>' + body + '</tbody></table></div>';
+  }
+  /* Bones for the roster's beat, then the page, so it lands in place. */
+  var HOLD = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 700;
+
+  var now = Date.now(), MONTH = 30.44 * 864e5;
+  var seq = 0;
+  function client(name, company, monthsAgo) { return { id: 'c' + (++seq), name: name, company: company, updated: now - monthsAgo * MONTH, active: true }; }
+  var CLIENTS = [
+    client('KULT', 'Test', 6), client('Shopee', '', 7), client('Skechers', '', 7.2), client('McDonalds', '', 9),
+    client('Nippon Paint', '', 9.1), client('SK Magic', '', 9.2), client('Tourism Malaysia', '', 9.3), client('U Mobile', '', 9.4)
+  ];
+  var COLS = [
+    { key: 'name', label: 'Client', sort: true, w: '23%' },
+    { key: 'company', label: 'Company name', sort: true, w: '24%' },
+    { key: 'updated', label: 'Last updated', sort: true, w: '22%' },
+    { key: 'active', label: 'Status', sort: true, w: '15%' },
+    { key: 'acts', label: 'Actions', w: '16%' }
+  ];
+  var state = { q: '', sort: { key: 'updated', dir: -1 } };
+
+  function ago(t) {
+    var s = Math.max(0, (Date.now() - t) / 1000);
+    if (s < 60) return 'Just now';
+    var m = s / 60; if (m < 60) return Math.round(m) + (Math.round(m) === 1 ? ' minute ago' : ' minutes ago');
+    var h = m / 60; if (h < 24) return Math.round(h) + (Math.round(h) === 1 ? ' hour ago' : ' hours ago');
+    var d = h / 24; if (d < 30) return Math.round(d) + (Math.round(d) === 1 ? ' day ago' : ' days ago');
+    var mo = Math.floor(d / 30.44); if (mo < 12) return mo + (mo === 1 ? ' month ago' : ' months ago');
+    var y = Math.floor(mo / 12); return y + (y === 1 ? ' year ago' : ' years ago');
+  }
+  function rows() {
+    var q = state.q.trim().toLowerCase();
+    var list = CLIENTS.filter(function (c) { return !q || (c.name + ' ' + c.company).toLowerCase().indexOf(q) >= 0; });
+    var k = state.sort.key, dir = state.sort.dir;
+    var val = function (c) { return k === 'updated' ? c.updated : k === 'active' ? (c.active ? 0 : 1) : String(c[k] || '￿').toLowerCase(); };
+    return list.sort(function (a, b) { var x = val(a), y = val(b); return (x < y ? -1 : x > y ? 1 : 0) * dir || a.name.localeCompare(b.name); });
+  }
+
+  function render() {
+    if (!A.holds(viewer.role, GATE)) { denied(); return; }
+    if (!document.getElementById('bar')) {
+      document.getElementById('content').innerHTML =
+        '<div class="al-bar" id="bar"><div class="al-bar-left"><div class="al-search"><i class="ph ph-magnifying-glass" aria-hidden="true"></i>' +
+        '<input type="text" id="q" placeholder="Search client or company name" aria-label="Search clients" /></div></div>' +
+        '<div class="al-bar-right"><button class="c-btn c-btn-primary c-btn-md" type="button" id="addClient"><i class="ph ph-plus"></i> Add new client</button></div></div>' +
+        '<div id="list"></div>';
+      wire();
+    }
+    var list = rows();
+    var h = '<div class="al-count" aria-live="polite"><span><b>' + list.length + '</b> ' + (list.length === 1 ? 'client' : 'clients') + (list.length !== CLIENTS.length ? ' of ' + CLIENTS.length : '') + '</span></div>' +
+      '<div class="al-tablewrap"><table class="c-table al-table"><thead><tr>' + sortHead(COLS, state.sort) + '</tr></thead><tbody>';
+    if (!list.length) h += '<tr><td colspan="5"><div class="c-empty al-empty"><i class="ph ph-buildings"></i><h4>' + (CLIENTS.length ? 'No client matches' : 'No clients yet') + '</h4><p>' + (CLIENTS.length ? 'Change the search, or add the client.' : 'Add the first one, and people can pick it for a campaign.') + '</p></div></td></tr>';
+    list.forEach(function (c) {
+      h += '<tr data-id="' + c.id + '"><td class="al-strong">' + esc(c.name) + '</td>' +
+        '<td>' + (c.company ? esc(c.company) : '<span class="al-muted" aria-label="No company name">—</span>') + '</td>' +
+        '<td>' + esc(ago(c.updated)) + '</td>' +
+        '<td><span class="al-badge ' + (c.active ? 'is-active">Active' : 'is-inactive">Inactive') + '</span></td>' +
+        '<td><div class="al-acts"><button class="al-icon" type="button" data-edit="' + c.id + '" aria-label="Edit ' + esc(c.name) + '"><i class="ph ph-pencil-simple"></i></button>' +
+        '<button class="al-icon is-danger" type="button" data-remove="' + c.id + '" aria-label="Remove ' + esc(c.name) + '"><i class="ph ph-trash"></i></button></div></td></tr>';
+    });
+    h += '</tbody></table></div>';
+    document.getElementById('list').innerHTML = h;
+  }
+  function byId(id) { return CLIENTS.filter(function (c) { return c.id === id; })[0]; }
+  function wire() {
+    document.getElementById('q').addEventListener('input', function (e) { state.q = e.target.value; render(); });
+    document.getElementById('addClient').addEventListener('click', function (e) { openEdit(null, e.currentTarget); });
+    document.getElementById('content').addEventListener('click', function (e) {
+      var s = e.target.closest('[data-sort]');
+      if (s) {
+        var k = s.dataset.sort;
+        state.sort = state.sort.key === k ? { key: k, dir: -state.sort.dir } : { key: k, dir: k === 'updated' ? -1 : 1 };
+        render();
+        var again = document.querySelector('[data-sort="' + k + '"]'); if (again) again.focus();
+        return;
+      }
+      var ed = e.target.closest('[data-edit]'); if (ed) { openEdit(byId(ed.dataset.edit), ed); return; }
+      var rm = e.target.closest('[data-remove]'); if (rm) openRemove(byId(rm.dataset.remove), rm);
+    });
+  }
+
+  /* ── The sheet ── */
+  var overlay = document.getElementById('overlay'), modal = document.getElementById('modal'), returnTo = null;
+  function open(html, focusSel) {
+    modal.innerHTML = html;
+    overlay.classList.add('is-open');
+    overlay.setAttribute('aria-hidden', 'false');
+    requestAnimationFrame(function () { overlay.classList.add('is-shown'); });
+    var f = modal.querySelector(focusSel); if (f) f.focus();
+  }
+  function close() {
+    overlay.classList.remove('is-shown');
+    overlay.setAttribute('aria-hidden', 'true');
+    setTimeout(function () { overlay.classList.remove('is-open'); modal.innerHTML = ''; }, 260);
+    if (returnTo && document.contains(returnTo)) returnTo.focus();
+  }
+  overlay.addEventListener('click', function (e) { if (e.target.closest('[data-close]')) close(); });
+  document.addEventListener('keydown', function (e) {
+    if (!overlay.classList.contains('is-open')) return;
+    if (e.key === 'Escape') { close(); return; }
+    if (e.key === 'Tab') {   /* keep focus inside the sheet */
+      var f = modal.querySelectorAll('button, input, [tabindex]:not([tabindex="-1"])');
+      if (!f.length) return;
+      var first = f[0], last = f[f.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    }
+  });
+  var head = function (title, sub) {
+    return '<div class="c-modal-head"><div><h4 id="modalTitle">' + esc(title) + '</h4><p class="sub">' + esc(sub) + '</p></div>' +
+      '<button class="al-x" type="button" data-close aria-label="Close"><i class="ph ph-x"></i></button></div>';
+  };
+  function openEdit(c, from) {
+    returnTo = from;
+    var isAdd = !c, active = c ? c.active : true;
+    open(head(isAdd ? 'Add new client' : 'Edit client', isAdd ? 'People can pick it as soon as it is added.' : 'Changes show wherever the client is picked.') +
+      '<form class="c-modal-body" id="clientForm" novalidate>' +
+        '<div class="al-f"><label for="fName">Client</label><input type="text" id="fName" maxlength="80" autocomplete="off" value="' + esc(c ? c.name : '') + '" aria-describedby="fNameErr" />' +
+        '<span class="err" id="fNameErr" hidden></span></div>' +
+        '<div class="al-f"><label for="fCo">Company name <span class="opt">(optional)</span></label><input type="text" id="fCo" maxlength="120" autocomplete="off" value="' + esc(c ? c.company : '') + '" /></div>' +
+        '<button class="al-switch" type="button" role="switch" id="fActive" aria-checked="' + active + '"><span class="c-switch-track" aria-hidden="true"><span class="c-switch-thumb"></span></span>' +
+          '<span>Active<small>Inactive clients stay on their campaigns but can no longer be picked.</small></span></button>' +
+      '</form>' +
+      '<div class="c-modal-foot"><button class="c-btn c-btn-secondary c-btn-md" type="button" data-close>Cancel</button>' +
+      '<button class="c-btn c-btn-primary c-btn-md" type="submit" form="clientForm">' + (isAdd ? 'Add client' : 'Save changes') + '</button></div>', '#fName');
+    var sw = document.getElementById('fActive');
+    sw.addEventListener('click', function () { sw.setAttribute('aria-checked', String(sw.getAttribute('aria-checked') !== 'true')); });
+    document.getElementById('clientForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+      var nameEl = document.getElementById('fName'), err = document.getElementById('fNameErr');
+      var name = nameEl.value.trim().replace(/\s+/g, ' '), company = document.getElementById('fCo').value.trim();
+      var clash = CLIENTS.filter(function (x) { return x !== c && x.name.toLowerCase() === name.toLowerCase(); })[0];
+      var msg = !name ? 'Give the client a name.' : clash ? clash.name + ' is already a client.' : '';
+      err.textContent = msg; err.hidden = !msg;
+      nameEl.setAttribute('aria-invalid', String(!!msg));
+      if (msg) { nameEl.focus(); return; }
+      var on = sw.getAttribute('aria-checked') === 'true';
+      if (isAdd) { c = { id: 'c' + (++seq), name: name, company: company, updated: Date.now(), active: on }; CLIENTS.push(c); }
+      else { c.name = name; c.company = company; c.active = on; c.updated = Date.now(); }
+      close(); render();
+      Sh.toast('success', isAdd ? 'Client added' : 'Changes saved', isAdd ? name + ' can now be picked for a campaign.' : name + ' is up to date.');
+    });
+  }
+  function openRemove(c, from) {
+    returnTo = from;
+    open(head('Remove ' + c.name + '?', 'People will no longer be able to pick it for a campaign.') +
+      '<div class="c-modal-body"><p style="margin:0">Campaigns already made with ' + esc(c.name) + ' keep it. To stop it being picked without removing it, mark it inactive instead.</p></div>' +
+      '<div class="c-modal-foot"><button class="c-btn c-btn-secondary c-btn-md" type="button" data-close>Cancel</button>' +
+      '<button class="c-btn c-btn-md al-btn-danger" type="button" id="confirmRemove">Remove client</button></div>', '[data-close].c-btn');
+    document.getElementById('confirmRemove').addEventListener('click', function () {
+      CLIENTS = CLIENTS.filter(function (x) { return x !== c; });
+      returnTo = document.getElementById('addClient');
+      close(); render();
+      Sh.toast('neutral', 'Client removed', c.name + ' can no longer be picked for a campaign.');
+    });
+  }
+
+  if (A.holds(viewer.role, GATE)) skeleton(COLS, 8);
+  setTimeout(function () { ready = true; render(); }, HOLD);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,133 @@
+/* The Settings list pages: Activity log and Client management (4 Nov).
+   One toolbar (search, dropdown filters, range pills, a primary action),
+   a count line, and a rounded table with a pinned header row. The same
+   shape as Users & roles, set to the approved screens: title-case column
+   heads in ink rather than the DS's small grey caps. */
+
+/* ── Toolbar ─────────────────────────────────────────────────────── */
+.al-bar{display:flex; align-items:center; justify-content:space-between; gap:var(--spacing-12); flex-wrap:wrap; margin-bottom:var(--spacing-12);}
+.al-bar-left, .al-bar-right{display:flex; align-items:center; gap:var(--spacing-8); flex-wrap:wrap;}
+.al-search{position:relative;}
+.al-search i{position:absolute; left:14px; top:50%; transform:translateY(-50%); color:var(--color-neutral-5); font-size:var(--icon-sm); pointer-events:none;}
+.al-search input{height:40px; width:280px; max-width:100%; padding:0 14px 0 38px; border:1px solid var(--color-neutral-3); border-radius:var(--radius-md);
+  font-family:inherit; font-size:var(--text-body2-size); background:var(--color-neutral-1); color:var(--color-neutral-9);}
+.al-search input:focus{outline:none; border:2px solid var(--color-obsidian); padding:0 13px 0 37px;}
+/* A single-choice filter as a dropdown, with the sheet's own caret. */
+.al-select{height:40px; min-width:168px; padding:0 40px 0 14px; border:1px solid var(--color-neutral-3); border-radius:var(--radius-md);
+  font-family:inherit; font-size:var(--text-body2-size); color:var(--color-neutral-9); background-color:var(--color-neutral-1); cursor:pointer;
+  -webkit-appearance:none; appearance:none;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 256' width='16' height='16'><path fill='none' stroke='%23525252' stroke-width='16' stroke-linecap='round' stroke-linejoin='round' d='M208 96l-80 80-80-80'/></svg>");
+  background-repeat:no-repeat; background-position:right 14px center; background-size:16px 16px;}
+.al-select:focus{outline:none; border:2px solid var(--color-obsidian); padding:0 39px 0 13px; background-position:right 13px center;}
+.al-select.is-set{border-color:var(--color-obsidian);}
+/* The range pills: one set, the chosen one in ink. */
+.al-range{display:flex; gap:var(--spacing-8); flex-wrap:wrap;}
+.al-range button{height:36px; padding:0 var(--spacing-16); border:1px solid var(--color-neutral-3); border-radius:var(--radius-pill);
+  background:var(--color-neutral-1); font-family:inherit; font-size:var(--text-body2-size); font-weight:700; color:var(--color-neutral-9); cursor:pointer;
+  transition:background-color var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard), border-color var(--duration-fast) var(--ease-standard);}
+.al-range button:hover{background:var(--color-neutral-2);}
+.al-range button[aria-pressed="true"]{background:var(--color-obsidian); border-color:var(--color-obsidian); color:var(--color-neutral-1);}
+.al-range button:focus-visible{outline:2px solid var(--color-obsidian); outline-offset:2px;}
+.al-count{display:flex; justify-content:flex-end; font-size:var(--text-body2-size); color:var(--color-neutral-5); margin:0 0 var(--spacing-12);}
+.al-count b{color:var(--color-neutral-9);}
+.al-note{font-size:var(--text-caption-size); color:var(--color-neutral-5); margin:calc(-1 * var(--spacing-4)) 0 var(--spacing-16);}
+
+/* ── Table ───────────────────────────────────────────────────────── */
+.al-tablewrap{background:var(--color-neutral-1); border:1px solid var(--color-neutral-3); border-radius:var(--radius-lg); overflow:visible;}
+.al-table{width:100%; table-layout:fixed; border-collapse:separate; border-spacing:0;}
+.al-table th, .al-table td{padding:var(--spacing-20) var(--spacing-16); vertical-align:middle; border-bottom:1px solid var(--color-neutral-3);}
+.al-table th:first-child, .al-table td:first-child{padding-left:var(--spacing-24);}
+.al-table th:last-child, .al-table td:last-child{padding-right:var(--spacing-24);}
+.al-table thead th{position:sticky; top:0; z-index:4; background:var(--color-neutral-2); padding-top:var(--spacing-16); padding-bottom:var(--spacing-16);
+  text-align:left; text-transform:none; letter-spacing:0; font-size:var(--text-body2-size); font-weight:800; color:var(--color-neutral-9); white-space:nowrap;}
+.al-table thead th:first-child{border-top-left-radius:var(--radius-lg);}
+.al-table thead th:last-child{border-top-right-radius:var(--radius-lg);}
+.al-table tbody tr:last-child td{border-bottom:0;}
+.al-table tbody tr:last-child td:first-child{border-bottom-left-radius:var(--radius-lg);}
+.al-table tbody tr:last-child td:last-child{border-bottom-right-radius:var(--radius-lg);}
+.al-table tbody tr{transition:background-color var(--duration-fast) var(--ease-standard);}
+.al-table tbody tr:hover td{background:var(--color-neutral-2);}
+.al-sort{border:none; background:transparent; padding:0; font:inherit; color:inherit; cursor:pointer; display:inline-flex; align-items:center; gap:6px;}
+.al-sort:focus-visible{outline:2px solid var(--color-obsidian); outline-offset:2px; border-radius:4px;}
+.al-sorticon{font-size:14px; color:var(--color-neutral-4);}
+.al-sorticon.is-on{color:var(--color-neutral-9);}
+.al-sort:hover .al-sorticon{color:var(--color-neutral-9);}
+.al-strong{font-weight:800; color:var(--color-neutral-9);}
+.al-desc{margin-top:4px; font-size:var(--text-body2-size); line-height:1.45; color:var(--color-neutral-6);}
+.al-muted{color:var(--color-neutral-6);}
+.al-nowrap{white-space:nowrap;}
+@media (max-width:1100px){ .al-tablewrap{overflow:auto;} .al-table{min-width:900px;} .al-table thead th{position:static;} }
+
+/* Action and status badges: the DS badge, tinted by what happened. */
+.al-badge{display:inline-flex; align-items:center; height:28px; padding:0 var(--spacing-12); border-radius:var(--radius-pill); border:1px solid;
+  font-size:var(--text-body2-size); font-weight:700; white-space:nowrap;}
+.al-badge.is-updated{background:var(--color-water-bg); color:var(--color-navy); border-color:rgba(20,115,230,.28);}
+.al-badge.is-created, .al-badge.is-active{background:var(--color-earth-bg); color:#00854c; border-color:rgba(0,194,110,.32);}
+.al-badge.is-removed{background:var(--color-gold-bg); color:#8a5300; border-color:rgba(255,164,37,.45);}
+.al-badge.is-type, .al-badge.is-inactive{background:var(--color-neutral-2); color:var(--color-neutral-9); border-color:var(--color-neutral-3);}
+.al-badge.is-inactive{color:var(--color-neutral-6);}
+
+/* The person: initials on the water tint, then the name. */
+.al-who{display:flex; align-items:center; gap:var(--spacing-12); min-width:0;}
+.al-av{flex:none; width:32px; height:32px; border-radius:var(--radius-pill); display:inline-flex; align-items:center; justify-content:center;
+  background:var(--color-water-bg); color:var(--color-navy); font-size:11px; font-weight:800; letter-spacing:.02em;}
+.al-who span:last-child{overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+
+/* Row actions: an icon button each, the destructive one in red. */
+.al-acts{display:flex; align-items:center; gap:var(--spacing-8);}
+.al-icon{width:36px; height:36px; border:none; background:transparent; border-radius:var(--radius-sm); cursor:pointer;
+  display:inline-flex; align-items:center; justify-content:center; font-size:18px; color:var(--color-neutral-9);}
+.al-icon:hover{background:var(--color-neutral-3);}
+.al-icon.is-danger{color:var(--color-red);}
+.al-icon.is-danger:hover{background:rgba(253,51,67,.10);}
+.al-icon:focus-visible{outline:2px solid var(--color-obsidian); outline-offset:1px;}
+.al-empty{padding:var(--spacing-40);}
+.al-denied{max-width:420px; margin:var(--spacing-60) auto;}
+.al-denied a{text-decoration:none;}
+
+/* ── Skeleton first paint, the roster's pulse ── */
+.al-sk{display:block; height:12px; border-radius:var(--radius-sm); background:var(--color-neutral-2);}
+.al-sk-box{height:40px; border-radius:var(--radius-md); border:1px solid var(--color-neutral-3); background:var(--color-neutral-1);}
+@media (prefers-reduced-motion:no-preference){
+  .al-sk{animation:al-sk-pulse 1.4s var(--ease-standard) infinite;}
+  @keyframes al-sk-pulse{0%,100%{opacity:1;} 50%{opacity:.45;}}
+}
+
+/* ── The sheet: add, edit, remove ── */
+.al-overlay{position:fixed; inset:0; z-index:80; display:none; align-items:center; justify-content:center; padding:var(--spacing-16);}
+.al-overlay.is-open{display:flex;}
+.al-backdrop{position:absolute; inset:0; background:var(--color-canvas-warm); opacity:0; transition:opacity .3s var(--ease-standard);}
+.al-overlay.is-shown .al-backdrop{opacity:.88;}
+.al-modal{position:relative; max-width:none; width:min(480px, 100%); border:1px solid var(--color-neutral-3); box-shadow:0 25px 50px -12px rgba(0,0,0,.25);
+  opacity:0; transform:translateY(12px) scale(.98); transition:opacity .25s var(--ease-standard), transform .3s var(--ease-settle);}
+.al-overlay.is-shown .al-modal{opacity:1; transform:none;}
+@media (prefers-reduced-motion:reduce){ .al-modal, .al-backdrop{transition:none;} }
+.al-modal .c-modal-head{align-items:flex-start; padding:var(--spacing-20) var(--spacing-24) var(--spacing-12); border-bottom:1px solid var(--color-neutral-3);}
+.al-modal .c-modal-head .sub{margin:2px 0 0; font-size:var(--text-body2-size); color:var(--color-neutral-5); font-weight:400;}
+.al-modal .c-modal-body{padding:var(--spacing-20) var(--spacing-24); display:flex; flex-direction:column; gap:var(--spacing-16);}
+.al-modal .c-modal-foot{align-items:center; padding:var(--spacing-16) var(--spacing-24);}
+.al-x{border:none; background:transparent; width:32px; height:32px; margin:-4px -8px 0 0; border-radius:var(--radius-sm); cursor:pointer;
+  color:var(--color-neutral-5); display:inline-flex; align-items:center; justify-content:center; font-size:18px;}
+.al-x:hover{background:var(--color-neutral-2); color:var(--color-neutral-9);}
+.al-f{display:flex; flex-direction:column; gap:var(--spacing-4);}
+.al-f label{font-size:var(--text-label1-size); font-weight:700;}
+.al-f label .opt{font-weight:500; color:var(--color-neutral-5);}
+.al-f input[type="text"]{height:40px; border:1px solid var(--color-neutral-3); border-radius:var(--radius-sm); padding:0 var(--spacing-12);
+  font-family:inherit; font-size:var(--text-body2-size); background:var(--color-neutral-1); width:100%;}
+.al-f input[type="text"]:focus{outline:none; border:2px solid var(--color-obsidian); padding:0 11px;}
+.al-f input[aria-invalid="true"]{border-color:var(--color-red);}
+.al-f .err{font-size:var(--text-caption-size); color:var(--color-red);}
+.al-f .err[hidden]{display:none;}
+.al-switch{display:flex; align-items:center; gap:var(--spacing-12); border:none; background:none; padding:0; font:inherit; color:var(--color-neutral-9); cursor:pointer; text-align:left;}
+.al-switch[aria-checked="true"] .c-switch-track{background:var(--color-obsidian);}
+.al-switch[aria-checked="true"] .c-switch-thumb{left:19px;}
+.al-switch:focus-visible{outline:2px solid var(--color-obsidian); outline-offset:4px; border-radius:var(--radius-pill);}
+.al-switch small{display:block; font-size:var(--text-caption-size); color:var(--color-neutral-5);}
+.al-btn-danger{background:var(--color-red); color:var(--color-neutral-1); border-color:var(--color-red);}
+.al-btn-danger:hover{background:#d8232f;}
+
+@media (max-width:760px){
+  .al-search, .al-search input{width:100%;}
+  .al-bar-left{width:100%;}
+  .al-select{flex:1;}
+}

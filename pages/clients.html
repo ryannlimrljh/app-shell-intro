@@ -14,7 +14,7 @@
 <link rel="stylesheet" href="../collabrium-dls/tokens.css?v=f278e40" />
 <link rel="stylesheet" href="../collabrium-dls/components.css?v=f278e40" />
 <link rel="stylesheet" href="../shared/shell.css?v=4" />
-<link rel="stylesheet" href="../shared/admin-list.css?v=1" />
+<link rel="stylesheet" href="../shared/admin-list.css?v=2" />
 <style>
 /* Pods, in the nav. Element marks are SVG files rather than Phosphor
    glyphs, so they sit inside the item's own <i> slot at the icon size:
@@ -121,7 +121,7 @@ a.c-sidebar-item, a.c-nav-child{text-decoration:none;}
             <a class="pg-back" href="settings.html" aria-label="Back to Settings"><i class="ph ph-arrow-left"></i></a>
             <div>
               <h1>Client management</h1>
-              <p class="sub">The clients people can pick when they create a campaign. Sample clients, changes reset when the page reloads.</p>
+              <p class="sub">The clients people can pick when they create a campaign, and the brands the board and the hero cards show. A change here shows wherever the brand appears.</p>
             </div>
           </div>
           <div class="pg-head-right">
@@ -165,10 +165,15 @@ window.addEventListener('error', function (e) {
 </script>
 <script src="../shared/access.js?v=6"></script>
 <script src="../shared/shell.js?v=4"></script>
+<script src="../data/brand-logos.js"></script>
+<script src="../shared/clients.js?v=1"></script>
 <script>
-/* Client management (4 Nov). The clients people can pick when they create
-   a campaign: search, sort, add, edit, deactivate and remove. Sample
-   clients, held in the page, so every change resets on reload. */
+/* Client management (4 Nov). The one list of clients and brands: the ones
+   people can pick when they create a campaign, and the ones the board and
+   the hero cards show, each with its logo. It reads and writes through
+   shared/clients.js, which lays these edits over data/brand-logos.js for
+   every page that shows a brand. Kept in this browser until the directory
+   is served from the server. */
 (function () {
 
   var A = window.CollabAccess, Sh = window.CollabShell, esc = Sh.esc;
@@ -184,7 +189,7 @@ window.addEventListener('error', function (e) {
   }
   function sortHead(cols, sort) {
     return cols.map(function (c) {
-      if (!c.sort) return '<th scope="col"' + (c.w ? ' style="width:' + c.w + '"' : '') + '>' + esc(c.label) + '</th>';
+      if (!c.sort) return '<th scope="col"' + (c.right ? ' class="is-right"' : '') + (c.w ? ' style="width:' + c.w + '"' : '') + '>' + esc(c.label) + '</th>';
       var on = sort.key === c.key;
       return '<th scope="col"' + (c.w ? ' style="width:' + c.w + '"' : '') + ' aria-sort="' + (on ? (sort.dir > 0 ? 'ascending' : 'descending') : 'none') + '">' +
         '<button type="button" class="al-sort" data-sort="' + c.key + '">' + esc(c.label) +
@@ -204,34 +209,50 @@ window.addEventListener('error', function (e) {
   /* Bones for the roster's beat, then the page, so it lands in place. */
   var HOLD = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 700;
 
-  var now = Date.now(), MONTH = 30.44 * 864e5;
-  var seq = 0;
-  function client(name, company, monthsAgo) { return { id: 'c' + (++seq), name: name, company: company, updated: now - monthsAgo * MONTH, active: true }; }
-  var CLIENTS = [
-    client('KULT', 'Test', 6), client('Shopee', '', 7), client('Skechers', '', 7.2), client('McDonalds', '', 9),
-    client('Nippon Paint', '', 9.1), client('SK Magic', '', 9.2), client('Tourism Malaysia', '', 9.3), client('U Mobile', '', 9.4)
-  ];
+  var C = window.CollabClients;
   var COLS = [
-    { key: 'name', label: 'Client', sort: true, w: '23%' },
-    { key: 'company', label: 'Company name', sort: true, w: '24%' },
-    { key: 'updated', label: 'Last updated', sort: true, w: '22%' },
-    { key: 'active', label: 'Status', sort: true, w: '15%' },
-    { key: 'acts', label: 'Actions', w: '16%' }
+    { key: 'name', label: 'Client', sort: true, w: '27%' },
+    { key: 'company', label: 'Company name', sort: true, w: '19%' },
+    { key: 'domain', label: 'Website', sort: true, w: '17%' },
+    { key: 'updated', label: 'Last updated', sort: true, w: '14%' },
+    { key: 'active', label: 'Status', sort: true, w: '11%' },
+    { key: 'acts', label: 'Actions', w: '12%', right: true }
   ];
   var state = { q: '', sort: { key: 'updated', dir: -1 } };
+  var by = function () { var n = document.querySelector('.c-search-input-title'); return n ? n.textContent.trim() : ''; };
 
   function ago(t) {
+    if (!t) return '—';
     var s = Math.max(0, (Date.now() - t) / 1000);
     if (s < 60) return 'Just now';
     var m = s / 60; if (m < 60) return Math.round(m) + (Math.round(m) === 1 ? ' minute ago' : ' minutes ago');
     var h = m / 60; if (h < 24) return Math.round(h) + (Math.round(h) === 1 ? ' hour ago' : ' hours ago');
-    var d = h / 24; if (d < 30) return Math.round(d) + (Math.round(d) === 1 ? ' day ago' : ' days ago');
+    var d = h / 24; if (d < 1.5) return 'Yesterday'; if (d < 30) return Math.round(d) + ' days ago';
     var mo = Math.floor(d / 30.44); if (mo < 12) return mo + (mo === 1 ? ' month ago' : ' months ago');
     var y = Math.floor(mo / 12); return y + (y === 1 ? ' year ago' : ' years ago');
   }
-  function rows() {
+  /* A brand nobody has edited carries only the date the directory was
+     revised, so it counts in whole days: Today, not "3 hours ago". */
+  function agoDay(t) {
+    if (!t) return '—';
+    var d0 = new Date(t), today = new Date(); d0 = new Date(d0.getUTCFullYear(), d0.getUTCMonth(), d0.getUTCDate()); today.setHours(0, 0, 0, 0);
+    var n = Math.round((today - d0) / 864e5);
+    return n <= 0 ? 'Today' : n === 1 ? 'Yesterday' : n < 30 ? n + ' days ago' : ago(t);
+  }
+  /* The brand's mark, as the board draws it: its live logo, or its
+     initials when it has no website, the logo fails, or it comes back too
+     small to read (under 32px, how a placeholder globe arrives). */
+  window.__logoOk = window.__logoOk || {};
+  function mark(c, big) {
+    var url = C.logoUrl(c.domain), known = url ? window.__logoOk[url] : 0;
+    return '<span class="al-logo' + (big ? ' is-big' : '') + (known === 1 ? ' has-logo' : '') + '" aria-hidden="true"><span class="ini">' + esc(C.initials(c.name)) + '</span>' +
+      (url && known !== 0 ? '<img src="' + esc(url) + '" alt="" decoding="async" referrerpolicy="no-referrer" ' +
+        'onload="var u=this.getAttribute(\'src\');if(this.naturalWidth<32){window.__logoOk[u]=0;this.remove()}else{window.__logoOk[u]=1;this.parentNode.classList.add(\'has-logo\')}" ' +
+        'onerror="window.__logoOk[this.getAttribute(\'src\')]=0;this.remove()">' : '') + '</span>';
+  }
+  function rows(all) {
     var q = state.q.trim().toLowerCase();
-    var list = CLIENTS.filter(function (c) { return !q || (c.name + ' ' + c.company).toLowerCase().indexOf(q) >= 0; });
+    var list = all.filter(function (c) { return !q || (c.name + ' ' + c.company + ' ' + c.domain).toLowerCase().indexOf(q) >= 0; });
     var k = state.sort.key, dir = state.sort.dir;
     var val = function (c) { return k === 'updated' ? c.updated : k === 'active' ? (c.active ? 0 : 1) : String(c[k] || '￿').toLowerCase(); };
     return list.sort(function (a, b) { var x = val(a), y = val(b); return (x < y ? -1 : x > y ? 1 : 0) * dir || a.name.localeCompare(b.name); });
@@ -242,30 +263,36 @@ window.addEventListener('error', function (e) {
     if (!document.getElementById('bar')) {
       document.getElementById('content').innerHTML =
         '<div class="al-bar" id="bar"><div class="al-bar-left"><div class="al-search"><i class="ph ph-magnifying-glass" aria-hidden="true"></i>' +
-        '<input type="text" id="q" placeholder="Search client or company name" aria-label="Search clients" /></div></div>' +
-        '<div class="al-bar-right"><button class="c-btn c-btn-primary c-btn-md" type="button" id="addClient"><i class="ph ph-plus"></i> Add new client</button></div></div>' +
+        '<input type="text" id="q" placeholder="Search client, company or website" aria-label="Search clients" /></div></div>' +
+        '<div class="al-bar-right"><button class="c-btn c-btn-ghost c-btn-md" type="button" id="resetAll" hidden>Undo my changes</button>' +
+        '<button class="c-btn c-btn-primary c-btn-md" type="button" id="addClient"><i class="ph ph-plus"></i> Add new client</button></div></div>' +
+        '<p class="al-note">Changes are kept in this browser for now, and show on the board and the hero cards straight away. To make one permanent for everyone, it goes into the brand directory.</p>' +
         '<div id="list"></div>';
       wire();
     }
-    var list = rows();
-    var h = '<div class="al-count" aria-live="polite"><span><b>' + list.length + '</b> ' + (list.length === 1 ? 'client' : 'clients') + (list.length !== CLIENTS.length ? ' of ' + CLIENTS.length : '') + '</span></div>' +
-      '<div class="al-tablewrap"><table class="c-table al-table"><thead><tr>' + sortHead(COLS, state.sort) + '</tr></thead><tbody>';
-    if (!list.length) h += '<tr><td colspan="5"><div class="c-empty al-empty"><i class="ph ph-buildings"></i><h4>' + (CLIENTS.length ? 'No client matches' : 'No clients yet') + '</h4><p>' + (CLIENTS.length ? 'Change the search, or add the client.' : 'Add the first one, and people can pick it for a campaign.') + '</p></div></td></tr>';
+    var all = C.list();
+    document.getElementById('resetAll').hidden = !C.log().length;
+    var list = rows(all);
+    var h = '<div class="al-count" aria-live="polite"><span><b>' + list.length + '</b> ' + (list.length === 1 ? 'client' : 'clients') + (list.length !== all.length ? ' of ' + all.length : '') + '</span></div>' +
+      '<div class="al-tablewrap"><table class="c-table al-table cl-table"><thead><tr>' + sortHead(COLS, state.sort) + '</tr></thead><tbody>';
+    if (!list.length) h += '<tr><td colspan="6"><div class="c-empty al-empty"><i class="ph ph-buildings"></i><h4>' + (all.length ? 'No client matches' : 'No clients yet') + '</h4><p>' + (all.length ? 'Change the search, or add the client.' : 'Add the first one, and people can pick it for a campaign.') + '</p></div></td></tr>';
     list.forEach(function (c) {
-      h += '<tr data-id="' + c.id + '"><td class="al-strong">' + esc(c.name) + '</td>' +
+      h += '<tr data-key="' + esc(c.key) + '"><td><div class="cl-client">' + mark(c) + '<span class="al-strong">' + esc(c.name) + '</span></div></td>' +
         '<td>' + (c.company ? esc(c.company) : '<span class="al-muted" aria-label="No company name">—</span>') + '</td>' +
-        '<td>' + esc(ago(c.updated)) + '</td>' +
+        '<td>' + (c.domain ? '<span class="al-muted">' + esc(c.domain) + '</span>' : '<span class="al-muted" aria-label="No website">—</span>') + '</td>' +
+        '<td>' + esc(c.edited ? ago(c.updated) : agoDay(c.updated)) + '</td>' +
         '<td><span class="al-badge ' + (c.active ? 'is-active">Active' : 'is-inactive">Inactive') + '</span></td>' +
-        '<td><div class="al-acts"><button class="al-icon" type="button" data-edit="' + c.id + '" aria-label="Edit ' + esc(c.name) + '"><i class="ph ph-pencil-simple"></i></button>' +
-        '<button class="al-icon is-danger" type="button" data-remove="' + c.id + '" aria-label="Remove ' + esc(c.name) + '"><i class="ph ph-trash"></i></button></div></td></tr>';
+        '<td><div class="al-acts"><button class="al-icon" type="button" data-edit="' + esc(c.key) + '" aria-label="Edit ' + esc(c.name) + '"><i class="ph ph-pencil-simple"></i></button>' +
+        '<button class="al-icon is-danger" type="button" data-remove="' + esc(c.key) + '" aria-label="Remove ' + esc(c.name) + '"><i class="ph ph-trash"></i></button></div></td></tr>';
     });
     h += '</tbody></table></div>';
     document.getElementById('list').innerHTML = h;
   }
-  function byId(id) { return CLIENTS.filter(function (c) { return c.id === id; })[0]; }
+  function byKey(k) { return C.list().filter(function (c) { return c.key === k; })[0]; }
   function wire() {
     document.getElementById('q').addEventListener('input', function (e) { state.q = e.target.value; render(); });
     document.getElementById('addClient').addEventListener('click', function (e) { openEdit(null, e.currentTarget); });
+    document.getElementById('resetAll').addEventListener('click', function (e) { openReset(e.currentTarget); });
     document.getElementById('content').addEventListener('click', function (e) {
       var s = e.target.closest('[data-sort]');
       if (s) {
@@ -275,8 +302,8 @@ window.addEventListener('error', function (e) {
         var again = document.querySelector('[data-sort="' + k + '"]'); if (again) again.focus();
         return;
       }
-      var ed = e.target.closest('[data-edit]'); if (ed) { openEdit(byId(ed.dataset.edit), ed); return; }
-      var rm = e.target.closest('[data-remove]'); if (rm) openRemove(byId(rm.dataset.remove), rm);
+      var ed = e.target.closest('[data-edit]'); if (ed) { openEdit(byKey(ed.dataset.edit), ed); return; }
+      var rm = e.target.closest('[data-remove]'); if (rm) openRemove(byKey(rm.dataset.remove), rm);
     });
   }
 
@@ -311,52 +338,83 @@ window.addEventListener('error', function (e) {
     return '<div class="c-modal-head"><div><h4 id="modalTitle">' + esc(title) + '</h4><p class="sub">' + esc(sub) + '</p></div>' +
       '<button class="al-x" type="button" data-close aria-label="Close"><i class="ph ph-x"></i></button></div>';
   };
+  /* "https://www.shopee.com.my/shop" -> "shopee.com.my" */
+  function cleanDomain(v) { return String(v || '').trim().toLowerCase().replace(/^[a-z]+:\/\//, '').replace(/^www\./, '').replace(/[\/?#].*$/, ''); }
+  var DOMAIN_OK = /^[a-z0-9-]+(\.[a-z0-9-]+)+$/;
   function openEdit(c, from) {
     returnTo = from;
     var isAdd = !c, active = c ? c.active : true;
-    open(head(isAdd ? 'Add new client' : 'Edit client', isAdd ? 'People can pick it as soon as it is added.' : 'Changes show wherever the client is picked.') +
+    open(head(isAdd ? 'Add new client' : 'Edit client', isAdd ? 'People can pick it as soon as it is added.' : 'The change shows wherever ' + c.name + ' appears.') +
       '<form class="c-modal-body" id="clientForm" novalidate>' +
+        '<div class="cl-preview" aria-hidden="true"><span id="fMark"></span><span><b id="fPrevName"></b><small id="fPrevSrc"></small></span></div>' +
         '<div class="al-f"><label for="fName">Client</label><input type="text" id="fName" maxlength="80" autocomplete="off" value="' + esc(c ? c.name : '') + '" aria-describedby="fNameErr" />' +
         '<span class="err" id="fNameErr" hidden></span></div>' +
         '<div class="al-f"><label for="fCo">Company name <span class="opt">(optional)</span></label><input type="text" id="fCo" maxlength="120" autocomplete="off" value="' + esc(c ? c.company : '') + '" /></div>' +
+        '<div class="al-f"><label for="fWeb">Website <span class="opt">(optional, for the logo)</span></label><input type="text" id="fWeb" maxlength="120" autocomplete="off" inputmode="url" placeholder="e.g. shopee.com.my" value="' + esc(c ? c.domain : '') + '" aria-describedby="fWebErr fWebHelp" />' +
+        '<span class="help" id="fWebHelp">The logo comes from the brand\'s own website. Leave it empty and the initials show.</span><span class="err" id="fWebErr" hidden></span></div>' +
         '<button class="al-switch" type="button" role="switch" id="fActive" aria-checked="' + active + '"><span class="c-switch-track" aria-hidden="true"><span class="c-switch-thumb"></span></span>' +
-          '<span>Active<small>Inactive clients stay on their campaigns but can no longer be picked.</small></span></button>' +
+          '<span>Active<small>Inactive clients stay on their campaigns and the board but can no longer be picked.</small></span></button>' +
       '</form>' +
       '<div class="c-modal-foot"><button class="c-btn c-btn-secondary c-btn-md" type="button" data-close>Cancel</button>' +
       '<button class="c-btn c-btn-primary c-btn-md" type="submit" form="clientForm">' + (isAdd ? 'Add client' : 'Save changes') + '</button></div>', '#fName');
+    var nameEl = document.getElementById('fName'), webEl = document.getElementById('fWeb'), t = null;
+    /* the preview: the mark as it will show everywhere, a beat after typing */
+    function preview() {
+      var box = document.getElementById('fMark');
+      if (!box) return;   /* the sheet closed before the typing pause ran out */
+      var d = cleanDomain(webEl.value), name = nameEl.value.trim() || 'New client';
+      box.innerHTML = mark({ name: name, domain: DOMAIN_OK.test(d) ? d : '' }, true);
+      document.getElementById('fPrevName').textContent = name;
+      document.getElementById('fPrevSrc').textContent = DOMAIN_OK.test(d) ? 'Logo from ' + d : 'Initials until a website is added';
+    }
+    preview();
+    [nameEl, webEl].forEach(function (el) { el.addEventListener('input', function () { clearTimeout(t); t = setTimeout(preview, 350); }); });
     var sw = document.getElementById('fActive');
     sw.addEventListener('click', function () { sw.setAttribute('aria-checked', String(sw.getAttribute('aria-checked') !== 'true')); });
     document.getElementById('clientForm').addEventListener('submit', function (e) {
       e.preventDefault();
-      var nameEl = document.getElementById('fName'), err = document.getElementById('fNameErr');
-      var name = nameEl.value.trim().replace(/\s+/g, ' '), company = document.getElementById('fCo').value.trim();
-      var clash = CLIENTS.filter(function (x) { return x !== c && x.name.toLowerCase() === name.toLowerCase(); })[0];
-      var msg = !name ? 'Give the client a name.' : clash ? clash.name + ' is already a client.' : '';
-      err.textContent = msg; err.hidden = !msg;
-      nameEl.setAttribute('aria-invalid', String(!!msg));
-      if (msg) { nameEl.focus(); return; }
-      var on = sw.getAttribute('aria-checked') === 'true';
-      if (isAdd) { c = { id: 'c' + (++seq), name: name, company: company, updated: Date.now(), active: on }; CLIENTS.push(c); }
-      else { c.name = name; c.company = company; c.active = on; c.updated = Date.now(); }
+      var nErr = document.getElementById('fNameErr'), wErr = document.getElementById('fWebErr');
+      var name = nameEl.value.trim().replace(/\s+/g, ' '), company = document.getElementById('fCo').value.trim(), domain = cleanDomain(webEl.value);
+      var clash = C.list().filter(function (x) { return (!c || x.key !== c.key) && x.name.toLowerCase() === name.toLowerCase(); })[0];
+      var nMsg = !name ? 'Give the client a name.' : clash ? clash.name + ' is already a client.' : '';
+      var wMsg = domain && !DOMAIN_OK.test(domain) ? 'That doesn\'t look like a website. Try something like shopee.com.my.' : '';
+      nErr.textContent = nMsg; nErr.hidden = !nMsg; nameEl.setAttribute('aria-invalid', String(!!nMsg));
+      wErr.textContent = wMsg; wErr.hidden = !wMsg; webEl.setAttribute('aria-invalid', String(!!wMsg));
+      if (nMsg) { nameEl.focus(); return; }
+      if (wMsg) { webEl.focus(); return; }
+      C.save({ key: c && c.key, name: name, company: company, domain: domain, active: sw.getAttribute('aria-checked') === 'true' }, by());
       close(); render();
-      Sh.toast('success', isAdd ? 'Client added' : 'Changes saved', isAdd ? name + ' can now be picked for a campaign.' : name + ' is up to date.');
+      Sh.toast('success', isAdd ? 'Client added' : 'Changes saved', isAdd ? name + ' can now be picked for a campaign.' : name + ' is up to date everywhere it shows.');
     });
   }
   function openRemove(c, from) {
     returnTo = from;
     open(head('Remove ' + c.name + '?', 'People will no longer be able to pick it for a campaign.') +
-      '<div class="c-modal-body"><p style="margin:0">Campaigns already made with ' + esc(c.name) + ' keep it. To stop it being picked without removing it, mark it inactive instead.</p></div>' +
+      '<div class="c-modal-body"><p style="margin:0">Campaigns already made with ' + esc(c.name) + ' keep it, and its deals stay on the board without its logo. To stop it being picked without removing it, mark it inactive instead.</p></div>' +
       '<div class="c-modal-foot"><button class="c-btn c-btn-secondary c-btn-md" type="button" data-close>Cancel</button>' +
       '<button class="c-btn c-btn-md al-btn-danger" type="button" id="confirmRemove">Remove client</button></div>', '[data-close].c-btn');
     document.getElementById('confirmRemove').addEventListener('click', function () {
-      CLIENTS = CLIENTS.filter(function (x) { return x !== c; });
+      C.remove(c.key, by());
       returnTo = document.getElementById('addClient');
       close(); render();
       Sh.toast('neutral', 'Client removed', c.name + ' can no longer be picked for a campaign.');
     });
   }
+  function openReset(from) {
+    returnTo = from;
+    open(head('Undo my changes?', 'Every client goes back to the brand directory as it was.') +
+      '<div class="c-modal-body"><p style="margin:0">The clients you added, edited or removed in this browser go back to how the directory has them. The Activity log forgets those changes too.</p></div>' +
+      '<div class="c-modal-foot"><button class="c-btn c-btn-secondary c-btn-md" type="button" data-close>Cancel</button>' +
+      '<button class="c-btn c-btn-md al-btn-danger" type="button" id="confirmReset">Undo changes</button></div>', '[data-close].c-btn');
+    document.getElementById('confirmReset').addEventListener('click', function () {
+      C.reset();
+      returnTo = document.getElementById('addClient');
+      close(); render();
+      Sh.toast('neutral', 'Changes undone', 'The clients match the brand directory again.');
+    });
+  }
 
-  if (A.holds(viewer.role, GATE)) skeleton(COLS, 8);
+  if (A.holds(viewer.role, GATE)) skeleton(COLS, 10);
   setTimeout(function () { ready = true; render(); }, HOLD);
 })();
 </script>

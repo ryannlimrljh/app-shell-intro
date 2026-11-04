@@ -14,7 +14,7 @@
 <link rel="stylesheet" href="../collabrium-dls/tokens.css?v=f278e40" />
 <link rel="stylesheet" href="../collabrium-dls/components.css?v=f278e40" />
 <link rel="stylesheet" href="../shared/shell.css?v=4" />
-<link rel="stylesheet" href="../shared/admin-list.css?v=1" />
+<link rel="stylesheet" href="../shared/admin-list.css?v=2" />
 <style>
 /* Pods, in the nav. Element marks are SVG files rather than Phosphor
    glyphs, so they sit inside the item's own <i> slot at the icon size:
@@ -121,7 +121,7 @@ a.c-sidebar-item, a.c-nav-child{text-decoration:none;}
             <a class="pg-back" href="settings.html" aria-label="Back to Settings"><i class="ph ph-arrow-left"></i></a>
             <div>
               <h1>Activity log</h1>
-              <p class="sub">Every change to users, roles and sales reports across Collabrium. Reads and sign-ins are not logged. Entries are kept for 12 months.</p>
+              <p class="sub">Every change to users, roles, clients and sales reports across Collabrium. Reads and sign-ins are not logged. Entries are kept for 12 months.</p>
             </div>
           </div>
           <div class="pg-head-right">
@@ -165,6 +165,8 @@ window.addEventListener('error', function (e) {
 </script>
 <script src="../shared/access.js?v=6"></script>
 <script src="../shared/shell.js?v=4"></script>
+<script src="../data/brand-logos.js"></script>
+<script src="../shared/clients.js?v=1"></script>
 <script>
 /* Activity log (4 Nov). Every change to users, roles and sales reports.
    The entries are samples until the audit trail is wired: dated relative
@@ -185,7 +187,7 @@ window.addEventListener('error', function (e) {
   }
   function sortHead(cols, sort) {
     return cols.map(function (c) {
-      if (!c.sort) return '<th scope="col"' + (c.w ? ' style="width:' + c.w + '"' : '') + '>' + esc(c.label) + '</th>';
+      if (!c.sort) return '<th scope="col"' + (c.right ? ' class="is-right"' : '') + (c.w ? ' style="width:' + c.w + '"' : '') + '>' + esc(c.label) + '</th>';
       var on = sort.key === c.key;
       return '<th scope="col"' + (c.w ? ' style="width:' + c.w + '"' : '') + ' aria-sort="' + (on ? (sort.dir > 0 ? 'ascending' : 'descending') : 'none') + '">' +
         '<button type="button" class="al-sort" data-sort="' + c.key + '">' + esc(c.label) +
@@ -205,7 +207,7 @@ window.addEventListener('error', function (e) {
   /* Bones for the roster's beat, then the page, so it lands in place. */
   var HOLD = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 700;
 
-  var TYPES = [{ key: 'report', label: 'Sales report' }, { key: 'users', label: 'User management' }, { key: 'roles', label: 'Roles & permissions' }];
+  var TYPES = [{ key: 'report', label: 'Sales report' }, { key: 'users', label: 'User management' }, { key: 'roles', label: 'Roles & permissions' }, { key: 'clients', label: 'Client management' }];
   var ACTIONS = [{ key: 'created', label: 'Created' }, { key: 'updated', label: 'Updated' }, { key: 'removed', label: 'Removed' }];
   var RANGES = [{ key: 'today', label: 'Today', days: 0 }, { key: '7', label: '7 days', days: 7 }, { key: '30', label: '30 days', days: 30 }, { key: 'all', label: 'All', days: null }];
   var label = function (list, k) { return (list.filter(function (x) { return x.key === k; })[0] || {}).label || k; };
@@ -222,6 +224,11 @@ window.addEventListener('error', function (e) {
     { title: 'User created', desc: 'New user ONG, Kai Xin [Kai] onboarded as Sales Manager role.', action: 'created', type: 'users', by: RYANN, at: at(52, 15, 40) },
     { title: 'Role removed', desc: 'The Viewer role was removed; its two users moved to Sales Rep.', action: 'removed', type: 'roles', by: RYANN, at: at(64, 9, 55) }
   ];
+  /* Client changes are real: Client management writes them through
+     shared/clients.js, and they join the samples here. */
+  if (window.CollabClients) CollabClients.log().forEach(function (e) {
+    EVENTS.push({ title: e.title, desc: e.desc, action: e.action, type: 'clients', by: e.by || 'You', at: new Date(e.at) });
+  });
   var COLS = [
     { key: 'title', label: 'Activity', sort: true, w: '32%' },
     { key: 'action', label: 'Action', sort: true, w: '12%' },
@@ -238,6 +245,7 @@ window.addEventListener('error', function (e) {
   }
   /* "YAP, Wei Yin [Wein]" -> "YW": surname, then the first given name. */
   function initials(n) {
+    if (String(n).indexOf(',') < 0) return String(n).split(/\s+/).slice(0, 2).map(function (w) { return w.charAt(0); }).join('').toUpperCase();   /* "Ryann Lim" -> "RL" */
     var p = String(n).replace(/\[.*?\]/g, '').split(',');
     return ((p[0] || '').trim().charAt(0) + ((p[1] || '').trim().charAt(0) || '')).toUpperCase();
   }

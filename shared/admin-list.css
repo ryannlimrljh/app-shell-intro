@@ -131,3 +131,22 @@
   .al-bar-left{width:100%;}
   .al-select{flex:1;}
 }
+
+/* ── Client management: the brand's mark beside its name (4 Nov), drawn
+   as the board draws it: the live logo on white, or its initials. ── */
+.cl-client{display:flex; align-items:center; gap:var(--spacing-12); min-width:0;}
+.cl-client .al-strong{overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+.al-logo{position:relative; flex:none; width:32px; height:32px; border-radius:var(--radius-sm); border:1px solid var(--color-neutral-3); background:var(--color-neutral-1);
+  display:inline-flex; align-items:center; justify-content:center; overflow:hidden; font-size:11px; font-weight:800; color:var(--color-neutral-6);}
+.al-logo.is-big{width:44px; height:44px; font-size:13px; border-radius:var(--radius-md);}
+.al-logo img{position:absolute; inset:3px; width:calc(100% - 6px); height:calc(100% - 6px); object-fit:contain; opacity:0; transition:opacity var(--duration-base) var(--ease-standard);}
+.al-logo.has-logo img{opacity:1;}
+.al-logo.has-logo .ini{opacity:0;}
+/* Edit and remove sit at the far right of the row. */
+.al-table th.is-right{text-align:right;}
+.cl-table td:last-child .al-acts{justify-content:flex-end;}
+/* The sheet's preview: the mark as it will show everywhere. */
+.cl-preview{display:flex; align-items:center; gap:var(--spacing-12); padding:var(--spacing-12); border-radius:var(--radius-md); background:var(--color-neutral-2);}
+.cl-preview b{display:block; font-size:var(--text-body2-size); font-weight:800;}
+.cl-preview small{display:block; font-size:var(--text-caption-size); color:var(--color-neutral-5);}
+.al-f .help{font-size:var(--text-caption-size); color:var(--color-neutral-5); line-height:1.4;}

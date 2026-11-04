@@ -14,7 +14,7 @@
 <link rel="stylesheet" href="../collabrium-dls/tokens.css?v=f278e40" />
 <link rel="stylesheet" href="../collabrium-dls/components.css?v=f278e40" />
 <link rel="stylesheet" href="../shared/shell.css?v=4" />
-<link rel="stylesheet" href="../shared/admin-list.css?v=2" />
+<link rel="stylesheet" href="../shared/admin-list.css?v=3" />
 <style>
 /* Pods, in the nav. Element marks are SVG files rather than Phosphor
    glyphs, so they sit inside the item's own <i> slot at the icon size:
@@ -218,7 +218,7 @@ window.addEventListener('error', function (e) {
     { key: 'active', label: 'Status', sort: true, w: '11%' },
     { key: 'acts', label: 'Actions', w: '12%', right: true }
   ];
-  var state = { q: '', sort: { key: 'updated', dir: -1 } };
+  var state = { q: '', sort: { key: 'name', dir: 1 } };
   var by = function () { var n = document.querySelector('.c-search-input-title'); return n ? n.textContent.trim() : ''; };
 
   function ago(t) {
@@ -277,7 +277,7 @@ window.addEventListener('error', function (e) {
       '<div class="al-tablewrap"><table class="c-table al-table cl-table"><thead><tr>' + sortHead(COLS, state.sort) + '</tr></thead><tbody>';
     if (!list.length) h += '<tr><td colspan="6"><div class="c-empty al-empty"><i class="ph ph-buildings"></i><h4>' + (all.length ? 'No client matches' : 'No clients yet') + '</h4><p>' + (all.length ? 'Change the search, or add the client.' : 'Add the first one, and people can pick it for a campaign.') + '</p></div></td></tr>';
     list.forEach(function (c) {
-      h += '<tr data-key="' + esc(c.key) + '"><td><div class="cl-client">' + mark(c) + '<span class="al-strong">' + esc(c.name) + '</span></div></td>' +
+      h += '<tr data-key="' + esc(c.key) + '" data-letter="' + letterOf(c.name) + '"><td><div class="cl-client">' + mark(c) + '<span class="al-strong">' + esc(c.name) + '</span></div></td>' +
         '<td>' + (c.company ? esc(c.company) : '<span class="al-muted" aria-label="No company name">—</span>') + '</td>' +
         '<td>' + (c.domain ? '<span class="al-muted">' + esc(c.domain) + '</span>' : '<span class="al-muted" aria-label="No website">—</span>') + '</td>' +
         '<td>' + esc(c.edited ? ago(c.updated) : agoDay(c.updated)) + '</td>' +
@@ -287,7 +287,90 @@ window.addEventListener('error', function (e) {
     });
     h += '</tbody></table></div>';
     document.getElementById('list').innerHTML = h;
+    /* The rail only means something in name order; sorted by anything
+       else the letters are scattered, so it steps aside. */
+    lastRows = state.sort.key === 'name' ? list : [];
+    renderRail();
+    spy();
   }
+
+  /* ── A–Z rail: the Influencers page's jump-and-spy, as Users & roles
+     has it. Letter counts come from the filtered list; a jump scrolls the
+     shell's own scroll container to the first client with that letter,
+     and the spy marks the letter of the row at the top as you scroll. ── */
+  var LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ#'.split('');
+  var railEl = document.createElement('nav');
+  railEl.className = 'al-rail'; railEl.id = 'rail'; railEl.hidden = true;
+  railEl.setAttribute('aria-label', 'Jump to letter');
+  document.body.appendChild(railEl);
+  document.body.classList.add('has-rail');
+  var scroller = document.querySelector('.c-shell-content');
+  var lastRows = [];
+  var REDUCED_RAIL = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function letterOf(name) {
+    var c = String(name || '').trim().charAt(0).toUpperCase();
+    return /[A-Z]/.test(c) ? c : '#';
+  }
+  function renderRail() {
+    var counts = {};
+    LETTERS.forEach(function (L) { counts[L] = 0; });
+    lastRows.forEach(function (r) { counts[letterOf(r.name)] += 1; });
+    railEl.hidden = !lastRows.length;
+    document.body.classList.toggle('has-rail', !railEl.hidden);
+    railEl.innerHTML = LETTERS.map(function (L) {
+      var n = counts[L];
+      return '<button class="al-rail-row' + (n ? '' : ' is-empty') + '" type="button" data-letter="' + L + '"' +
+        (n ? ' title="' + n + '" aria-label="Jump to ' + (L === '#' ? 'symbols' : L) + ', ' + n + (n === 1 ? ' client' : ' clients') + '"' : ' tabindex="-1" aria-hidden="true"') + '>' +
+        '<span class="al-rail-letter">' + L + '</span></button>';
+    }).join('');
+  }
+  railEl.addEventListener('click', function (e) {
+    var row = e.target.closest('.al-rail-row');
+    if (!row || row.classList.contains('is-empty')) return;
+    var target = document.querySelector('#list tr[data-letter="' + row.dataset.letter + '"]');
+    if (!target || !scroller) return;
+    /* land the row just under the pinned header */
+    var head = document.querySelector('#list thead');
+    var top = target.getBoundingClientRect().top - scroller.getBoundingClientRect().top + scroller.scrollTop - (head ? head.offsetHeight : 0);
+    jumped = row.dataset.letter; jumpedAt = Date.now();
+    /* Smooth only when the tab is actually being painted: a hidden pane
+       stalls the animation clock and the glide never lands. */
+    var glide = !REDUCED_RAIL && document.visibilityState === 'visible';
+    scroller.scrollTo({ top: Math.max(0, top), behavior: glide ? 'smooth' : 'auto' });
+    if (!glide) spy();
+  });
+  /* Squares the pinned header's corners once it is stuck. */
+  function syncStick() {
+    var table = document.querySelector('#list .al-table');
+    if (!table || !scroller) return;
+    table.classList.toggle('is-stuck', table.querySelector('thead').getBoundingClientRect().top <= scroller.getBoundingClientRect().top + 0.5);
+  }
+  /* Scroll-spy: the letter of the row that owns the top, under the header. */
+  var spyTick = false, jumped = null, jumpedAt = 0;
+  function spy() {
+    syncStick();
+    if (!scroller || railEl.hidden) return;
+    var rows = document.querySelectorAll('#list tr[data-letter]');
+    var head = document.querySelector('#list thead');
+    var topEdge = scroller.getBoundingClientRect().top + (head ? head.offsetHeight : 0) + 24;
+    var current = null;
+    rows.forEach(function (tr) { if (tr.getBoundingClientRect().top <= topEdge) current = tr.dataset.letter; });
+    if (!current && rows.length) current = rows[0].dataset.letter;
+    /* At the very end the last letters can't scroll to the top: there the
+       letter you jumped to stays marked, as long as its rows are in view. */
+    var atEnd = scroller.scrollTop + scroller.clientHeight >= scroller.scrollHeight - 2;
+    if (atEnd && jumped) {
+      var j = document.querySelector('#list tr[data-letter="' + jumped + '"]');
+      if (j && j.getBoundingClientRect().top < scroller.getBoundingClientRect().bottom) current = jumped;
+    } else if (!atEnd && Date.now() - jumpedAt > 1200) jumped = null;   /* not mid-glide */
+    railEl.querySelectorAll('.al-rail-row').forEach(function (b) { b.classList.toggle('is-active', b.dataset.letter === current); });
+  }
+  if (scroller) scroller.addEventListener('scroll', function () {
+    if (spyTick) return;
+    spyTick = true;
+    setTimeout(function () { spyTick = false; spy(); }, 80);
+  });
+
   function byKey(k) { return C.list().filter(function (c) { return c.key === k; })[0]; }
   function wire() {
     document.getElementById('q').addEventListener('input', function (e) { state.q = e.target.value; render(); });

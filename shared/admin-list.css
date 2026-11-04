@@ -150,3 +150,28 @@
 .cl-preview b{display:block; font-size:var(--text-body2-size); font-weight:800;}
 .cl-preview small{display:block; font-size:var(--text-caption-size); color:var(--color-neutral-5);}
 .al-f .help{font-size:var(--text-caption-size); color:var(--color-neutral-5); line-height:1.4;}
+
+/* ── A–Z rail (4 Nov): the Influencers page's, as Users & roles has it.
+   Small grey letters fixed to the right edge, the current one in ink,
+   letters with nothing to jump to faded near-out. It takes the strip the
+   scrollbar used, so on a page with a rail the scrollbar goes and the
+   page keeps clear of it. ── */
+.al-rail{position:fixed; right:6px; top:50%; transform:translateY(-50%); width:24px; z-index:20; display:flex; flex-direction:column; align-items:center; gap:7px;}
+.al-rail[hidden]{display:none;}
+.al-rail-row{display:flex; align-items:center; justify-content:center; border:0; background:none; padding:0; cursor:pointer; font-family:inherit; line-height:1;}
+.al-rail-letter{width:22px; text-align:center; font-size:12px; font-weight:600; color:var(--color-neutral-4);
+  transition:color var(--duration-fast) var(--ease-standard), transform var(--duration-fast) var(--ease-settle);}
+.al-rail-row:hover .al-rail-letter{color:var(--color-neutral-9); transform:translateX(-2px) scale(1.15);}
+.al-rail-row.is-active .al-rail-letter{color:var(--color-neutral-9); font-weight:800;}
+.al-rail-row.is-empty{cursor:default; pointer-events:none;}
+.al-rail-row.is-empty .al-rail-letter{color:var(--color-neutral-3);}
+.al-rail-row:focus-visible{outline:2px solid var(--color-obsidian); outline-offset:1px; border-radius:var(--radius-sm);}
+@media (max-height:760px){ .al-rail{gap:4px;} .al-rail-letter{font-size:11px;} }
+@media (max-height:620px){ .al-rail{gap:2px;} .al-rail-letter{font-size:10px;} }
+@media (max-width:640px){ .al-rail{display:none;} }
+.has-rail .c-shell .c-shell-content{scrollbar-width:none; -ms-overflow-style:none;}
+.has-rail .c-shell .c-shell-content::-webkit-scrollbar{width:0; height:0;}
+@media (min-width:641px){ .has-rail .pg-wrap{padding-right:var(--spacing-60);} }
+/* Once pinned, the header meets the rows under it on a hard edge. */
+.al-table.is-stuck thead th:first-child, .al-table.is-stuck thead th:last-child{border-radius:0;}
+.al-table thead th{transition:border-radius var(--duration-fast) var(--ease-standard);}
